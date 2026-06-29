@@ -1,6 +1,6 @@
-# Unifeed
+# unifeed
 
-Unifeed is a trimmed auth-first prop-firm landing app built with Next.js, Convex, Hexclave, and Turborepo.
+unifeed is a trimmed auth-first prop-firm landing app built with Next.js, Convex, Hexclave, and Turborepo.
 
 ## What stays
 

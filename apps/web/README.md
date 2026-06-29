@@ -1,6 +1,6 @@
-# Unifeed Web
+# unifeed Web
 
-`apps/web` is the public Unifeed site.
+`apps/web` is the public unifeed site.
 
 ## Scope
 

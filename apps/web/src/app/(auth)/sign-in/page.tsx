@@ -89,7 +89,7 @@ export default function SignInPage() {
     <div className="flex w-full sm:max-w-sm flex-col gap-6 mx-auto">
       <div className="text-center">
         <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
-          Welcome to Unifeed
+          Welcome to unifeed
         </h1>
         <p className="mt-2 text-sm text-muted font-light">
           {step === "email"
@@ -222,7 +222,7 @@ export default function SignInPage() {
       </Button>
 
       <p className="text-center text-xs text-muted">
-        &copy; {new Date().getFullYear()} Unifeed. All rights reserved.
+        &copy; {new Date().getFullYear()} unifeed. All rights reserved.
       </p>
     </div>
   );

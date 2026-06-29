@@ -33,7 +33,7 @@ export function WhyUS() {
           className="text-4xl font-bold leading-tight"
           variants={revealItemVariants}
         >
-          Why choose Unifeed
+          Why choose unifeed
         </motion.h2>
         <motion.span
           className="text-lg leading-relaxed text-muted"

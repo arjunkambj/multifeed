@@ -25,12 +25,12 @@ export const brands = [
 export const faqItems = [
   {
     content:
-      "Add the public profiles you want to track and Unifeed keeps their posts, videos, engagement, links, and campaign history in one place.",
-    title: "How does Unifeed track creators?",
+      "Add the public profiles you want to track and unifeed keeps their posts, videos, engagement, links, and campaign history in one place.",
+    title: "How does unifeed track creators?",
   },
   {
     content:
-      "No. Unifeed tracks public social activity and campaign assets without asking creators for passwords.",
+      "No. unifeed tracks public social activity and campaign assets without asking creators for passwords.",
     title: "Do creators need to share account access?",
   },
   {
@@ -41,7 +41,7 @@ export const faqItems = [
   {
     content:
       "Yes. Invite teammates, assign campaigns, manage contracts, and keep creator records synced across your workspace.",
-    title: "Can my team collaborate in Unifeed?",
+    title: "Can my team collaborate in unifeed?",
   },
   {
     content:
@@ -50,7 +50,7 @@ export const faqItems = [
   },
   {
     content:
-      "Yes. Unifeed is built for brands, agencies, and operators managing creators across multiple social channels.",
+      "Yes. unifeed is built for brands, agencies, and operators managing creators across multiple social channels.",
     title: "Is this for agencies too?",
   },
 ] as const;
@@ -128,7 +128,7 @@ export const testimonials = [
     avatar: "https://i.pravatar.cc/150?u=amina",
     name: "Amina Patel",
     quote:
-      "Unifeed replaced the spreadsheet we were terrified to touch. Every creator campaign is finally trackable.",
+      "unifeed replaced the spreadsheet we were terrified to touch. Every creator campaign is finally trackable.",
     role: "Head of Growth, Northstar Labs",
   },
   {

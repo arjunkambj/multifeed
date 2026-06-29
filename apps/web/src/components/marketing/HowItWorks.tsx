@@ -18,7 +18,7 @@ const steps = [
   },
   {
     description:
-      "Unifeed keeps social performance, link clicks, contract status, and campaign data in sync.",
+      "unifeed keeps social performance, link clicks, contract status, and campaign data in sync.",
     step: "2",
     title: "Track every moving part",
   },

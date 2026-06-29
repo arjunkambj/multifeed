@@ -49,7 +49,7 @@ export function Hero() {
           className="max-w-3xl text-center text-base leading-tight text-muted sm:text-lg"
           variants={revealItemVariants}
         >
-          Unifeed keeps creator performance, campaign attribution, and team
+          unifeed keeps creator performance, campaign attribution, and team
           workflows synced across TikTok, Instagram, YouTube, and X without
           passwords or messy spreadsheets.
         </motion.p>

@@ -12,20 +12,20 @@ import { MarketingMarquee } from "@/components/marketing/MarketingMarquee";
 import { WhyUS } from "@/components/marketing/WhyUS";
 
 export const metadata: Metadata = {
-  title: "Unifeed | Track Any Account Across All Socials",
+  title: "unifeed | Track Any Account Across All Socials",
   description:
-    "Unifeed tracks all your creators, competitors, and campaigns across TikTok, Instagram, YouTube, and X — no passwords required.",
+    "unifeed tracks all your creators, competitors, and campaigns across TikTok, Instagram, YouTube, and X — no passwords required.",
   openGraph: {
-    title: "Unifeed | Track Any Account Across All Socials",
+    title: "unifeed | Track Any Account Across All Socials",
     description:
-      "Unifeed tracks all your creators, competitors, and campaigns across TikTok, Instagram, YouTube, and X — no passwords required.",
-    siteName: "Unifeed",
+      "unifeed tracks all your creators, competitors, and campaigns across TikTok, Instagram, YouTube, and X — no passwords required.",
+    siteName: "unifeed",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Unifeed | Track Any Account Across All Socials",
+    title: "unifeed | Track Any Account Across All Socials",
     description:
-      "Unifeed tracks all your creators, competitors, and campaigns across TikTok, Instagram, YouTube, and X — no passwords required.",
+      "unifeed tracks all your creators, competitors, and campaigns across TikTok, Instagram, YouTube, and X — no passwords required.",
   },
 };
 

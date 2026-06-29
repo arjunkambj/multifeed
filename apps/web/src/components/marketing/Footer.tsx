@@ -152,7 +152,7 @@ export function Footer() {
               </p>
             </div>
             <p className="text-xs text-muted">
-              &copy; {new Date().getFullYear()} Unifeed. All rights reserved.
+              &copy; {new Date().getFullYear()} unifeed. All rights reserved.
             </p>
           </motion.div>
         </motion.div>

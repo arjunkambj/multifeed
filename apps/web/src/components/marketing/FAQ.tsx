@@ -42,7 +42,7 @@ export function FAQ() {
           variants={revealItemVariants}
         >
           Find answers to common questions about tracking creator campaigns with
-          Unifeed.
+          unifeed.
         </motion.span>
       </motion.div>
       <motion.div

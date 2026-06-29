@@ -1,4 +1,4 @@
-import { config as base } from "@repo/eslint-config/base";
+import { config as base } from "@unifeed/eslint-config/base";
 
 export default [
   ...base,

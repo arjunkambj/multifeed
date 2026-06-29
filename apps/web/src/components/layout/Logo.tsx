@@ -22,7 +22,7 @@ export default function Logo({ className, markOnly = false }: LogoProps) {
       </svg>
       {!markOnly && (
         <span className="text-lg font-display font-bold tracking-tight">
-          Unifeed
+          unifeed
         </span>
       )}
     </div>
