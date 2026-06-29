@@ -1,0 +1,28 @@
+{
+  "name": "@unifeed/backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "convex dev",
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^25.6.2",
+    "eslint": "^10.3.0",
+    "typescript": "6.0.3"
+  },
+  "dependencies": {
+    "@hexclave/next": "^1.0.14",
+    "convex": "^1.42.0",
+    "zod": "4.4.3"
+  }
+}

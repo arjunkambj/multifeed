@@ -1,0 +1,29 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "globalEnv": [
+    "NEXT_PUBLIC_HEXCLAVE_PROJECT_ID",
+    "NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY",
+    "NEXT_PUBLIC_CONVEX_URL",
+    "HEXCLAVE_SECRET_SERVER_KEY",
+    "HEXCLAVE_WEBHOOK_SECRET",
+    "NEXT_PUBLIC_APP_URL"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
