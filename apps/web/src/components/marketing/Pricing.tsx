@@ -41,10 +41,11 @@ export function Pricing() {
           Simple, transparent pricing
         </motion.h2>
         <motion.span
-          className="text-lg leading-relaxed text-muted"
+          className="max-w-2xl text-lg leading-relaxed text-muted"
           variants={revealItemVariants}
         >
-          Choose the plan that fits your creator program. No hidden fees.
+          Schedule everywhere, keep the calendar clean, and add analytics only
+          when your team needs it.
         </motion.span>
         <motion.div
           className="mt-4 flex items-center gap-3 rounded-2xl border border-border/60 bg-surface/80 px-3 py-1.5"
@@ -73,7 +74,7 @@ export function Pricing() {
         </motion.div>
       </motion.div>
       <motion.div
-        className="grid grid-cols-1 items-start gap-6 md:grid-cols-3"
+        className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-3"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
@@ -100,9 +101,27 @@ const PricingCard = ({
   plan: (typeof pricingPlans)[number];
   isYearly: boolean;
 }) => (
-  <div className="relative flex h-full flex-col gap-4 rounded-[2rem] border border-border/50 bg-surface p-6 py-8 text-foreground">
-    <div className="flex flex-col">
-      <h3 className="text-4xl">{plan.name}</h3>
+  <div
+    className={`relative flex h-full flex-col gap-5 rounded-[2rem] border bg-surface p-6 py-8 text-foreground shadow-sm ${
+      plan.preferred
+        ? "border-accent/80 shadow-accent/10"
+        : "border-border/50"
+    }`}
+  >
+    {plan.badge && (
+      <span
+        className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${
+          plan.preferred
+            ? "bg-accent text-accent-foreground"
+            : "bg-accent/10 text-accent"
+        }`}
+      >
+        {plan.badge}
+      </span>
+    )}
+    <div className="flex flex-col gap-2">
+      <h3 className="text-3xl font-semibold">{plan.name}</h3>
+      <p className="text-sm leading-relaxed text-muted">{plan.description}</p>
     </div>
     <div className="flex items-baseline gap-1">
       <span className="text-5xl font-semibold">
@@ -110,8 +129,12 @@ const PricingCard = ({
       </span>
       <span className="text-sm text-muted">{plan.period}</span>
     </div>
-    <p className="my-2 text-sm text-muted">{plan.description}</p>
-    <ul className="flex flex-col gap-3 border-t border-border pt-8">
+    {isYearly && (
+      <p className="text-sm font-medium text-accent">
+        Billed yearly. Save 20%.
+      </p>
+    )}
+    <ul className="flex flex-col gap-3 border-t border-border pt-6">
       {plan.features.map((feature) => (
         <li className="flex items-start gap-2.5 text-sm" key={feature}>
           <Icon
@@ -125,5 +148,8 @@ const PricingCard = ({
     <Button className="mt-auto font-semibold" fullWidth size="lg">
       {plan.cta}
     </Button>
+    <p className="text-center text-xs text-muted">
+      $0 due today. Cancel anytime.
+    </p>
   </div>
 );
