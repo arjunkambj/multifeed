@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Label, Switch } from "@heroui/react";
+import { Button, Switch } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -18,7 +18,7 @@ export function Pricing() {
 
   return (
     <section
-      className="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-24"
+      className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-20"
       id="pricing"
     >
       <motion.div
@@ -48,33 +48,38 @@ export function Pricing() {
           when your team needs it.
         </motion.span>
         <motion.div
-          className="mt-4 flex items-center gap-3 rounded-2xl border border-border/60 bg-surface/80 px-3 py-1.5"
+          className="mt-1 flex items-center gap-1 rounded-lg border border-border/60 bg-surface px-1.5 py-0.5"
+          role="group"
           variants={revealItemVariants}
         >
-          <Label
-            className={`cursor-pointer text-sm font-medium ${
-              !isYearly ? "text-foreground" : "text-muted"
+          <button
+            className={`cursor-pointer rounded-md px-1.5 py-0.5 text-sm font-medium transition-colors ${
+              !isYearly ? "text-foreground" : "text-muted hover:text-foreground"
             }`}
+            onClick={() => setIsYearly(false)}
+            type="button"
           >
             Monthly
-          </Label>
+          </button>
           <Switch isSelected={isYearly} onChange={setIsYearly}>
             <Switch.Control>
               <Switch.Thumb />
             </Switch.Control>
           </Switch>
-          <Label
-            className={`cursor-pointer text-sm font-medium ${
-              isYearly ? "text-foreground" : "text-muted"
+          <button
+            className={`cursor-pointer rounded-md px-1.5 py-0.5 text-sm font-medium transition-colors ${
+              isYearly ? "text-foreground" : "text-muted hover:text-foreground"
             }`}
+            onClick={() => setIsYearly(true)}
+            type="button"
           >
             Yearly
-            <span className="ml-1 text-xs text-accent">(Save 20%)</span>
-          </Label>
+            <span className="text-xs text-accent"> · Save 20%</span>
+          </button>
         </motion.div>
       </motion.div>
       <motion.div
-        className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-3"
+        className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-3"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
@@ -102,15 +107,13 @@ const PricingCard = ({
   isYearly: boolean;
 }) => (
   <div
-    className={`relative flex h-full flex-col gap-5 rounded-[2rem] border bg-surface p-6 py-8 text-foreground shadow-sm ${
-      plan.preferred
-        ? "border-accent/80 shadow-accent/10"
-        : "border-border/50"
+    className={`flex h-full flex-col gap-4 rounded-[2rem] border bg-surface p-5 text-foreground ${
+      plan.preferred ? "border-accent" : "border-border/50"
     }`}
   >
     {plan.badge && (
       <span
-        className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${
+        className={`w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold ${
           plan.preferred
             ? "bg-accent text-accent-foreground"
             : "bg-accent/10 text-accent"
@@ -119,37 +122,38 @@ const PricingCard = ({
         {plan.badge}
       </span>
     )}
-    <div className="flex flex-col gap-2">
-      <h3 className="text-3xl font-semibold">{plan.name}</h3>
-      <p className="text-sm leading-relaxed text-muted">{plan.description}</p>
+    <div className="flex flex-col gap-1">
+      <h3 className="text-xl font-semibold">{plan.name}</h3>
+      <p className="text-sm text-muted">{plan.description}</p>
     </div>
     <div className="flex items-baseline gap-1">
-      <span className="text-5xl font-semibold">
+      <span className="text-4xl font-semibold tabular-nums">
         {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
       </span>
-      <span className="text-sm text-muted">{plan.period}</span>
+      <span className="text-sm text-muted">
+        {plan.period}
+        {isYearly && <span className="text-accent"> · billed yearly</span>}
+      </span>
     </div>
-    {isYearly && (
-      <p className="text-sm font-medium text-accent">
-        Billed yearly. Save 20%.
-      </p>
-    )}
-    <ul className="flex flex-col gap-3 border-t border-border pt-6">
+    <ul className="flex flex-1 flex-col gap-2 border-t border-border pt-4">
       {plan.features.map((feature) => (
-        <li className="flex items-start gap-2.5 text-sm" key={feature}>
+        <li className="flex items-start gap-2 text-sm" key={feature}>
           <Icon
-            className="mt-0.5 shrink-0 text-base text-accent"
+            className="mt-0.5 shrink-0 text-accent"
             icon="ph:check"
+            width={16}
           />
           {feature}
         </li>
       ))}
     </ul>
-    <Button className="mt-auto font-semibold" fullWidth size="lg">
+    <Button
+      className="mt-auto font-semibold"
+      fullWidth
+      size="lg"
+      variant={plan.preferred ? "primary" : "secondary"}
+    >
       {plan.cta}
     </Button>
-    <p className="text-center text-xs text-muted">
-      $0 due today. Cancel anytime.
-    </p>
   </div>
 );

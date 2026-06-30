@@ -33,7 +33,7 @@ const navLinks = [
 export function Navbar() {
   return (
     <motion.div
-      className="sticky top-3 z-50 mx-4 mt-4 rounded-4xl bg-white/50 backdrop-blur-lg dark:border dark:border-border/60 dark:bg-surface/75 dark:shadow-lg dark:shadow-black/20 sm:mx-auto sm:w-[min(64rem,calc(100%-2rem))]"
+      className="sticky top-3 z-50 mx-4 mt-4 rounded-xl bg-white/50 backdrop-blur-lg dark:border dark:border-border/60 dark:bg-surface/75 dark:shadow-lg dark:shadow-black/20 sm:mx-auto sm:w-[min(64rem,calc(100%-2rem))]"
       initial="initial"
       variants={navVariants}
       viewport={{ once: true }}

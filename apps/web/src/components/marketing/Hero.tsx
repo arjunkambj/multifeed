@@ -36,35 +36,34 @@ export function Hero() {
           variants={revealItemVariants}
         >
           <Chip className="rounded-xl bg-transparent px-0 py-0 text-accent">
-            Creator campaign intelligence
+            Social posting, without the tabs
           </Chip>
         </motion.div>
         <motion.h1
           className="mt-2 max-w-5xl text-center text-5xl font-bold leading-none sm:text-6xl lg:text-7xl"
           variants={revealItemVariants}
         >
-          Track every creator, post, click, and contract in one place
+          Post to all your social accounts from one dashboard
         </motion.h1>
         <motion.p
           className="max-w-3xl text-center text-base leading-tight text-muted sm:text-lg"
           variants={revealItemVariants}
         >
-          unifeed keeps creator performance, campaign attribution, and team
-          workflows synced across TikTok, Instagram, YouTube, and X without
-          passwords or messy spreadsheets.
+          Everything flows better when your content, data, and team are all in
+          the same tab.
         </motion.p>
         <motion.div
           className="flex flex-wrap justify-center gap-3"
           variants={revealItemVariants}
         >
           <Link className={buttonVariants({ size: "lg" })} href="/sign-in">
-            Start tracking
+            Start posting
           </Link>
           <Link
             className={buttonVariants({ size: "lg", variant: "tertiary" })}
             href="#features"
           >
-            View features
+            See pricing
           </Link>
         </motion.div>
       </motion.div>
