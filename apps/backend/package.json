@@ -14,15 +14,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^25.6.2",
     "@unifeed/eslint-config": "workspace:*",
     "@unifeed/typescript-config": "workspace:*",
-    "@types/node": "^25.6.2",
     "eslint": "^10.3.0",
     "typescript": "6.0.3"
   },
   "dependencies": {
     "@hexclave/next": "^1.0.14",
     "convex": "^1.42.0",
+    "svix": "^1.96.1",
     "zod": "4.4.3"
   }
 }

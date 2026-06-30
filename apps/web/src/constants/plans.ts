@@ -1,10 +1,9 @@
 export interface Plan {
-  key: string;
+  key: "creator" | "growth" | "agency";
   name: string;
   description: string;
-  priceAmount: number;
+  prices: Record<"month" | "year", number>;
   currency: string;
-  interval: "month" | "year";
   features: string[];
 }
 
@@ -14,9 +13,11 @@ export const PLANS: Plan[] = [
     name: "Creator",
     description:
       "Best for solo creators and founders scheduling across core channels.",
-    priceAmount: 29,
+    prices: {
+      month: 29,
+      year: 23,
+    },
     currency: "USD",
-    interval: "month",
     features: [
       "15 connected social accounts",
       "Unlimited scheduled posts",
@@ -31,9 +32,11 @@ export const PLANS: Plan[] = [
     key: "growth",
     name: "Growth",
     description: "Best for teams managing multiple brands and calendars.",
-    priceAmount: 59,
+    prices: {
+      month: 59,
+      year: 47,
+    },
     currency: "USD",
-    interval: "month",
     features: [
       "50 connected social accounts",
       "Everything in Creator",
@@ -48,9 +51,11 @@ export const PLANS: Plan[] = [
     key: "agency",
     name: "Agency",
     description: "Best for agencies and brands with high-volume publishing.",
-    priceAmount: 119,
+    prices: {
+      month: 119,
+      year: 95,
+    },
     currency: "USD",
-    interval: "month",
     features: [
       "Unlimited connected accounts",
       "Everything in Growth",
@@ -62,3 +67,8 @@ export const PLANS: Plan[] = [
     ],
   },
 ];
+
+export type PlanKey = (typeof PLANS)[number]["key"];
+export type BillingInterval = keyof Plan["prices"];
+
+export const getPlan = (key: PlanKey) => PLANS.find((plan) => plan.key === key);

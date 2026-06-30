@@ -1,5 +1,10 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import {
+  billingInterval,
+  billingSubscriptionStatus,
+  planKey,
+} from "./billing/validators";
 
 const platform = v.union(
   v.literal("x"),
@@ -41,6 +46,37 @@ const metricSyncStatus = v.union(
 );
 
 const schema = defineSchema({
+  billingSubscriptions: defineTable({
+    teamId: v.string(),
+    userId: v.string(),
+    planKey,
+    interval: billingInterval,
+    status: billingSubscriptionStatus,
+    dodoSubscriptionId: v.optional(v.string()),
+    dodoCustomerId: v.optional(v.string()),
+    dodoProductId: v.string(),
+    dodoCheckoutSessionId: v.optional(v.string()),
+    dodoCheckoutUrl: v.optional(v.string()),
+    currentPeriodEnd: v.optional(v.number()),
+    accessEndsAt: v.optional(v.number()),
+    rawEventTimestamp: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_team_status_updated", ["teamId", "status", "updatedAt"])
+    .index("by_subscription", ["dodoSubscriptionId"])
+    .index("by_customer", ["dodoCustomerId"]),
+
+  dodoWebhookEvents: defineTable({
+    webhookId: v.string(),
+    eventType: v.string(),
+    processedAt: v.number(),
+    eventTimestamp: v.optional(v.number()),
+    teamId: v.optional(v.string()),
+    subscriptionId: v.optional(v.string()),
+    rawEvent: v.any(),
+  }).index("by_webhook_id", ["webhookId"]),
+
   connectedAccounts: defineTable({
     teamId: v.string(),
     platform,
@@ -81,7 +117,11 @@ const schema = defineSchema({
     teamId: v.string(),
     storageId: v.optional(v.id("_storage")),
     externalUrl: v.optional(v.string()),
-    kind: v.union(v.literal("image"), v.literal("video"), v.literal("document")),
+    kind: v.union(
+      v.literal("image"),
+      v.literal("video"),
+      v.literal("document"),
+    ),
     filename: v.string(),
     mimeType: v.string(),
     sizeBytes: v.number(),
@@ -159,7 +199,11 @@ const schema = defineSchema({
     teamId: v.string(),
     connectedAccountId: v.id("connectedAccounts"),
     platform,
-    kind: v.union(v.literal("comment"), v.literal("mention"), v.literal("message")),
+    kind: v.union(
+      v.literal("comment"),
+      v.literal("mention"),
+      v.literal("message"),
+    ),
     externalId: v.string(),
     authorName: v.string(),
     authorHandle: v.optional(v.string()),

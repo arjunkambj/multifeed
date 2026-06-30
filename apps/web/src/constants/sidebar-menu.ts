@@ -102,6 +102,11 @@ export const sidebarFooterItems: MenuItem[] = [
     href: "/settings",
     icon: "hugeicons:settings-02",
   },
+  {
+    name: "Billing",
+    href: "/billing",
+    icon: "hugeicons:credit-card",
+  },
 ];
 
 export const routeLabels: Record<string, string> = {
@@ -118,4 +123,5 @@ export const routeLabels: Record<string, string> = {
   "/inbox": "Inbox",
   "/teams": "Team",
   "/settings": "Settings",
+  "/billing": "Billing",
 };
