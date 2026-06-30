@@ -46,7 +46,7 @@ const socialLinks = [
 export function FooterCTA() {
   return (
     <motion.div
-      className="marketing-surface relative mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-3 overflow-hidden bg-surface-secondary px-6 py-20 text-center md:px-12"
+      className="marketing-surface relative mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-3 overflow-hidden border border-border bg-surface/80 px-6 py-20 text-center md:px-12"
       initial="initial"
       variants={revealContainerVariants}
       viewport={revealViewport}
