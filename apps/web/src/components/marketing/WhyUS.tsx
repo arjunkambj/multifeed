@@ -67,9 +67,9 @@ const WhyUSCard = ({
   point: (typeof whyUsPoints)[number];
   reversed: boolean;
 }) => (
-  <div className="flex w-full max-w-7xl flex-col justify-between gap-8 overflow-hidden rounded-[2rem] border border-border/50 bg-surface px-6 py-6 md:flex-row md:px-12 md:py-12">
+  <div className="marketing-surface flex w-full max-w-7xl flex-col justify-between gap-8 overflow-hidden border border-border/50 bg-surface px-6 py-6 md:flex-row md:px-12 md:py-12">
     <div
-      className={`relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-surface-secondary md:w-96 ${
+      className={`marketing-media relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden bg-surface-secondary md:w-96 ${
         reversed ? "md:order-2" : ""
       }`}
     >
@@ -87,7 +87,7 @@ const WhyUSCard = ({
       </span>
       <h3 className="text-3xl font-semibold md:text-4xl">{point.title}</h3>
       <p className="leading-relaxed text-muted">{point.description}</p>
-      <Button className="mt-3 w-fit" size="lg">
+      <Button className="button mt-3 w-fit" size="lg">
         {point.cta}
         <Icon icon="mdi:arrow-right" />
       </Button>

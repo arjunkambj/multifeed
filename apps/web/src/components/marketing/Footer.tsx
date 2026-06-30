@@ -46,7 +46,7 @@ const socialLinks = [
 export function FooterCTA() {
   return (
     <motion.div
-      className="relative mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-3 overflow-hidden rounded-[2rem] bg-surface-secondary px-6 py-20 text-center md:px-12"
+      className="marketing-surface relative mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-3 overflow-hidden bg-surface-secondary px-6 py-20 text-center md:px-12"
       initial="initial"
       variants={revealContainerVariants}
       viewport={revealViewport}
@@ -67,7 +67,7 @@ export function FooterCTA() {
       </motion.p>
       <motion.div variants={revealItemVariants}>
         <Link
-          className={`${buttonVariants({ size: "lg" })} mt-4`}
+          className={`${buttonVariants({ size: "lg" })} button mt-4`}
           href="/sign-in"
         >
           Get Started

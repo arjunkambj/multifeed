@@ -84,7 +84,7 @@ export function Features() {
 }
 
 const FeatureCard = ({ item }: { item: (typeof featureItems)[number] }) => (
-  <div className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/50 bg-surface">
+  <div className="marketing-surface flex h-full flex-col overflow-hidden border border-border/50 bg-surface">
     <div className="relative h-56 w-full md:h-60">
       <Image
         alt={item.heading}

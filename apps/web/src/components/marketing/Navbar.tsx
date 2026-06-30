@@ -3,6 +3,7 @@
 import { buttonVariants } from "@heroui/react";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { useEffect, useState } from "react";
 
 import Logo from "@/components/layout/Logo";
 
@@ -31,9 +32,22 @@ const navLinks = [
 ] as const;
 
 export function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <motion.div
-      className="sticky top-3 z-50 mx-4 mt-4 rounded-xl bg-white/50 backdrop-blur-lg dark:border dark:border-border/60 dark:bg-surface/75 dark:shadow-lg dark:shadow-black/20 sm:mx-auto sm:w-[min(64rem,calc(100%-2rem))]"
+      className={`marketing-nav sticky top-3 z-50 mx-4 mt-4 border border-border/50 backdrop-blur-lg transition-colors duration-300 dark:shadow-lg dark:shadow-black/20 sm:mx-auto sm:w-[min(64rem,calc(100%-2rem))] ${
+        isScrolled ? "bg-white/50 dark:bg-surface/75" : "bg-surface"
+      }`}
       initial="initial"
       variants={navVariants}
       viewport={{ once: true }}
@@ -61,7 +75,10 @@ export function Navbar() {
           ))}
         </motion.ul>
         <motion.div variants={navItemVariants}>
-          <Link className={buttonVariants({ size: "sm" })} href="/sign-in">
+          <Link
+            className={`${buttonVariants({ size: "sm" })} button`}
+            href="/sign-in"
+          >
             Get Started
           </Link>
         </motion.div>

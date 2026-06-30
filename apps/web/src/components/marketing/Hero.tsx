@@ -32,10 +32,10 @@ export function Hero() {
         variants={revealContainerVariants}
       >
         <motion.div
-          className="rounded-2xl border border-border/60 bg-surface/80 px-3 py-1"
+          className="marketing-chip border border-border/60 bg-surface/80 px-3 py-1"
           variants={revealItemVariants}
         >
-          <Chip className="rounded-xl bg-transparent px-0 py-0 text-accent">
+          <Chip className="marketing-chip bg-transparent px-0 py-0 text-accent">
             Social posting, without the tabs
           </Chip>
         </motion.div>
@@ -56,11 +56,14 @@ export function Hero() {
           className="flex flex-wrap justify-center gap-3"
           variants={revealItemVariants}
         >
-          <Link className={buttonVariants({ size: "lg" })} href="/sign-in">
+          <Link
+            className={`${buttonVariants({ size: "lg" })} button`}
+            href="/sign-in"
+          >
             Start posting
           </Link>
           <Link
-            className={buttonVariants({ size: "lg", variant: "tertiary" })}
+            className={`${buttonVariants({ size: "lg", variant: "tertiary" })} button`}
             href="#features"
           >
             See pricing
@@ -69,7 +72,7 @@ export function Hero() {
       </motion.div>
       <motion.div
         animate="animate"
-        className="relative z-10 mx-auto aspect-[16/9] w-full max-w-5xl overflow-hidden rounded-[2rem] bg-surface/80 shadow-2xl shadow-foreground/10 dark:border dark:border-border/60 dark:bg-surface/70 dark:shadow-black/50"
+        className="marketing-surface relative z-10 mx-auto aspect-[16/9] w-full max-w-5xl overflow-hidden bg-surface/80 shadow-2xl shadow-foreground/10 dark:border dark:border-border/60 dark:bg-surface/70 dark:shadow-black/50"
         initial="initial"
         variants={imageVariants}
       />

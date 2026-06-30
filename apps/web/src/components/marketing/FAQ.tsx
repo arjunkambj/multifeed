@@ -61,7 +61,7 @@ export function FAQ() {
             Drop a note to our support team and we&apos;ll point you in the
             right direction.
           </p>
-          <Button className="mt-5 w-fit">
+          <Button className="button mt-5 w-fit">
             <Icon icon="mdi:chat-outline" />
             Ask us anything
           </Button>

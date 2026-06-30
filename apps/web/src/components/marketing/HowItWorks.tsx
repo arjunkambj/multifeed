@@ -90,8 +90,8 @@ const Card = ({
   description: string;
   step: string;
 }) => (
-  <div className="flex h-full w-full flex-col gap-6 rounded-[2rem] border border-border/50 bg-surface p-2">
-    <div className="flex h-70 w-full items-end rounded-[1.5rem] bg-background p-5">
+  <div className="marketing-surface flex h-full w-full flex-col gap-6 border border-border/50 bg-surface p-2">
+    <div className="marketing-media flex h-70 w-full items-end bg-background p-5">
       <div className="grid w-full grid-cols-4 gap-2">
         {[32, 58, 76, 44].map((height, index) => (
           <div
@@ -107,7 +107,7 @@ const Card = ({
       </div>
     </div>
     <div className="flex flex-col gap-2 px-2 pb-6">
-      <div className="mr-auto rounded-2xl bg-background px-3 py-0.5 text-sm font-semibold">
+      <div className="marketing-chip mr-auto bg-background px-3 py-0.5 text-sm font-semibold">
         Step {step}
       </div>
       <h3 className="text-xl font-medium">{title}</h3>

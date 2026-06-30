@@ -1,12 +1,6 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 
-@layer components {
-  .button {
-    @apply rounded-xl;
-  }
-}
-
 @keyframes marquee {
   0% {
     transform: translateX(0);
@@ -36,7 +30,7 @@ html.lenis {
   /* Theme Colors (Light Mode) */
   --accent: oklch(69% 0.18 46);
   --accent-foreground: oklch(99.11% 0 0);
-  --background: oklch(97.02% 0.0015 35.26);
+  --background: oklch(98.5% 0 0);
   --border: oklch(90% 0.0015 35.26);
   --danger: oklch(65.32% 0.2335 359.51);
   --danger-foreground: oklch(99.11% 0 0);
@@ -68,6 +62,8 @@ html.lenis {
 
   /* Border Radius */
   --radius: 0.5rem;
+  --button-radius: 0.75rem;
+  --marketing-radius: 1rem;
   --field-radius: 0.75rem;
 
   /* Font Family */
@@ -110,4 +106,20 @@ html.lenis {
   --surface-tertiary-foreground: oklch(99.11% 0.0015 35.26);
   --warning: oklch(82.03% 0.1392 50.11);
   --warning-foreground: oklch(21.03% 0.0059 50.11);
+}
+
+.button,
+.marketing-chip,
+.marketing-control {
+  border-radius: var(--button-radius, 0.75rem);
+}
+
+.marketing-media,
+.marketing-nav,
+.marketing-surface {
+  border-radius: var(--marketing-radius, 1rem);
+}
+
+.marketing-control-item {
+  border-radius: calc(var(--button-radius, 0.75rem) - 0.25rem);
 }

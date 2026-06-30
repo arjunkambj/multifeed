@@ -48,12 +48,12 @@ export function Pricing() {
           when your team needs it.
         </motion.span>
         <motion.div
-          className="mt-1 flex items-center gap-1 rounded-lg border border-border/60 bg-surface px-1.5 py-0.5"
+          className="marketing-control mt-1 flex items-center gap-1 border border-border/60 bg-surface px-1.5 py-0.5"
           role="group"
           variants={revealItemVariants}
         >
           <button
-            className={`cursor-pointer rounded-md px-1.5 py-0.5 text-sm font-medium transition-colors ${
+            className={`marketing-control-item cursor-pointer px-1.5 py-0.5 text-sm font-medium transition-colors ${
               !isYearly ? "text-foreground" : "text-muted hover:text-foreground"
             }`}
             onClick={() => setIsYearly(false)}
@@ -67,7 +67,7 @@ export function Pricing() {
             </Switch.Control>
           </Switch>
           <button
-            className={`cursor-pointer rounded-md px-1.5 py-0.5 text-sm font-medium transition-colors ${
+            className={`marketing-control-item cursor-pointer px-1.5 py-0.5 text-sm font-medium transition-colors ${
               isYearly ? "text-foreground" : "text-muted hover:text-foreground"
             }`}
             onClick={() => setIsYearly(true)}
@@ -107,13 +107,13 @@ const PricingCard = ({
   isYearly: boolean;
 }) => (
   <div
-    className={`flex h-full flex-col gap-4 rounded-[2rem] border bg-surface p-5 text-foreground ${
+    className={`marketing-surface flex h-full flex-col gap-4 border bg-surface p-5 text-foreground ${
       plan.preferred ? "border-accent" : "border-border/50"
     }`}
   >
     {plan.badge && (
       <span
-        className={`w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+        className={`marketing-chip w-fit px-2.5 py-0.5 text-xs font-semibold ${
           plan.preferred
             ? "bg-accent text-accent-foreground"
             : "bg-accent/10 text-accent"
@@ -148,7 +148,7 @@ const PricingCard = ({
       ))}
     </ul>
     <Button
-      className="mt-auto font-semibold"
+      className="button mt-auto font-semibold"
       fullWidth
       size="lg"
       variant={plan.preferred ? "primary" : "secondary"}

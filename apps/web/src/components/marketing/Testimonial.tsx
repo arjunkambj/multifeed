@@ -68,7 +68,7 @@ function TestimonialCard({
   testimonial: (typeof testimonials)[number];
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-[2rem] border border-border/50 bg-surface p-6">
+    <div className="marketing-surface flex flex-col gap-3 border border-border/50 bg-surface p-6">
       <Icon icon="mdi:format-quote-open" width={28} />
       <p className="flex-1 text-lg leading-tight text-foreground">
         {testimonial.quote}
