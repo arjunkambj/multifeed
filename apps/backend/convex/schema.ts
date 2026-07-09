@@ -1,10 +1,25 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import {
-  billingInterval,
-  billingSubscriptionStatus,
-  planKey,
-} from "./billing/validators";
+
+const planKey = v.union(
+  v.literal("creator"),
+  v.literal("growth"),
+  v.literal("agency"),
+);
+
+const billingInterval = v.union(v.literal("month"), v.literal("year"));
+
+const billingStatus = v.union(
+  v.literal("pending"),
+  v.literal("active"),
+  v.literal("renewed"),
+  v.literal("updated"),
+  v.literal("plan_changed"),
+  v.literal("cancelled"),
+  v.literal("on_hold"),
+  v.literal("failed"),
+  v.literal("expired"),
+);
 
 const platform = v.union(
   v.literal("x"),
@@ -45,13 +60,13 @@ const metricSyncStatus = v.union(
   v.literal("failed"),
 );
 
-const schema = defineSchema({
+export default defineSchema({
   billingSubscriptions: defineTable({
     teamId: v.string(),
     userId: v.string(),
     planKey,
     interval: billingInterval,
-    status: billingSubscriptionStatus,
+    status: billingStatus,
     dodoSubscriptionId: v.optional(v.string()),
     dodoCustomerId: v.optional(v.string()),
     dodoProductId: v.string(),
@@ -215,5 +230,3 @@ const schema = defineSchema({
     .index("by_team_status_time", ["teamId", "status", "receivedAt"])
     .index("by_account_external", ["connectedAccountId", "externalId"]),
 });
-
-export default schema;

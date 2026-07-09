@@ -86,14 +86,14 @@ export default function SignInPage() {
   }, [otp, nonce, isVerifying, app]);
 
   return (
-    <div className="flex w-full sm:max-w-sm flex-col gap-6 mx-auto">
+    <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
       <div className="text-center">
         <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
           Welcome to unifeed
         </h1>
-        <p className="mt-2 text-sm text-muted font-light">
+        <p className="mt-2 text-sm font-light text-muted">
           {step === "email"
-            ? "Enter your email to continue"
+            ? "Sign in to run social on autopilot"
             : `We sent a code to ${email}`}
         </p>
       </div>

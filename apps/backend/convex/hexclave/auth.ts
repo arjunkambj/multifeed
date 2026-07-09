@@ -1,8 +1,6 @@
 import { z } from "zod";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 
-type Ctx = MutationCtx | QueryCtx;
-
 const HexclaveUserSchema = z.object({
   id: z.string(),
   email: z.string(),
@@ -13,11 +11,11 @@ const HexclaveUserSchema = z.object({
   selectedTeamId: z.string(),
 });
 
-export const getCurrentHexclaveUser = async (ctx: Ctx) => {
+export async function getCurrentHexclaveUser(ctx: MutationCtx | QueryCtx) {
   const identity = await ctx.auth.getUserIdentity();
 
   if (identity == null) {
-    return { authenticated: false, error: "Unauthenticated." } as const;
+    return { authenticated: false as const, error: "Unauthenticated." };
   }
 
   const user = HexclaveUserSchema.safeParse({
@@ -31,8 +29,17 @@ export const getCurrentHexclaveUser = async (ctx: Ctx) => {
   });
 
   if (!user.success) {
-    return { authenticated: false, error: "Missing Hexclave user claims." } as const;
+    return {
+      authenticated: false as const,
+      error: "Missing Hexclave user claims.",
+    };
   }
 
-  return { authenticated: true, user: user.data } as const;
-};
+  return { authenticated: true as const, user: user.data };
+}
+
+export async function requireUser(ctx: MutationCtx | QueryCtx) {
+  const auth = await getCurrentHexclaveUser(ctx);
+  if (!auth.authenticated) throw new Error(auth.error);
+  return auth.user;
+}

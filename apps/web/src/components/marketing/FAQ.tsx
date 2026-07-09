@@ -1,8 +1,9 @@
 "use client";
 
-import { Accordion, Button } from "@heroui/react";
+import { Accordion, buttonVariants } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
+import Link from "next/link";
 
 import { faqItems } from "@/constants/landing-page";
 import {
@@ -15,11 +16,11 @@ import {
 export function FAQ() {
   return (
     <section
-      className="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-24"
+      className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
       id="faq"
     >
       <motion.div
-        className="flex flex-col items-center gap-2 text-center"
+        className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
@@ -32,67 +33,68 @@ export function FAQ() {
           FAQ
         </motion.span>
         <motion.h2
-          className="text-4xl font-bold leading-tight"
+          className="font-display text-3xl font-bold tracking-tight sm:text-4xl"
           variants={revealItemVariants}
         >
-          Frequently asked questions
+          Questions, answered straight
         </motion.h2>
-        <motion.span
-          className="text-lg leading-relaxed text-muted"
+        <motion.p
+          className="text-base leading-relaxed text-muted sm:text-lg"
           variants={revealItemVariants}
         >
-          Find answers to common questions about tracking creator campaigns with
-          unifeed.
-        </motion.span>
+          Agents, networks, and the calendar — what people ask before going on
+          autopilot.
+        </motion.p>
       </motion.div>
+
       <motion.div
-        className="mx-auto flex w-full flex-col items-start justify-between gap-12 md:flex-row md:px-12"
+        className="mx-auto flex w-full flex-col items-start justify-between gap-10 md:flex-row md:gap-12"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
         whileInView="animate"
       >
         <motion.div
-          className="flex w-full max-w-sm flex-col gap-1 md:sticky md:top-32"
+          className="flex w-full max-w-sm flex-col gap-2 md:sticky md:top-28"
           variants={revealItemVariants}
         >
-          <h3 className="text-2xl font-medium">Need personalized help?</h3>
+          <h3 className="text-xl font-medium sm:text-2xl">Still unsure?</h3>
           <p className="leading-relaxed text-muted">
-            Drop a note to our support team and we&apos;ll point you in the
-            right direction.
+            Tell us what you’re trying to ship — we’ll help you pick the right
+            setup.
           </p>
-          <Button className="button mt-5 w-fit">
+          <Link
+            className={`${buttonVariants()} button mt-4 w-fit`}
+            href="/sign-in"
+          >
             <Icon icon="mdi:chat-outline" />
-            Ask us anything
-          </Button>
+            Talk to us
+          </Link>
         </motion.div>
+
         <motion.div
           className="flex w-full max-w-2xl justify-center"
           variants={revealCardVariants}
         >
           <Accordion className="w-full">
-            {faqItems.map((item, index) => accordionItem(item, index))}
+            {faqItems.map((item, index) => (
+              <Accordion.Item key={item.title} id={`${index}`}>
+                <Accordion.Heading>
+                  <Accordion.Trigger className="text-base font-medium sm:text-lg">
+                    {item.title}
+                    <Accordion.Indicator>
+                      <Icon icon="mdi:chevron-down" />
+                    </Accordion.Indicator>
+                  </Accordion.Trigger>
+                </Accordion.Heading>
+                <Accordion.Panel>
+                  <Accordion.Body>{item.content}</Accordion.Body>
+                </Accordion.Panel>
+              </Accordion.Item>
+            ))}
           </Accordion>
         </motion.div>
       </motion.div>
     </section>
-  );
-}
-
-function accordionItem(item: (typeof faqItems)[number], index: number) {
-  return (
-    <Accordion.Item key={item.title} id={`${index}`}>
-      <Accordion.Heading>
-        <Accordion.Trigger className="text-lg font-medium">
-          {item.title}
-          <Accordion.Indicator>
-            <Icon icon="mdi:chevron-down" />
-          </Accordion.Indicator>
-        </Accordion.Trigger>
-      </Accordion.Heading>
-      <Accordion.Panel>
-        <Accordion.Body>{item.content}</Accordion.Body>
-      </Accordion.Panel>
-    </Accordion.Item>
   );
 }

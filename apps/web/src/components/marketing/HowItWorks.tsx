@@ -12,29 +12,29 @@ import {
 const steps = [
   {
     description:
-      "Add public creator profiles, campaign details, deliverables, and the links you want to attribute.",
+      "Link 30+ networks and plug in the agents you already use — Claude, ChatGPT, Codex, Cursor, and more.",
     step: "1",
-    title: "Set up your creator roster",
+    title: "Connect networks & agents",
   },
   {
     description:
-      "unifeed keeps social performance, link clicks, contract status, and campaign data in sync.",
+      "Agents plan and generate posts. Everything lands on a visual calendar ready for you to tweak.",
     step: "2",
-    title: "Track every moving part",
+    title: "Generate on autopilot",
   },
   {
     description:
-      "See what is working, renew top creators, and share clean campaign reports with your team.",
+      "Review, edit, and approve — then unifeed schedules and publishes across every connected network.",
     step: "3",
-    title: "Act on the signal",
+    title: "Approve & publish",
   },
 ] as const;
 
 export function HowItWorks() {
   return (
-    <section className="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-24">
+    <section className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24">
       <motion.div
-        className="flex flex-col items-center gap-2 text-center"
+        className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
@@ -44,24 +44,25 @@ export function HowItWorks() {
           className="text-sm font-semibold uppercase tracking-wide text-accent"
           variants={revealItemVariants}
         >
-          Process
+          How it works
         </motion.span>
         <motion.h2
-          className="text-4xl font-bold leading-tight"
+          className="font-display text-3xl font-bold tracking-tight sm:text-4xl"
           variants={revealItemVariants}
         >
-          How it works
+          Three steps to social autopilot
         </motion.h2>
-        <motion.span
-          className="text-lg leading-relaxed text-muted"
+        <motion.p
+          className="text-base leading-relaxed text-muted sm:text-lg"
           variants={revealItemVariants}
         >
-          Three simple steps from scattered creator work to a clear operating
-          system.
-        </motion.span>
+          From empty calendar to multi-network schedule — with AI doing the
+          heavy lifting.
+        </motion.p>
       </motion.div>
+
       <motion.div
-        className="grid grid-cols-1 gap-6 md:grid-cols-3"
+        className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
@@ -69,7 +70,7 @@ export function HowItWorks() {
       >
         {steps.map((step) => (
           <motion.div key={step.step} variants={revealCardVariants}>
-            <Card
+            <StepCard
               description={step.description}
               step={step.step}
               title={step.title}
@@ -81,7 +82,7 @@ export function HowItWorks() {
   );
 }
 
-const Card = ({
+function StepCard({
   title,
   description,
   step,
@@ -89,29 +90,31 @@ const Card = ({
   title: string;
   description: string;
   step: string;
-}) => (
-  <div className="marketing-surface flex h-full w-full flex-col gap-6 border border-border/50 bg-surface p-2">
-    <div className="marketing-media flex h-70 w-full items-end bg-background p-5">
-      <div className="grid w-full grid-cols-4 gap-2">
-        {[32, 58, 76, 44].map((height, index) => (
-          <div
-            className="flex h-36 items-end rounded-full bg-surface-secondary"
-            key={height + index}
-          >
+}) {
+  return (
+    <div className="marketing-surface flex h-full w-full flex-col gap-5 border border-border/50 bg-surface p-2">
+      <div className="marketing-media flex h-56 w-full items-end bg-background p-5 sm:h-64">
+        <div className="grid w-full grid-cols-4 gap-2">
+          {[32, 58, 76, 44].map((height, index) => (
             <div
-              className="w-full rounded-full bg-accent"
-              style={{ height: `${height}%` }}
-            />
-          </div>
-        ))}
+              className="flex h-32 items-end rounded-full bg-surface-secondary sm:h-36"
+              key={`${height}-${index}`}
+            >
+              <div
+                className="w-full rounded-full bg-accent"
+                style={{ height: `${height}%` }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col gap-2 px-3 pb-5">
+        <div className="marketing-chip mr-auto bg-background px-3 py-0.5 text-sm font-semibold">
+          Step {step}
+        </div>
+        <h3 className="text-xl font-medium">{title}</h3>
+        <p className="text-sm leading-relaxed text-muted">{description}</p>
       </div>
     </div>
-    <div className="flex flex-col gap-2 px-2 pb-6">
-      <div className="marketing-chip mr-auto bg-background px-3 py-0.5 text-sm font-semibold">
-        Step {step}
-      </div>
-      <h3 className="text-xl font-medium">{title}</h3>
-      <p className="text-sm text-muted">{description}</p>
-    </div>
-  </div>
-);
+  );
+}

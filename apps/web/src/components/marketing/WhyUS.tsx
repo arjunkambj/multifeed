@@ -1,9 +1,10 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { buttonVariants } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 
 import { whyUsPoints } from "@/constants/landing-page";
 import {
@@ -15,9 +16,9 @@ import {
 
 export function WhyUS() {
   return (
-    <section className="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-24">
+    <section className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24">
       <motion.div
-        className="flex flex-col items-center gap-2 text-center"
+        className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
@@ -27,24 +28,25 @@ export function WhyUS() {
           className="text-sm font-semibold uppercase tracking-wide text-accent"
           variants={revealItemVariants}
         >
-          Why us
+          Why unifeed
         </motion.span>
         <motion.h2
-          className="text-4xl font-bold leading-tight"
+          className="font-display text-3xl font-bold tracking-tight sm:text-4xl"
           variants={revealItemVariants}
         >
-          Why choose unifeed
+          Social on autopilot — without losing control
         </motion.h2>
-        <motion.span
-          className="text-lg leading-relaxed text-muted"
+        <motion.p
+          className="text-base leading-relaxed text-muted sm:text-lg"
           variants={revealItemVariants}
         >
-          Built for modern creator operations where performance, process, and
-          attribution need to live together.
-        </motion.span>
+          AI agents generate. unifeed schedules across 30+ networks. You review
+          everything on one calendar.
+        </motion.p>
       </motion.div>
+
       <motion.div
-        className="mx-auto flex w-full flex-col gap-8"
+        className="flex w-full flex-col gap-4 md:gap-6"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
@@ -60,37 +62,44 @@ export function WhyUS() {
   );
 }
 
-const WhyUSCard = ({
+function WhyUSCard({
   point,
   reversed,
 }: {
   point: (typeof whyUsPoints)[number];
   reversed: boolean;
-}) => (
-  <div className="marketing-surface flex w-full max-w-7xl flex-col justify-between gap-8 overflow-hidden border border-border/50 bg-surface px-6 py-6 md:flex-row md:px-12 md:py-12">
-    <div
-      className={`marketing-media relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden bg-surface-secondary md:w-96 ${
-        reversed ? "md:order-2" : ""
-      }`}
-    >
-      <Image
-        alt={point.title}
-        className="object-cover"
-        fill
-        sizes="(max-width: 768px) 100vw, 384px"
-        src={point.image}
-      />
+}) {
+  return (
+    <div className="marketing-surface flex w-full flex-col justify-between gap-6 overflow-hidden border border-border/50 bg-surface p-5 sm:p-6 md:flex-row md:gap-10 md:p-10">
+      <div
+        className={`marketing-media relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden bg-surface-secondary md:w-80 lg:w-96 ${
+          reversed ? "md:order-2" : ""
+        }`}
+      >
+        <Image
+          alt={point.title}
+          className="object-cover"
+          fill
+          sizes="(max-width: 768px) 100vw, 384px"
+          src={point.image}
+        />
+      </div>
+      <div className="flex flex-1 flex-col justify-center gap-3 md:max-w-lg">
+        <span className="text-sm font-medium uppercase tracking-wide text-accent">
+          {point.subheading}
+        </span>
+        <h3 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+          {point.title}
+        </h3>
+        <p className="leading-relaxed text-muted">{point.description}</p>
+        <Link
+          className={`${buttonVariants({ size: "lg" })} button mt-2 w-fit`}
+          href="/sign-in"
+        >
+          {point.cta}
+          <Icon icon="mdi:arrow-right" />
+        </Link>
+      </div>
     </div>
-    <div className="flex flex-1 flex-col justify-center gap-3 md:max-w-lg">
-      <span className="text-sm font-medium uppercase tracking-wide text-accent">
-        {point.subheading}
-      </span>
-      <h3 className="text-3xl font-semibold md:text-4xl">{point.title}</h3>
-      <p className="leading-relaxed text-muted">{point.description}</p>
-      <Button className="button mt-3 w-fit" size="lg">
-        {point.cta}
-        <Icon icon="mdi:arrow-right" />
-      </Button>
-    </div>
-  </div>
-);
+  );
+}

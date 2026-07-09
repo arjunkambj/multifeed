@@ -13,69 +13,114 @@ const imageVariants = {
   animate: {
     opacity: 1,
     scale: 1,
-    transition: { delay: 0.3, duration: 0.8, ease: "easeInOut" as const },
+    transition: { delay: 0.25, duration: 0.8, ease: "easeInOut" as const },
     y: 0,
   },
-  initial: { opacity: 0, scale: 0.8, y: 40 },
+  initial: { opacity: 0, scale: 0.96, y: 32 },
 };
 
 export function Hero() {
   return (
     <section
-      className="relative flex min-h-[60dvh] w-full flex-col gap-12 px-4 pb-20 pt-24 sm:pt-28"
+      className="relative mx-auto flex min-h-[58dvh] w-full max-w-7xl flex-col gap-12 px-4 pb-16 pt-20 sm:px-6 sm:pt-24 md:gap-14 md:pb-20"
       id="hero"
     >
       <motion.div
         animate="animate"
-        className="relative z-10 flex flex-col items-center gap-4"
+        className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-5 text-center"
         initial="initial"
         variants={revealContainerVariants}
       >
-        <motion.div
-          className="marketing-chip border border-border/60 bg-surface/80 px-3 py-1"
-          variants={revealItemVariants}
-        >
-          <Chip className="marketing-chip bg-transparent px-0 py-0 text-accent">
-            Social posting, without the tabs
+        <motion.div variants={revealItemVariants}>
+          <Chip className="marketing-chip border border-border/60 bg-surface px-3 py-1 text-accent">
+            AI agents · 30+ social networks
           </Chip>
         </motion.div>
+
         <motion.h1
-          className="mt-2 max-w-5xl text-center text-5xl font-bold leading-none sm:text-6xl lg:text-7xl"
+          className="font-display max-w-4xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.05]"
           variants={revealItemVariants}
         >
-          Post to all your social accounts from one dashboard
+          Run your social media on autopilot with{" "}
+          <span className="relative inline-block whitespace-nowrap">
+            AI agents
+            <span
+              aria-hidden
+              className="absolute inset-x-0 -bottom-1 h-[0.18em] rounded-full bg-accent sm:-bottom-1.5"
+            />
+          </span>
         </motion.h1>
+
         <motion.p
-          className="max-w-3xl text-center text-base leading-tight text-muted sm:text-lg"
+          className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg"
           variants={revealItemVariants}
         >
-          Everything flows better when your content, data, and team are all in
-          the same tab.
+          Plan, generate, and schedule posts automatically to 30+ social media
+          networks — then review and edit everything in a visual calendar.
         </motion.p>
+
         <motion.div
-          className="flex flex-wrap justify-center gap-3"
+          className="flex flex-wrap items-center justify-center gap-3 pt-1"
           variants={revealItemVariants}
         >
           <Link
             className={`${buttonVariants({ size: "lg" })} button`}
             href="/sign-in"
           >
-            Start posting
+            Start free for 7 days
           </Link>
           <Link
             className={`${buttonVariants({ size: "lg", variant: "tertiary" })} button`}
-            href="#features"
+            href="#pricing"
           >
             See pricing
           </Link>
         </motion.div>
+
+        <motion.p
+          className="max-w-xl text-sm leading-relaxed text-muted"
+          variants={revealItemVariants}
+        >
+          Use any agent:{" "}
+          <span className="font-medium text-foreground/80">
+            OpenClaw / Hermes / Claude / ChatGPT / Codex / Cursor
+          </span>
+        </motion.p>
       </motion.div>
+
+      {/* Image frame — drop product screenshots here later */}
       <motion.div
         animate="animate"
-        className="marketing-surface relative z-10 mx-auto aspect-[16/9] w-full max-w-5xl overflow-hidden bg-surface/80 shadow-2xl shadow-foreground/10 dark:border dark:border-border/60 dark:bg-surface/70 dark:shadow-black/50"
+        className="relative z-10 mx-auto w-full max-w-5xl"
         initial="initial"
         variants={imageVariants}
-      />
+      >
+        <div className="marketing-surface overflow-hidden border border-border/60 bg-surface shadow-xl shadow-foreground/5 dark:shadow-black/30">
+          {/* Window chrome */}
+          <div className="flex h-11 items-center gap-3 border-b border-border/50 bg-surface-secondary/50 px-4">
+            <div className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-[#FF5F57]" />
+              <span className="size-2.5 rounded-full bg-[#FEBC2E]" />
+              <span className="size-2.5 rounded-full bg-[#28C840]" />
+            </div>
+            <div className="mx-auto flex h-7 max-w-xs flex-1 items-center justify-center rounded-lg border border-border/40 bg-background px-3">
+              <span className="truncate text-[11px] font-medium text-muted">
+                app.unifeed.io
+              </span>
+            </div>
+            <div className="hidden w-14 sm:block" />
+          </div>
+
+          {/* Main image slot */}
+          <div className="relative aspect-[16/10] w-full bg-surface-secondary/40">
+            {/*
+              Replace this empty frame with:
+              <Image src="/hero.png" alt="unifeed dashboard" fill className="object-cover object-top" />
+            */}
+            <div className="absolute inset-4 rounded-xl border border-dashed border-border/60 bg-background/60 sm:inset-5 md:inset-6" />
+          </div>
+        </div>
+      </motion.div>
     </section>
   );
 }

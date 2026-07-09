@@ -1,30 +1,23 @@
-import type React from "react";
 import Link from "next/link";
 
 import Logo from "@/components/layout/Logo";
 
-interface AuthLayoutProps {
+export default function AuthLayout({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-export default function AuthLayout({ children }: AuthLayoutProps) {
+}) {
   return (
     <div className="relative flex min-h-dvh flex-col bg-background">
-      <div className="absolute left-5 top-5 sm:left-8 sm:top-8">
-        <HomeLink />
-      </div>
+      <header className="absolute inset-x-0 top-0 z-10 flex h-14 items-center px-4 sm:px-6">
+        <Link href="/" className="inline-flex">
+          <Logo className="gap-2" />
+        </Link>
+      </header>
 
-      <main className="flex flex-1 items-center justify-center px-5 py-20 sm:px-8">
+      <main className="flex flex-1 items-center justify-center px-4 py-20 sm:px-6 sm:py-24">
         {children}
       </main>
     </div>
-  );
-}
-
-function HomeLink() {
-  return (
-    <Link href="/">
-      <Logo className="gap-2" />
-    </Link>
   );
 }

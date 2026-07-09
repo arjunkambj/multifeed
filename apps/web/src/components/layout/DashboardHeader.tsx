@@ -1,27 +1,26 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { UserProfileMenu } from "@/components/layout/UserProfileMenu";
 
-type DashboardUser = {
-  displayName: string | null;
-  primaryEmail: string | null;
-  profileImageUrl: string | null;
-};
+import { UserProfileMenu } from "@/components/layout/UserProfileMenu";
 
 export function DashboardHeader({
   onToggle,
   user,
 }: {
   onToggle: () => void;
-  user: DashboardUser;
+  user: {
+    displayName: string | null;
+    primaryEmail: string | null;
+    profileImageUrl: string | null;
+  };
 }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 sm:px-6">
       <button
         type="button"
         onClick={onToggle}
-        className="inline-flex size-9 items-center rounded-3xl justify-center text-muted transition-colors hover:bg-surface-secondary hover:text-foreground"
+        className="inline-flex size-9 items-center justify-center rounded-3xl text-muted transition-colors hover:bg-surface-secondary hover:text-foreground"
         aria-label="Toggle sidebar"
       >
         <Icon icon="hugeicons:sidebar-left" className="size-4.5" />

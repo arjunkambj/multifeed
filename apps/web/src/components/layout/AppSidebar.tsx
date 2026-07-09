@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@iconify/react";
+
 import {
   sidebarMainItems,
   sidebarCategories,
@@ -11,15 +12,10 @@ import {
 import type { MenuItem } from "@/constants/sidebar-menu";
 import Logo from "./Logo";
 
-type SidebarSection = {
-  name?: string;
-  items: MenuItem[];
-};
-
 const collapsedRailSlot =
   "mx-auto flex size-10 items-center justify-center px-0";
 
-const NavItem = ({
+function NavItem({
   item,
   active,
   collapsed,
@@ -27,42 +23,46 @@ const NavItem = ({
   item: MenuItem;
   active: boolean;
   collapsed: boolean;
-}) => (
-  <Link
-    href={item.href}
-    title={collapsed ? item.name : undefined}
-    className={`flex items-center gap-3 rounded-[0.75rem] text-sm transition-colors ${
-      collapsed ? collapsedRailSlot : "h-9 px-3"
-    } ${active ? "bg-accent/10 font-medium" : "hover:bg-surface-secondary"}`}
-  >
-    <Icon
-      icon={item.icon}
-      className={`size-[18px] shrink-0 ${active ? "[stroke-width:2]" : ""}`}
-    />
-    {!collapsed && <span>{item.name}</span>}
-  </Link>
-);
+}) {
+  return (
+    <Link
+      href={item.href}
+      title={collapsed ? item.name : undefined}
+      className={`flex items-center gap-3 rounded-[0.75rem] text-sm transition-colors ${
+        collapsed ? collapsedRailSlot : "h-9 px-3"
+      } ${active ? "bg-accent/10 font-medium" : "hover:bg-surface-secondary"}`}
+    >
+      <Icon
+        icon={item.icon}
+        className={`size-[18px] shrink-0 ${active ? "[stroke-width:2]" : ""}`}
+      />
+      {!collapsed && <span>{item.name}</span>}
+    </Link>
+  );
+}
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
-  const sections: SidebarSection[] = [
+  const sections: { name?: string; items: MenuItem[] }[] = [
     { items: sidebarMainItems },
     ...sidebarCategories.map(({ name, items }) => ({ name, items })),
   ];
 
   return (
     <aside
-      className={`sticky top-0 flex h-dvh px-1 shrink-0 flex-col bg-background transition-[width] duration-200 ${
+      className={`sticky top-0 flex h-dvh shrink-0 flex-col bg-background px-1 transition-[width] duration-200 ${
         collapsed ? "w-16" : "w-62"
       }`}
     >
       <div
-        className={`mt-2 flex h-16 items-center ${
+        className={`mt-2 flex h-14 items-center ${
           collapsed ? "justify-center px-0" : "px-3"
         }`}
       >
         <div
-          className={`overflow-hidden${collapsed ? " flex size-10 items-center justify-center" : ""}`}
+          className={
+            collapsed ? "flex size-10 items-center justify-center overflow-hidden" : "overflow-hidden"
+          }
         >
           <Logo
             className={collapsed ? "justify-center" : undefined}

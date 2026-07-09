@@ -123,3 +123,65 @@ html.lenis {
 .marketing-control-item {
   border-radius: calc(var(--button-radius, 0.75rem) - 0.25rem);
 }
+
+/* Shared layout rhythm — marketing, auth, dashboard
+   Plain CSS (not @utility/@apply) so layout never silently fails. */
+.page-gutter {
+  padding-inline: 1rem;
+}
+
+.page-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1rem;
+}
+
+.section-y {
+  padding-block: 5rem;
+}
+
+.section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.shell-header {
+  display: flex;
+  height: 3.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 1rem;
+}
+
+.shell-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .page-gutter,
+  .page-container,
+  .shell-header {
+    padding-inline: 1.5rem;
+  }
+
+  .shell-main {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .section-y {
+    padding-block: 6rem;
+  }
+
+  .section-stack {
+    gap: 4rem;
+  }
+}

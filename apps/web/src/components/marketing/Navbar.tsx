@@ -8,24 +8,6 @@ import { useEffect, useState } from "react";
 
 import Logo from "@/components/layout/Logo";
 
-const navVariants = {
-  animate: {
-    opacity: 1,
-    transition: { duration: 0.5, ease: "easeInOut" as const },
-    y: 0,
-  },
-  initial: { opacity: 0, y: -20 },
-};
-
-const navItemVariants = {
-  animate: {
-    opacity: 1,
-    transition: { duration: 0.4, ease: "easeInOut" as const },
-    y: 0,
-  },
-  initial: { opacity: 0, y: -10 },
-};
-
 const navLinks = [
   { href: "#features", name: "Features" },
   { href: "#pricing", name: "Pricing" },
@@ -45,7 +27,6 @@ export function Navbar() {
       const currentSection =
         [...sectionIds].reverse().find((id) => {
           const section = document.getElementById(id);
-
           return section ? section.getBoundingClientRect().top <= 120 : false;
         }) ?? "hero";
 
@@ -63,117 +44,90 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (!isMenuOpen) {
-      return;
-    }
+    if (!isMenuOpen) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsMenuOpen(false);
-      }
+      if (event.key === "Escape") setIsMenuOpen(false);
     };
 
     window.addEventListener("keydown", onKeyDown);
-
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isMenuOpen]);
 
   return (
-    <motion.div
-      className={`marketing-nav sticky top-3 z-50 mx-4 mt-4 border border-border/50 backdrop-blur-lg transition-colors duration-300 dark:shadow-lg dark:shadow-black/20 sm:mx-auto sm:w-[min(64rem,calc(100%-2rem))] ${
-        isScrolled ? "bg-white/50 dark:bg-surface/75" : "bg-surface"
+    <motion.header
+      animate={{ opacity: 1, y: 0 }}
+      className={`marketing-nav sticky top-2 z-50 mx-auto mt-2 w-[min(48rem,calc(100%-2rem))] border border-border/50 backdrop-blur-lg transition-colors duration-300 dark:shadow-lg dark:shadow-black/20 ${
+        isScrolled ? "bg-white/55 dark:bg-surface/80" : "bg-surface/95"
       }`}
-      initial="initial"
-      variants={navVariants}
-      viewport={{ once: true }}
-      whileInView="animate"
+      initial={{ opacity: 0, y: -12 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between bg-transparent px-4 py-3">
-        <motion.div variants={navItemVariants}>
+      <nav className="grid h-14 w-full grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 sm:px-5">
+        <div className="justify-self-start">
           <Logo />
-        </motion.div>
-        <motion.ul
-          className="hidden items-center gap-1 sm:flex"
-          variants={{
-            animate: { transition: { staggerChildren: 0.08 } },
-            initial: {},
-          }}
-        >
-          {navLinks.map((link) => (
-            <motion.li key={link.name} variants={navItemVariants}>
-              <Link
-                aria-current={
-                  activeSection === link.href.slice(1) ? "page" : undefined
-                }
-                className={`marketing-chip block px-3 py-2 text-sm font-medium transition-colors hover:text-accent ${
-                  activeSection === link.href.slice(1)
-                    ? "text-accent"
-                    : "text-muted"
-                }`}
-                href={link.href}
-              >
-                {link.name}
-              </Link>
-            </motion.li>
-          ))}
-        </motion.ul>
-        <motion.div
-          className="hidden items-center gap-2 sm:flex"
-          variants={navItemVariants}
-        >
+        </div>
+
+        <ul className="hidden items-center justify-center gap-1 md:flex">
+          {navLinks.map((link) => {
+            const isActive = activeSection === link.href.slice(1);
+            return (
+              <li key={link.name}>
+                <Link
+                  aria-current={isActive ? "page" : undefined}
+                  className={`block rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:text-accent ${
+                    isActive ? "text-accent" : "text-muted"
+                  }`}
+                  href={link.href}
+                >
+                  {link.name}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2">
           <Link
             className={`${buttonVariants({ size: "sm" })} button`}
             href="/sign-in"
           >
-            Get Started
+            Get started
           </Link>
-        </motion.div>
-        <motion.button
-          aria-expanded={isMenuOpen}
-          aria-label="Toggle navigation"
-          className="button inline-flex size-9 items-center justify-center border border-border/60 bg-surface text-foreground transition-colors hover:border-accent/40 hover:text-accent sm:hidden"
-          onClick={() => setIsMenuOpen((open) => !open)}
-          type="button"
-          variants={navItemVariants}
-        >
-          <Icon icon={isMenuOpen ? "ph:x" : "ph:list"} width={18} />
-        </motion.button>
+          <button
+            aria-expanded={isMenuOpen}
+            aria-label="Toggle navigation"
+            className="button inline-flex size-9 items-center justify-center border border-border/60 bg-surface text-foreground transition-colors hover:border-accent/40 hover:text-accent md:hidden"
+            onClick={() => setIsMenuOpen((open) => !open)}
+            type="button"
+          >
+            <Icon icon={isMenuOpen ? "ph:x" : "ph:list"} width={18} />
+          </button>
+        </div>
       </nav>
+
       {isMenuOpen && (
-        <motion.div
-          animate={{ opacity: 1, y: 0 }}
-          className="border-t border-border/50 px-2 pb-2 sm:hidden"
-          initial={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
-        >
+        <div className="border-t border-border/50 px-3 pb-3 md:hidden">
           <div className="flex flex-col gap-1 pt-2">
-            {navLinks.map((link) => (
-              <Link
-                aria-current={
-                  activeSection === link.href.slice(1) ? "page" : undefined
-                }
-                className={`marketing-chip px-3 py-2 text-sm font-medium transition-colors ${
-                  activeSection === link.href.slice(1)
-                    ? "text-accent"
-                    : "text-muted hover:text-accent"
-                }`}
-                href={link.href}
-                key={link.name}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <Link
-              className={`${buttonVariants({ size: "sm" })} button mt-1`}
-              href="/sign-in"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Get Started
-            </Link>
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.href.slice(1);
+              return (
+                <Link
+                  aria-current={isActive ? "page" : undefined}
+                  className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive ? "text-accent" : "text-muted hover:text-accent"
+                  }`}
+                  href={link.href}
+                  key={link.name}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
           </div>
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </motion.header>
   );
 }

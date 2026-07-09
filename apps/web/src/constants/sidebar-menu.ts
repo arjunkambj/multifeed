@@ -30,11 +30,6 @@ export const sidebarCategories: MenuCategory[] = [
         href: "/posts/new",
         icon: "hugeicons:file-add",
       },
-      {
-        name: "Studio",
-        href: "/studio",
-        icon: "hugeicons:magic-wand-01",
-      },
     ],
   },
   {
@@ -47,19 +42,9 @@ export const sidebarCategories: MenuCategory[] = [
         icon: "hugeicons:calendar-03",
       },
       {
-        name: "All Posts",
-        href: "/posts",
-        icon: "hugeicons:list-view",
-      },
-      {
         name: "Scheduled",
         href: "/posts/scheduled",
         icon: "hugeicons:calendar-check-in-01",
-      },
-      {
-        name: "Published",
-        href: "/posts/published",
-        icon: "hugeicons:task-done-01",
       },
       {
         name: "Drafts",
@@ -76,11 +61,6 @@ export const sidebarCategories: MenuCategory[] = [
         name: "Connections",
         href: "/connections",
         icon: "hugeicons:connect",
-      },
-      {
-        name: "Analytics",
-        href: "/analytics",
-        icon: "hugeicons:analytics-01",
       },
       {
         name: "Inbox",
@@ -102,26 +82,16 @@ export const sidebarFooterItems: MenuItem[] = [
     href: "/settings",
     icon: "hugeicons:settings-02",
   },
-  {
-    name: "Billing",
-    href: "/billing",
-    icon: "hugeicons:credit-card",
-  },
 ];
 
 export const routeLabels: Record<string, string> = {
   "/overview": "Overview",
   "/posts/new": "New Post",
-  "/studio": "Studio",
   "/calendar": "Calendar",
-  "/posts": "All Posts",
   "/posts/scheduled": "Scheduled",
-  "/posts/published": "Published",
   "/posts/drafts": "Drafts",
   "/connections": "Connections",
-  "/analytics": "Analytics",
   "/inbox": "Inbox",
   "/teams": "Team",
   "/settings": "Settings",
-  "/billing": "Billing",
 };

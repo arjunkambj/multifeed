@@ -1,9 +1,10 @@
-interface LogoProps {
-  className?: string
-  markOnly?: boolean
-}
-
-export default function Logo({ className, markOnly = false }: LogoProps) {
+export default function Logo({
+  className,
+  markOnly = false,
+}: {
+  className?: string;
+  markOnly?: boolean;
+}) {
   return (
     <div
       className={`group flex cursor-pointer items-center gap-2.5 text-foreground transition-colors hover:text-accent${className ? ` ${className}` : ""}`}
@@ -21,10 +22,10 @@ export default function Logo({ className, markOnly = false }: LogoProps) {
         <path d="M22 14H34V24L22 30V14Z" fill="currentColor" />
       </svg>
       {!markOnly && (
-        <span className="text-lg font-display font-bold tracking-tight">
+        <span className="font-display text-lg font-bold tracking-tight">
           Unifeed
         </span>
       )}
     </div>
-  )
+  );
 }

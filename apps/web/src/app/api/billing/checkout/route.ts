@@ -91,8 +91,8 @@ export async function POST(request: NextRequest) {
       planKey: payload.planKey,
       interval: payload.interval,
     },
-    return_url: `${origin}/billing?checkout=complete`,
-    cancel_url: `${origin}/billing?checkout=cancelled`,
+    return_url: `${origin}/settings?tab=billing&checkout=complete`,
+    cancel_url: `${origin}/settings?tab=billing&checkout=cancelled`,
   });
 
   if (!session.checkout_url) {
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
   const convex = new ConvexHttpClient(serverEnv.NEXT_PUBLIC_CONVEX_URL);
   convex.setAuth(token);
 
-  await convex.mutation(api.dodopayment.recordCheckoutStarted, {
+  await convex.mutation(api.billing.startCheckout, {
     planKey: payload.planKey,
     interval: payload.interval,
     dodoProductId: productId,

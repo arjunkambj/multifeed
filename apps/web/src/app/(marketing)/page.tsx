@@ -12,39 +12,36 @@ import { MarketingMarquee } from "@/components/marketing/MarketingMarquee";
 import { WhyUS } from "@/components/marketing/WhyUS";
 
 export const metadata: Metadata = {
-  title: "unifeed | Post to All Your Socials From One Dashboard",
+  title: "unifeed | Run social on autopilot with AI agents",
   description:
-    "unifeed helps you connect social accounts, plan posts, and keep your content, data, and team in one tab.",
+    "Plan, generate, and schedule posts automatically to 30+ social networks — then review everything in a visual calendar. Use Claude, ChatGPT, Codex, Cursor, and more.",
   openGraph: {
-    title: "unifeed | Post to All Your Socials From One Dashboard",
+    title: "unifeed | Run social on autopilot with AI agents",
     description:
-      "Connect social accounts, plan posts, and keep your content, data, and team in one tab.",
+      "Plan, generate, and schedule posts to 30+ networks with AI agents — then review and edit on a visual calendar.",
     siteName: "unifeed",
   },
   twitter: {
     card: "summary_large_image",
-    title: "unifeed | Post to All Your Socials From One Dashboard",
+    title: "unifeed | Run social on autopilot with AI agents",
     description:
-      "Connect social accounts, plan posts, and keep your content, data, and team in one tab.",
+      "Plan, generate, and schedule posts to 30+ networks with AI agents — then review and edit on a visual calendar.",
   },
 };
 
 export default function Home() {
   return (
-    <main className="motion-landing relative isolate flex w-full flex-col bg-background">
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[calc(60dvh+18rem)] bg-[url('/mainbg.avif')] bg-cover bg-center bg-no-repeat dark:opacity-35" />
-      <div className="relative z-10 flex flex-col">
-        <Navbar />
-        <Hero />
-        <MarketingMarquee />
-        <Features />
-        <WhyUS />
-        <HowItWorks />
-        <Testimonitals />
-        <Pricing />
-        <FAQ />
-        <Footer />
-      </div>
+    <main className="motion-landing flex w-full flex-col bg-background">
+      <Navbar />
+      <Hero />
+      <MarketingMarquee />
+      <Features />
+      <WhyUS />
+      <HowItWorks />
+      <Testimonitals />
+      <Pricing />
+      <FAQ />
+      <Footer />
     </main>
   );
 }

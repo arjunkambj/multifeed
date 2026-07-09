@@ -17,11 +17,11 @@ export function Features() {
 
   return (
     <section
-      className="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-24"
+      className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
       id="features"
     >
       <motion.div
-        className="flex flex-col items-center gap-2 text-center"
+        className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
@@ -34,28 +34,28 @@ export function Features() {
           Features
         </motion.span>
         <motion.h2
-          className="text-4xl font-bold leading-tight"
+          className="font-display text-3xl font-bold tracking-tight sm:text-4xl"
           variants={revealItemVariants}
         >
-          Everything creator teams need to scale
+          Agents plan. You approve. Networks publish.
         </motion.h2>
-        <motion.span
-          className="text-lg leading-relaxed text-muted"
+        <motion.p
+          className="text-base leading-relaxed text-muted sm:text-lg"
           variants={revealItemVariants}
         >
-          Track performance, contracts, links, and team operations from one
-          clean workspace.
-        </motion.span>
+          Autopilot for generation and scheduling — with a visual calendar so
+          nothing ships without your eyes on it.
+        </motion.p>
       </motion.div>
 
       <motion.div
-        className="flex flex-col gap-6"
+        className="flex flex-col gap-4 md:gap-6"
         initial="initial"
         variants={revealContainerVariants}
         viewport={revealViewport}
         whileInView="animate"
       >
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
           {firstRow.map((item) => (
             <motion.div
               className="h-full"
@@ -67,7 +67,7 @@ export function Features() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
           {secondRow.map((item) => (
             <motion.div
               className="h-full"
@@ -83,21 +83,23 @@ export function Features() {
   );
 }
 
-const FeatureCard = ({ item }: { item: (typeof featureItems)[number] }) => (
-  <div className="marketing-surface flex h-full flex-col overflow-hidden border border-border/50 bg-surface">
-    <div className="relative h-56 w-full md:h-60">
-      <Image
-        alt={item.heading}
-        className="object-cover"
-        fill
-        loading="lazy"
-        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        src={item.image}
-      />
+function FeatureCard({ item }: { item: (typeof featureItems)[number] }) {
+  return (
+    <div className="marketing-surface flex h-full flex-col overflow-hidden border border-border/50 bg-surface">
+      <div className="relative h-52 w-full md:h-56">
+        <Image
+          alt={item.heading}
+          className="object-cover"
+          fill
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          src={item.image}
+        />
+      </div>
+      <div className="flex flex-col gap-2 p-5 sm:p-6">
+        <h3 className="text-lg font-semibold sm:text-xl">{item.heading}</h3>
+        <p className="text-sm leading-relaxed text-muted">{item.description}</p>
+      </div>
     </div>
-    <div className="flex flex-col gap-2 p-6">
-      <h3 className="text-xl font-semibold">{item.heading}</h3>
-      <p className="text-sm leading-relaxed text-muted">{item.description}</p>
-    </div>
-  </div>
-);
+  );
+}
