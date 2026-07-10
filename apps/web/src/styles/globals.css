@@ -270,6 +270,7 @@ html.lenis {
 }
 
 .multifeed-calendar .fc-scrollgrid {
-  border-radius: 0.75rem;
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
 }

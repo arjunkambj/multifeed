@@ -70,7 +70,7 @@ export function SelectAccountPage() {
 
   if (!state) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <DashboardPageTitle title="Select account" />
         <p className="text-sm text-danger">Missing OAuth session state.</p>
       </div>
@@ -87,31 +87,30 @@ export function SelectAccountPage() {
 
   if (pending === null) {
     return (
-      <div className="flex flex-col gap-4">
-        <DashboardPageTitle title="Select account" />
-        <p className="text-sm text-muted">
-          This selection session expired.{" "}
-          <button
-            type="button"
-            className="text-accent underline"
-            onClick={() => router.push("/connections")}
-          >
-            Back to connections
-          </button>
-        </p>
+      <div className="flex flex-col gap-6">
+        <DashboardPageTitle
+          title="Select account"
+          description="This selection session expired. Return to Connections and try again."
+          actions={
+            <Button
+              size="sm"
+              variant="tertiary"
+              onPress={() => router.push("/connections")}
+            >
+              Back to connections
+            </Button>
+          }
+        />
       </div>
     );
   }
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
-      <div>
-        <DashboardPageTitle title="Choose an account" />
-        <p className="mt-1 text-sm text-muted">
-          Select which {meta?.label ?? platform} account to connect to this
-          workspace.
-        </p>
-      </div>
+      <DashboardPageTitle
+        title="Choose an account"
+        description={`Select which ${meta?.label ?? platform} account to connect to this workspace.`}
+      />
 
       {error && (
         <div className="rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">

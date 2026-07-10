@@ -118,7 +118,6 @@ export default function SignInPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               fullWidth
-              variant="secondary"
               className="h-10 text-base pl-10"
             />
           </div>
@@ -217,7 +216,11 @@ export default function SignInPage() {
           setIsGoogleLoading(false);
         }}
       >
-        {isGoogleLoading ? <Spinner size="sm" /> : <Icon icon="logos:google-icon" width={18} />}
+        {isGoogleLoading ? (
+          <Spinner size="sm" />
+        ) : (
+          <Icon icon="logos:google-icon" width={18} />
+        )}
         {isGoogleLoading ? "Redirecting..." : "Continue with Google"}
       </Button>
 

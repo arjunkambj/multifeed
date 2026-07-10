@@ -63,11 +63,7 @@ export function InvitePopover({ team }: { team: Team }) {
               }}
             >
               <Label>Email address</Label>
-              <Input
-                autoComplete="email"
-                placeholder="teammate@company.com"
-                variant="secondary"
-              />
+              <Input autoComplete="email" placeholder="teammate@company.com" />
               <Description>Hexclave will email a team invitation.</Description>
             </TextField>
 

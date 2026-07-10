@@ -7,7 +7,11 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { requireUser } from "./hexclave/auth";
-import { platform as platformValidator } from "./schema";
+import {
+  platform as platformValidator,
+  platformSettings as platformSettingsValidator,
+  postKind as postKindValidator,
+} from "./schema";
 
 const postStatus = v.union(
   v.literal("draft"),
@@ -22,6 +26,8 @@ const targetInput = v.object({
   connectedAccountId: v.id("connectedAccounts"),
   bodyOverride: v.optional(v.string()),
   firstComment: v.optional(v.string()),
+  referenceUrl: v.optional(v.string()),
+  platformSettings: v.optional(platformSettingsValidator),
 });
 
 const CALENDAR_COLORS = [
@@ -51,7 +57,8 @@ async function assertMediaOwnedByTeam(
   teamId: string,
   mediaAssetIds: Id<"mediaAssets">[] | undefined,
 ) {
-  if (!mediaAssetIds?.length) return;
+  if (!mediaAssetIds?.length) return [];
+  const assets: Doc<"mediaAssets">[] = [];
   for (const id of mediaAssetIds) {
     const asset = await ctx.db.get(id);
     if (!asset || asset.teamId !== teamId) {
@@ -60,7 +67,57 @@ async function assertMediaOwnedByTeam(
     if (asset.status !== "ready") {
       throw new Error("Media asset is not ready");
     }
+    assets.push(asset);
   }
+  return assets;
+}
+
+function validateMediaForKind(
+  kind: Doc<"posts">["kind"],
+  assets: Doc<"mediaAssets">[],
+) {
+  if (kind === "text") {
+    if (assets.length > 0) throw new Error("Text posts cannot include media");
+    return;
+  }
+  if (assets.length === 0) throw new Error(`Add media for this ${kind} post`);
+
+  if (kind === "image") {
+    if (assets.length > 10 || assets.some((asset) => asset.kind !== "image")) {
+      throw new Error("Image posts support up to 10 images");
+    }
+    return;
+  }
+
+  if (assets.length !== 1) {
+    throw new Error(
+      `${kind === "story" ? "Stories" : "Videos"} need one media file`,
+    );
+  }
+  if (kind === "video" && assets[0]?.kind !== "video") {
+    throw new Error("Video posts need a video file");
+  }
+  if (kind === "story" && !["image", "video"].includes(assets[0]!.kind)) {
+    throw new Error("Stories need an image or video");
+  }
+}
+
+function accountSupportsKind(
+  account: Doc<"connectedAccounts">,
+  kind: Doc<"posts">["kind"],
+  assets: Doc<"mediaAssets">[],
+) {
+  if (kind === "story") {
+    const assetKind = assets[0]?.kind;
+    const mediaKind =
+      assetKind === "image" || assetKind === "video" ? assetKind : undefined;
+    return (
+      ["facebook", "instagram", "snapchat"].includes(account.platform) &&
+      mediaKind != null &&
+      account.capabilities.includes(mediaKind)
+    );
+  }
+  return account.capabilities.includes(kind);
 }
 
 async function replaceTargets(
@@ -69,12 +126,16 @@ async function replaceTargets(
     teamId: string;
     postId: Id<"posts">;
     status: Doc<"postTargets">["status"];
+    kind: Doc<"posts">["kind"];
     scheduledFor?: number;
     targets: Array<{
       connectedAccountId: Id<"connectedAccounts">;
       bodyOverride?: string;
       firstComment?: string;
+      referenceUrl?: string;
+      platformSettings?: Doc<"postTargets">["platformSettings"];
     }>;
+    mediaAssets: Doc<"mediaAssets">[];
   },
 ) {
   const existing = await loadTargets(ctx, input.postId);
@@ -93,6 +154,11 @@ async function replaceTargets(
         `Account @${account.username} is ${account.status}. Reconnect it first.`,
       );
     }
+    if (!accountSupportsKind(account, input.kind, input.mediaAssets)) {
+      throw new Error(
+        `${account.username} does not support this ${input.kind} post`,
+      );
+    }
 
     await ctx.db.insert("postTargets", {
       teamId: input.teamId,
@@ -102,6 +168,8 @@ async function replaceTargets(
       status: input.status,
       bodyOverride: target.bodyOverride,
       firstComment: target.firstComment,
+      referenceUrl: target.referenceUrl,
+      platformSettings: target.platformSettings,
       scheduledFor: input.scheduledFor,
       attempts: 0,
       metricSyncStatus: "idle",
@@ -119,6 +187,9 @@ function targetStatusFromPost(
 
 async function enrichPost(ctx: QueryCtx, post: Doc<"posts">) {
   const targets = await loadTargets(ctx, post._id);
+  const mediaAssets = (
+    await Promise.all(post.mediaAssetIds.map((id) => ctx.db.get(id)))
+  ).filter((asset): asset is Doc<"mediaAssets"> => asset != null);
   const accounts = await Promise.all(
     targets.map(async (t) => {
       const account = await ctx.db.get(t.connectedAccountId);
@@ -129,6 +200,8 @@ async function enrichPost(ctx: QueryCtx, post: Doc<"posts">) {
         status: t.status,
         bodyOverride: t.bodyOverride,
         firstComment: t.firstComment,
+        referenceUrl: t.referenceUrl,
+        platformSettings: t.platformSettings,
         scheduledFor: t.scheduledFor,
         platformPostId: t.platformPostId,
         platformPermalink: t.platformPermalink,
@@ -143,6 +216,7 @@ async function enrichPost(ctx: QueryCtx, post: Doc<"posts">) {
   return {
     ...post,
     targets: accounts,
+    mediaAssets,
   };
 }
 
@@ -155,6 +229,7 @@ export const create = mutation({
   args: {
     title: v.optional(v.string()),
     body: v.string(),
+    kind: postKindValidator,
     notes: v.optional(v.string()),
     timezone: v.string(),
     scheduledFor: v.optional(v.number()),
@@ -171,15 +246,16 @@ export const create = mutation({
     const user = await requireUser(ctx);
     const now = Date.now();
 
-    if (!args.body.trim() && (args.mediaAssetIds?.length ?? 0) === 0) {
-      throw new Error("Add a caption or media before saving");
+    if (args.kind === "text" && !args.body.trim()) {
+      throw new Error("Add text before saving");
     }
 
-    await assertMediaOwnedByTeam(
+    const mediaAssets = await assertMediaOwnedByTeam(
       ctx,
       user.selectedTeamId,
       args.mediaAssetIds,
     );
+    validateMediaForKind(args.kind, mediaAssets);
 
     // "Post now" → schedule for immediate publish once a worker exists.
     // Storing as `scheduled` keeps the post visible in list/calendar UIs.
@@ -213,6 +289,7 @@ export const create = mutation({
       createdByUserId: user.id,
       title: args.title?.trim() || undefined,
       body: args.body,
+      kind: args.kind,
       notes: args.notes?.trim() || undefined,
       status,
       scheduledFor: status === "draft" ? args.scheduledFor : scheduledFor,
@@ -230,6 +307,8 @@ export const create = mutation({
         status: targetStatusFromPost(status),
         scheduledFor: status === "draft" ? args.scheduledFor : scheduledFor,
         targets: args.targets,
+        kind: args.kind,
+        mediaAssets,
       });
     }
 
@@ -242,6 +321,7 @@ export const update = mutation({
     postId: v.id("posts"),
     title: v.optional(v.string()),
     body: v.optional(v.string()),
+    kind: v.optional(postKindValidator),
     notes: v.optional(v.string()),
     timezone: v.optional(v.string()),
     scheduledFor: v.optional(v.number()),
@@ -258,12 +338,17 @@ export const update = mutation({
       throw new Error("Post not found");
     }
 
-    if (args.mediaAssetIds !== undefined) {
-      await assertMediaOwnedByTeam(
-        ctx,
-        user.selectedTeamId,
-        args.mediaAssetIds,
-      );
+    const kind = args.kind ?? post.kind;
+    const mediaAssetIds = args.mediaAssetIds ?? post.mediaAssetIds;
+    const mediaAssets = await assertMediaOwnedByTeam(
+      ctx,
+      user.selectedTeamId,
+      mediaAssetIds,
+    );
+    validateMediaForKind(kind, mediaAssets);
+    const body = args.body ?? post.body;
+    if (kind === "text" && !body.trim()) {
+      throw new Error("Add text before saving");
     }
 
     const now = Date.now();
@@ -285,16 +370,16 @@ export const update = mutation({
     }
 
     await ctx.db.patch(args.postId, {
-      title: args.title !== undefined ? args.title.trim() || undefined : post.title,
+      title:
+        args.title !== undefined ? args.title.trim() || undefined : post.title,
       body: args.body ?? post.body,
+      kind,
       notes:
-        args.notes !== undefined
-          ? args.notes.trim() || undefined
-          : post.notes,
+        args.notes !== undefined ? args.notes.trim() || undefined : post.notes,
       timezone: args.timezone ?? post.timezone,
       scheduledFor,
       status,
-      mediaAssetIds: args.mediaAssetIds ?? post.mediaAssetIds,
+      mediaAssetIds,
       calendarColor: args.calendarColor ?? post.calendarColor,
       updatedByUserId: user.id,
       updatedAt: now,
@@ -310,6 +395,8 @@ export const update = mutation({
         status: targetStatusFromPost(status),
         scheduledFor,
         targets: args.targets,
+        kind,
+        mediaAssets,
       });
     } else if (
       args.scheduledFor !== undefined ||

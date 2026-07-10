@@ -13,7 +13,15 @@ import type {
   DateSelectArg,
   EventInput,
 } from "@fullcalendar/core";
-import { Button, Card, Chip, Spinner } from "@heroui/react";
+import {
+  Button,
+  Card,
+  Chip,
+  ListBox,
+  Select,
+  Spinner,
+  Tabs,
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -55,6 +63,7 @@ export function PostCalendar() {
   const calendarRef = useRef<FullCalendar>(null);
 
   const [view, setView] = useState<CalendarView>("dayGridMonth");
+  const [platformFilter, setPlatformFilter] = useState("all");
   const [range, setRange] = useState<{ start: number; end: number } | null>(
     null,
   );
@@ -74,30 +83,51 @@ export function PostCalendar() {
   const reschedule = useMutation(api.posts.reschedule);
   const removePost = useMutation(api.posts.remove);
 
+  const platformOptions = useMemo(
+    () =>
+      [
+        ...new Set(
+          (posts ?? []).flatMap((post) =>
+            post.targets.map((target) => target.platform),
+          ),
+        ),
+      ].sort(),
+    [posts],
+  );
+
   const events: EventInput[] = useMemo(() => {
     if (!posts) return [];
-    return posts.map((post) => {
-      const platforms = [...new Set(post.targets.map((t) => t.platform))].join(
-        ", ",
-      );
-      const label =
-        post.title?.trim() || post.body.trim().slice(0, 48) || "Untitled post";
-      return {
-        id: post._id,
-        title: label,
-        start: post.scheduledFor,
-        backgroundColor:
-          post.calendarColor ?? platformBrand(post.targets[0]?.platform ?? "x"),
-        borderColor: "transparent",
-        textColor: "#fff",
-        extendedProps: {
-          status: post.status,
-          platforms,
-          body: post.body,
-        },
-      };
-    });
-  }, [posts]);
+    return posts
+      .filter(
+        (post) =>
+          platformFilter === "all" ||
+          post.targets.some((target) => target.platform === platformFilter),
+      )
+      .map((post) => {
+        const platforms = [
+          ...new Set(post.targets.map((t) => t.platform)),
+        ].join(", ");
+        const label =
+          post.title?.trim() ||
+          post.body.trim().slice(0, 48) ||
+          "Untitled post";
+        return {
+          id: post._id,
+          title: label,
+          start: post.scheduledFor,
+          backgroundColor:
+            post.calendarColor ??
+            platformBrand(post.targets[0]?.platform ?? "x"),
+          borderColor: "transparent",
+          textColor: "#fff",
+          extendedProps: {
+            status: post.status,
+            platforms,
+            body: post.body,
+          },
+        };
+      });
+  }, [platformFilter, posts]);
 
   const onDatesSet = useCallback((arg: DatesSetArg) => {
     setRange({
@@ -150,23 +180,21 @@ export function PostCalendar() {
   };
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <DashboardPageTitle title="Calendar" />
-          <p className="mt-1 text-sm text-muted">
-            Month, week, day, and list — drag to reschedule.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="sm"
-          onPress={() => router.push("/posts/new")}
-        >
-          <Icon icon="hugeicons:add-01" width={16} />
-          New post
-        </Button>
-      </div>
+    <div className="flex flex-col gap-6">
+      <DashboardPageTitle
+        title="Calendar"
+        description="Month, week, day, and list — drag to reschedule."
+        actions={
+          <Button
+            variant="primary"
+            size="sm"
+            onPress={() => router.push("/posts/new")}
+          >
+            <Icon icon="hugeicons:add-01" width={16} />
+            New post
+          </Button>
+        }
+      />
 
       <div
         className={
@@ -175,8 +203,8 @@ export function PostCalendar() {
             : "grid"
         }
       >
-        <div className="min-w-0 overflow-hidden">
-          <div className="flex flex-col gap-3 border-b border-border py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-4 overflow-hidden">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-1">
               <Button size="sm" variant="tertiary" onPress={goPrev}>
                 <Icon icon="hugeicons:arrow-left-01" width={16} />
@@ -191,26 +219,57 @@ export function PostCalendar() {
                 {title || "…"}
               </h2>
             </div>
-            <div className="flex flex-wrap gap-1 rounded-xl bg-surface-secondary p-1">
-              {VIEWS.map((v) => (
-                <button
-                  key={v.id}
-                  type="button"
-                  onClick={() => changeView(v.id)}
-                  className={
-                    view === v.id
-                      ? "inline-flex items-center gap-1.5 rounded-lg bg-surface px-2.5 py-1.5 text-xs font-medium shadow-sm"
-                      : "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted transition hover:text-foreground"
-                  }
-                >
-                  <Icon icon={v.icon} width={14} />
-                  {v.label}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                aria-label="Filter calendar by platform"
+                className="w-40"
+                variant="secondary"
+                value={platformFilter}
+                onChange={(value) => setPlatformFilter(String(value ?? "all"))}
+              >
+                <Select.Trigger>
+                  <Select.Value />
+                  <Select.Indicator />
+                </Select.Trigger>
+                <Select.Popover>
+                  <ListBox>
+                    <ListBox.Item id="all" textValue="All platforms">
+                      All platforms
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                    {platformOptions.map((platform) => (
+                      <ListBox.Item
+                        key={platform}
+                        id={platform}
+                        textValue={platformLabel(platform)}
+                      >
+                        {platformLabel(platform)}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                    ))}
+                  </ListBox>
+                </Select.Popover>
+              </Select>
+              <Tabs
+                selectedKey={view}
+                onSelectionChange={(key) => changeView(key as CalendarView)}
+              >
+                <Tabs.ListContainer>
+                  <Tabs.List aria-label="Calendar view">
+                    {VIEWS.map((item) => (
+                      <Tabs.Tab key={item.id} id={item.id}>
+                        <Icon icon={item.icon} width={14} />
+                        {item.label}
+                        <Tabs.Indicator />
+                      </Tabs.Tab>
+                    ))}
+                  </Tabs.List>
+                </Tabs.ListContainer>
+              </Tabs>
             </div>
           </div>
 
-          <div className="multifeed-calendar relative min-h-[640px] pt-3">
+          <div className="multifeed-calendar relative min-h-[640px]">
             {posts === undefined && range && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface/60">
                 <Spinner />
@@ -352,7 +411,16 @@ export function PostCalendar() {
                   <div className="flex flex-wrap gap-2 pt-1">
                     <Button
                       size="sm"
-                      variant="secondary"
+                      variant="tertiary"
+                      onPress={() =>
+                        router.push(`/posts/new?edit=${selectedPost._id}`)
+                      }
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="tertiary"
                       onPress={() =>
                         router.push(`/posts/new?from=${selectedPost._id}`)
                       }

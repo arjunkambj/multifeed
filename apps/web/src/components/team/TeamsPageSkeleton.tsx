@@ -4,7 +4,7 @@ import { TeamTableSkeleton } from "@/components/team/TeamTableSkeleton";
 export function TeamsPageSkeleton() {
   return (
     <div className="flex w-full flex-1 flex-col gap-6">
-      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex flex-col gap-2">
           <Skeleton className="h-8 w-44 rounded-xl" />
           <Skeleton className="h-4 w-full max-w-md rounded-xl" />

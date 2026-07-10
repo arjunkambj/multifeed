@@ -45,6 +45,45 @@ const postStatus = v.union(
   v.literal("archived"),
 );
 
+export const postKind = v.union(
+  v.literal("text"),
+  v.literal("image"),
+  v.literal("video"),
+  v.literal("story"),
+);
+
+export const postPlacement = v.union(
+  v.literal("feed"),
+  v.literal("reel"),
+  v.literal("story"),
+  v.literal("short"),
+  v.literal("spotlight"),
+  v.literal("pin"),
+);
+
+export const platformSettings = v.object({
+  placement: v.optional(postPlacement),
+  title: v.optional(v.string()),
+  altText: v.optional(v.string()),
+  destinationUrl: v.optional(v.string()),
+  boardId: v.optional(v.string()),
+  subreddit: v.optional(v.string()),
+  visibility: v.optional(
+    v.union(
+      v.literal("public"),
+      v.literal("followers"),
+      v.literal("private"),
+      v.literal("unlisted"),
+    ),
+  ),
+  shareToFeed: v.optional(v.boolean()),
+  allowComments: v.optional(v.boolean()),
+  allowDuet: v.optional(v.boolean()),
+  allowStitch: v.optional(v.boolean()),
+  notifySubscribers: v.optional(v.boolean()),
+  madeForKids: v.optional(v.boolean()),
+});
+
 const targetStatus = v.union(
   v.literal("draft"),
   v.literal("scheduled"),
@@ -203,6 +242,7 @@ export default defineSchema({
     updatedByUserId: v.optional(v.string()),
     title: v.optional(v.string()),
     body: v.string(),
+    kind: postKind,
     status: postStatus,
     /** Epoch ms when the post should go out (drafts may omit). */
     scheduledFor: v.optional(v.number()),
@@ -229,6 +269,10 @@ export default defineSchema({
     status: targetStatus,
     bodyOverride: v.optional(v.string()),
     firstComment: v.optional(v.string()),
+    /** URL of a post this target should reply to or reference, when supported. */
+    referenceUrl: v.optional(v.string()),
+    /** Per-network placement and publishing controls. */
+    platformSettings: v.optional(platformSettings),
     scheduledFor: v.optional(v.number()),
     publishedAt: v.optional(v.number()),
     platformPostId: v.optional(v.string()),

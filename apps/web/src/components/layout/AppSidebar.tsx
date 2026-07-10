@@ -43,6 +43,11 @@ function NavItem({
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
+  const isActive = (item: MenuItem) =>
+    pathname === item.href ||
+    (item.href === "/posts" &&
+      pathname.startsWith("/posts/") &&
+      pathname !== "/posts/new");
   const sections: { name?: string; items: MenuItem[] }[] = [
     { items: sidebarMainItems },
     ...sidebarCategories.map(({ name, items }) => ({ name, items })),
@@ -89,7 +94,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                 <NavItem
                   key={item.name}
                   item={item}
-                  active={pathname === item.href}
+                  active={isActive(item)}
                   collapsed={collapsed}
                 />
               ))}
@@ -104,7 +109,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
             <NavItem
               key={item.name}
               item={item}
-              active={pathname === item.href}
+              active={isActive(item)}
               collapsed={collapsed}
             />
           ))}

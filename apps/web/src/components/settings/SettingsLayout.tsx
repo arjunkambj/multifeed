@@ -4,6 +4,7 @@ import { Tabs } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BillingPage } from "@/components/billing/BillingPage";
+import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { GeneralSettingsForm } from "@/components/settings/GeneralSettingsForm";
 
 const settingsTabs = [
@@ -26,14 +27,10 @@ export function SettingsLayout() {
 
   return (
     <div className="flex w-full flex-1 flex-col items-start gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
-          Settings
-        </h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-muted">
-          Manage your profile, organization, billing, and support preferences.
-        </p>
-      </header>
+      <DashboardPageTitle
+        title="Settings"
+        description="Manage your profile, organization, billing, and support preferences."
+      />
 
       <Tabs
         className="w-full"
@@ -46,7 +43,7 @@ export function SettingsLayout() {
           }
           router.replace(`/settings?tab=${next}`, { scroll: false });
         }}
-        variant="secondary"
+        variant="primary"
       >
         <Tabs.ListContainer>
           <Tabs.List
@@ -63,19 +60,16 @@ export function SettingsLayout() {
           </Tabs.List>
         </Tabs.ListContainer>
 
-        <Tabs.Panel className="flex w-full flex-col gap-8 pt-6" id="general">
+        <Tabs.Panel className="w-full pt-4" id="general">
           <GeneralSettingsForm />
         </Tabs.Panel>
 
-        <Tabs.Panel className="w-full pt-6" id="billing">
+        <Tabs.Panel className="w-full pt-4" id="billing">
           <BillingPage />
         </Tabs.Panel>
 
-        <Tabs.Panel className="w-full pt-6" id="support">
-          <div className="flex max-w-xl flex-col gap-3 rounded-2xl border border-border/50 bg-surface-secondary/60 p-5 sm:p-6">
-            <h2 className="font-heading text-lg font-semibold text-foreground">
-              Support
-            </h2>
+        <Tabs.Panel className="w-full pt-4" id="support">
+          <div className="flex max-w-xl flex-col gap-3 rounded-2xl bg-surface-secondary p-5">
             <p className="text-sm leading-relaxed text-muted">
               Need help with posting, billing, or your workspace? Reach out and
               we&apos;ll get you unstuck.

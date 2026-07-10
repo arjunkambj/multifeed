@@ -12,7 +12,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useUser } from "@hexclave/next";
-import { PasswordPopover } from "@/components/settings/PasswordPopover";
+import { PasswordModal } from "@/components/settings/PasswordModal";
 
 const cleanOptional = (value: string) => {
   const trimmed = value.trim();
@@ -86,12 +86,15 @@ export function GeneralSettingsForm() {
           fullWidth
           isRequired
           name="displayName"
-          variant="secondary"
           value={displayName}
           onChange={setDisplayName}
         >
           <Label>Name</Label>
-          <Input className="w-full" placeholder="Your name" />
+          <Input
+            className="w-full"
+            placeholder="Your name"
+            variant="secondary"
+          />
         </TextField>
 
         <TextField
@@ -99,12 +102,15 @@ export function GeneralSettingsForm() {
           isRequired
           name="primaryEmail"
           type="email"
-          variant="secondary"
           value={email}
           onChange={setEmail}
         >
           <Label>Email</Label>
-          <Input className="w-full" placeholder="you@company.com" />
+          <Input
+            className="w-full"
+            placeholder="you@company.com"
+            variant="secondary"
+          />
           <Description>
             {user.primaryEmailVerified ? "Verified" : "Not verified"}
           </Description>
@@ -115,12 +121,15 @@ export function GeneralSettingsForm() {
         fullWidth
         isDisabled={!organization}
         name="organizationName"
-        variant="secondary"
         value={organizationName}
         onChange={setOrganizationName}
       >
         <Label>Organization name</Label>
-        <Input className="w-full" placeholder="Organization name" />
+        <Input
+          className="w-full"
+          placeholder="Organization name"
+          variant="secondary"
+        />
       </TextField>
 
       {error && (
@@ -146,7 +155,7 @@ export function GeneralSettingsForm() {
             </>
           )}
         </Button>
-        <PasswordPopover />
+        <PasswordModal />
         {status === "saved" && (
           <span className="text-sm font-medium text-success">Saved</span>
         )}

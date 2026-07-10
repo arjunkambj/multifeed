@@ -79,16 +79,13 @@ export function BillingPage() {
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <h2 className="font-heading text-lg font-semibold text-foreground">
-        Plan & billing
-      </h2>
-
-      <section className="marketing-surface flex flex-col gap-3 border border-border/50 bg-surface p-4 sm:p-5">
+      <section className="flex flex-col gap-3 rounded-2xl bg-surface-secondary p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
-              <Icon icon="solar:card-linear" className="size-5" />
-            </div>
+            <Icon
+              icon="solar:card-linear"
+              className="size-5 shrink-0 text-muted"
+            />
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-semibold text-foreground">
                 {activePlan ? activePlan.name : "No active plan"}
@@ -102,7 +99,7 @@ export function BillingPage() {
           </div>
           {subscription === undefined && <Spinner color="current" size="sm" />}
           {subscription && (
-            <span className="marketing-chip border border-border/50 bg-surface-secondary px-3 py-1.5 text-sm font-medium text-foreground">
+            <span className="marketing-chip bg-surface px-3 py-1.5 text-sm font-medium text-foreground">
               {formatDate(subscription.currentPeriodEnd)
                 ? `Renews ${formatDate(subscription.currentPeriodEnd)}`
                 : "Active"}
@@ -167,11 +164,7 @@ export function BillingPage() {
 
           return (
             <article
-              className={`marketing-surface flex flex-col overflow-hidden border bg-surface ${
-                preferred
-                  ? "border-accent/40"
-                  : "border-border/50"
-              }`}
+              className="flex flex-col overflow-hidden rounded-2xl bg-surface-secondary"
               key={plan.key}
             >
               <div className="flex flex-1 flex-col p-5 sm:p-6">
@@ -219,13 +212,12 @@ export function BillingPage() {
                 </ul>
 
                 <Button
-                  className="button mt-7 font-medium"
-                  fullWidth
+                  className="button mt-7 w-full max-w-sm self-center font-medium"
                   isDisabled={isCurrent || checkingOut !== null}
                   isPending={isPending}
                   onPress={() => startCheckout(plan.key)}
                   size="lg"
-                  variant={preferred ? "primary" : "tertiary"}
+                  variant="primary"
                 >
                   {({ isPending: pending }) => (
                     <>

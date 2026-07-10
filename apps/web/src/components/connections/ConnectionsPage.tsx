@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Chip, Spinner } from "@heroui/react";
+import { Button, Spinner } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -15,14 +15,13 @@ import {
 import type { OAuthPlatform } from "@/components/connections/types";
 import { OAUTH_ERROR_MESSAGES, oauthErrorMessage } from "@/lib/oauth/env";
 
-const statusTone: Record<string, "success" | "warning" | "danger" | "default"> =
-  {
-    active: "success",
-    expired: "warning",
-    revoked: "danger",
-    error: "danger",
-    pending_selection: "warning",
-  };
+const statusDot: Record<string, string> = {
+  active: "bg-success",
+  expired: "bg-warning",
+  revoked: "bg-danger",
+  error: "bg-danger",
+  pending_selection: "bg-warning",
+};
 
 export function ConnectionsPage() {
   const accounts = useQuery(api.oauth.accounts.list, {});
@@ -129,23 +128,10 @@ export function ConnectionsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <DashboardPageTitle title="Connections" />
-          <p className="mt-1 max-w-2xl text-sm text-muted">
-            Connect multiple accounts per network — Instagram, TikTok, Snapchat,
-            and more. Tokens are stored encrypted for publishing.
-          </p>
-        </div>
-        {accounts && (
-          <p className="text-sm text-muted">
-            <span className="font-medium text-foreground">
-              {accounts.length}
-            </span>{" "}
-            connected
-          </p>
-        )}
-      </div>
+      <DashboardPageTitle
+        title="Connections"
+        description="Connect and manage multiple social accounts from one workspace. Tokens are encrypted for publishing."
+      />
 
       {displayBanner && (
         <div
@@ -164,109 +150,104 @@ export function ConnectionsPage() {
           <Spinner />
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {CONNECTABLE_PLATFORMS.map((platform) => {
-            const meta = PLATFORM_META[platform] ?? {
-              label: platform,
-              icon: "hugeicons:link-01",
-              brand: "#666666",
-              description: "",
-            };
-            const connected = byPlatform.get(platform) ?? [];
-            const isConnecting = connecting === platform;
+        <section>
+          <div className="divide-y divide-border/70">
+            {CONNECTABLE_PLATFORMS.map((platform) => {
+              const meta = PLATFORM_META[platform] ?? {
+                label: platform,
+                icon: "hugeicons:link-01",
+                brand: "#666666",
+                description: "",
+              };
+              const connected = byPlatform.get(platform) ?? [];
+              const isConnecting = connecting === platform;
 
-            return (
-              <Card
-                key={platform}
-                className="border border-border bg-surface shadow-none"
-              >
-                <Card.Header className="flex flex-row items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
+              return (
+                <div
+                  key={platform}
+                  className="grid gap-3 py-3 first:pt-0 last:pb-0 md:grid-cols-[240px_minmax(0,1fr)] md:items-center"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
                     <span
-                      className="flex size-10 items-center justify-center rounded-xl text-white"
+                      className="flex size-9 shrink-0 items-center justify-center rounded-xl text-white"
                       style={{
                         backgroundColor: meta.brand,
                         color: meta.foreground ?? "#FFFFFF",
                       }}
                     >
-                      <Icon icon={meta.icon} width={20} />
+                      <Icon icon={meta.icon} width={18} />
                     </span>
-                    <div>
-                      <Card.Title className="text-base">
-                        {meta.label}
-                      </Card.Title>
-                      <Card.Description className="text-xs">
-                        {meta.description}
-                      </Card.Description>
-                    </div>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      className="justify-start"
+                      isPending={isConnecting}
+                      onPress={() => void onConnect(platform)}
+                    >
+                      {isConnecting
+                        ? "Redirecting…"
+                        : connected.length > 0
+                          ? `Add ${meta.label}`
+                          : `Connect ${meta.label}`}
+                    </Button>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    isPending={isConnecting}
-                    onPress={() => void onConnect(platform)}
-                  >
-                    {isConnecting ? "Redirecting…" : "Connect"}
-                  </Button>
-                </Card.Header>
-                <Card.Content className="flex flex-col gap-2 pt-0">
-                  {connected.length === 0 ? (
-                    <p className="rounded-xl bg-default/40 px-3 py-4 text-center text-xs text-muted">
-                      No accounts connected yet
-                    </p>
-                  ) : (
-                    connected.map((account) => (
-                      <div
-                        key={account._id}
-                        className="flex items-center gap-3 rounded-xl border border-border/60 px-3 py-2"
-                      >
-                        {account.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={account.avatarUrl}
-                            alt=""
-                            className="size-8 rounded-full object-cover"
+
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    {connected.length === 0 ? (
+                      <p className="text-xs text-muted">
+                        No {meta.label} accounts connected
+                      </p>
+                    ) : (
+                      connected.map((account) => (
+                        <div
+                          key={account._id}
+                          className="flex max-w-full items-center gap-2 rounded-full border border-border/70 bg-surface-secondary px-2 py-1.5"
+                        >
+                          {account.avatarUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={account.avatarUrl}
+                              alt=""
+                              className="size-6 rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-semibold">
+                              {account.username.slice(0, 1).toUpperCase()}
+                            </span>
+                          )}
+                          <span
+                            className={`size-2 shrink-0 rounded-full ${statusDot[account.status] ?? "bg-muted"}`}
+                            title={account.status}
                           />
-                        ) : (
-                          <span className="flex size-8 items-center justify-center rounded-full bg-default text-xs font-medium">
-                            {account.username.slice(0, 1).toUpperCase()}
-                          </span>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">
-                            {account.displayName ?? account.username}
-                          </p>
-                          <p className="truncate text-xs text-muted">
-                            @{account.username}
-                          </p>
+                          <div className="min-w-0">
+                            <p className="max-w-44 truncate text-xs font-medium">
+                              @{account.username}
+                            </p>
+                          </div>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            aria-label={`Disconnect @${account.username}`}
+                            className="size-7 min-w-7 rounded-full"
+                            isPending={disconnecting === account._id}
+                            onPress={() =>
+                              void onDisconnect(
+                                account._id as Id<"connectedAccounts">,
+                              )
+                            }
+                          >
+                            <Icon icon="hugeicons:delete-02" width={14} />
+                          </Button>
                         </div>
-                        <Chip
-                          size="sm"
-                          color={statusTone[account.status] ?? "default"}
-                          variant="soft"
-                        >
-                          {account.status}
-                        </Chip>
-                        <Button
-                          size="sm"
-                          variant="tertiary"
-                          isPending={disconnecting === account._id}
-                          onPress={() =>
-                            void onDisconnect(
-                              account._id as Id<"connectedAccounts">,
-                            )
-                          }
-                        >
-                          <Icon icon="hugeicons:delete-02" width={16} />
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </Card.Content>
-              </Card>
-            );
-          })}
-        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
     </div>
   );
