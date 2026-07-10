@@ -1,5 +1,5 @@
 {
-  "name": "@unifeed/eslint-config",
+  "name": "@multifeed/eslint-config",
   "version": "0.0.0",
   "type": "module",
   "private": true,

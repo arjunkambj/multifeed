@@ -8,7 +8,7 @@ importers:
 
   .:
     devDependencies:
-      '@unifeed/typescript-config':
+      '@multifeed/typescript-config':
         specifier: workspace:*
         version: link:packages/typescript-config
       prettier:
@@ -39,15 +39,15 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
+      '@multifeed/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@multifeed/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       '@types/node':
         specifier: ^25.6.2
         version: 25.6.2
-      '@unifeed/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/eslint-config
-      '@unifeed/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       eslint:
         specifier: ^10.3.0
         version: 10.3.0(jiti@2.7.0)
@@ -130,6 +130,12 @@ importers:
         specifier: ^4.3.0
         version: 4.3.0
     devDependencies:
+      '@multifeed/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@multifeed/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       '@types/node':
         specifier: ^25.6.2
         version: 25.6.2
@@ -139,12 +145,6 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.17)
-      '@unifeed/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/eslint-config
-      '@unifeed/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       babel-plugin-react-compiler:
         specifier: ^1.0.0
         version: 1.0.0

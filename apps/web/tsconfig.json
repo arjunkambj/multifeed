@@ -1,5 +1,5 @@
 {
-  "extends": "@unifeed/typescript-config/nextjs.json",
+  "extends": "@multifeed/typescript-config/nextjs.json",
   "compilerOptions": {
     "plugins": [
       {

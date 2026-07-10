@@ -1,3 +1,5 @@
+import type { OAuthPlatform } from "@/lib/oauth/connectors/types";
+
 export type PlatformKey =
   | "x"
   | "instagram"
@@ -8,23 +10,17 @@ export type PlatformKey =
   | "pinterest"
   | "reddit"
   | "tiktok"
+  | "snapchat"
   | "bluesky"
   | "google_business";
 
-export type OAuthPlatform =
-  | "x"
-  | "instagram"
-  | "facebook"
-  | "threads"
-  | "linkedin"
-  | "youtube"
-  | "pinterest"
-  | "reddit";
+export type { OAuthPlatform } from "@/lib/oauth/connectors/types";
 
 export type PlatformMeta = {
   label: string;
   icon: string;
   brand: string;
+  foreground?: string;
   description?: string;
   maxChars?: number;
 };
@@ -86,7 +82,20 @@ export const PLATFORM_META: Record<string, PlatformMeta> = {
     description: "Posts and media on X",
     maxChars: 280,
   },
-  tiktok: { label: "TikTok", icon: "hugeicons:tiktok", brand: "#010101" },
+  tiktok: {
+    label: "TikTok",
+    icon: "hugeicons:tiktok",
+    brand: "#010101",
+    description: "Videos and photos via Content Posting API",
+    maxChars: 2200,
+  },
+  snapchat: {
+    label: "Snapchat",
+    icon: "hugeicons:snapchat",
+    brand: "#FFFC00",
+    foreground: "#000000",
+    description: "Public Profile Stories and Spotlights",
+  },
   bluesky: { label: "Bluesky", icon: "simple-icons:bluesky", brand: "#1185FE" },
   google_business: {
     label: "Google Business",
@@ -104,6 +113,8 @@ export const CONNECTABLE_PLATFORMS = [
   "pinterest",
   "reddit",
   "x",
+  "tiktok",
+  "snapchat",
 ] as const satisfies readonly OAuthPlatform[];
 
 export function platformLabel(platform: string) {

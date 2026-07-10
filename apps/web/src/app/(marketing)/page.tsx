@@ -13,18 +13,18 @@ import { WhyUS } from "@/components/marketing/WhyUS";
 import { MarketingAnimations } from "@/components/marketing/MarketingAnimations";
 
 export const metadata: Metadata = {
-  title: "unifeed | Run social on autopilot with AI agents",
+  title: "Multi Feed | Run social on autopilot with AI agents",
   description:
     "Plan, generate, and schedule posts automatically to 30+ social networks — then review everything in a visual calendar. Use Claude, ChatGPT, Codex, Cursor, and more.",
   openGraph: {
-    title: "unifeed | Run social on autopilot with AI agents",
+    title: "Multi Feed | Run social on autopilot with AI agents",
     description:
       "Plan, generate, and schedule posts to 30+ networks with AI agents — then review and edit on a visual calendar.",
-    siteName: "unifeed",
+    siteName: "Multi Feed",
   },
   twitter: {
     card: "summary_large_image",
-    title: "unifeed | Run social on autopilot with AI agents",
+    title: "Multi Feed | Run social on autopilot with AI agents",
     description:
       "Plan, generate, and schedule posts to 30+ networks with AI agents — then review and edit on a visual calendar.",
   },

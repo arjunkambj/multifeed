@@ -31,6 +31,8 @@ const OAUTH_PLATFORMS = [
   "youtube",
   "pinterest",
   "reddit",
+  "tiktok",
+  "snapchat",
 ] as const;
 
 function stripSecrets<T extends Record<string, unknown>>(doc: T) {

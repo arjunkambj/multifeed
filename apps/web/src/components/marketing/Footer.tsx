@@ -47,7 +47,7 @@ function FooterCTA() {
           Ready to run social on autopilot?
         </h3>
         <p className="relative max-w-xl text-base text-muted sm:text-lg">
-          Point your AI agents at unifeed, review on the calendar, and publish
+          Point your AI agents at Multi Feed, review on the calendar, and publish
           to 30+ networks — free for 7 days.
         </p>
         <div>
@@ -129,7 +129,7 @@ export function Footer() {
               </p>
             </div>
             <p className="text-xs text-muted">
-              &copy; {new Date().getFullYear()} unifeed. All rights reserved.
+              &copy; {new Date().getFullYear()} Multi Feed. All rights reserved.
             </p>
           </div>
         </div>

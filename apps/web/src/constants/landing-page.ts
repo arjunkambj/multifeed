@@ -17,7 +17,7 @@ export const brands = [
 export const faqItems = [
   {
     content:
-      "Connect your networks, point an AI agent at unifeed, and start generating and scheduling. Most teams ship their first week of posts in under ten minutes.",
+      "Connect your networks, point an AI agent at Multi Feed, and start generating and scheduling. Most teams ship their first week of posts in under ten minutes.",
     title: "How fast can I get on autopilot?",
   },
   {
@@ -27,7 +27,7 @@ export const faqItems = [
   },
   {
     content:
-      "Yes. Bring Claude, ChatGPT, Codex, Cursor, OpenClaw, Hermes, or any agent that can call your workspace. unifeed is the layer that plans, schedules, and publishes.",
+      "Yes. Bring Claude, ChatGPT, Codex, Cursor, OpenClaw, Hermes, or any agent that can call your workspace. Multi Feed is the layer that plans, schedules, and publishes.",
     title: "Can I use my own AI agents?",
   },
   {
@@ -42,7 +42,7 @@ export const faqItems = [
   },
   {
     content:
-      "Creators, founders, and agencies all run unifeed — solo operators on autopilot and teams sharing one calendar.",
+      "Creators, founders, and agencies all run Multi Feed — solo operators on autopilot and teams sharing one calendar.",
     title: "Is this only for solo creators?",
   },
 ] as const;
@@ -51,7 +51,7 @@ export const whyUsPoints = [
   {
     cta: "Meet the agents",
     description:
-      "Point Claude, ChatGPT, Codex, Cursor, or your own stack at unifeed. Agents plan and generate; you keep the final say.",
+      "Point Claude, ChatGPT, Codex, Cursor, or your own stack at Multi Feed. Agents plan and generate; you keep the final say.",
     image:
       "https://framerusercontent.com/images/l1CpF5EzDSCksVlxtEBU1RLqPI.png?scale-down-to=1024",
     subheading: "AI agents",
@@ -127,7 +127,7 @@ export const testimonials = [
     avatar: "https://i.pravatar.cc/150?u=daniel",
     name: "Daniel Ruiz",
     quote:
-      "We pointed Claude at unifeed and the calendar filled itself. Reviewing posts is minutes, not hours.",
+      "We pointed Claude at Multi Feed and the calendar filled itself. Reviewing posts is minutes, not hours.",
     role: "Founder, Fieldhouse",
   },
   {
@@ -141,14 +141,14 @@ export const testimonials = [
     avatar: "https://i.pravatar.cc/150?u=james",
     name: "James Carter",
     quote:
-      "Clients want coverage on 15+ platforms. Agents + unifeed is how we deliver without another hire.",
+      "Clients want coverage on 15+ platforms. Agents + Multi Feed is how we deliver without another hire.",
     role: "Agency Director, Apex Social",
   },
   {
     avatar: "https://i.pravatar.cc/150?u=emily",
     name: "Emily Chen",
     quote:
-      "I keep Cursor for drafts and unifeed for publish. Autopilot with an edit button — that’s the unlock.",
+      "I keep Cursor for drafts and Multi Feed for publish. Autopilot with an edit button — that’s the unlock.",
     role: "CEO, Brightline",
   },
   {

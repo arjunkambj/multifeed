@@ -210,7 +210,7 @@ export function PostCalendar() {
             </div>
           </div>
 
-          <div className="unifeed-calendar relative min-h-[640px] pt-3">
+          <div className="multifeed-calendar relative min-h-[640px] pt-3">
             {posts === undefined && range && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface/60">
                 <Spinner />
@@ -238,7 +238,7 @@ export function PostCalendar() {
               eventClick={onEventClick}
               select={onSelect}
               eventDrop={(info) => void onEventDrop(info)}
-              eventClassNames="unifeed-cal-event"
+              eventClassNames="multifeed-cal-event"
               views={{
                 dayGridMonth: { dayMaxEventRows: 3 },
                 timeGridWeek: {

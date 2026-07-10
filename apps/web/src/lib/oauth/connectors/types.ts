@@ -7,6 +7,8 @@ export const OAUTH_PLATFORMS = [
   "youtube",
   "pinterest",
   "reddit",
+  "tiktok",
+  "snapchat",
 ] as const;
 
 export type OAuthPlatform = (typeof OAUTH_PLATFORMS)[number];

@@ -1,6 +1,6 @@
-# unifeed Web
+# Multi Feed Web
 
-`apps/web` is the public unifeed site.
+`apps/web` is the public Multi Feed site.
 
 ## Scope
 
@@ -11,7 +11,7 @@
 ## Commands
 
 ```bash
-pnpm --filter @unifeed/web dev
-pnpm --filter @unifeed/web lint
-pnpm --filter @unifeed/web check-types
+pnpm --filter @multifeed/web dev
+pnpm --filter @multifeed/web lint
+pnpm --filter @multifeed/web check-types
 ```

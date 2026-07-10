@@ -18,13 +18,13 @@ export function WhyUS() {
         data-gsap-heading
       >
         <span className="text-sm font-semibold uppercase tracking-wide text-accent">
-          Why unifeed
+          Why Multi Feed
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Social on autopilot — without losing control
         </h2>
         <p className="text-base leading-relaxed text-muted sm:text-lg">
-          AI agents generate. unifeed schedules across 30+ networks. You review
+          AI agents generate. Multi Feed schedules across 30+ networks. You review
           everything on one calendar.
         </p>
       </div>

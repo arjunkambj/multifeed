@@ -15,16 +15,14 @@ import {
 import type { OAuthPlatform } from "@/components/connections/types";
 import { OAUTH_ERROR_MESSAGES, oauthErrorMessage } from "@/lib/oauth/env";
 
-const statusTone: Record<
-  string,
-  "success" | "warning" | "danger" | "default"
-> = {
-  active: "success",
-  expired: "warning",
-  revoked: "danger",
-  error: "danger",
-  pending_selection: "warning",
-};
+const statusTone: Record<string, "success" | "warning" | "danger" | "default"> =
+  {
+    active: "success",
+    expired: "warning",
+    revoked: "danger",
+    error: "danger",
+    pending_selection: "warning",
+  };
 
 export function ConnectionsPage() {
   const accounts = useQuery(api.oauth.accounts.list, {});
@@ -88,7 +86,7 @@ export function ConnectionsPage() {
 
   const displayBanner =
     actionError != null
-      ? ({ type: "error" as const, message: actionError })
+      ? { type: "error" as const, message: actionError }
       : banner;
 
   const onConnect = async (platform: OAuthPlatform) => {
@@ -135,13 +133,15 @@ export function ConnectionsPage() {
         <div>
           <DashboardPageTitle title="Connections" />
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            Connect multiple accounts per network — Instagram, Facebook, X, and
-            more. Tokens are stored encrypted for publishing.
+            Connect multiple accounts per network — Instagram, TikTok, Snapchat,
+            and more. Tokens are stored encrypted for publishing.
           </p>
         </div>
         {accounts && (
           <p className="text-sm text-muted">
-            <span className="font-medium text-foreground">{accounts.length}</span>{" "}
+            <span className="font-medium text-foreground">
+              {accounts.length}
+            </span>{" "}
             connected
           </p>
         )}
@@ -184,12 +184,17 @@ export function ConnectionsPage() {
                   <div className="flex items-center gap-3">
                     <span
                       className="flex size-10 items-center justify-center rounded-xl text-white"
-                      style={{ backgroundColor: meta.brand }}
+                      style={{
+                        backgroundColor: meta.brand,
+                        color: meta.foreground ?? "#FFFFFF",
+                      }}
                     >
                       <Icon icon={meta.icon} width={20} />
                     </span>
                     <div>
-                      <Card.Title className="text-base">{meta.label}</Card.Title>
+                      <Card.Title className="text-base">
+                        {meta.label}
+                      </Card.Title>
                       <Card.Description className="text-xs">
                         {meta.description}
                       </Card.Description>

@@ -4,12 +4,14 @@ import { threadsConnector } from "./meta/threads";
 import { linkedinConnector } from "./linkedin";
 import { pinterestConnector } from "./pinterest";
 import { redditConnector } from "./reddit";
+import { snapchatConnector } from "./snapchat";
 import {
   isOAuthPlatform,
   type OAuthPlatform,
   type SocialConnector,
 } from "./types";
 import { xConnector } from "./x";
+import { tiktokConnector } from "./tiktok";
 import { youtubeConnector } from "./youtube";
 
 const REGISTRY: Record<OAuthPlatform, SocialConnector> = {
@@ -21,6 +23,8 @@ const REGISTRY: Record<OAuthPlatform, SocialConnector> = {
   youtube: youtubeConnector,
   pinterest: pinterestConnector,
   x: xConnector,
+  tiktok: tiktokConnector,
+  snapchat: snapchatConnector,
 };
 
 export function getConnector(platform: string): SocialConnector {

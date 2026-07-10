@@ -15,7 +15,7 @@ const steps = [
   },
   {
     description:
-      "Review, edit, and approve — then unifeed schedules and publishes across every connected network.",
+      "Review, edit, and approve — then Multi Feed schedules and publishes across every connected network.",
     step: "3",
     title: "Approve & publish",
   },

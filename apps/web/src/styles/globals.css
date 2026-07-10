@@ -196,8 +196,8 @@ html.lenis {
   }
 }
 
-/* FullCalendar — unifeed theme */
-.unifeed-calendar {
+/* FullCalendar — Multi Feed theme */
+.multifeed-calendar {
   --fc-border-color: var(--border);
   --fc-page-bg-color: transparent;
   --fc-neutral-bg-color: var(--surface-secondary);
@@ -214,16 +214,16 @@ html.lenis {
   font-size: 0.875rem;
 }
 
-.unifeed-calendar .fc {
+.multifeed-calendar .fc {
   --fc-font-size: 0.875rem;
 }
 
-.unifeed-calendar .fc-theme-standard td,
-.unifeed-calendar .fc-theme-standard th {
+.multifeed-calendar .fc-theme-standard td,
+.multifeed-calendar .fc-theme-standard th {
   border-color: var(--border);
 }
 
-.unifeed-calendar .fc-col-header-cell {
+.multifeed-calendar .fc-col-header-cell {
   padding: 0.5rem 0;
   font-size: 0.75rem;
   font-weight: 600;
@@ -233,14 +233,14 @@ html.lenis {
   background: var(--surface-secondary);
 }
 
-.unifeed-calendar .fc-daygrid-day-number,
-.unifeed-calendar .fc-timegrid-slot-label {
+.multifeed-calendar .fc-daygrid-day-number,
+.multifeed-calendar .fc-timegrid-slot-label {
   color: var(--muted);
   font-size: 0.75rem;
   padding: 0.35rem 0.5rem;
 }
 
-.unifeed-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+.multifeed-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
   background: var(--accent);
   color: var(--accent-foreground);
   border-radius: 999px;
@@ -252,7 +252,7 @@ html.lenis {
   padding: 0;
 }
 
-.unifeed-cal-event {
+.multifeed-cal-event {
   border-radius: 0.4rem !important;
   padding: 1px 4px !important;
   font-size: 0.7rem !important;
@@ -261,15 +261,15 @@ html.lenis {
   cursor: pointer;
 }
 
-.unifeed-calendar .fc-list-event:hover td {
+.multifeed-calendar .fc-list-event:hover td {
   background: var(--surface-secondary);
 }
 
-.unifeed-calendar .fc-timegrid-now-indicator-line {
+.multifeed-calendar .fc-timegrid-now-indicator-line {
   border-color: var(--accent);
 }
 
-.unifeed-calendar .fc-scrollgrid {
+.multifeed-calendar .fc-scrollgrid {
   border-radius: 0.75rem;
   overflow: hidden;
 }

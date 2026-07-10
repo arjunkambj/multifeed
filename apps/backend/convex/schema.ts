@@ -28,6 +28,7 @@ export const platform = v.union(
   v.literal("threads"),
   v.literal("linkedin"),
   v.literal("tiktok"),
+  v.literal("snapchat"),
   v.literal("youtube"),
   v.literal("pinterest"),
   v.literal("bluesky"),

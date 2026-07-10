@@ -1,5 +1,5 @@
 {
-  "name": "@unifeed/backend",
+  "name": "@multifeed/backend",
   "version": "1.0.0",
   "type": "module",
   "description": "",
@@ -15,8 +15,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^25.6.2",
-    "@unifeed/eslint-config": "workspace:*",
-    "@unifeed/typescript-config": "workspace:*",
+    "@multifeed/eslint-config": "workspace:*",
+    "@multifeed/typescript-config": "workspace:*",
     "eslint": "^10.3.0",
     "typescript": "6.0.3"
   },

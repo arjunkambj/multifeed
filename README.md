@@ -1,4 +1,4 @@
-# unifeed
+# Multi Feed
 
 Social scheduling app built with Next.js, Convex, Hexclave, and Turborepo.
 
@@ -17,8 +17,8 @@ cp apps/web/.env.sample apps/web/.env.local
 cp apps/backend/.env.sample apps/backend/.env.local
 # Fill values, then set Convex deployment secrets (see below)
 
-pnpm --filter @unifeed/backend dev
-pnpm --filter @unifeed/web dev
+pnpm --filter @multifeed/backend dev
+pnpm --filter @multifeed/web dev
 ```
 
 ## Environment variables
@@ -32,13 +32,13 @@ Samples live next to each app (do **not** put provider secrets in Convex, or Con
 
 ### Web (`apps/web/.env.local`) — summary
 
-| Group             | Variables                                                                                                      |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Core**          | `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_APP_URL`                                                                |
-| **Hexclave**      | `NEXT_PUBLIC_HEXCLAVE_PROJECT_ID`, `NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY`, `HEXCLAVE_SECRET_SERVER_KEY` |
-| **Dodo checkout** | `DODO_PAYMENTS_API_KEY`, `DODO_PAYMENTS_ENVIRONMENT`, `DODO_*_PRODUCT_ID` (6 product IDs)                      |
-| **OAuth**         | `OAUTH_SERVER_SECRET`, `META_*`, `THREADS_*`, `LINKEDIN_*`, `REDDIT_*`, `GOOGLE_*`, `PINTEREST_*`, `X_*`       |
-| **Optional**      | `APP_ORIGIN`, `OAUTH_REDIRECT_URI`                                                                             |
+| Group             | Variables                                                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Core**          | `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_APP_URL`                                                                                    |
+| **Hexclave**      | `NEXT_PUBLIC_HEXCLAVE_PROJECT_ID`, `NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY`, `HEXCLAVE_SECRET_SERVER_KEY`                     |
+| **Dodo checkout** | `DODO_PAYMENTS_API_KEY`, `DODO_PAYMENTS_ENVIRONMENT`, `DODO_*_PRODUCT_ID` (6 product IDs)                                          |
+| **OAuth**         | `OAUTH_SERVER_SECRET`, `META_*`, `THREADS_*`, `LINKEDIN_*`, `REDDIT_*`, `GOOGLE_*`, `PINTEREST_*`, `TIKTOK_*`, `SNAPCHAT_*`, `X_*` |
+| **Optional**      | `APP_ORIGIN`, `OAUTH_REDIRECT_URI`                                                                                                 |
 
 OAuth redirect on every provider console:
 
@@ -57,6 +57,8 @@ Provider-console requirements:
 | LinkedIn  | Sign In with LinkedIn using OpenID Connect plus Share on LinkedIn; programmatic refresh tokens require Marketing Developer Platform approval                                                            |
 | YouTube   | Enable YouTube Data API v3 and YouTube Analytics API; configure the OAuth consent screen for the requested scopes                                                                                       |
 | Pinterest | Pinterest API v5 app with the requested boards, pins, and user-account scopes                                                                                                                           |
+| TikTok    | Login Kit and Content Posting API with approved `user.info.basic`, `user.info.profile`, and `video.publish` scopes                                                                                      |
+| Snapchat  | Business Manager OAuth app (not a Developer Portal Login Kit app), plus allowlisted Public Profile API access and the `snapchat-profile-api` scope                                                      |
 | X         | OAuth 2.0 enabled with exact callback URL; use a confidential client secret when available                                                                                                              |
 | Reddit    | Web app credentials and a unique, descriptive `REDDIT_USER_AGENT` that identifies the app and Reddit contact account                                                                                    |
 

@@ -10,20 +10,24 @@ export default function Logo({
       className={`group flex cursor-pointer items-center gap-2.5 text-foreground transition-colors hover:text-accent${className ? ` ${className}` : ""}`}
     >
       <svg
-        aria-hidden="true"
-        className="h-7 w-7 shrink-0 text-current transition-colors"
+        aria-label={markOnly ? "Multi Feed" : undefined}
+        aria-hidden={!markOnly}
+        className="size-10 shrink-0"
         fill="none"
-        viewBox="0 0 40 40"
+        role={markOnly ? "img" : undefined}
+        viewBox="0 0 64 64"
       >
         <path
-          d="M6 4L18 10V26C18 29.3137 15.3137 32 12 32C8.68629 32 6 29.3137 6 26V4Z"
-          fill="currentColor"
+          d="M8 44 27 25M33 44l19-19v19"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="12"
         />
-        <path d="M22 14H34V24L22 30V14Z" fill="currentColor" />
       </svg>
       {!markOnly && (
         <span className="font-display text-lg font-bold tracking-tight">
-          Unifeed
+          Multi Feed
         </span>
       )}
     </div>
