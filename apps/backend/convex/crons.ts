@@ -6,7 +6,7 @@ const crons = cronJobs();
 /** Drop expired OAuth sessions (PKCE verifiers + interim encrypted tokens). */
 crons.interval(
   "purge expired oauth sessions",
-  { minutes: 15 },
+  { minutes: 500 },
   internal.oauth.sessions.purgeExpired,
 );
 

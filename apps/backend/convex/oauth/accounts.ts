@@ -143,7 +143,7 @@ export const list = query({
     if (args.platform) {
       const rows = await ctx.db
         .query("connectedAccounts")
-        .withIndex("by_team_platform", (q) =>
+        .withIndex("by_team_provider", (q) =>
           q.eq("teamId", teamId).eq("platform", args.platform!),
         )
         .collect();
@@ -152,7 +152,7 @@ export const list = query({
 
     const rows = await ctx.db
       .query("connectedAccounts")
-      .withIndex("by_team", (q) => q.eq("teamId", teamId))
+      .withIndex("by_team_provider", (q) => q.eq("teamId", teamId))
       .collect();
     return rows.map(stripSecrets);
   },
@@ -284,6 +284,7 @@ export const disconnect = mutation({
 export const getPendingSelection = query({
   args: {
     state: v.string(),
+    now: v.number(),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
@@ -297,7 +298,7 @@ export const getPendingSelection = query({
       session.teamId !== user.selectedTeamId ||
       session.userId !== user.id ||
       session.phase !== "select_account" ||
-      session.expiresAt < Date.now()
+      session.expiresAt < args.now
     ) {
       return null;
     }

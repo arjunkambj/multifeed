@@ -3,12 +3,7 @@ import "../styles/globals.css";
 import Providers from "@/components/Providers";
 import { HexclaveProvider, HexclaveTheme } from "@hexclave/next";
 import { hexclaveServerApp } from "@/hexclave/server";
-import {
-  Bricolage_Grotesque,
-  Plus_Jakarta_Sans,
-  Inter,
-  Figtree,
-} from "next/font/google";
+import { Bricolage_Grotesque, Inter, Figtree } from "next/font/google";
 
 const figtreeHeading = Figtree({
   subsets: ["latin"],
@@ -20,13 +15,6 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const appSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-app-sans",
-  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -58,10 +46,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${appSans.variable} font-sans ${inter.variable} ${figtreeHeading.variable}`}
+      className={`${bricolage.variable} font-sans ${inter.variable} ${figtreeHeading.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-sans" suppressHydrationWarning>
+      <body className="font-sans">
         <HexclaveProvider app={hexclaveServerApp}>
           <HexclaveTheme>
             <Providers>{children}</Providers>

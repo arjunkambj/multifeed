@@ -81,7 +81,9 @@ export const confirmMediaUpload = mutation({
     // Ensure the object exists in our R2 component metadata.
     const meta = await r2.getMetadata(ctx, args.r2Key);
     if (!meta) {
-      throw new Error("Upload not found. Complete the upload before confirming.");
+      throw new Error(
+        "Upload not found. Complete the upload before confirming.",
+      );
     }
 
     if (meta.size != null && meta.size > MAX_UPLOAD_BYTES) {
@@ -138,18 +140,26 @@ export const confirmMediaUpload = mutation({
 
 export const listMedia = query({
   args: {
-    kind: v.optional(
-      v.union(v.literal("image"), v.literal("video"), v.literal("document")),
+    kind: v.union(
+      v.literal("image"),
+      v.literal("video"),
+      v.literal("document"),
     ),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const rows = await ctx.db
+    const limit = Math.max(1, Math.min(args.limit ?? 50, 100));
+
+    return await ctx.db
       .query("mediaAssets")
-      .withIndex("by_team", (q) => q.eq("teamId", user.selectedTeamId))
-      .collect();
-    const ready = rows.filter((r) => r.status === "ready");
-    if (!args.kind) return ready;
-    return ready.filter((r) => r.kind === args.kind);
+      .withIndex("by_team_status_kind", (q) =>
+        q
+          .eq("teamId", user.selectedTeamId)
+          .eq("status", "ready")
+          .eq("kind", args.kind),
+      )
+      .order("desc")
+      .take(limit);
   },
 });

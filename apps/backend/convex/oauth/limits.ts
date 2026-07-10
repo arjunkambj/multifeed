@@ -8,11 +8,13 @@ const PLAN_LIMITS: Record<string, number> = {
   agency: Number.POSITIVE_INFINITY,
 };
 
+const COUNTED_ACCOUNT_STATUSES = ["active", "expired", "error"] as const;
+
 /** Max connected accounts for the team based on active subscription. */
 export async function accountLimitForTeam(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
-): Promise<number> {
+) {
   const rows = await Promise.all(
     ["active", "renewed", "updated", "plan_changed"].map((status) =>
       ctx.db
@@ -41,28 +43,33 @@ export async function accountLimitForTeam(
   return PLAN_LIMITS[sub.planKey] ?? PLAN_LIMITS.creator ?? 15;
 }
 
-export async function countConnectedAccounts(
+async function countConnectedAccounts(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
-): Promise<number> {
-  const accounts = await ctx.db
-    .query("connectedAccounts")
-    .withIndex("by_team", (q) => q.eq("teamId", teamId))
-    .collect();
-  // Only active-ish accounts count toward the plan limit.
-  return accounts.filter(
-    (a) => a.status !== "pending_selection" && a.status !== "revoked",
-  ).length;
+  limit: number,
+) {
+  const accounts = await Promise.all(
+    COUNTED_ACCOUNT_STATUSES.map((status) =>
+      ctx.db
+        .query("connectedAccounts")
+        .withIndex("by_team_status", (q) =>
+          q.eq("teamId", teamId).eq("status", status),
+        )
+        .take(limit),
+    ),
+  );
+
+  return accounts.reduce((count, rows) => count + rows.length, 0);
 }
 
 export async function assertCanConnect(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
-): Promise<void> {
-  const [limit, count] = await Promise.all([
-    accountLimitForTeam(ctx, teamId),
-    countConnectedAccounts(ctx, teamId),
-  ]);
+) {
+  const limit = await accountLimitForTeam(ctx, teamId);
+  if (!Number.isFinite(limit)) return;
+
+  const count = await countConnectedAccounts(ctx, teamId, limit);
   if (count >= limit) {
     throw new Error(
       `Account limit reached (${count}/${limit}). Upgrade your plan to connect more accounts.`,

@@ -30,6 +30,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
   PLATFORM_META,
   platformBrand,
@@ -619,10 +620,9 @@ function PostComposerForm({
                         }
                       >
                         {account.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <RemoteAvatar
                             src={account.avatarUrl}
-                            alt=""
+                            size={36}
                             className="size-9 rounded-full object-cover"
                           />
                         ) : (

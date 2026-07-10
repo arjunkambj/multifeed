@@ -40,6 +40,7 @@ const CALENDAR_COLORS = [
   "#7C3AED",
   "#059669",
 ];
+const MAX_TARGETS_PER_POST = 100;
 
 function colorForIndex(i: number) {
   return CALENDAR_COLORS[i % CALENDAR_COLORS.length]!;
@@ -138,6 +139,10 @@ async function replaceTargets(
     mediaAssets: Doc<"mediaAssets">[];
   },
 ) {
+  if (input.targets.length > MAX_TARGETS_PER_POST) {
+    throw new Error(`Posts support up to ${MAX_TARGETS_PER_POST} targets`);
+  }
+
   const existing = await loadTargets(ctx, input.postId);
   for (const row of existing) {
     await ctx.db.delete(row._id);
@@ -499,7 +504,7 @@ export const list = query({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const limit = Math.min(args.limit ?? 50, 100);
+    const limit = Math.max(1, Math.min(args.limit ?? 50, 100));
 
     let posts: Doc<"posts">[];
     if (args.status) {
@@ -544,10 +549,10 @@ export const listInRange = query({
       )
       .take(500);
 
-    const enriched = await Promise.all(posts.map((p) => enrichPost(ctx, p)));
-    return enriched.filter(
+    const visiblePosts = posts.filter(
       (p) => p.status !== "archived" && p.status !== "draft",
     );
+    return await Promise.all(visiblePosts.map((p) => enrichPost(ctx, p)));
   },
 });
 
@@ -555,7 +560,7 @@ export const listScheduled = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const limit = Math.min(args.limit ?? 40, 100);
+    const limit = Math.max(1, Math.min(args.limit ?? 40, 100));
     const posts = await ctx.db
       .query("posts")
       .withIndex("by_team_status", (q) =>

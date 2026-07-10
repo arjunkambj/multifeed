@@ -8,6 +8,7 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
   CONNECTABLE_PLATFORMS,
   PLATFORM_META,
@@ -204,10 +205,9 @@ export function ConnectionsPage() {
                           className="flex max-w-full items-center gap-2 rounded-full border border-border/70 bg-surface-secondary px-2 py-1.5"
                         >
                           {account.avatarUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <RemoteAvatar
                               src={account.avatarUrl}
-                              alt=""
+                              size={24}
                               className="size-6 rounded-full object-cover"
                             />
                           ) : (

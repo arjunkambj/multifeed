@@ -1,6 +1,3 @@
-"use client";
-
-import { Icon } from "@iconify/react";
 import Image from "next/image";
 
 import { testimonials } from "@/constants/landing-page";
@@ -48,11 +45,9 @@ function TestimonialCard({
 }) {
   return (
     <div className="marketing-surface flex h-full flex-col gap-3 border border-border/50 bg-surface p-5 sm:p-6">
-      <Icon
-        icon="mdi:format-quote-open"
-        width={28}
-        className="text-accent/80"
-      />
+      <span aria-hidden className="text-4xl leading-none text-accent/80">
+        “
+      </span>
       <p className="flex-1 text-base leading-relaxed text-foreground sm:text-lg sm:leading-snug">
         {testimonial.quote}
       </p>

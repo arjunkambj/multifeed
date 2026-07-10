@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "../_generated/server";
+import { internalMutation, mutation } from "../_generated/server";
 import { requireUser } from "../hexclave/auth";
 import { platform as platformValidator } from "../schema";
 import { decryptSecret, encryptSecret, randomUrlSafe } from "./crypto";
@@ -123,39 +123,6 @@ export const beginExchange = mutation({
       codeVerifier,
       returnTo: session.returnTo,
       phase: "exchanging" as const,
-      expiresAt: session.expiresAt,
-    };
-  },
-});
-
-/**
- * Public read of selection-phase metadata only (no secrets / PKCE).
- * Do not use for token exchange — use beginExchange.
- */
-export const getByState = query({
-  args: { state: v.string() },
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    const session = await ctx.db
-      .query("oauthSessions")
-      .withIndex("by_state", (q) => q.eq("state", args.state))
-      .unique();
-
-    if (
-      !session ||
-      session.teamId !== user.selectedTeamId ||
-      session.userId !== user.id ||
-      session.expiresAt < Date.now()
-    ) {
-      return null;
-    }
-
-    // Never return codeVerifier or tokens to query callers (browser-safe).
-    return {
-      state: session.state,
-      platform: session.platform,
-      returnTo: session.returnTo,
-      phase: session.phase,
       expiresAt: session.expiresAt,
     };
   },

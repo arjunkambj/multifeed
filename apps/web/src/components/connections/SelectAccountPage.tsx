@@ -7,6 +7,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { RemoteAvatar } from "@/components/RemoteAvatar";
 import { PLATFORM_META } from "@/components/connections/platform-meta";
 import type { OAuthPlatform } from "@/components/connections/types";
 
@@ -29,10 +30,11 @@ export function SelectAccountPage() {
   const router = useRouter();
   const state = searchParams.get("state") ?? "";
   const platformParam = searchParams.get("platform") ?? "";
+  const [queryNow] = useState(Date.now);
 
   const pending = useQuery(
     api.oauth.accounts.getPendingSelection,
-    state ? { state } : "skip",
+    state ? { state, now: queryNow } : "skip",
   );
 
   const [selecting, setSelecting] = useState<string | null>(null);
@@ -126,10 +128,9 @@ export function SelectAccountPage() {
           >
             <Card.Content className="flex flex-row items-center gap-3 py-3">
               {option.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <RemoteAvatar
                   src={option.avatarUrl}
-                  alt=""
+                  size={40}
                   className="size-10 rounded-full object-cover"
                 />
               ) : (

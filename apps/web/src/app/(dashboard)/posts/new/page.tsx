@@ -1,17 +1,31 @@
-import { Suspense } from "react";
-import { Spinner } from "@heroui/react";
-import { CreatePostPageClient } from "./CreatePostPageClient";
+import type { Id } from "@convex/_generated/dataModel";
+import { CreatePostComposer } from "@/components/posts/CreatePostComposer";
 
-export default function NewPostPage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+const first = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
+
+export default async function NewPostPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  const at = first(params.at);
+  const from = first(params.from);
+  const edit = first(params.edit);
+  const initialScheduledFor = at ? Number(at) : undefined;
+
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-40 items-center justify-center">
-          <Spinner />
-        </div>
+    <CreatePostComposer
+      initialScheduledFor={
+        initialScheduledFor && !Number.isNaN(initialScheduledFor)
+          ? initialScheduledFor
+          : undefined
       }
-    >
-      <CreatePostPageClient />
-    </Suspense>
+      duplicateFromId={from ? (from as Id<"posts">) : undefined}
+      editPostId={edit ? (edit as Id<"posts">) : undefined}
+    />
   );
 }
