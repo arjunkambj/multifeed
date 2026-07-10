@@ -47,9 +47,14 @@ export const sidebarCategories: MenuCategory[] = [
         icon: "hugeicons:calendar-check-in-01",
       },
       {
+        name: "Posted",
+        href: "/posts/posted",
+        icon: "hugeicons:checkmark-circle-02",
+      },
+      {
         name: "Drafts",
         href: "/posts/drafts",
-        icon: "hugeicons:file-02",
+        icon: "hugeicons:note-01",
       },
     ],
   },
@@ -61,11 +66,6 @@ export const sidebarCategories: MenuCategory[] = [
         name: "Connections",
         href: "/connections",
         icon: "hugeicons:connect",
-      },
-      {
-        name: "Inbox",
-        href: "/inbox",
-        icon: "hugeicons:inbox",
       },
     ],
   },
@@ -89,9 +89,9 @@ export const routeLabels: Record<string, string> = {
   "/posts/new": "New Post",
   "/calendar": "Calendar",
   "/posts/scheduled": "Scheduled",
+  "/posts/posted": "Posted",
   "/posts/drafts": "Drafts",
   "/connections": "Connections",
-  "/inbox": "Inbox",
   "/teams": "Team",
   "/settings": "Settings",
 };

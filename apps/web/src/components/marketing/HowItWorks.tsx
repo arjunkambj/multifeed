@@ -1,14 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
-
-import {
-  revealCardVariants,
-  revealContainerVariants,
-  revealItemVariants,
-  revealViewport,
-} from "@/components/marketing/motion-variants";
-
 const steps = [
   {
     description:
@@ -32,52 +23,37 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24">
-      <motion.div
+    <section
+      className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
+      data-gsap-section
+    >
+      <div
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-        initial="initial"
-        variants={revealContainerVariants}
-        viewport={revealViewport}
-        whileInView="animate"
+        data-gsap-heading
       >
-        <motion.span
-          className="text-sm font-semibold uppercase tracking-wide text-accent"
-          variants={revealItemVariants}
-        >
+        <span className="text-sm font-semibold uppercase tracking-wide text-accent">
           How it works
-        </motion.span>
-        <motion.h2
-          className="font-display text-3xl font-bold tracking-tight sm:text-4xl"
-          variants={revealItemVariants}
-        >
+        </span>
+        <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Three steps to social autopilot
-        </motion.h2>
-        <motion.p
-          className="text-base leading-relaxed text-muted sm:text-lg"
-          variants={revealItemVariants}
-        >
+        </h2>
+        <p className="text-base leading-relaxed text-muted sm:text-lg">
           From empty calendar to multi-network schedule — with AI doing the
           heavy lifting.
-        </motion.p>
-      </motion.div>
+        </p>
+      </div>
 
-      <motion.div
-        className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6"
-        initial="initial"
-        variants={revealContainerVariants}
-        viewport={revealViewport}
-        whileInView="animate"
-      >
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
         {steps.map((step) => (
-          <motion.div key={step.step} variants={revealCardVariants}>
+          <div data-gsap-card key={step.step}>
             <StepCard
               description={step.description}
               step={step.step}
               title={step.title}
             />
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -102,6 +78,7 @@ function StepCard({
             >
               <div
                 className="w-full rounded-full bg-accent"
+                data-gsap-bar
                 style={{ height: `${height}%` }}
               />
             </div>

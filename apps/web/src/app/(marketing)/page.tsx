@@ -10,6 +10,7 @@ import { Testimonitals } from "@/components/marketing/Testimonial";
 import { Pricing } from "@/components/marketing/Pricing";
 import { MarketingMarquee } from "@/components/marketing/MarketingMarquee";
 import { WhyUS } from "@/components/marketing/WhyUS";
+import { MarketingAnimations } from "@/components/marketing/MarketingAnimations";
 
 export const metadata: Metadata = {
   title: "unifeed | Run social on autopilot with AI agents",
@@ -31,7 +32,8 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="motion-landing flex w-full flex-col bg-background">
+    <main className="marketing-landing flex w-full flex-col bg-background">
+      <MarketingAnimations />
       <Navbar />
       <Hero />
       <MarketingMarquee />

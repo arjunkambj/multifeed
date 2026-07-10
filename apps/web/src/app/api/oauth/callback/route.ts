@@ -1,0 +1,210 @@
+import { fetchMutation } from "convex/nextjs";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { api } from "@convex/_generated/api";
+import { getHexclaveConvexServerToken } from "@/hexclave/server";
+import { getConnector, isOAuthPlatform } from "@/lib/oauth/connectors/registry";
+import {
+  appOrigin,
+  connectedReturnPath,
+  connectionsUrl,
+  oauthRedirectUri,
+  oauthServerSecret,
+  sanitizeReturnTo,
+  selectAccountUrl,
+} from "@/lib/oauth/env";
+import { saveConnectedAccount } from "@/lib/oauth/save-account";
+
+function redirect(url: string) {
+  return NextResponse.redirect(url, {
+    headers: { "Cache-Control": "private, no-store" },
+  });
+}
+
+function errorRedirect(code: string) {
+  return redirect(connectionsUrl({ error: code }));
+}
+
+export async function GET(request: NextRequest) {
+  const token = await getHexclaveConvexServerToken(request);
+  if (token == null) {
+    // Never put the OAuth `code` into sign-in returnTo (history/logs/Referer).
+    const signIn = new URL("/sign-in", appOrigin());
+    signIn.searchParams.set("returnTo", "/connections");
+    signIn.searchParams.set("error", "auth_required");
+    return redirect(signIn.toString());
+  }
+
+  const url = new URL(request.url);
+  const error = url.searchParams.get("error");
+  if (error) {
+    console.error(
+      "[oauth/callback] provider error",
+      error,
+      url.searchParams.get("error_description"),
+    );
+    return errorRedirect(
+      error === "access_denied" ? "oauth_denied" : "oauth_failed",
+    );
+  }
+
+  const code = url.searchParams.get("code");
+  const state = url.searchParams.get("state");
+  if (!code || !state) {
+    return errorRedirect("missing_code");
+  }
+
+  let serverSecret: string;
+  try {
+    serverSecret = oauthServerSecret();
+  } catch (err) {
+    console.error(
+      "[oauth/callback] server configuration",
+      err instanceof Error ? err.message : err,
+    );
+    return errorRedirect("oauth_failed");
+  }
+
+  try {
+    // Atomically consume authorize session (single-use; no PKCE via public query).
+    const session = await fetchMutation(
+      api.oauth.sessions.beginExchange,
+      { state, serverSecret },
+      { token },
+    );
+
+    if (!session) {
+      return errorRedirect("session_expired");
+    }
+
+    if (!isOAuthPlatform(session.platform)) {
+      return errorRedirect("unsupported_platform");
+    }
+
+    const connector = getConnector(session.platform);
+    const redirectUri = oauthRedirectUri();
+    let tokens;
+    try {
+      tokens = await connector.exchangeCode({
+        code,
+        redirectUri,
+        codeVerifier: session.codeVerifier,
+      });
+    } catch (err) {
+      console.error(
+        "[oauth/callback] token exchange",
+        err instanceof Error ? err.message : err,
+      );
+      await fetchMutation(
+        api.oauth.sessions.remove,
+        { state, serverSecret },
+        { token },
+      ).catch(() => undefined);
+      return errorRedirect("token_exchange_failed");
+    }
+
+    // Meta (and similar): multi-account selection
+    if (connector.listSelectableAccounts) {
+      const options = await connector.listSelectableAccounts(
+        tokens.accessToken,
+      );
+
+      if (options.length === 0) {
+        await fetchMutation(
+          api.oauth.sessions.remove,
+          { state, serverSecret },
+          { token },
+        );
+        return errorRedirect(
+          session.platform === "instagram" ? "no_instagram" : "no_accounts",
+        );
+      }
+
+      if (options.length === 1 && connector.resolveSelectedAccount) {
+        const only = options[0]!;
+        const resolved = await connector.resolveSelectedAccount(
+          tokens.accessToken,
+          only.id,
+          only,
+        );
+        await saveConnectedAccount({
+          token,
+          platform: session.platform,
+          connector,
+          tokens: resolved.tokens,
+          profile: resolved.profile,
+        });
+        await fetchMutation(
+          api.oauth.sessions.remove,
+          { state, serverSecret },
+          { token },
+        );
+        return redirect(
+          new URL(
+            connectedReturnPath(session.returnTo, session.platform),
+            appOrigin(),
+          ).toString(),
+        );
+      }
+
+      await fetchMutation(
+        api.oauth.sessions.markPending,
+        {
+          state,
+          serverSecret,
+          accessToken: tokens.accessToken,
+          options: options.map((o) => ({
+            id: o.id,
+            label: o.label,
+            username: o.username,
+            avatarUrl: o.avatarUrl,
+          })),
+        },
+        { token },
+      );
+
+      return redirect(selectAccountUrl(state, session.platform));
+    }
+
+    const profile = await connector.fetchProfile(tokens.accessToken);
+    await saveConnectedAccount({
+      token,
+      platform: session.platform,
+      connector,
+      tokens,
+      profile,
+    });
+    await fetchMutation(
+      api.oauth.sessions.remove,
+      { state, serverSecret },
+      { token },
+    );
+
+    const safeReturn = sanitizeReturnTo(session.returnTo);
+    if (safeReturn) {
+      const u = new URL(safeReturn, appOrigin());
+      // Only allow same-origin after sanitize
+      if (u.origin === new URL(appOrigin()).origin) {
+        u.searchParams.set("connected", session.platform);
+        return redirect(u.toString());
+      }
+    }
+
+    return redirect(connectionsUrl({ connected: session.platform }));
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "OAuth failed";
+    console.error("[oauth/callback]", message);
+    try {
+      if (state) {
+        await fetchMutation(
+          api.oauth.sessions.remove,
+          { state, serverSecret },
+          { token },
+        );
+      }
+    } catch {
+      // ignore cleanup errors
+    }
+    return errorRedirect("oauth_failed");
+  }
+}

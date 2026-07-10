@@ -21,6 +21,7 @@
     "typescript": "6.0.3"
   },
   "dependencies": {
+    "@convex-dev/r2": "^0.10.2",
     "@hexclave/next": "^1.0.14",
     "convex": "^1.42.0",
     "svix": "^1.96.1",

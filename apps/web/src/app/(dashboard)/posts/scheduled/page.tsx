@@ -1,5 +1,5 @@
-import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { ScheduledPostsList } from "@/components/posts/ScheduledPostsList";
 
 export default function ScheduledPostsPage() {
-  return <DashboardPageTitle title="Scheduled" />;
+  return <ScheduledPostsList />;
 }

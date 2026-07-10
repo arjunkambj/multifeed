@@ -21,7 +21,7 @@ export function DashboardShell({
   return (
     <div className="flex min-h-dvh bg-background">
       <AppSidebar collapsed={collapsed} />
-      <div className="my-2 mr-2 flex min-w-0 border flex-1 flex-col overflow-hidden rounded-4xl bg-surface">
+      <div className="my-2 mr-2 flex min-w-0 flex-1 flex-col overflow-hidden rounded-4xl bg-surface">
         <DashboardHeader
           user={user}
           onToggle={() => setCollapsed((value) => !value)}

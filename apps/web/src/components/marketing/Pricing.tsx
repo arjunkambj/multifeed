@@ -2,17 +2,10 @@
 
 import { buttonVariants, Switch } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { pricingPlans } from "@/constants/landing-page";
-import {
-  revealCardVariants,
-  revealContainerVariants,
-  revealItemVariants,
-  revealViewport,
-} from "@/components/marketing/motion-variants";
 
 export function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
@@ -20,42 +13,32 @@ export function Pricing() {
   return (
     <section
       className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
+      data-gsap-section
       id="pricing"
     >
-      <motion.div
+      <div
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-        initial="initial"
-        variants={revealContainerVariants}
-        viewport={revealViewport}
-        whileInView="animate"
+        data-gsap-heading
       >
-        <motion.span
-          className="text-sm font-semibold uppercase tracking-wide text-accent"
-          variants={revealItemVariants}
-        >
+        <span className="text-sm font-semibold uppercase tracking-wide text-accent">
           Pricing
-        </motion.span>
-        <motion.h2
-          className="font-display text-3xl font-bold tracking-tight sm:text-4xl"
-          variants={revealItemVariants}
-        >
+        </span>
+        <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Simple pricing. Start free for 7 days.
-        </motion.h2>
-        <motion.p
-          className="text-base leading-relaxed text-muted sm:text-lg"
-          variants={revealItemVariants}
-        >
+        </h2>
+        <p className="text-base leading-relaxed text-muted sm:text-lg">
           Pick a plan for how many networks and agents you run — upgrade when
           autopilot needs more room.
-        </motion.p>
-        <motion.div
+        </p>
+        <div
           className="marketing-control mt-2 flex items-center gap-1 border border-border/50 bg-surface px-1.5 py-1"
           role="group"
-          variants={revealItemVariants}
         >
           <button
             className={`marketing-control-item cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
-              !isYearly ? "bg-surface-secondary text-foreground" : "text-muted hover:text-foreground"
+              !isYearly
+                ? "bg-surface-secondary text-foreground"
+                : "text-muted hover:text-foreground"
             }`}
             onClick={() => setIsYearly(false)}
             type="button"
@@ -69,7 +52,9 @@ export function Pricing() {
           </Switch>
           <button
             className={`marketing-control-item cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
-              isYearly ? "bg-surface-secondary text-foreground" : "text-muted hover:text-foreground"
+              isYearly
+                ? "bg-surface-secondary text-foreground"
+                : "text-muted hover:text-foreground"
             }`}
             onClick={() => setIsYearly(true)}
             type="button"
@@ -77,26 +62,16 @@ export function Pricing() {
             Yearly
             <span className="text-xs text-accent"> · Save 20%</span>
           </button>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
-      <motion.div
-        className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-3 md:gap-5"
-        initial="initial"
-        variants={revealContainerVariants}
-        viewport={revealViewport}
-        whileInView="animate"
-      >
+      <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-3 md:gap-5">
         {pricingPlans.map((plan) => (
-          <motion.div
-            className="h-full"
-            key={plan.name}
-            variants={revealCardVariants}
-          >
+          <div className="h-full" data-gsap-card key={plan.name}>
             <PricingCard isYearly={isYearly} plan={plan} />
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -113,9 +88,7 @@ function PricingCard({
   return (
     <div
       className={`marketing-surface group relative flex h-full flex-col overflow-hidden border bg-surface transition-colors ${
-        preferred
-          ? "border-accent/40"
-          : "border-border/50 hover:border-border"
+        preferred ? "border-accent/40" : "border-border/50 hover:border-border"
       }`}
     >
       <div className="flex flex-1 flex-col p-5 sm:p-6">
@@ -147,9 +120,7 @@ function PricingCard({
           </span>
           <span className="text-sm text-muted">
             {plan.period}
-            {isYearly && (
-              <span className="text-accent"> · yearly</span>
-            )}
+            {isYearly && <span className="text-accent"> · yearly</span>}
           </span>
         </div>
 

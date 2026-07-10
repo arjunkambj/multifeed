@@ -2,61 +2,37 @@
 
 import { Accordion, buttonVariants } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { motion } from "motion/react";
 import Link from "next/link";
 
 import { faqItems } from "@/constants/landing-page";
-import {
-  revealCardVariants,
-  revealContainerVariants,
-  revealItemVariants,
-  revealViewport,
-} from "@/components/marketing/motion-variants";
 
 export function FAQ() {
   return (
     <section
       className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
+      data-gsap-section
       id="faq"
     >
-      <motion.div
+      <div
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-        initial="initial"
-        variants={revealContainerVariants}
-        viewport={revealViewport}
-        whileInView="animate"
+        data-gsap-heading
       >
-        <motion.span
-          className="text-sm font-semibold uppercase tracking-wide text-accent"
-          variants={revealItemVariants}
-        >
+        <span className="text-sm font-semibold uppercase tracking-wide text-accent">
           FAQ
-        </motion.span>
-        <motion.h2
-          className="font-display text-3xl font-bold tracking-tight sm:text-4xl"
-          variants={revealItemVariants}
-        >
+        </span>
+        <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Questions, answered straight
-        </motion.h2>
-        <motion.p
-          className="text-base leading-relaxed text-muted sm:text-lg"
-          variants={revealItemVariants}
-        >
+        </h2>
+        <p className="text-base leading-relaxed text-muted sm:text-lg">
           Agents, networks, and the calendar — what people ask before going on
           autopilot.
-        </motion.p>
-      </motion.div>
+        </p>
+      </div>
 
-      <motion.div
-        className="mx-auto flex w-full flex-col items-start justify-between gap-10 md:flex-row md:gap-12"
-        initial="initial"
-        variants={revealContainerVariants}
-        viewport={revealViewport}
-        whileInView="animate"
-      >
-        <motion.div
+      <div className="mx-auto flex w-full flex-col items-start justify-between gap-10 md:flex-row md:gap-12">
+        <div
           className="flex w-full max-w-sm flex-col gap-2 md:sticky md:top-28"
-          variants={revealItemVariants}
+          data-gsap-card
         >
           <h3 className="text-xl font-medium sm:text-2xl">Still unsure?</h3>
           <p className="leading-relaxed text-muted">
@@ -70,12 +46,9 @@ export function FAQ() {
             <Icon icon="mdi:chat-outline" />
             Talk to us
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="flex w-full max-w-2xl justify-center"
-          variants={revealCardVariants}
-        >
+        <div className="flex w-full max-w-2xl justify-center" data-gsap-card>
           <Accordion className="w-full">
             {faqItems.map((item, index) => (
               <Accordion.Item key={item.title} id={`${index}`}>
@@ -93,8 +66,8 @@ export function FAQ() {
               </Accordion.Item>
             ))}
           </Accordion>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 }

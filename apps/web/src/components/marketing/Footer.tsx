@@ -2,16 +2,9 @@
 
 import { buttonVariants } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { motion } from "motion/react";
 import Link from "next/link";
 
 import Logo from "@/components/layout/Logo";
-import {
-  revealCardVariants,
-  revealContainerVariants,
-  revealItemVariants,
-  revealViewport,
-} from "@/components/marketing/motion-variants";
 
 const footerLinks = [
   {
@@ -45,35 +38,28 @@ const socialLinks = [
 
 function FooterCTA() {
   return (
-    <motion.div
+    <div
       className="marketing-surface relative mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-4 overflow-hidden border border-border bg-surface/80 px-6 py-16 text-center sm:px-10 sm:py-20"
-      initial="initial"
-      variants={revealContainerVariants}
-      viewport={revealViewport}
-      whileInView="animate"
+      data-gsap-section
     >
-      <motion.h3
-        className="relative font-display text-3xl font-bold tracking-tight sm:text-4xl"
-        variants={revealItemVariants}
-      >
-        Ready to run social on autopilot?
-      </motion.h3>
-      <motion.p
-        className="relative max-w-xl text-base text-muted sm:text-lg"
-        variants={revealItemVariants}
-      >
-        Point your AI agents at unifeed, review on the calendar, and publish to
-        30+ networks — free for 7 days.
-      </motion.p>
-      <motion.div variants={revealItemVariants}>
-        <Link
-          className={`${buttonVariants({ size: "lg" })} button mt-2`}
-          href="/sign-in"
-        >
-          Start free trial
-        </Link>
-      </motion.div>
-    </motion.div>
+      <div className="contents" data-gsap-heading>
+        <h3 className="relative font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Ready to run social on autopilot?
+        </h3>
+        <p className="relative max-w-xl text-base text-muted sm:text-lg">
+          Point your AI agents at unifeed, review on the calendar, and publish
+          to 30+ networks — free for 7 days.
+        </p>
+        <div>
+          <Link
+            className={`${buttonVariants({ size: "lg" })} button mt-2`}
+            href="/sign-in"
+          >
+            Start free trial
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -82,22 +68,16 @@ export function Footer() {
     <div className="flex flex-col gap-12 px-4 pb-0 pt-12 sm:px-6 md:gap-16 md:pt-16">
       <FooterCTA />
       <footer className="w-full bg-background">
-        <motion.div
+        <div
           className="mx-auto w-full max-w-7xl py-12 sm:py-16"
-          initial="initial"
-          variants={revealContainerVariants}
-          viewport={revealViewport}
-          whileInView="animate"
+          data-gsap-section
         >
-          <motion.div
-            className="grid grid-cols-2 gap-10 md:grid-cols-4 md:gap-12"
-            variants={revealContainerVariants}
-          >
+          <div className="grid grid-cols-2 gap-10 md:grid-cols-4 md:gap-12">
             {footerLinks.map((section) => (
-              <motion.div
+              <div
                 className="flex flex-col gap-4"
+                data-gsap-card
                 key={section.title}
-                variants={revealCardVariants}
               >
                 <h4 className="text-sm font-semibold">{section.title}</h4>
                 <ul className="flex flex-col gap-3">
@@ -112,13 +92,10 @@ export function Footer() {
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
             ))}
 
-            <motion.div
-              className="flex flex-col gap-4"
-              variants={revealCardVariants}
-            >
+            <div className="flex flex-col gap-4" data-gsap-card>
               <h4 className="text-sm font-semibold">Stay connected</h4>
               <div className="flex gap-3">
                 {socialLinks.map((social) => (
@@ -132,17 +109,17 @@ export function Footer() {
                   </Link>
                 ))}
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
-          <motion.div
+          <div
             className="mt-12 border-t border-border sm:mt-16"
-            variants={revealItemVariants}
+            data-gsap-card
           />
 
-          <motion.div
+          <div
             className="mt-8 flex flex-col items-start justify-between gap-6 sm:mt-10 sm:flex-row sm:items-end"
-            variants={revealContainerVariants}
+            data-gsap-card
           >
             <div className="flex max-w-xs flex-col gap-3">
               <Logo />
@@ -154,8 +131,8 @@ export function Footer() {
             <p className="text-xs text-muted">
               &copy; {new Date().getFullYear()} unifeed. All rights reserved.
             </p>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </footer>
     </div>
   );

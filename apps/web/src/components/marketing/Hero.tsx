@@ -1,68 +1,42 @@
 "use client";
 
 import { buttonVariants, Chip } from "@heroui/react";
-import { motion } from "motion/react";
 import Link from "next/link";
-
-import {
-  revealContainerVariants,
-  revealItemVariants,
-} from "@/components/marketing/motion-variants";
-
-const imageVariants = {
-  animate: {
-    opacity: 1,
-    scale: 1,
-    transition: { delay: 0.25, duration: 0.8, ease: "easeInOut" as const },
-    y: 0,
-  },
-  initial: { opacity: 0, scale: 0.96, y: 32 },
-};
 
 export function Hero() {
   return (
     <section
-      className="relative mx-auto flex min-h-[58dvh] w-full max-w-7xl flex-col gap-12 px-4 pb-16 pt-20 sm:px-6 sm:pt-24 md:gap-14 md:pb-20"
+      className="relative mx-auto flex min-h-[58dvh] w-full max-w-7xl flex-col gap-12 px-4 pb-16 pt-20 sm:px-6 sm:pt-24 md:gap-14 md:pb-20 lg:pt-36"
       id="hero"
     >
-      <motion.div
-        animate="animate"
-        className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-5 text-center"
-        initial="initial"
-        variants={revealContainerVariants}
+      <div
+        className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-5 text-center lg:mt-4"
+        data-gsap-hero-copy
       >
-        <motion.div variants={revealItemVariants}>
+        <div>
           <Chip className="marketing-chip border border-border/60 bg-surface px-3 py-1 text-accent">
             AI agents · 30+ social networks
           </Chip>
-        </motion.div>
+        </div>
 
-        <motion.h1
-          className="font-display max-w-4xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.05]"
-          variants={revealItemVariants}
-        >
+        <h1 className="font-display max-w-4xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.05]">
           Run your social media on autopilot with{" "}
           <span className="relative inline-block whitespace-nowrap">
             AI agents
             <span
               aria-hidden
               className="absolute inset-x-0 -bottom-1 h-[0.18em] rounded-full bg-accent sm:-bottom-1.5"
+              data-gsap-underline
             />
           </span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg"
-          variants={revealItemVariants}
-        >
+        <p className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
           Plan, generate, and schedule posts automatically to 30+ social media
           networks — then review and edit everything in a visual calendar.
-        </motion.p>
+        </p>
 
-        <motion.div
-          className="flex flex-wrap items-center justify-center gap-3 pt-1"
-          variants={revealItemVariants}
-        >
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Link
             className={`${buttonVariants({ size: "lg" })} button`}
             href="/sign-in"
@@ -75,25 +49,20 @@ export function Hero() {
           >
             See pricing
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.p
-          className="max-w-xl text-sm leading-relaxed text-muted"
-          variants={revealItemVariants}
-        >
+        <p className="max-w-xl text-sm leading-relaxed text-muted">
           Use any agent:{" "}
           <span className="font-medium text-foreground/80">
             OpenClaw / Hermes / Claude / ChatGPT / Codex / Cursor
           </span>
-        </motion.p>
-      </motion.div>
+        </p>
+      </div>
 
       {/* Image frame — drop product screenshots here later */}
-      <motion.div
-        animate="animate"
+      <div
         className="relative z-10 mx-auto w-full max-w-5xl"
-        initial="initial"
-        variants={imageVariants}
+        data-gsap-hero-visual
       >
         <div className="marketing-surface overflow-hidden border border-border/60 bg-surface shadow-xl shadow-foreground/5 dark:shadow-black/30">
           {/* Window chrome */}
@@ -120,7 +89,7 @@ export function Hero() {
             <div className="absolute inset-4 rounded-xl border border-dashed border-border/60 bg-background/60 sm:inset-5 md:inset-6" />
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

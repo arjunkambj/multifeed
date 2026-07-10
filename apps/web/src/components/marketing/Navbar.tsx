@@ -3,7 +3,6 @@
 import { buttonVariants } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
-import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 
 import Logo from "@/components/layout/Logo";
@@ -55,13 +54,11 @@ export function Navbar() {
   }, [isMenuOpen]);
 
   return (
-    <motion.header
-      animate={{ opacity: 1, y: 0 }}
+    <header
       className={`marketing-nav sticky top-2 z-50 mx-auto mt-2 w-[min(48rem,calc(100%-2rem))] border border-border/50 backdrop-blur-lg transition-colors duration-300 dark:shadow-lg dark:shadow-black/20 ${
         isScrolled ? "bg-white/55 dark:bg-surface/80" : "bg-surface/95"
       }`}
-      initial={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      data-gsap-nav
     >
       <nav className="grid h-14 w-full grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 sm:px-5">
         <div className="justify-self-start">
@@ -128,6 +125,6 @@ export function Navbar() {
           </div>
         </div>
       )}
-    </motion.header>
+    </header>
   );
 }
