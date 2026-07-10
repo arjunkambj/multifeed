@@ -14,6 +14,13 @@ const pendingOption = v.object({
   avatarUrl: v.optional(v.string()),
 });
 
+type PendingOption = {
+  id: string;
+  label: string;
+  username?: string;
+  avatarUrl?: string;
+};
+
 /** Same rules as web sanitizeReturnTo — keep relative, same-app paths only. */
 function sanitizeReturnTo(value: string | undefined): string | undefined {
   if (!value) return undefined;
@@ -207,12 +214,7 @@ export const takePending = mutation({
     }
 
     const accessToken = await decryptSecret(session.encryptedPendingToken);
-    const options = (session.pendingOptions ?? []) as Array<{
-      id: string;
-      label: string;
-      username?: string;
-      avatarUrl?: string;
-    }>;
+    const options = (session.pendingOptions ?? []) as PendingOption[];
     const option = options.find((candidate) => candidate.id === args.optionId);
     if (!option) {
       throw new Error("OAuth account option not found");

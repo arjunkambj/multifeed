@@ -104,7 +104,7 @@ export const PLATFORM_META: Record<string, PlatformMeta> = {
   },
 };
 
-export const CONNECTABLE_PLATFORMS = [
+export const CONNECTABLE_PLATFORMS: OAuthPlatform[] = [
   "facebook",
   "instagram",
   "threads",
@@ -115,7 +115,7 @@ export const CONNECTABLE_PLATFORMS = [
   "x",
   "tiktok",
   "snapchat",
-] as const satisfies readonly OAuthPlatform[];
+];
 
 export function platformLabel(platform: string) {
   return PLATFORM_META[platform]?.label ?? platform;

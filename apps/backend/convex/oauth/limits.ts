@@ -1,6 +1,5 @@
 import type { MutationCtx, QueryCtx } from "../_generated/server";
-
-const ACTIVE = new Set(["active", "renewed", "updated", "plan_changed"]);
+import { ACTIVE_BILLING, latestForTeam } from "../billing";
 
 const PLAN_LIMITS: Record<string, number> = {
   creator: 15,
@@ -15,23 +14,9 @@ export async function accountLimitForTeam(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
 ) {
-  const rows = await Promise.all(
-    ["active", "renewed", "updated", "plan_changed"].map((status) =>
-      ctx.db
-        .query("billingSubscriptions")
-        .withIndex("by_team_status_updated", (q) =>
-          q.eq("teamId", teamId).eq("status", status as "active"),
-        )
-        .order("desc")
-        .first(),
-    ),
-  );
+  const sub = await latestForTeam(ctx, teamId);
 
-  const sub = rows
-    .flatMap((r) => (r ? [r] : []))
-    .sort((a, b) => b.updatedAt - a.updatedAt)[0];
-
-  if (!sub || !ACTIVE.has(sub.status)) {
+  if (!sub || !ACTIVE_BILLING.has(sub.status)) {
     // Soft default for local/dev. Set BILLING_SOFT_LIMITS=false in production
     // to require an active subscription before connecting accounts.
     if (process.env.BILLING_SOFT_LIMITS === "false") {

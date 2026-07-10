@@ -8,26 +8,17 @@ import {
 } from "./_generated/server";
 import { requireUser } from "./hexclave/auth";
 import {
-  platform as platformValidator,
-  platformSettings as platformSettingsValidator,
-  postKind as postKindValidator,
+  platformSettings,
+  postKind,
+  postStatus,
 } from "./schema";
-
-const postStatus = v.union(
-  v.literal("draft"),
-  v.literal("scheduled"),
-  v.literal("publishing"),
-  v.literal("published"),
-  v.literal("failed"),
-  v.literal("archived"),
-);
 
 const targetInput = v.object({
   connectedAccountId: v.id("connectedAccounts"),
   bodyOverride: v.optional(v.string()),
   firstComment: v.optional(v.string()),
   referenceUrl: v.optional(v.string()),
-  platformSettings: v.optional(platformSettingsValidator),
+  platformSettings: v.optional(platformSettings),
 });
 
 const CALENDAR_COLORS = [
@@ -121,6 +112,14 @@ function accountSupportsKind(
   return account.capabilities.includes(kind);
 }
 
+type TargetInput = {
+  connectedAccountId: Id<"connectedAccounts">;
+  bodyOverride?: string;
+  firstComment?: string;
+  referenceUrl?: string;
+  platformSettings?: Doc<"postTargets">["platformSettings"];
+};
+
 async function replaceTargets(
   ctx: MutationCtx,
   input: {
@@ -129,13 +128,7 @@ async function replaceTargets(
     status: Doc<"postTargets">["status"];
     kind: Doc<"posts">["kind"];
     scheduledFor?: number;
-    targets: Array<{
-      connectedAccountId: Id<"connectedAccounts">;
-      bodyOverride?: string;
-      firstComment?: string;
-      referenceUrl?: string;
-      platformSettings?: Doc<"postTargets">["platformSettings"];
-    }>;
+    targets: TargetInput[];
     mediaAssets: Doc<"mediaAssets">[];
   },
 ) {
@@ -234,7 +227,7 @@ export const create = mutation({
   args: {
     title: v.optional(v.string()),
     body: v.string(),
-    kind: postKindValidator,
+    kind: postKind,
     notes: v.optional(v.string()),
     timezone: v.string(),
     scheduledFor: v.optional(v.number()),
@@ -264,11 +257,10 @@ export const create = mutation({
 
     // "Post now" → schedule for immediate publish once a worker exists.
     // Storing as `scheduled` keeps the post visible in list/calendar UIs.
-    let status: Doc<"posts">["status"] = args.status;
+    const status = args.status === "publishing" ? "scheduled" : args.status;
     let scheduledFor = args.scheduledFor;
 
     if (args.status === "publishing") {
-      status = "scheduled";
       scheduledFor = now;
     } else if (args.status === "scheduled") {
       if (!scheduledFor) {
@@ -283,9 +275,7 @@ export const create = mutation({
       throw new Error("Select at least one account");
     }
 
-    if (status === "draft") {
-      // keep optional scheduledFor on drafts
-    } else if (scheduledFor == null) {
+    if (status !== "draft" && scheduledFor == null) {
       scheduledFor = now;
     }
 
@@ -326,7 +316,7 @@ export const update = mutation({
     postId: v.id("posts"),
     title: v.optional(v.string()),
     body: v.optional(v.string()),
-    kind: v.optional(postKindValidator),
+    kind: v.optional(postKind),
     notes: v.optional(v.string()),
     timezone: v.optional(v.string()),
     scheduledFor: v.optional(v.number()),
@@ -572,6 +562,3 @@ export const listScheduled = query({
     return await Promise.all(posts.map((p) => enrichPost(ctx, p)));
   },
 });
-
-// keep platform validator referenced for future filters
-void platformValidator;

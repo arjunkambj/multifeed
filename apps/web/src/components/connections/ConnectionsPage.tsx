@@ -12,8 +12,8 @@ import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
   CONNECTABLE_PLATFORMS,
   PLATFORM_META,
-} from "@/components/connections/platform-meta";
-import type { OAuthPlatform } from "@/components/connections/types";
+  type OAuthPlatform,
+} from "@/lib/platform-meta";
 import { OAUTH_ERROR_MESSAGES, oauthErrorMessage } from "@/lib/oauth/env";
 
 const statusDot: Record<string, string> = {

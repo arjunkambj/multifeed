@@ -1,13 +1,13 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-const planKey = v.union(
+export const planKey = v.union(
   v.literal("creator"),
   v.literal("growth"),
   v.literal("agency"),
 );
 
-const billingInterval = v.union(v.literal("month"), v.literal("year"));
+export const billingInterval = v.union(v.literal("month"), v.literal("year"));
 
 const billingStatus = v.union(
   v.literal("pending"),
@@ -36,7 +36,7 @@ export const platform = v.union(
   v.literal("reddit"),
 );
 
-const postStatus = v.union(
+export const postStatus = v.union(
   v.literal("draft"),
   v.literal("scheduled"),
   v.literal("publishing"),
@@ -101,7 +101,7 @@ const metricSyncStatus = v.union(
   v.literal("failed"),
 );
 
-const capability = v.union(
+export const capability = v.union(
   v.literal("text"),
   v.literal("image"),
   v.literal("video"),
@@ -118,7 +118,7 @@ const accountStatus = v.union(
   v.literal("pending_selection"),
 );
 
-const tokenType = v.union(
+export const tokenType = v.union(
   v.literal("user"),
   v.literal("page"),
   v.literal("organization"),

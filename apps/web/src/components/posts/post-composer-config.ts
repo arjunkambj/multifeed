@@ -66,12 +66,7 @@ export const POST_FORMATS = [
     description: "Vertical image or video",
     icon: "hugeicons:camera-01",
   },
-] as const satisfies ReadonlyArray<{
-  id: PostKind;
-  label: string;
-  description: string;
-  icon: string;
-}>;
+] as const;
 
 export const formatLabel = (kind: PostKind) =>
   POST_FORMATS.find((format) => format.id === kind)?.label ?? "Post";

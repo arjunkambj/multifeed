@@ -1,26 +1,15 @@
 import { v } from "convex/values";
-import type { Id } from "../_generated/dataModel";
+import type { Doc } from "../_generated/dataModel";
 import { mutation, query, type MutationCtx } from "../_generated/server";
 import { requireUser } from "../hexclave/auth";
-import { platform as platformValidator } from "../schema";
+import {
+  capability,
+  platform as platformValidator,
+  tokenType,
+} from "../schema";
 import { encryptSecret } from "./crypto";
 import { assertCanConnect } from "./limits";
 import { requireOAuthServer } from "./server";
-
-const capability = v.union(
-  v.literal("text"),
-  v.literal("image"),
-  v.literal("video"),
-  v.literal("carousel"),
-  v.literal("analytics"),
-  v.literal("inbox"),
-);
-
-const tokenType = v.union(
-  v.literal("user"),
-  v.literal("page"),
-  v.literal("organization"),
-);
 
 const OAUTH_PLATFORMS = [
   "x",
@@ -35,14 +24,24 @@ const OAUTH_PLATFORMS = [
   "snapchat",
 ] as const;
 
-function stripSecrets<T extends Record<string, unknown>>(doc: T) {
-  const copy = { ...doc } as T & {
-    encryptedAccessToken?: string;
-    encryptedRefreshToken?: string;
-  };
-  delete copy.encryptedAccessToken;
-  delete copy.encryptedRefreshToken;
-  return copy;
+type PendingOption = {
+  id: string;
+  label: string;
+  username?: string;
+  avatarUrl?: string;
+};
+
+type PublicAccount = Omit<
+  Doc<"connectedAccounts">,
+  "encryptedAccessToken" | "encryptedRefreshToken"
+>;
+
+/** Drop token fields before returning accounts to the client. */
+function stripSecrets(doc: Doc<"connectedAccounts">): PublicAccount {
+  const safe = { ...doc };
+  delete safe.encryptedAccessToken;
+  delete safe.encryptedRefreshToken;
+  return safe;
 }
 
 async function upsertAccount(
@@ -50,15 +49,13 @@ async function upsertAccount(
   input: {
     teamId: string;
     userId: string;
-    platform: (typeof OAUTH_PLATFORMS)[number] | string;
+    platform: Doc<"connectedAccounts">["platform"];
     providerAccountId: string;
     username: string;
     displayName?: string;
     avatarUrl?: string;
-    tokenType?: "user" | "page" | "organization";
-    capabilities: Array<
-      "text" | "image" | "video" | "carousel" | "analytics" | "inbox"
-    >;
+    tokenType?: Doc<"connectedAccounts">["tokenType"];
+    capabilities: Doc<"connectedAccounts">["capabilities"];
     scopes: string[];
     encryptedAccessToken: string;
     /** Only set when a new refresh token was provided — omit to preserve. */
@@ -68,14 +65,14 @@ async function upsertAccount(
     refreshTokenExpiresAt?: number;
     metadata?: unknown;
   },
-): Promise<Id<"connectedAccounts">> {
+) {
   const now = Date.now();
   const existing = await ctx.db
     .query("connectedAccounts")
     .withIndex("by_team_provider", (q) =>
       q
         .eq("teamId", input.teamId)
-        .eq("platform", input.platform as never)
+        .eq("platform", input.platform)
         .eq("providerAccountId", input.providerAccountId),
     )
     .unique();
@@ -97,25 +94,25 @@ async function upsertAccount(
   };
 
   if (existing) {
-    // Build patch so optional secrets are preserved when omitted.
     // Convex removes fields set to `undefined` — never pass undefined refresh.
-    const patch: Record<string, unknown> = {
+    await ctx.db.patch(existing._id, {
       ...baseFields,
-      errorMessage: undefined, // clear prior errors on successful reconnect
-    };
-    if (input.hasNewRefreshToken) {
-      patch.encryptedRefreshToken = input.encryptedRefreshToken;
-      patch.refreshTokenExpiresAt = input.refreshTokenExpiresAt;
-    } else if (input.refreshTokenExpiresAt != null) {
-      patch.refreshTokenExpiresAt = input.refreshTokenExpiresAt;
-    }
-    await ctx.db.patch(existing._id, patch);
+      errorMessage: undefined,
+      ...(input.hasNewRefreshToken
+        ? {
+            encryptedRefreshToken: input.encryptedRefreshToken,
+            refreshTokenExpiresAt: input.refreshTokenExpiresAt,
+          }
+        : input.refreshTokenExpiresAt != null
+          ? { refreshTokenExpiresAt: input.refreshTokenExpiresAt }
+          : {}),
+    });
     return existing._id;
   }
 
   return await ctx.db.insert("connectedAccounts", {
     teamId: input.teamId,
-    platform: input.platform as never,
+    platform: input.platform,
     providerAccountId: input.providerAccountId,
     ...baseFields,
     encryptedRefreshToken: input.encryptedRefreshToken,
@@ -179,10 +176,7 @@ export const save = mutation({
     refreshTokenExpiresAt: v.optional(v.number()),
     metadata: v.optional(v.any()),
   },
-  handler: async (
-    ctx,
-    args,
-  ): Promise<{ accountId: Id<"connectedAccounts"> }> => {
+  handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
 
@@ -201,8 +195,7 @@ export const save = mutation({
     }
 
     const encryptedAccessToken = await encryptSecret(args.accessToken);
-    const hasNewRefreshToken =
-      args.refreshToken != null && args.refreshToken.length > 0;
+    const hasNewRefreshToken = Boolean(args.refreshToken);
     const encryptedRefreshToken = hasNewRefreshToken
       ? await encryptSecret(args.refreshToken!)
       : undefined;
@@ -306,12 +299,7 @@ export const getPendingSelection = query({
     return {
       state: session.state,
       platform: session.platform,
-      options: session.pendingOptions as Array<{
-        id: string;
-        label: string;
-        username?: string;
-        avatarUrl?: string;
-      }> | null,
+      options: (session.pendingOptions as PendingOption[] | undefined) ?? null,
     };
   },
 });

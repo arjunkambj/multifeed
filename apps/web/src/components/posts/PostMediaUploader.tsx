@@ -18,34 +18,38 @@ const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
 const wait = (milliseconds: number) =>
   new Promise((resolve) => setTimeout(resolve, milliseconds));
 
+type MediaMeta = {
+  width?: number;
+  height?: number;
+  durationMs?: number;
+};
+
 const mediaMetadata = (file: File, previewUrl: string) =>
-  new Promise<{ width?: number; height?: number; durationMs?: number }>(
-    (resolve) => {
-      if (file.type.startsWith("image/")) {
-        const image = new window.Image();
-        image.onload = () =>
-          resolve({ width: image.naturalWidth, height: image.naturalHeight });
-        image.onerror = () => resolve({});
-        image.src = previewUrl;
-        return;
-      }
-      if (file.type.startsWith("video/")) {
-        const video = document.createElement("video");
-        video.onloadedmetadata = () =>
-          resolve({
-            width: video.videoWidth,
-            height: video.videoHeight,
-            durationMs: Number.isFinite(video.duration)
-              ? Math.round(video.duration * 1000)
-              : undefined,
-          });
-        video.onerror = () => resolve({});
-        video.src = previewUrl;
-        return;
-      }
-      resolve({});
-    },
-  );
+  new Promise<MediaMeta>((resolve) => {
+    if (file.type.startsWith("image/")) {
+      const image = new window.Image();
+      image.onload = () =>
+        resolve({ width: image.naturalWidth, height: image.naturalHeight });
+      image.onerror = () => resolve({});
+      image.src = previewUrl;
+      return;
+    }
+    if (file.type.startsWith("video/")) {
+      const video = document.createElement("video");
+      video.onloadedmetadata = () =>
+        resolve({
+          width: video.videoWidth,
+          height: video.videoHeight,
+          durationMs: Number.isFinite(video.duration)
+            ? Math.round(video.duration * 1000)
+            : undefined,
+        });
+      video.onerror = () => resolve({});
+      video.src = previewUrl;
+      return;
+    }
+    resolve({});
+  });
 
 type Props = {
   kind: Exclude<PostKind, "text">;
@@ -72,7 +76,7 @@ export function PostMediaUploader({
   const confirmUpload = async (
     key: string,
     file: File,
-    metadata: Awaited<ReturnType<typeof mediaMetadata>>,
+    metadata: MediaMeta,
   ) => {
     let lastError: unknown;
     for (let attempt = 0; attempt < 12; attempt += 1) {

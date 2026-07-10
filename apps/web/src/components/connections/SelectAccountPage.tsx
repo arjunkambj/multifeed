@@ -8,8 +8,10 @@ import { api } from "@convex/_generated/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
-import { PLATFORM_META } from "@/components/connections/platform-meta";
-import type { OAuthPlatform } from "@/components/connections/types";
+import {
+  PLATFORM_META,
+  type OAuthPlatform,
+} from "@/lib/platform-meta";
 
 function safeSameOriginPath(next: string): string | null {
   // Prefer relative paths from the API.

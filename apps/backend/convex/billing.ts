@@ -8,16 +8,15 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { requireUser } from "./hexclave/auth";
+import { billingInterval, planKey } from "./schema";
 
-const planKey = v.union(
-  v.literal("creator"),
-  v.literal("growth"),
-  v.literal("agency"),
-);
-
-const billingInterval = v.union(v.literal("month"), v.literal("year"));
-
-const ACTIVE = new Set(["active", "renewed", "updated", "plan_changed"]);
+/** Subscription statuses that grant product access. */
+export const ACTIVE_BILLING = new Set([
+  "active",
+  "renewed",
+  "updated",
+  "plan_changed",
+]);
 
 const STATUSES = [
   "pending",
@@ -31,7 +30,9 @@ const STATUSES = [
   "expired",
 ] as const;
 
-const EVENT_STATUS: Record<string, (typeof STATUSES)[number]> = {
+type BillingStatus = (typeof STATUSES)[number];
+
+const EVENT_STATUS: Record<string, BillingStatus> = {
   "subscription.active": "active",
   "subscription.updated": "updated",
   "subscription.renewed": "renewed",
@@ -69,12 +70,15 @@ function asInterval(value: unknown) {
 }
 
 function statusRank(status: string) {
-  if (ACTIVE.has(status)) return 2;
+  if (ACTIVE_BILLING.has(status)) return 2;
   if (status === "pending") return 1;
   return 0;
 }
 
-async function latestForTeam(ctx: QueryCtx | MutationCtx, teamId: string) {
+export async function latestForTeam(
+  ctx: QueryCtx | MutationCtx,
+  teamId: string,
+) {
   const rows = await Promise.all(
     STATUSES.map((status) =>
       ctx.db
@@ -114,7 +118,7 @@ export async function hasActive(
   teamId: string,
 ) {
   const sub = await latestForTeam(ctx, teamId);
-  return sub ? ACTIVE.has(sub.status) : false;
+  return sub ? ACTIVE_BILLING.has(sub.status) : false;
 }
 
 export async function hasPlan(
@@ -124,7 +128,7 @@ export async function hasPlan(
 ) {
   const sub = await latestForTeam(ctx, teamId);
   const plan = asPlan(sub?.planKey);
-  if (!sub || !plan || !ACTIVE.has(sub.status)) return false;
+  if (!sub || !plan || !ACTIVE_BILLING.has(sub.status)) return false;
   return PLAN_RANK[plan] >= PLAN_RANK[minimum];
 }
 
@@ -219,7 +223,7 @@ export const handleWebhook = internalMutation({
 
 async function upsertSubscription(
   ctx: MutationCtx,
-  status: (typeof STATUSES)[number],
+  status: BillingStatus,
   event: Record<string, unknown>,
   rawEventTimestamp: number | undefined,
 ) {
@@ -262,7 +266,7 @@ async function upsertSubscription(
     existing?.currentPeriodEnd;
 
   let accessEndsAt = existing?.accessEndsAt;
-  if (ACTIVE.has(status)) {
+  if (ACTIVE_BILLING.has(status)) {
     accessEndsAt = undefined;
   } else if (status === "expired" || status === "failed") {
     accessEndsAt = Date.now();
