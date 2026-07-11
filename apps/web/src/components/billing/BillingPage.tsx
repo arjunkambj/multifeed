@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button, Spinner, Switch } from "@heroui/react";
+import { Button, Spinner, Switch, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -43,7 +43,6 @@ function formatDate(value?: number) {
 export function BillingPage() {
   const [interval, setInterval] = useState<BillingInterval>("month");
   const [checkingOut, setCheckingOut] = useState<PlanKey | null>(null);
-  const [error, setError] = useState("");
   const subscription = useQuery(api.billing.getSubscription, {});
   const isYearly = interval === "year";
   const activePlan = useMemo(
@@ -53,7 +52,6 @@ export function BillingPage() {
 
   const startCheckout = async (planKey: PlanKey) => {
     setCheckingOut(planKey);
-    setError("");
 
     try {
       const response = await fetch("/api/billing/checkout", {
@@ -73,7 +71,9 @@ export function BillingPage() {
       window.location.assign(payload.checkoutUrl);
     } catch (err) {
       setCheckingOut(null);
-      setError(err instanceof Error ? err.message : String(err));
+      toast.danger(err instanceof Error ? err.message : String(err), {
+        timeout: 3000,
+      });
     }
   };
 
@@ -147,12 +147,6 @@ export function BillingPage() {
           </button>
         </div>
       </div>
-
-      {error && (
-        <div className="rounded-2xl border border-danger/20 bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
 
       <section className="grid gap-4 lg:grid-cols-3 lg:gap-5">
         {PLANS.map((plan) => {

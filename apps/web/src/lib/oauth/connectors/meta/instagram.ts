@@ -1,3 +1,4 @@
+import { requireEnv } from "../../env";
 import type { AccountProfile, SocialConnector, TokenBundle } from "../types";
 import {
   metaAuthorizeUrl,
@@ -24,7 +25,10 @@ export const instagramConnector: SocialConnector = {
   requiresPkce: false,
 
   buildAuthorizeUrl(input) {
-    return metaAuthorizeUrl({ ...input, scopes: SCOPES });
+    return metaAuthorizeUrl({
+      ...input,
+      configurationId: requireEnv("META_INSTAGRAM_CONFIG_ID"),
+    });
   },
 
   async exchangeCode(input) {
@@ -50,24 +54,28 @@ export const instagramConnector: SocialConnector = {
     );
   },
 
-  async listSelectableAccounts(accessToken) {
+  async listAccounts(accessToken) {
     const pages = await metaListPages(accessToken);
     return pagesToInstagramOptions(pages);
   },
 
-  async resolveSelectedAccount(accessToken, optionId) {
-    const pages = await metaListPages(accessToken);
-    const page = pages.find(
-      (p) => p.instagram_business_account?.id === optionId,
-    );
-    if (!page?.instagram_business_account || !page.access_token) {
+  async resolveAccount(userTokens, optionId, option) {
+    const pageAccessToken = option?.metadata?.pageAccessToken;
+    const pageId = option?.metadata?.pageId;
+    const igUserId = option?.metadata?.igUserId;
+    if (
+      option?.id !== optionId ||
+      typeof pageAccessToken !== "string" ||
+      typeof pageId !== "string" ||
+      igUserId !== optionId
+    ) {
       throw new Error("Instagram account not found");
     }
 
-    const igId = page.instagram_business_account.id;
-    const profile = await metaFetchIgProfile(page.access_token, igId);
+    const profile = await metaFetchIgProfile(pageAccessToken, igUserId);
     const tokens: TokenBundle = {
-      accessToken: page.access_token,
+      accessToken: pageAccessToken,
+      expiresAt: userTokens.expiresAt,
       scopes: SCOPES,
       tokenType: "page",
     };
@@ -75,9 +83,9 @@ export const instagramConnector: SocialConnector = {
       ...profile,
       metadata: {
         ...profile.metadata,
-        pageId: page.id,
-        pageName: page.name,
-        igUserId: igId,
+        pageId,
+        pageName: option.label,
+        igUserId,
       },
     };
     return { tokens, profile: fullProfile };

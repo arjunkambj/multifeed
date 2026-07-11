@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toast } from "@heroui/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ThemeProvider } from "next-themes";
 import { clientEnv } from "@/env";
@@ -24,6 +25,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ConvexProvider client={convex}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <Toast.Provider />
           {children}
         </ThemeProvider>
       </ConvexProvider>

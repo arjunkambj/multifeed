@@ -7,11 +7,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { requireUser } from "./hexclave/auth";
-import {
-  platformSettings,
-  postKind,
-  postStatus,
-} from "./schema";
+import { platformSettings, postKind, postStatus } from "./schema";
 
 const targetInput = v.object({
   connectedAccountId: v.id("connectedAccounts"),
@@ -32,6 +28,21 @@ const CALENDAR_COLORS = [
   "#059669",
 ];
 const MAX_TARGETS_PER_POST = 100;
+
+const POST_KIND_PLATFORMS = {
+  text: ["facebook", "linkedin", "threads", "x"],
+  image: ["facebook", "instagram", "linkedin", "threads", "x", "tiktok"],
+  video: [
+    "facebook",
+    "instagram",
+    "threads",
+    "tiktok",
+    "youtube",
+    "linkedin",
+    "x",
+  ],
+  story: ["facebook", "instagram"],
+} as const;
 
 function colorForIndex(i: number) {
   return CALENDAR_COLORS[i % CALENDAR_COLORS.length]!;
@@ -99,15 +110,17 @@ function accountSupportsKind(
   kind: Doc<"posts">["kind"],
   assets: Doc<"mediaAssets">[],
 ) {
+  if (
+    !POST_KIND_PLATFORMS[kind].some((platform) => platform === account.platform)
+  ) {
+    return false;
+  }
+
   if (kind === "story") {
     const assetKind = assets[0]?.kind;
     const mediaKind =
       assetKind === "image" || assetKind === "video" ? assetKind : undefined;
-    return (
-      ["facebook", "instagram", "snapchat"].includes(account.platform) &&
-      mediaKind != null &&
-      account.capabilities.includes(mediaKind)
-    );
+    return mediaKind != null && account.capabilities.includes(mediaKind);
   }
   return account.capabilities.includes(kind);
 }

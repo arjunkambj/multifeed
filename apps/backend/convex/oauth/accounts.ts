@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { type Infer, v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { mutation, query, type MutationCtx } from "../_generated/server";
 import { requireUser } from "../hexclave/auth";
@@ -11,25 +11,25 @@ import { encryptSecret } from "./crypto";
 import { assertCanConnect } from "./limits";
 import { requireOAuthServer } from "./server";
 
-const OAUTH_PLATFORMS = [
-  "x",
-  "instagram",
-  "facebook",
-  "threads",
-  "linkedin",
-  "youtube",
-  "pinterest",
-  "reddit",
-  "tiktok",
-  "snapchat",
-] as const;
+const MAX_ACCOUNTS_PER_CONNECTION = 100;
 
-type PendingOption = {
-  id: string;
-  label: string;
-  username?: string;
-  avatarUrl?: string;
-};
+const accountInput = v.object({
+  platform: platformValidator,
+  providerAccountId: v.string(),
+  username: v.string(),
+  displayName: v.optional(v.string()),
+  avatarUrl: v.optional(v.string()),
+  tokenType: v.optional(tokenType),
+  capabilities: v.array(capability),
+  scopes: v.array(v.string()),
+  accessToken: v.string(),
+  refreshToken: v.optional(v.string()),
+  tokenExpiresAt: v.optional(v.number()),
+  refreshTokenExpiresAt: v.optional(v.number()),
+  metadata: v.optional(v.any()),
+});
+
+type AccountInput = Infer<typeof accountInput>;
 
 type PublicAccount = Omit<
   Doc<"connectedAccounts">,
@@ -46,37 +46,17 @@ function stripSecrets(doc: Doc<"connectedAccounts">): PublicAccount {
 
 async function upsertAccount(
   ctx: MutationCtx,
-  input: {
+  existing: Doc<"connectedAccounts"> | null,
+  input: AccountInput & {
     teamId: string;
     userId: string;
-    platform: Doc<"connectedAccounts">["platform"];
-    providerAccountId: string;
-    username: string;
-    displayName?: string;
-    avatarUrl?: string;
-    tokenType?: Doc<"connectedAccounts">["tokenType"];
-    capabilities: Doc<"connectedAccounts">["capabilities"];
-    scopes: string[];
     encryptedAccessToken: string;
     /** Only set when a new refresh token was provided — omit to preserve. */
     encryptedRefreshToken?: string;
     hasNewRefreshToken: boolean;
-    tokenExpiresAt?: number;
-    refreshTokenExpiresAt?: number;
-    metadata?: unknown;
   },
 ) {
   const now = Date.now();
-  const existing = await ctx.db
-    .query("connectedAccounts")
-    .withIndex("by_team_provider", (q) =>
-      q
-        .eq("teamId", input.teamId)
-        .eq("platform", input.platform)
-        .eq("providerAccountId", input.providerAccountId),
-    )
-    .unique();
-
   const baseFields = {
     username: input.username,
     displayName: input.displayName,
@@ -110,7 +90,7 @@ async function upsertAccount(
     return existing._id;
   }
 
-  return await ctx.db.insert("connectedAccounts", {
+  return ctx.db.insert("connectedAccounts", {
     teamId: input.teamId,
     platform: input.platform,
     providerAccountId: input.providerAccountId,
@@ -121,13 +101,6 @@ async function upsertAccount(
   });
 }
 
-export const listPlatforms = query({
-  args: {},
-  handler: async () => {
-    return OAUTH_PLATFORMS.map((platform) => ({ platform }));
-  },
-});
-
 /** Team-scoped connected accounts (never includes tokens). */
 export const list = query({
   args: {
@@ -136,12 +109,13 @@ export const list = query({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const teamId = user.selectedTeamId;
+    const selectedPlatform = args.platform;
 
-    if (args.platform) {
+    if (selectedPlatform) {
       const rows = await ctx.db
         .query("connectedAccounts")
         .withIndex("by_team_provider", (q) =>
-          q.eq("teamId", teamId).eq("platform", args.platform!),
+          q.eq("teamId", teamId).eq("platform", selectedPlatform),
         )
         .collect();
       return rows.map(stripSecrets);
@@ -156,70 +130,88 @@ export const list = query({
 });
 
 /**
- * Save or update a connected account. Encrypts tokens at rest.
+ * Atomically save or update a bounded set of connected accounts.
  * Called from Next.js via fetchMutation only — never pass tokens to the browser.
  */
-export const save = mutation({
+export const saveMany = mutation({
   args: {
     serverSecret: v.string(),
-    platform: platformValidator,
-    providerAccountId: v.string(),
-    username: v.string(),
-    displayName: v.optional(v.string()),
-    avatarUrl: v.optional(v.string()),
-    tokenType: v.optional(tokenType),
-    capabilities: v.array(capability),
-    scopes: v.array(v.string()),
-    accessToken: v.string(),
-    refreshToken: v.optional(v.string()),
-    tokenExpiresAt: v.optional(v.number()),
-    refreshTokenExpiresAt: v.optional(v.number()),
-    metadata: v.optional(v.any()),
+    accounts: v.array(accountInput),
   },
   handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
 
-    const existing = await ctx.db
-      .query("connectedAccounts")
-      .withIndex("by_team_provider", (q) =>
-        q
-          .eq("teamId", user.selectedTeamId)
-          .eq("platform", args.platform)
-          .eq("providerAccountId", args.providerAccountId),
-      )
-      .unique();
-
-    if (!existing) {
-      await assertCanConnect(ctx, user.selectedTeamId);
+    if (
+      args.accounts.length === 0 ||
+      args.accounts.length > MAX_ACCOUNTS_PER_CONNECTION
+    ) {
+      throw new Error(
+        `A connection must contain between 1 and ${MAX_ACCOUNTS_PER_CONNECTION} accounts`,
+      );
     }
 
-    const encryptedAccessToken = await encryptSecret(args.accessToken);
-    const hasNewRefreshToken = Boolean(args.refreshToken);
-    const encryptedRefreshToken = hasNewRefreshToken
-      ? await encryptSecret(args.refreshToken!)
-      : undefined;
+    const identities = args.accounts.map(
+      ({ platform, providerAccountId }) => `${platform}:${providerAccountId}`,
+    );
+    if (new Set(identities).size !== identities.length) {
+      throw new Error("A connection cannot contain duplicate accounts");
+    }
 
-    const accountId = await upsertAccount(ctx, {
-      teamId: user.selectedTeamId,
-      userId: user.id,
-      platform: args.platform,
-      providerAccountId: args.providerAccountId,
-      username: args.username,
-      displayName: args.displayName,
-      avatarUrl: args.avatarUrl,
-      tokenType: args.tokenType,
-      capabilities: args.capabilities,
-      scopes: args.scopes,
-      encryptedAccessToken,
-      encryptedRefreshToken,
-      hasNewRefreshToken,
-      tokenExpiresAt: args.tokenExpiresAt,
-      refreshTokenExpiresAt: args.refreshTokenExpiresAt,
-      metadata: args.metadata,
-    });
+    const accountStates = await Promise.all(
+      args.accounts.map(async (account) => ({
+        account,
+        existing: await ctx.db
+          .query("connectedAccounts")
+          .withIndex("by_team_provider", (q) =>
+            q
+              .eq("teamId", user.selectedTeamId)
+              .eq("platform", account.platform)
+              .eq("providerAccountId", account.providerAccountId),
+          )
+          .unique(),
+      })),
+    );
 
-    return { accountId };
+    const additionalAccountCount = accountStates.filter(
+      ({ existing }) => existing === null || existing.status === "revoked",
+    ).length;
+    if (additionalAccountCount > 0) {
+      await assertCanConnect(ctx, user.selectedTeamId, additionalAccountCount);
+    }
+
+    const encryptedAccounts = await Promise.all(
+      accountStates.map(async ({ account, existing }) => {
+        const encryptedAccessToken = await encryptSecret(account.accessToken);
+        const encryptedRefreshToken = account.refreshToken
+          ? await encryptSecret(account.refreshToken)
+          : undefined;
+
+        return {
+          account,
+          existing,
+          encryptedAccessToken,
+          encryptedRefreshToken,
+          hasNewRefreshToken: encryptedRefreshToken !== undefined,
+        };
+      }),
+    );
+
+    const accountIds = [];
+    for (const encrypted of encryptedAccounts) {
+      accountIds.push(
+        await upsertAccount(ctx, encrypted.existing, {
+          ...encrypted.account,
+          teamId: user.selectedTeamId,
+          userId: user.id,
+          encryptedAccessToken: encrypted.encryptedAccessToken,
+          encryptedRefreshToken: encrypted.encryptedRefreshToken,
+          hasNewRefreshToken: encrypted.hasNewRefreshToken,
+        }),
+      );
+    }
+
+    return { accountIds };
   },
 });
 
@@ -270,36 +262,5 @@ export const disconnect = mutation({
 
     await ctx.db.delete(args.accountId);
     return { ok: true as const };
-  },
-});
-
-/** Options only for Meta (etc.) account picker — no tokens. */
-export const getPendingSelection = query({
-  args: {
-    state: v.string(),
-    now: v.number(),
-  },
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    const session = await ctx.db
-      .query("oauthSessions")
-      .withIndex("by_state", (q) => q.eq("state", args.state))
-      .unique();
-
-    if (
-      !session ||
-      session.teamId !== user.selectedTeamId ||
-      session.userId !== user.id ||
-      session.phase !== "select_account" ||
-      session.expiresAt < args.now
-    ) {
-      return null;
-    }
-
-    return {
-      state: session.state,
-      platform: session.platform,
-      options: (session.pendingOptions as PendingOption[] | undefined) ?? null,
-    };
   },
 });

@@ -3,12 +3,12 @@
 import { useState } from "react";
 import {
   Button,
-  FieldError,
   Input,
   Label,
   Modal,
   Spinner,
   TextField,
+  toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useUser } from "@hexclave/next";
@@ -19,15 +19,13 @@ export function PasswordModal() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [status, setStatus] = useState<"idle" | "saving">("idle");
-  const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const reset = () => {
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-    setError("");
-    setStatus("idle");
+    setIsSaving(false);
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -37,18 +35,20 @@ export function PasswordModal() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
-
     if (newPassword.length < 8) {
-      setError("Use at least 8 characters for your new password.");
+      toast.danger("Use at least 8 characters for your new password.", {
+        timeout: 3000,
+      });
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("New password and confirmation must match.");
+      toast.danger("New password and confirmation must match.", {
+        timeout: 3000,
+      });
       return;
     }
 
-    setStatus("saving");
+    setIsSaving(true);
     try {
       if (user.hasPassword) {
         await user.updatePassword({
@@ -60,15 +60,16 @@ export function PasswordModal() {
       }
       setIsOpen(false);
       reset();
+      toast.success("Password updated.", { timeout: 3000 });
     } catch (caught) {
-      setStatus("idle");
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setIsSaving(false);
+      toast.danger(caught instanceof Error ? caught.message : String(caught), {
+        timeout: 3000,
+      });
     }
   };
 
   const actionLabel = user.hasPassword ? "Change password" : "Set password";
-  const isSaving = status === "saving";
-
   return (
     <Modal isOpen={isOpen} onOpenChange={handleOpenChange}>
       <Button type="button" variant="tertiary">
@@ -145,12 +146,6 @@ export function PasswordModal() {
                     variant="secondary"
                   />
                 </TextField>
-
-                {error && (
-                  <FieldError className="rounded-xl bg-danger/10 px-3 py-2 text-sm">
-                    {error}
-                  </FieldError>
-                )}
               </Modal.Body>
 
               <Modal.Footer>

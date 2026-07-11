@@ -51,7 +51,7 @@ export function PlatformSettingsFields({
   onChange,
 }: Props) {
   const placements = placementOptions(platform, kind);
-  const showTitle = ["youtube", "reddit", "pinterest"].includes(platform);
+  const showTitle = platform === "youtube";
   const showVisibility = ["youtube", "tiktok"].includes(platform);
   const showAltText = kind === "image" && platform !== "tiktok";
   const showComments = ["facebook", "instagram", "tiktok", "youtube"].includes(
@@ -128,13 +128,7 @@ export function PlatformSettingsFields({
 
         {showTitle && (
           <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <Label htmlFor={`platform-title-${accountId}`}>
-              {platform === "reddit"
-                ? "Post title"
-                : platform === "pinterest"
-                  ? "Pin title"
-                  : "Video title"}
-            </Label>
+            <Label htmlFor={`platform-title-${accountId}`}>Video title</Label>
             <Input
               id={`platform-title-${accountId}`}
               fullWidth
@@ -143,50 +137,6 @@ export function PlatformSettingsFields({
               onChange={(event) => onChange({ title: event.target.value })}
             />
           </div>
-        )}
-
-        {platform === "reddit" && (
-          <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <Label htmlFor={`subreddit-${accountId}`}>Community</Label>
-            <Input
-              id={`subreddit-${accountId}`}
-              fullWidth
-              variant="secondary"
-              placeholder="r/community"
-              value={value.subreddit ?? ""}
-              onChange={(event) => onChange({ subreddit: event.target.value })}
-            />
-          </div>
-        )}
-
-        {platform === "pinterest" && (
-          <>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`board-${accountId}`}>Board ID</Label>
-              <Input
-                id={`board-${accountId}`}
-                fullWidth
-                variant="secondary"
-                value={value.boardId ?? ""}
-                onChange={(event) => onChange({ boardId: event.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor={`destination-${accountId}`}>
-                Destination URL
-              </Label>
-              <Input
-                id={`destination-${accountId}`}
-                type="url"
-                fullWidth
-                variant="secondary"
-                value={value.destinationUrl ?? ""}
-                onChange={(event) =>
-                  onChange({ destinationUrl: event.target.value })
-                }
-              />
-            </div>
-          </>
         )}
 
         {showAltText && (

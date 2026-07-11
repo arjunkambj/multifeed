@@ -1,3 +1,4 @@
+import { requireEnv } from "../../env";
 import type { AccountProfile, SocialConnector, TokenBundle } from "../types";
 import {
   metaAuthorizeUrl,
@@ -13,17 +14,19 @@ const SCOPES = [
   "pages_manage_posts",
   "pages_read_user_content",
   "read_insights",
-  "pages_messaging",
   "pages_manage_metadata",
 ];
 
 export const facebookConnector: SocialConnector = {
   platform: "facebook",
-  capabilities: ["text", "image", "video", "carousel", "analytics", "inbox"],
+  capabilities: ["text", "image", "video", "carousel", "analytics"],
   requiresPkce: false,
 
   buildAuthorizeUrl(input) {
-    return metaAuthorizeUrl({ ...input, scopes: SCOPES });
+    return metaAuthorizeUrl({
+      ...input,
+      configurationId: requireEnv("META_FACEBOOK_CONFIG_ID"),
+    });
   },
 
   async exchangeCode(input) {
@@ -39,31 +42,31 @@ export const facebookConnector: SocialConnector = {
     return metaFetchMe(accessToken);
   },
 
-  async listSelectableAccounts(accessToken) {
+  async listAccounts(accessToken) {
     const pages = await metaListPages(accessToken);
     return pagesToFacebookOptions(pages);
   },
 
-  async resolveSelectedAccount(accessToken, optionId, option) {
-    const pages = await metaListPages(accessToken);
-    const page = pages.find((p) => p.id === optionId);
-    if (!page?.access_token) {
+  async resolveAccount(userTokens, optionId, option) {
+    const pageAccessToken = option?.metadata?.pageAccessToken;
+    if (option?.id !== optionId || typeof pageAccessToken !== "string") {
       throw new Error("Facebook Page access token not available");
     }
 
     const tokens: TokenBundle = {
-      accessToken: page.access_token,
+      accessToken: pageAccessToken,
+      expiresAt: userTokens.expiresAt,
       scopes: SCOPES,
       tokenType: "page",
     };
 
     const profile: AccountProfile = {
-      providerAccountId: page.id,
-      username: page.username ?? page.name,
-      displayName: page.name,
-      avatarUrl: page.picture?.data?.url ?? option?.avatarUrl,
+      providerAccountId: optionId,
+      username: option.username ?? option.label,
+      displayName: option.label,
+      avatarUrl: option.avatarUrl,
       tokenType: "page",
-      metadata: { pageId: page.id, pageName: page.name },
+      metadata: { pageId: optionId, pageName: option.label },
     };
 
     return { tokens, profile };

@@ -22,14 +22,14 @@ export function threadsAppCredentials() {
 export function metaAuthorizeUrl(input: {
   state: string;
   redirectUri: string;
-  scopes: string[];
-}): string {
+  configurationId: string;
+}) {
   const { appId } = metaAppCredentials();
   const params = new URLSearchParams({
     client_id: appId,
     redirect_uri: input.redirectUri,
     state: input.state,
-    scope: input.scopes.join(","),
+    config_id: input.configurationId,
     response_type: "code",
     return_scopes: "true",
   });

@@ -28,12 +28,9 @@ export const platform = v.union(
   v.literal("threads"),
   v.literal("linkedin"),
   v.literal("tiktok"),
-  v.literal("snapchat"),
   v.literal("youtube"),
-  v.literal("pinterest"),
   v.literal("bluesky"),
   v.literal("google_business"),
-  v.literal("reddit"),
 );
 
 export const postStatus = v.union(
@@ -57,17 +54,12 @@ export const postPlacement = v.union(
   v.literal("reel"),
   v.literal("story"),
   v.literal("short"),
-  v.literal("spotlight"),
-  v.literal("pin"),
 );
 
 export const platformSettings = v.object({
   placement: v.optional(postPlacement),
   title: v.optional(v.string()),
   altText: v.optional(v.string()),
-  destinationUrl: v.optional(v.string()),
-  boardId: v.optional(v.string()),
-  subreddit: v.optional(v.string()),
   visibility: v.optional(
     v.union(
       v.literal("public"),
@@ -115,7 +107,6 @@ const accountStatus = v.union(
   v.literal("expired"),
   v.literal("revoked"),
   v.literal("error"),
-  v.literal("pending_selection"),
 );
 
 export const tokenType = v.union(
@@ -167,13 +158,7 @@ export default defineSchema({
       v.literal("authorize"),
       /** Authorize consumed; token exchange in progress (single-use). */
       v.literal("exchanging"),
-      v.literal("select_account"),
-      v.literal("completing"),
     ),
-    /** Encrypted interim user token while picking Meta pages / IG accounts. */
-    encryptedPendingToken: v.optional(v.string()),
-    pendingOptions: v.optional(v.any()),
-    selectionAttemptId: v.optional(v.string()),
     createdAt: v.number(),
     expiresAt: v.number(),
   })

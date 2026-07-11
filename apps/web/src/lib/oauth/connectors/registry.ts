@@ -2,9 +2,6 @@ import { facebookConnector } from "./meta/facebook";
 import { instagramConnector } from "./meta/instagram";
 import { threadsConnector } from "./meta/threads";
 import { linkedinConnector } from "./linkedin";
-import { pinterestConnector } from "./pinterest";
-import { redditConnector } from "./reddit";
-import { snapchatConnector } from "./snapchat";
 import {
   isOAuthPlatform,
   type OAuthPlatform,
@@ -19,12 +16,9 @@ const REGISTRY: Record<OAuthPlatform, SocialConnector> = {
   instagram: instagramConnector,
   threads: threadsConnector,
   linkedin: linkedinConnector,
-  reddit: redditConnector,
   youtube: youtubeConnector,
-  pinterest: pinterestConnector,
   x: xConnector,
   tiktok: tiktokConnector,
-  snapchat: snapchatConnector,
 };
 
 export function getConnector(platform: string): SocialConnector {

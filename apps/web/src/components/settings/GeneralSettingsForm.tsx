@@ -4,11 +4,11 @@ import { useMemo, useState } from "react";
 import {
   Button,
   Description,
-  FieldError,
   Input,
   Label,
   Spinner,
   TextField,
+  toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useUser } from "@hexclave/next";
@@ -28,8 +28,7 @@ export function GeneralSettingsForm() {
   const [organizationName, setOrganizationName] = useState(
     organization?.displayName ?? "",
   );
-  const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
-  const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const hasChanges = useMemo(
     () =>
@@ -48,8 +47,7 @@ export function GeneralSettingsForm() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
-    setStatus("saving");
+    setIsSaving(true);
 
     try {
       const updates = [
@@ -69,10 +67,13 @@ export function GeneralSettingsForm() {
       }
 
       await Promise.all(updates);
-      setStatus("saved");
+      toast.success("Changes saved.", { timeout: 3000 });
     } catch (err) {
-      setStatus("idle");
-      setError(String(err));
+      toast.danger(err instanceof Error ? err.message : String(err), {
+        timeout: 3000,
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -132,16 +133,10 @@ export function GeneralSettingsForm() {
         />
       </TextField>
 
-      {error && (
-        <FieldError className="rounded-2xl border border-danger/20 bg-danger/10 px-3 py-2 text-sm">
-          {error}
-        </FieldError>
-      )}
-
       <div className="flex items-center gap-3">
         <Button
-          isDisabled={!hasChanges || status === "saving"}
-          isPending={status === "saving"}
+          isDisabled={!hasChanges || isSaving}
+          isPending={isSaving}
           type="submit"
         >
           {({ isPending }) => (
@@ -156,9 +151,6 @@ export function GeneralSettingsForm() {
           )}
         </Button>
         <PasswordModal />
-        {status === "saved" && (
-          <span className="text-sm font-medium text-success">Saved</span>
-        )}
       </div>
     </form>
   );

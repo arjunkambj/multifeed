@@ -21,6 +21,7 @@ import {
   Select,
   Spinner,
   Tabs,
+  toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMutation, useQuery } from "convex/react";
@@ -168,15 +169,28 @@ export function PostCalendar() {
         postId: info.event.id as Id<"posts">,
         scheduledFor: start.getTime(),
       });
-    } catch {
+      toast.success("Post rescheduled.", { timeout: 3000 });
+    } catch (error) {
       info.revert();
+      toast.danger(
+        error instanceof Error ? error.message : "Could not reschedule post",
+        { timeout: 3000 },
+      );
     }
   };
 
   const onDelete = async () => {
     if (!selectedPostId) return;
-    await removePost({ postId: selectedPostId });
-    setSelectedPostId(null);
+    try {
+      await removePost({ postId: selectedPostId });
+      setSelectedPostId(null);
+      toast.success("Post deleted.", { timeout: 3000 });
+    } catch (error) {
+      toast.danger(
+        error instanceof Error ? error.message : "Could not delete post",
+        { timeout: 3000 },
+      );
+    }
   };
 
   return (

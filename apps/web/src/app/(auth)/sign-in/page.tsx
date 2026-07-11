@@ -1,9 +1,9 @@
 "use client";
 
 import { useHexclaveApp } from "@hexclave/next";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
-import { Button, Input, InputOTP, Spinner } from "@heroui/react";
+import { Button, Input, InputOTP, Spinner, toast } from "@heroui/react";
 
 export default function SignInPage() {
   const app = useHexclaveApp();
@@ -16,7 +16,7 @@ export default function SignInPage() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [message, setMessage] = useState("");
+  const verificationPending = useRef(false);
 
   const handleSendMagicLink = async (
     source: "initial" | "resend" = "initial",
@@ -25,29 +25,36 @@ export default function SignInPage() {
       return;
     }
 
-    if (!email) {
-      setMessage("Please enter your email address.");
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) {
+      toast.danger("Please enter your email address.", { timeout: 3000 });
       return;
     }
 
     setIsEmailLoading(true);
-    setMessage("");
 
     try {
-      const result = await app.sendMagicLinkEmail(email, {
+      const result = await app.sendMagicLinkEmail(normalizedEmail, {
         callbackUrl: `${window.location.origin}${app.urls.magicLinkCallback}`,
       });
       if (result.status === "error") {
-        setMessage("Could not send verification code. Please try again.");
+        toast.danger("Could not send verification code. Please try again.", {
+          timeout: 3000,
+        });
       } else {
+        setEmail(normalizedEmail);
         setNonce(result.data.nonce);
         setOtp("");
         setStep("otp");
         setResendCooldown(20);
-        setMessage("Verification code sent. Check your email.");
+        toast.success("Verification code sent. Check your email.", {
+          timeout: 3000,
+        });
       }
     } catch {
-      setMessage("Something went wrong. Please try again.");
+      toast.danger("Something went wrong. Please try again.", {
+        timeout: 3000,
+      });
     } finally {
       setIsEmailLoading(false);
     }
@@ -64,26 +71,29 @@ export default function SignInPage() {
   }, [step, resendCooldown]);
 
   useEffect(() => {
-    if (otp.length !== 6 || isVerifying) return;
+    if (otp.length !== 6 || verificationPending.current) return;
+    verificationPending.current = true;
 
     const verify = async () => {
       setIsVerifying(true);
       try {
         const result = await app.signInWithMagicLink(otp + nonce);
         if (result.status === "error") {
-          setMessage("Invalid code. Please try again.");
-          setOtp("");
+          toast.danger("Invalid code. Please try again.", { timeout: 3000 });
         }
       } catch {
-        setMessage("Something went wrong. Please try again.");
-        setOtp("");
+        toast.danger("Something went wrong. Please try again.", {
+          timeout: 3000,
+        });
       } finally {
+        setOtp("");
         setIsVerifying(false);
+        verificationPending.current = false;
       }
     };
 
     void verify();
-  }, [otp, nonce, isVerifying, app]);
+  }, [app, nonce, otp]);
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
@@ -190,12 +200,6 @@ export default function SignInPage() {
         </div>
       )}
 
-      {message ? (
-        <p className="rounded-lg border border-border bg-surface-secondary/60 px-3 py-2 text-center text-sm text-muted">
-          {message}
-        </p>
-      ) : null}
-
       <div className="flex items-center gap-3">
         <span className="h-px flex-1 bg-border" />
         <span className="text-xs text-muted font-medium">OR</span>
@@ -210,10 +214,17 @@ export default function SignInPage() {
         className="font-normal"
         onPress={async () => {
           setIsGoogleLoading(true);
-          await app.signInWithOAuth("google", {
-            returnTo: app.urls.afterSignIn,
-          });
-          setIsGoogleLoading(false);
+          try {
+            await app.signInWithOAuth("google", {
+              returnTo: app.urls.afterSignIn,
+            });
+          } catch {
+            toast.danger("Could not continue with Google. Please try again.", {
+              timeout: 3000,
+            });
+          } finally {
+            setIsGoogleLoading(false);
+          }
         }}
       >
         {isGoogleLoading ? (

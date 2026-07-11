@@ -50,12 +50,18 @@ async function countConnectedAccounts(
 export async function assertCanConnect(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
+  additionalAccounts = 1,
 ) {
   const limit = await accountLimitForTeam(ctx, teamId);
   if (!Number.isFinite(limit)) return;
+  if (limit === 0) {
+    throw new Error(
+      "Account limit reached (0/0). Upgrade your plan to connect accounts.",
+    );
+  }
 
   const count = await countConnectedAccounts(ctx, teamId, limit);
-  if (count >= limit) {
+  if (count + additionalAccounts > limit) {
     throw new Error(
       `Account limit reached (${count}/${limit}). Upgrade your plan to connect more accounts.`,
     );

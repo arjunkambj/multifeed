@@ -1,14 +1,24 @@
 import type { Id } from "@convex/_generated/dataModel";
+import type { OAuthPlatform } from "@/lib/platform-meta";
 
 export type PostKind = "text" | "image" | "video" | "story";
 
-export type PostPlacement =
-  | "feed"
-  | "reel"
-  | "story"
-  | "short"
-  | "spotlight"
-  | "pin";
+export const POST_KIND_PLATFORMS = {
+  text: ["facebook", "linkedin", "threads", "x"],
+  image: ["facebook", "instagram", "linkedin", "threads", "x", "tiktok"],
+  video: [
+    "facebook",
+    "instagram",
+    "threads",
+    "tiktok",
+    "youtube",
+    "linkedin",
+    "x",
+  ],
+  story: ["facebook", "instagram"],
+} satisfies Record<PostKind, readonly OAuthPlatform[]>;
+
+export type PostPlacement = "feed" | "reel" | "story" | "short";
 
 export type PostVisibility = "public" | "followers" | "private" | "unlisted";
 
@@ -16,9 +26,6 @@ export type PlatformSettings = {
   placement?: PostPlacement;
   title?: string;
   altText?: string;
-  destinationUrl?: string;
-  boardId?: string;
-  subreddit?: string;
   visibility?: PostVisibility;
   shareToFeed?: boolean;
   allowComments?: boolean;
@@ -85,10 +92,15 @@ export const accountSupportsPostKind = (
   kind: PostKind,
   storyMediaKind?: "image" | "video",
 ) => {
+  if (
+    !POST_KIND_PLATFORMS[kind].some((platform) => platform === account.platform)
+  ) {
+    return false;
+  }
+
   if (kind === "story") {
     return (
-      ["facebook", "instagram", "snapchat"].includes(account.platform) &&
-      (storyMediaKind == null || account.capabilities.includes(storyMediaKind))
+      storyMediaKind == null || account.capabilities.includes(storyMediaKind)
     );
   }
   return account.capabilities.includes(kind);
@@ -100,10 +112,7 @@ export const defaultPlatformSettings = (
 ): PlatformSettings => {
   if (kind === "story") return { placement: "story", allowComments: true };
   if (kind === "image") {
-    return {
-      placement: platform === "pinterest" ? "pin" : "feed",
-      allowComments: true,
-    };
+    return { placement: "feed", allowComments: true };
   }
   if (kind === "video") {
     const placement: PostPlacement =
@@ -111,9 +120,7 @@ export const defaultPlatformSettings = (
         ? "reel"
         : platform === "youtube"
           ? "short"
-          : platform === "snapchat"
-            ? "spotlight"
-            : "feed";
+          : "feed";
     return {
       placement,
       visibility: "public",
@@ -131,9 +138,7 @@ export const defaultPlatformSettings = (
 export const placementOptions = (platform: string, kind: PostKind) => {
   if (kind === "story") return [{ id: "story", label: "Story" }] as const;
   if (kind === "image") {
-    return platform === "pinterest"
-      ? ([{ id: "pin", label: "Pin" }] as const)
-      : ([{ id: "feed", label: "Feed" }] as const);
+    return [{ id: "feed", label: "Feed" }] as const;
   }
   if (kind !== "video") return [{ id: "feed", label: "Feed" }] as const;
   if (["instagram", "facebook"].includes(platform)) {
@@ -146,12 +151,6 @@ export const placementOptions = (platform: string, kind: PostKind) => {
     return [
       { id: "short", label: "Short" },
       { id: "feed", label: "Video" },
-    ] as const;
-  }
-  if (platform === "snapchat") {
-    return [
-      { id: "spotlight", label: "Spotlight" },
-      { id: "story", label: "Story" },
     ] as const;
   }
   return [{ id: "feed", label: "Feed video" }] as const;

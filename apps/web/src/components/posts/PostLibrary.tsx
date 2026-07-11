@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Chip, Input, Spinner, Tabs } from "@heroui/react";
+import { Button, Card, Chip, Input, Spinner, Tabs, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -93,6 +93,12 @@ export function PostLibrary() {
     setDeleting(postId);
     try {
       await removePost({ postId: postId as Id<"posts"> });
+      toast.success("Post deleted.", { timeout: 3000 });
+    } catch (error) {
+      toast.danger(
+        error instanceof Error ? error.message : "Could not delete post",
+        { timeout: 3000 },
+      );
     } finally {
       setDeleting(null);
     }

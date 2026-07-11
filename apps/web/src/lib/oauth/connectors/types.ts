@@ -1,14 +1,11 @@
 export const OAUTH_PLATFORMS = [
-  "x",
-  "instagram",
   "facebook",
+  "instagram",
   "threads",
   "linkedin",
   "youtube",
-  "pinterest",
-  "reddit",
+  "x",
   "tiktok",
-  "snapchat",
 ] as const;
 
 export type OAuthPlatform = (typeof OAUTH_PLATFORMS)[number];
@@ -70,9 +67,9 @@ export type SocialConnector = {
   exchangeCode: (input: ExchangeInput) => Promise<TokenBundle>;
   refreshAccessToken?: (refreshToken: string) => Promise<TokenBundle>;
   fetchProfile: (accessToken: string) => Promise<AccountProfile>;
-  listSelectableAccounts?: (accessToken: string) => Promise<AccountOption[]>;
-  resolveSelectedAccount?: (
-    accessToken: string,
+  listAccounts?: (accessToken: string) => Promise<AccountOption[]>;
+  resolveAccount?: (
+    tokens: TokenBundle,
     optionId: string,
     option?: AccountOption,
   ) => Promise<{ tokens: TokenBundle; profile: AccountProfile }>;

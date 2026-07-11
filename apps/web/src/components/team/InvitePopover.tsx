@@ -7,39 +7,40 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Description,
-  FieldError,
   Input,
   Label,
   Popover,
   Spinner,
   TextField,
+  toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 
 export function InvitePopover({ team }: { team: Team }) {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
-  const [error, setError] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
   const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
-    setStatus("sending");
+    setIsSending(true);
 
     try {
       await team.inviteUser({ email: email.trim() });
       await queryClient.invalidateQueries({ queryKey: ["team-data", team.id] });
-      setStatus("sent");
       setEmail("");
+      toast.success("Invite sent.", { timeout: 3000 });
     } catch (err) {
-      setStatus("idle");
-      setError(err instanceof Error ? err.message : String(err));
+      toast.danger(err instanceof Error ? err.message : String(err), {
+        timeout: 3000,
+      });
+    } finally {
+      setIsSending(false);
     }
   };
 
   return (
-    <Popover onOpenChange={() => setError("")}>
+    <Popover>
       <Button>
         <Icon icon="hugeicons:user-add-02" className="size-4" />
         Invite member
@@ -57,29 +58,17 @@ export function InvitePopover({ team }: { team: Team }) {
               name="email"
               type="email"
               value={email}
-              onChange={(value) => {
-                setEmail(value);
-                setStatus("idle");
-              }}
+              onChange={setEmail}
             >
               <Label>Email address</Label>
               <Input autoComplete="email" placeholder="teammate@company.com" />
               <Description>Hexclave will email a team invitation.</Description>
             </TextField>
 
-            {error && (
-              <FieldError className="rounded-2xl border border-danger/20 bg-danger/10 px-3 py-2 text-sm">
-                {error}
-              </FieldError>
-            )}
-
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-medium text-success">
-                {status === "sent" ? "Invite sent" : ""}
-              </span>
+            <div className="flex justify-end">
               <Button
-                isDisabled={!email.trim() || status === "sending"}
-                isPending={status === "sending"}
+                isDisabled={!email.trim() || isSending}
+                isPending={isSending}
                 type="submit"
               >
                 {({ isPending }) => (

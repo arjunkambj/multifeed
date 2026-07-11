@@ -1,0 +1,11 @@
+{
+  "name": "multifeed-oauth-relay",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-10",
+  "routes": [
+    {
+      "pattern": "thechefbay.com/api/oauth/callback*",
+      "zone_name": "thechefbay.com",
+    },
+  ],
+}

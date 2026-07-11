@@ -15,7 +15,9 @@ export function oauthRedirectUri(): string {
   const value =
     optionalEnv("OAUTH_REDIRECT_URI") ?? `${origin}/api/oauth/callback`;
   const redirect = new URL(value);
-  if (redirect.origin !== origin) {
+  const isDevelopmentHttpsRelay =
+    process.env.NODE_ENV !== "production" && redirect.protocol === "https:";
+  if (redirect.origin !== origin && !isDevelopmentHttpsRelay) {
     throw new Error("OAUTH_REDIRECT_URI must use the configured app origin");
   }
   return redirect.toString();
@@ -94,8 +96,8 @@ export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   oauth_failed: "Could not complete connection. Please try again.",
   token_exchange_failed:
     "Could not exchange authorization code. Please try again.",
-  selection_failed: "Could not complete account selection. Please try again.",
-  start_failed: "Could not start connection. Please try again.",
+  account_limit:
+    "Your plan does not have room for every account returned by this connection.",
 };
 
 export function oauthErrorMessage(code: string): string {
@@ -120,13 +122,6 @@ export function connectedReturnPath(
   const url = new URL(safeReturn, "http://local.invalid");
   url.searchParams.set("connected", platform);
   return `${url.pathname}${url.search}${url.hash}`;
-}
-
-export function selectAccountUrl(state: string, platform: string): string {
-  const u = new URL("/connections/select", appOrigin());
-  u.searchParams.set("state", state);
-  u.searchParams.set("platform", platform);
-  return u.toString();
 }
 
 /** Reject cross-site POSTs (defense-in-depth alongside cookie SameSite). */

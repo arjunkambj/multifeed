@@ -8,30 +8,34 @@ import type {
 } from "./connectors/types";
 import { oauthServerSecret } from "./env";
 
-export async function saveConnectedAccount(input: {
+export async function saveConnectedAccounts(input: {
   token: string;
   platform: OAuthPlatform;
   connector: SocialConnector;
-  tokens: TokenBundle;
-  profile: AccountProfile;
+  accounts: Array<{
+    tokens: TokenBundle;
+    profile: AccountProfile;
+  }>;
 }) {
-  return await fetchMutation(
-    api.oauth.accounts.save,
+  return fetchMutation(
+    api.oauth.accounts.saveMany,
     {
       serverSecret: oauthServerSecret(),
-      platform: input.platform,
-      providerAccountId: input.profile.providerAccountId,
-      username: input.profile.username,
-      displayName: input.profile.displayName,
-      avatarUrl: input.profile.avatarUrl,
-      tokenType: input.profile.tokenType ?? input.tokens.tokenType,
-      capabilities: input.connector.capabilities,
-      scopes: input.tokens.scopes,
-      accessToken: input.tokens.accessToken,
-      refreshToken: input.tokens.refreshToken,
-      tokenExpiresAt: input.tokens.expiresAt,
-      refreshTokenExpiresAt: input.tokens.refreshTokenExpiresAt,
-      metadata: input.profile.metadata,
+      accounts: input.accounts.map(({ profile, tokens }) => ({
+        platform: input.platform,
+        providerAccountId: profile.providerAccountId,
+        username: profile.username,
+        displayName: profile.displayName,
+        avatarUrl: profile.avatarUrl,
+        tokenType: profile.tokenType ?? tokens.tokenType,
+        capabilities: input.connector.capabilities,
+        scopes: tokens.scopes,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        tokenExpiresAt: tokens.expiresAt,
+        refreshTokenExpiresAt: tokens.refreshTokenExpiresAt,
+        metadata: profile.metadata,
+      })),
     },
     { token: input.token },
   );

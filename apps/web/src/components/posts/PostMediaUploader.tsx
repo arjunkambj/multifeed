@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Button, ProgressBar } from "@heroui/react";
+import { Button, ProgressBar, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -70,7 +70,6 @@ export function PostMediaUploader({
   const confirmMediaUpload = useMutation(api.media.r2.confirmMediaUpload);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
   const maxFiles = maxMediaCount(kind);
 
   const confirmUpload = async (
@@ -97,12 +96,12 @@ export function PostMediaUploader({
   };
 
   const uploadFiles = async (files: File[]) => {
-    setError("");
     const room = maxFiles - media.length;
     const selectedFiles = files.slice(0, room);
     if (files.length > room) {
-      setError(
+      toast.danger(
         `${kind === "image" ? "Image posts" : "This format"} supports ${maxFiles} file${maxFiles === 1 ? "" : "s"}.`,
+        { timeout: 3000 },
       );
     }
     if (selectedFiles.length === 0) return;
@@ -158,12 +157,17 @@ export function PostMediaUploader({
         }
       }
       onChange([...media, ...uploaded]);
+      toast.success(
+        `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`,
+        { timeout: 3000 },
+      );
     } catch (caught) {
       uploaded.forEach((asset) => {
         if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
       });
-      setError(
+      toast.danger(
         caught instanceof Error ? caught.message : "Media upload failed",
+        { timeout: 3000 },
       );
     } finally {
       setUploading(false);
@@ -271,8 +275,6 @@ export function PostMediaUploader({
           </span>
         </Button>
       )}
-
-      {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   );
 }

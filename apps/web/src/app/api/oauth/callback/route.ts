@@ -10,10 +10,8 @@ import {
   connectionsUrl,
   oauthRedirectUri,
   oauthServerSecret,
-  sanitizeReturnTo,
-  selectAccountUrl,
 } from "@/lib/oauth/env";
-import { saveConnectedAccount } from "@/lib/oauth/save-account";
+import { saveConnectedAccounts } from "@/lib/oauth/save-account";
 
 function redirect(url: string) {
   return NextResponse.redirect(url, {
@@ -103,11 +101,9 @@ export async function GET(request: NextRequest) {
       return errorRedirect("token_exchange_failed");
     }
 
-    // Meta (and similar): multi-account selection
-    if (connector.listSelectableAccounts) {
-      const options = await connector.listSelectableAccounts(
-        tokens.accessToken,
-      );
+    // Meta (and similar): resolve every discovered account before one atomic save.
+    if (connector.listAccounts) {
+      const options = await connector.listAccounts(tokens.accessToken);
 
       if (options.length === 0) {
         await fetchMutation(
@@ -120,59 +116,45 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      if (options.length === 1 && connector.resolveSelectedAccount) {
-        const only = options[0]!;
-        const resolved = await connector.resolveSelectedAccount(
-          tokens.accessToken,
-          only.id,
-          only,
-        );
-        await saveConnectedAccount({
-          token,
-          platform: session.platform,
-          connector,
-          tokens: resolved.tokens,
-          profile: resolved.profile,
-        });
-        await fetchMutation(
-          api.oauth.sessions.remove,
-          { state, serverSecret },
-          { token },
-        );
-        return redirect(
-          new URL(
-            connectedReturnPath(session.returnTo, session.platform),
-            appOrigin(),
-          ).toString(),
+      if (!connector.resolveAccount) {
+        throw new Error(
+          `${session.platform} account resolution is unavailable`,
         );
       }
 
+      const accounts = [];
+      for (const option of options) {
+        accounts.push(
+          await connector.resolveAccount(tokens, option.id, option),
+        );
+      }
+
+      await saveConnectedAccounts({
+        token,
+        platform: session.platform,
+        connector,
+        accounts,
+      });
+
       await fetchMutation(
-        api.oauth.sessions.markPending,
-        {
-          state,
-          serverSecret,
-          accessToken: tokens.accessToken,
-          options: options.map((o) => ({
-            id: o.id,
-            label: o.label,
-            username: o.username,
-            avatarUrl: o.avatarUrl,
-          })),
-        },
+        api.oauth.sessions.remove,
+        { state, serverSecret },
         { token },
       );
-
-      return redirect(selectAccountUrl(state, session.platform));
+      return redirect(
+        new URL(
+          connectedReturnPath(session.returnTo, session.platform),
+          appOrigin(),
+        ).toString(),
+      );
     }
 
     const profile = await connector.fetchProfile(tokens.accessToken);
-    await saveConnectedAccount({
+    await saveConnectedAccounts({
       token,
       platform: session.platform,
       connector,
-      tokens,
-      profile,
+      accounts: [{ tokens, profile }],
     });
     await fetchMutation(
       api.oauth.sessions.remove,
@@ -180,17 +162,12 @@ export async function GET(request: NextRequest) {
       { token },
     );
 
-    const safeReturn = sanitizeReturnTo(session.returnTo);
-    if (safeReturn) {
-      const u = new URL(safeReturn, appOrigin());
-      // Only allow same-origin after sanitize
-      if (u.origin === new URL(appOrigin()).origin) {
-        u.searchParams.set("connected", session.platform);
-        return redirect(u.toString());
-      }
-    }
-
-    return redirect(connectionsUrl({ connected: session.platform }));
+    return redirect(
+      new URL(
+        connectedReturnPath(session.returnTo, session.platform),
+        appOrigin(),
+      ).toString(),
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : "OAuth failed";
     console.error("[oauth/callback]", message);
@@ -205,6 +182,10 @@ export async function GET(request: NextRequest) {
     } catch {
       // ignore cleanup errors
     }
-    return errorRedirect("oauth_failed");
+    return errorRedirect(
+      message.toLowerCase().includes("limit")
+        ? "account_limit"
+        : "oauth_failed",
+    );
   }
 }

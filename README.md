@@ -6,6 +6,7 @@ Social scheduling app built with Next.js, Convex, Hexclave, and Turborepo.
 
 - `apps/web`: Next.js app (marketing, dashboard, OAuth API routes)
 - `apps/backend`: Convex schema, mutations/queries, billing webhooks
+- `apps/oauth-relay`: optional Cloudflare Worker for HTTPS-to-localhost OAuth callbacks
 
 ## Local development
 
@@ -32,13 +33,13 @@ Samples live next to each app (do **not** put provider secrets in Convex, or Con
 
 ### Web (`apps/web/.env.local`) — summary
 
-| Group             | Variables                                                                                                                          |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Core**          | `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_APP_URL`                                                                                    |
-| **Hexclave**      | `NEXT_PUBLIC_HEXCLAVE_PROJECT_ID`, `NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY`, `HEXCLAVE_SECRET_SERVER_KEY`                     |
-| **Dodo checkout** | `DODO_PAYMENTS_API_KEY`, `DODO_PAYMENTS_ENVIRONMENT`, `DODO_*_PRODUCT_ID` (6 product IDs)                                          |
-| **OAuth**         | `OAUTH_SERVER_SECRET`, `META_*`, `THREADS_*`, `LINKEDIN_*`, `REDDIT_*`, `GOOGLE_*`, `PINTEREST_*`, `TIKTOK_*`, `SNAPCHAT_*`, `X_*` |
-| **Optional**      | `APP_ORIGIN`, `OAUTH_REDIRECT_URI`                                                                                                 |
+| Group             | Variables                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Core**          | `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_APP_URL`                                                                |
+| **Hexclave**      | `NEXT_PUBLIC_HEXCLAVE_PROJECT_ID`, `NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY`, `HEXCLAVE_SECRET_SERVER_KEY` |
+| **Dodo checkout** | `DODO_PAYMENTS_API_KEY`, `DODO_PAYMENTS_ENVIRONMENT`, `DODO_*_PRODUCT_ID` (6 product IDs)                      |
+| **OAuth**         | `OAUTH_SERVER_SECRET`, `META_*`, `THREADS_*`, `LINKEDIN_*`, `GOOGLE_*`, `TIKTOK_*`, `X_*`                      |
+| **Optional**      | `APP_ORIGIN`, `OAUTH_REDIRECT_URI`                                                                             |
 
 OAuth redirect on every provider console:
 
@@ -47,20 +48,23 @@ http://localhost:3000/api/oauth/callback
 https://<your-domain>/api/oauth/callback
 ```
 
+For local provider setups that require HTTPS, deploy `apps/oauth-relay` and set
+`OAUTH_REDIRECT_URI` to its configured HTTPS route. The Worker forwards the
+callback query to `http://localhost:3000/api/oauth/callback`. Its custom route is
+development-only: remove or disable it before serving the production callback
+from the same domain and path.
+
 Provider-console requirements:
 
-| Provider  | Required setup                                                                                                                                                                                          |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Facebook  | Facebook Login plus approved Page permissions: `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `pages_read_user_content`, `read_insights`, `pages_messaging`, `pages_manage_metadata` |
-| Instagram | Instagram API with Facebook Login, a professional account linked to a Page, and the requested `instagram_*`/Page permissions shown on the consent screen                                                |
-| Threads   | Threads use case with its own Threads App ID/secret; permissions `threads_basic`, `threads_content_publish`, `threads_manage_insights`                                                                  |
-| LinkedIn  | Sign In with LinkedIn using OpenID Connect plus Share on LinkedIn; programmatic refresh tokens require Marketing Developer Platform approval                                                            |
-| YouTube   | Enable YouTube Data API v3 and YouTube Analytics API; configure the OAuth consent screen for the requested scopes                                                                                       |
-| Pinterest | Pinterest API v5 app with the requested boards, pins, and user-account scopes                                                                                                                           |
-| TikTok    | Login Kit and Content Posting API with approved `user.info.basic`, `user.info.profile`, and `video.publish` scopes                                                                                      |
-| Snapchat  | Business Manager OAuth app (not a Developer Portal Login Kit app), plus allowlisted Public Profile API access and the `snapchat-profile-api` scope                                                      |
-| X         | OAuth 2.0 enabled with exact callback URL; use a confidential client secret when available                                                                                                              |
-| Reddit    | Web app credentials and a unique, descriptive `REDDIT_USER_AGENT` that identifies the app and Reddit contact account                                                                                    |
+| Provider  | Required setup                                                                                                                                                                                |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Facebook  | Business-type app with Facebook Login for Business; create a User access token configuration containing the requested Page permissions and set its ID as `META_FACEBOOK_CONFIG_ID`            |
+| Instagram | Instagram API with Facebook Login for Business; create a User access token configuration containing the requested `instagram_*`/Page permissions and set its ID as `META_INSTAGRAM_CONFIG_ID` |
+| Threads   | Threads use case with its own Threads App ID/secret; permissions `threads_basic`, `threads_content_publish`, `threads_manage_insights`                                                        |
+| LinkedIn  | Sign In with LinkedIn using OpenID Connect plus Share on LinkedIn; programmatic refresh tokens require Marketing Developer Platform approval                                                  |
+| YouTube   | Enable YouTube Data API v3 and YouTube Analytics API; configure the OAuth consent screen for the requested scopes                                                                             |
+| TikTok    | Login Kit and Content Posting API with approved `user.info.basic`, `user.info.profile`, and `video.publish` scopes                                                                            |
+| X         | OAuth 2.0 enabled with exact callback URL; use a confidential client secret when available                                                                                                    |
 
 ### Backend / Convex — summary
 
@@ -88,8 +92,8 @@ npx convex env set DODO_PAYMENTS_WEBHOOK_KEY "whsec_..."
 ### OAuth flow (reference)
 
 1. `POST /api/oauth/start` → `sessions.create` → provider URL
-2. Provider → `GET /api/oauth/callback` → `beginExchange` → token exchange → `accounts.save`
-3. Meta multi-page → `/connections/select` → `POST /api/oauth/complete-selection`
+2. Provider → `GET /api/oauth/callback` → `beginExchange` → token exchange and account discovery
+3. All discovered accounts are resolved first, then committed atomically by `accounts.saveMany`
 
 UI: `/connections`
 
