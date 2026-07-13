@@ -44,18 +44,18 @@ function FooterCTA() {
     >
       <div className="contents" data-gsap-heading>
         <h3 className="relative font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Ready to run social on autopilot?
+          Ready to trade seven tabs for one calendar?
         </h3>
         <p className="relative max-w-xl text-base text-muted sm:text-lg">
-          Point your AI agents at Multi Feed, review on the calendar, and publish
-          to 30+ networks — free for 7 days.
+          Create your post, tailor it for each platform, and schedule the whole
+          week from one place.
         </p>
         <div>
           <Link
             className={`${buttonVariants({ size: "lg" })} button mt-2`}
             href="/sign-in"
           >
-            Start free trial
+            Plan your first post
           </Link>
         </div>
       </div>
@@ -124,8 +124,8 @@ export function Footer() {
             <div className="flex max-w-xs flex-col gap-3">
               <Logo />
               <p className="text-sm leading-relaxed text-muted">
-                Run social on autopilot with AI agents — plan, generate, and
-                schedule to 30+ networks from one visual calendar.
+                Create, tailor, and schedule social posts across seven platforms
+                from one visual calendar.
               </p>
             </div>
             <p className="text-xs text-muted">

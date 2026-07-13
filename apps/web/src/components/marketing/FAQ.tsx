@@ -21,11 +21,11 @@ export function FAQ() {
           FAQ
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Questions, answered straight
+          Know before you schedule
         </h2>
         <p className="text-base leading-relaxed text-muted sm:text-lg">
-          Agents, networks, and the calendar — what people ask before going on
-          autopilot.
+          The practical details about platforms, post formats, teamwork, and
+          pricing.
         </p>
       </div>
 
@@ -36,7 +36,7 @@ export function FAQ() {
         >
           <h3 className="text-xl font-medium sm:text-2xl">Still unsure?</h3>
           <p className="leading-relaxed text-muted">
-            Tell us what you’re trying to ship — we’ll help you pick the right
+            Tell us how you publish today. We’ll help you choose the right
             setup.
           </p>
           <Link
@@ -44,7 +44,7 @@ export function FAQ() {
             href="/sign-in"
           >
             <Icon icon="mdi:chat-outline" />
-            Talk to us
+            Ask a question
           </Link>
         </div>
 

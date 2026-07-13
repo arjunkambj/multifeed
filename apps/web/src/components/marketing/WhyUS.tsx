@@ -21,11 +21,11 @@ export function WhyUS() {
           Why Multi Feed
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Social on autopilot — without losing control
+          Less time managing posts. More time making them matter.
         </h2>
         <p className="text-base leading-relaxed text-muted sm:text-lg">
-          AI agents generate. Multi Feed schedules across 30+ networks. You review
-          everything on one calendar.
+          Replace scattered drafts, native schedulers, and status messages with
+          one clear publishing workflow.
         </p>
       </div>
 

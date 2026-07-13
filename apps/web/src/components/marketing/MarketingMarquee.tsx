@@ -10,7 +10,7 @@ export function MarketingMarquee() {
     >
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6" data-gsap-heading>
         <p className="mb-8 text-center text-sm font-medium uppercase tracking-wide text-muted">
-          Publish automatically to the networks you already use
+          One workflow for every channel your audience follows
         </p>
       </div>
       <div

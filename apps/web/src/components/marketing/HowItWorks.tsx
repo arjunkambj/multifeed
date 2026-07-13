@@ -1,21 +1,21 @@
 const steps = [
   {
     description:
-      "Link 30+ networks and plug in the agents you already use — Claude, ChatGPT, Codex, Cursor, and more.",
+      "Link your social profiles once, then manage every channel from the same workspace.",
     step: "1",
-    title: "Connect networks & agents",
+    title: "Connect your accounts",
   },
   {
     description:
-      "Agents plan and generate posts. Everything lands on a visual calendar ready for you to tweak.",
+      "Start with one post, then adjust the caption, format, and settings for each platform.",
     step: "2",
-    title: "Generate on autopilot",
+    title: "Create once, tailor each channel",
   },
   {
     description:
-      "Review, edit, and approve — then Multi Feed schedules and publishes across every connected network.",
+      "Choose the time, check the calendar, and schedule every version from one place.",
     step: "3",
-    title: "Approve & publish",
+    title: "Review and schedule",
   },
 ] as const;
 
@@ -33,11 +33,10 @@ export function HowItWorks() {
           How it works
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Three steps to social autopilot
+          Three steps from idea to scheduled
         </h2>
         <p className="text-base leading-relaxed text-muted sm:text-lg">
-          From empty calendar to multi-network schedule — with AI doing the
-          heavy lifting.
+          A simple workflow your whole team can understand at a glance.
         </p>
       </div>
 

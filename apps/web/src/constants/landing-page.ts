@@ -1,3 +1,5 @@
+import { PLANS, type PlanKey } from "./plans";
+
 export const brands = [
   ["TikTok", "https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg"],
   [
@@ -17,208 +19,149 @@ export const brands = [
 export const faqItems = [
   {
     content:
-      "Connect your networks, point an AI agent at Multi Feed, and start generating and scheduling. Most teams ship their first week of posts in under ten minutes.",
-    title: "How fast can I get on autopilot?",
+      "Connect an account, create a post, and choose when it should go live. You can add the rest of your channels whenever you’re ready.",
+    title: "How quickly can I get started?",
   },
   {
     content:
-      "30+ social networks — including TikTok, Instagram, YouTube, X, LinkedIn, and more — with per-platform captions when you need them.",
+      "Instagram, TikTok, YouTube, LinkedIn, X, Facebook, and Threads. Available post formats vary by platform.",
     title: "Which platforms are supported?",
   },
   {
     content:
-      "Yes. Bring Claude, ChatGPT, Codex, Cursor, OpenClaw, Hermes, or any agent that can call your workspace. Multi Feed is the layer that plans, schedules, and publishes.",
-    title: "Can I use my own AI agents?",
+      "Yes. Start with one main caption, then add platform-specific copy and settings wherever the message or format needs to change.",
+    title: "Can I tailor a post for each platform?",
   },
   {
     content:
-      "Agents draft and queue. You stay in control with a visual calendar to review, edit, reschedule, or kill anything before it goes live.",
-    title: "Do I still review posts before they publish?",
+      "Multi Feed supports text, images, videos, carousels, Reels, Shorts, and Stories where each connected platform allows them.",
+    title: "What kinds of posts can I schedule?",
   },
   {
     content:
-      "Yes. Every plan includes a 7-day free trial. Cancel anytime before it ends and you won’t be charged.",
-    title: "Is there a free trial?",
+      "Yes. Use the month, week, day, or list view to review what is coming up. Drag a post to reschedule it without rebuilding the post.",
+    title: "Can I review and change my schedule?",
   },
   {
     content:
-      "Creators, founders, and agencies all run Multi Feed — solo operators on autopilot and teams sharing one calendar.",
-    title: "Is this only for solo creators?",
+      "Yes. Creator includes two seats, Growth includes five, and Agency includes fifteen, so your team can work from the same calendar.",
+    title: "Can my team use Multi Feed?",
   },
 ] as const;
 
 export const whyUsPoints = [
   {
-    cta: "Meet the agents",
+    cta: "Tailor your first post",
     description:
-      "Point Claude, ChatGPT, Codex, Cursor, or your own stack at Multi Feed. Agents plan and generate; you keep the final say.",
+      "Start with one idea, then adjust the caption and format for each channel. Your message stays consistent without sounding copied and pasted.",
     image:
       "https://framerusercontent.com/images/l1CpF5EzDSCksVlxtEBU1RLqPI.png?scale-down-to=1024",
-    subheading: "AI agents",
-    title: "Autopilot that still feels like you.",
+    subheading: "Platform-specific posts",
+    title: "Write once. Sound native everywhere.",
   },
   {
-    cta: "Open the calendar",
+    cta: "See your calendar",
     description:
-      "Every draft lands on a visual calendar. Drag, edit, or pause before it hits 30+ networks — no surprise posts.",
+      "See your entire month, week, or day at a glance. Drag to reschedule, open any post to edit, and catch empty days before they become missed opportunities.",
     image:
       "https://framerusercontent.com/images/veTFqarPod5nyzjlnsyKI6W1o.png?scale-down-to=1024&width=1936&height=1680",
     subheading: "Visual calendar",
-    title: "Review everything before it ships.",
+    title: "Spot the gaps before your audience does.",
   },
   {
-    cta: "Connect networks",
+    cta: "Connect your accounts",
     description:
-      "One workspace for every channel you care about. Schedule once, publish everywhere, stop living in native apps.",
+      "Manage Instagram, TikTok, YouTube, LinkedIn, X, Facebook, and Threads from one workspace instead of rebuilding the same post in every native app.",
     image:
       "https://framerusercontent.com/images/l1CpF5EzDSCksVlxtEBU1RLqPI.png?scale-down-to=1024",
-    subheading: "30+ networks",
-    title: "One feed. Every platform.",
+    subheading: "Seven social platforms",
+    title: "Trade seven tabs for one workspace.",
   },
 ] as const;
 
 export const featureItems = [
   {
     description:
-      "Plan, generate, and queue posts with the agents you already use — Claude, ChatGPT, Codex, Cursor, and more.",
-    heading: "AI agent autopilot",
+      "Draft one post, then tailor the caption and settings for every channel without starting over.",
+    heading: "One draft, seven channels",
     image:
       "https://framerusercontent.com/images/ll68lemaNuRB1V1tgDKcB0lgIMo.png",
   },
   {
     description:
-      "See the week at a glance. Review, edit, and reschedule everything before it goes live.",
+      "See your month, week, day, or list at a glance. Drag any post to change its publish time.",
     heading: "Visual content calendar",
     image:
       "https://framerusercontent.com/images/k4FW0xmCR8OnVmCfHcN8UrLY0c.png?width=1788&height=960",
   },
   {
     description:
-      "Publish to 30+ social networks from one place, with captions that still feel native per channel.",
-    heading: "Multi-network publishing",
+      "Schedule text, images, videos, Reels, Shorts, and Stories wherever each platform supports them.",
+    heading: "Multi-platform scheduling",
     image:
       "https://framerusercontent.com/images/CMWCv1aJ3T8Q05vz4cSyjExE8s.png?scale-down-to=1024&width=1158&height=759",
   },
   {
     description:
-      "Shared drafts and one calendar so founders, creators, and agencies stay aligned without Slack chaos.",
-    heading: "Team workflows",
+      "Give everyone the same drafts, schedule, and post status so work stays visible without another check-in.",
+    heading: "One calendar for the team",
     image:
       "https://framerusercontent.com/images/Jz9KleJLOcSD4s4U3Kjprs4Fx3s.png?scale-down-to=1024&width=1158&height=759",
   },
   {
     description:
-      "Connect accounts once and let agents + your calendar keep the cadence — without a new stack to learn.",
-    heading: "Account connections",
+      "Connect your social profiles once. Multi Feed encrypts account tokens and keeps each channel ready when you are.",
+    heading: "Secure account connections",
     image:
       "https://framerusercontent.com/images/y25C7HJ1wHWV4u0DZaY5UmLwI.png?scale-down-to=1024&width=1158&height=759",
   },
 ] as const;
 
-export const testimonials = [
+export const useCases = [
   {
-    avatar: "https://i.pravatar.cc/150?u=amina",
-    name: "Amina Patel",
-    quote:
-      "My agent drafts the week; I just polish on the calendar. Social finally runs without eating my mornings.",
-    role: "Creator, Northstar",
+    audience: "Creators",
+    description:
+      "Keep a steady publishing rhythm without spending your best creative hours inside scheduling tools.",
+    icon: "ph:video-camera",
+    title: "Protect your time to create",
   },
   {
-    avatar: "https://i.pravatar.cc/150?u=daniel",
-    name: "Daniel Ruiz",
-    quote:
-      "We pointed Claude at Multi Feed and the calendar filled itself. Reviewing posts is minutes, not hours.",
-    role: "Founder, Fieldhouse",
+    audience: "Founders",
+    description:
+      "Turn product updates, lessons, and launches into a clear schedule your whole team can see.",
+    icon: "ph:rocket-launch",
+    title: "Stay visible while building",
   },
   {
-    avatar: "https://i.pravatar.cc/150?u=sarah",
-    name: "Sarah Thompson",
-    quote:
-      "One visual calendar for every network. The team stopped asking “did we post?” in the group chat.",
-    role: "Social Lead, Loop",
+    audience: "Marketing teams",
+    description:
+      "Coordinate drafts, channel-specific copy, and publish times from one shared source of truth.",
+    icon: "ph:users-three",
+    title: "Keep every channel aligned",
   },
   {
-    avatar: "https://i.pravatar.cc/150?u=james",
-    name: "James Carter",
-    quote:
-      "Clients want coverage on 15+ platforms. Agents + Multi Feed is how we deliver without another hire.",
-    role: "Agency Director, Apex Social",
-  },
-  {
-    avatar: "https://i.pravatar.cc/150?u=emily",
-    name: "Emily Chen",
-    quote:
-      "I keep Cursor for drafts and Multi Feed for publish. Autopilot with an edit button — that’s the unlock.",
-    role: "CEO, Brightline",
-  },
-  {
-    avatar: "https://i.pravatar.cc/150?u=michael",
-    name: "Michael Brown",
-    quote:
-      "Schedule once, hit every network, still approve on the calendar. That’s how growth should feel.",
-    role: "Growth Lead, Grove",
+    audience: "Agencies",
+    description:
+      "Manage high-volume client calendars without rebuilding the same workflow for every account.",
+    icon: "ph:briefcase",
+    title: "Give every client a clear plan",
   },
 ] as const;
 
-export const pricingPlans = [
-  {
-    badge: "Most popular",
-    cta: "Start 7-day free trial",
-    description:
-      "Best for solo operators running AI agents across core channels.",
-    features: [
-      "15 connected social accounts",
-      "AI agent–ready scheduling",
-      "Visual content calendar",
-      "Multi-network publishing",
-      "Platform caption overrides",
-      "Basic analytics refresh",
-      "2 team seats",
-    ],
-    monthlyPrice: "$29",
-    name: "Creator",
-    period: "/month",
-    preferred: false,
-    yearlyPrice: "$23",
-  },
-  {
-    badge: "Best value",
-    cta: "Start 7-day free trial",
-    description:
-      "Best for teams running agents + shared calendars across brands.",
-    features: [
-      "50 connected social accounts",
-      "Everything in Creator",
-      "Calendar and status views",
-      "Shared inbox",
-      "Advanced analytics history",
-      "Priority metric refresh",
-      "5 team seats",
-    ],
-    monthlyPrice: "$59",
-    name: "Growth",
-    period: "/month",
-    yearlyPrice: "$47",
-    preferred: true,
-  },
-  {
-    badge: "Scale ready",
-    cta: "Start 7-day free trial",
-    description:
-      "Best for agencies shipping high volume across 30+ networks.",
-    features: [
-      "Unlimited connected accounts",
-      "Everything in Growth",
-      "Bulk video scheduling",
-      "Approval-ready team workflows",
-      "API / agent add-on",
-      "Priority support",
-      "15 team seats",
-    ],
-    monthlyPrice: "$119",
-    name: "Agency",
-    period: "/month",
-    preferred: false,
-    yearlyPrice: "$95",
-  },
-] as const;
+const planBadges: Record<PlanKey, string> = {
+  creator: "For solo work",
+  growth: "Most popular",
+  agency: "For scale",
+};
+
+export const pricingPlans = PLANS.map((plan) => ({
+  badge: planBadges[plan.key],
+  cta: `Start with ${plan.name}`,
+  description: plan.description,
+  features: plan.features,
+  monthlyPrice: `$${plan.prices.month}`,
+  name: plan.name,
+  period: "/month",
+  preferred: plan.key === "growth",
+  yearlyPrice: `$${plan.prices.year}`,
+}));

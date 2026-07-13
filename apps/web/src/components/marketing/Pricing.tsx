@@ -24,11 +24,11 @@ export function Pricing() {
           Pricing
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Simple pricing. Start free for 7 days.
+          A plan that fits the way you publish.
         </h2>
         <p className="text-base leading-relaxed text-muted sm:text-lg">
-          Pick a plan for how many networks and agents you run — upgrade when
-          autopilot needs more room.
+          Start with the accounts and seats you need. Move up when your team or
+          client list grows.
         </p>
         <div
           className="marketing-control mt-2 flex items-center gap-1 border border-border/50 bg-surface px-1.5 py-1"
@@ -120,7 +120,9 @@ function PricingCard({
           </span>
           <span className="text-sm text-muted">
             {plan.period}
-            {isYearly && <span className="text-accent"> · yearly</span>}
+            {isYearly && (
+              <span className="text-accent"> · billed annually</span>
+            )}
           </span>
         </div>
 

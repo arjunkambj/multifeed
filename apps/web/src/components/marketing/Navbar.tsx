@@ -89,7 +89,7 @@ export function Navbar() {
             className={`${buttonVariants({ size: "sm" })} button`}
             href="/sign-in"
           >
-            Get started
+            Plan a post
           </Link>
           <button
             aria-expanded={isMenuOpen}

@@ -20,11 +20,11 @@ export function Features() {
           Features
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Agents plan. You approve. Networks publish.
+          Create once. Tailor every channel.
         </h2>
         <p className="text-base leading-relaxed text-muted sm:text-lg">
-          Autopilot for generation and scheduling — with a visual calendar so
-          nothing ships without your eyes on it.
+          Move from first draft to scheduled post without copying, pasting, or
+          losing track of what goes live next.
         </p>
       </div>
 

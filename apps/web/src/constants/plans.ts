@@ -12,7 +12,7 @@ export const PLANS: Plan[] = [
     key: "creator",
     name: "Creator",
     description:
-      "Best for solo creators and founders scheduling across core channels.",
+      "For creators and founders building a consistent social presence.",
     prices: {
       month: 29,
       year: 23,
@@ -31,7 +31,7 @@ export const PLANS: Plan[] = [
   {
     key: "growth",
     name: "Growth",
-    description: "Best for teams managing multiple brands and calendars.",
+    description: "For teams coordinating multiple brands and calendars.",
     prices: {
       month: 59,
       year: 47,
@@ -50,7 +50,7 @@ export const PLANS: Plan[] = [
   {
     key: "agency",
     name: "Agency",
-    description: "Best for agencies and brands with high-volume publishing.",
+    description: "For agencies managing high-volume client publishing.",
     prices: {
       month: 119,
       year: 95,

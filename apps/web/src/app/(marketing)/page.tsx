@@ -6,27 +6,27 @@ import { HowItWorks } from "@/components/marketing/HowItWorks";
 import { Footer } from "@/components/marketing/Footer";
 import { FAQ } from "@/components/marketing/FAQ";
 import { Features } from "@/components/marketing/Feature";
-import { Testimonitals } from "@/components/marketing/Testimonial";
 import { Pricing } from "@/components/marketing/Pricing";
 import { MarketingMarquee } from "@/components/marketing/MarketingMarquee";
 import { WhyUS } from "@/components/marketing/WhyUS";
 import { MarketingAnimations } from "@/components/marketing/MarketingAnimations";
+import { UseCases } from "@/components/marketing/UseCases";
 
 export const metadata: Metadata = {
-  title: "Multi Feed | Run social on autopilot with AI agents",
+  title: "Multi Feed | Plan and schedule social posts in one place",
   description:
-    "Plan, generate, and schedule posts automatically to 30+ social networks — then review everything in a visual calendar. Use Claude, ChatGPT, Codex, Cursor, and more.",
+    "Create, tailor, and schedule posts for Instagram, TikTok, YouTube, LinkedIn, X, Facebook, and Threads from one visual content calendar.",
   openGraph: {
-    title: "Multi Feed | Run social on autopilot with AI agents",
+    title: "Multi Feed | Plan once. Show up everywhere.",
     description:
-      "Plan, generate, and schedule posts to 30+ networks with AI agents — then review and edit on a visual calendar.",
+      "Create, tailor, and schedule social posts across seven platforms from one visual calendar.",
     siteName: "Multi Feed",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Multi Feed | Run social on autopilot with AI agents",
+    title: "Multi Feed | Plan once. Show up everywhere.",
     description:
-      "Plan, generate, and schedule posts to 30+ networks with AI agents — then review and edit on a visual calendar.",
+      "Create, tailor, and schedule social posts across seven platforms from one visual calendar.",
   },
 };
 
@@ -40,7 +40,7 @@ export default function Home() {
       <Features />
       <WhyUS />
       <HowItWorks />
-      <Testimonitals />
+      <UseCases />
       <Pricing />
       <FAQ />
       <Footer />
