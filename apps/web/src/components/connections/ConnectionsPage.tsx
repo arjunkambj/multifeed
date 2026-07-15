@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button, Spinner, toast } from "@heroui/react";
+import { Button, Modal, Spinner, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -31,6 +31,10 @@ export function ConnectionsPage() {
 
   const [connecting, setConnecting] = useState<OAuthPlatform | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
+  const [accountToDisconnect, setAccountToDisconnect] = useState<{
+    id: Id<"connectedAccounts">;
+    username: string;
+  } | null>(null);
   const handledFlash = useRef("");
   const connected = searchParams.get("connected") ?? "";
   const oauthError = searchParams.get("error") ?? "";
@@ -91,18 +95,11 @@ export function ConnectionsPage() {
     }
   };
 
-  const onDisconnect = async (
-    accountId: Id<"connectedAccounts">,
-    username: string,
-  ) => {
-    if (
-      !window.confirm(`Disconnect @${username}? You can reconnect it anytime.`)
-    ) {
-      return;
-    }
+  const onDisconnect = async (accountId: Id<"connectedAccounts">) => {
     setDisconnecting(accountId);
     try {
       await disconnect({ accountId });
+      setAccountToDisconnect(null);
       toast.success("Account disconnected.", { timeout: 3000 });
     } catch (err) {
       toast.danger(
@@ -115,141 +112,193 @@ export function ConnectionsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <DashboardPageTitle
-        title="Connections"
-        description="Connect and manage social accounts from one workspace. Tokens are encrypted for publishing."
-      />
+    <>
+      <div className="flex flex-col gap-6">
+        <DashboardPageTitle
+          title="Connections"
+          description="Connect and manage social accounts from one workspace. Tokens are encrypted for publishing."
+        />
 
-      {accounts === undefined ? (
-        <div
-          className="flex min-h-52 flex-col items-center justify-center gap-3"
-          role="status"
-          aria-live="polite"
-          aria-busy="true"
-        >
-          <Spinner color="accent" size="lg" />
-          <p className="text-sm text-muted">Loading connections…</p>
-        </div>
-      ) : (
-        <section className="divide-y divide-border/70">
-          {CONNECTABLE_PLATFORMS.map((platform) => {
-            const meta = PLATFORM_META[platform] ?? {
-              label: platform,
-              icon: "hugeicons:link-01",
-              brand: "#666666",
-            };
-            const linked = byPlatform.get(platform) ?? [];
-            const isConnecting = connecting === platform;
-            const hasAccounts = linked.length > 0;
+        {accounts === undefined ? (
+          <div
+            className="flex min-h-52 flex-col items-center justify-center gap-3"
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+          >
+            <Spinner color="accent" size="lg" />
+            <p className="text-sm text-muted">Loading connections…</p>
+          </div>
+        ) : (
+          <section className="divide-y divide-border/70">
+            {CONNECTABLE_PLATFORMS.map((platform) => {
+              const meta = PLATFORM_META[platform] ?? {
+                label: platform,
+                icon: "hugeicons:link-01",
+                brand: "#666666",
+              };
+              const linked = byPlatform.get(platform) ?? [];
+              const isConnecting = connecting === platform;
+              const hasAccounts = linked.length > 0;
 
-            return (
-              <div
-                key={platform}
-                className="grid gap-3 py-3.5 first:pt-0 last:pb-0 md:grid-cols-[220px_minmax(0,1fr)] md:items-center"
-              >
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <span
-                    className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white"
-                    style={{
-                      backgroundColor: meta.brand,
-                      color: meta.foreground ?? "#FFFFFF",
-                    }}
-                  >
-                    <Icon icon={meta.icon} width={16} />
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    className="justify-start"
-                    isDisabled={connecting !== null && !isConnecting}
-                    isPending={isConnecting}
-                    onPress={() => void onConnect(platform)}
-                  >
-                    {isConnecting ? (
-                      <>
-                        <Spinner color="current" size="sm" />
-                        Redirecting…
-                      </>
-                    ) : hasAccounts ? (
-                      `Add ${meta.label}`
+              return (
+                <div
+                  key={platform}
+                  className="grid gap-3 py-3.5 first:pt-0 last:pb-0 md:grid-cols-[220px_minmax(0,1fr)] md:items-center"
+                >
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span
+                      className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white"
+                      style={{
+                        backgroundColor: meta.brand,
+                        color: meta.foreground ?? "#FFFFFF",
+                      }}
+                    >
+                      <Icon icon={meta.icon} width={16} />
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      className="justify-start"
+                      isDisabled={connecting !== null && !isConnecting}
+                      isPending={isConnecting}
+                      onPress={() => void onConnect(platform)}
+                    >
+                      {isConnecting ? (
+                        <>
+                          <Spinner color="current" size="sm" />
+                          Redirecting…
+                        </>
+                      ) : hasAccounts ? (
+                        `Add ${meta.label}`
+                      ) : (
+                        `Connect ${meta.label}`
+                      )}
+                    </Button>
+                  </div>
+
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    {linked.length === 0 ? (
+                      <p className="text-xs text-muted">
+                        No {meta.label} accounts connected
+                      </p>
                     ) : (
-                      `Connect ${meta.label}`
-                    )}
-                  </Button>
-                </div>
-
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  {linked.length === 0 ? (
-                    <p className="text-xs text-muted">
-                      No {meta.label} accounts connected
-                    </p>
-                  ) : (
-                    linked.map((account) => {
-                      const needsAttention = account.status !== "active";
-                      return (
-                        <div
-                          key={account._id}
-                          className={[
-                            "flex max-w-full items-center gap-2 rounded-full bg-surface-secondary py-1 pl-1.5 pr-1",
-                            needsAttention
-                              ? "ring-1 ring-warning/50"
-                              : "",
-                          ].join(" ")}
-                        >
-                          {account.avatarUrl ? (
-                            <RemoteAvatar
-                              src={account.avatarUrl}
-                              size={24}
-                              className="size-6 rounded-full object-cover"
+                      linked.map((account) => {
+                        const needsAttention = account.status !== "active";
+                        return (
+                          <div
+                            key={account._id}
+                            className={[
+                              "flex max-w-full items-center gap-2 rounded-full bg-surface-secondary py-1 pl-1.5 pr-1",
+                              needsAttention ? "ring-1 ring-warning/50" : "",
+                            ].join(" ")}
+                          >
+                            {account.avatarUrl ? (
+                              <RemoteAvatar
+                                src={account.avatarUrl}
+                                size={24}
+                                className="size-6 rounded-full object-cover"
+                              />
+                            ) : (
+                              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-semibold">
+                                {account.username.slice(0, 1).toUpperCase()}
+                              </span>
+                            )}
+                            <span
+                              className={`size-1.5 shrink-0 rounded-full ${statusDot[account.status] ?? "bg-muted"}`}
+                              title={account.status}
                             />
-                          ) : (
-                            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-semibold">
-                              {account.username.slice(0, 1).toUpperCase()}
-                            </span>
-                          )}
-                          <span
-                            className={`size-1.5 shrink-0 rounded-full ${statusDot[account.status] ?? "bg-muted"}`}
-                            title={account.status}
-                          />
-                          <p className="max-w-40 truncate text-xs font-medium">
-                            @{account.username}
-                          </p>
-                          {needsAttention && (
+                            <p className="max-w-40 truncate text-xs font-medium">
+                              @{account.username}
+                            </p>
+                            {needsAttention && (
+                              <Button
+                                size="sm"
+                                variant="tertiary"
+                                className="h-6 min-h-6 px-1.5 text-[11px] text-warning"
+                                isDisabled={
+                                  connecting !== null && !isConnecting
+                                }
+                                isPending={isConnecting}
+                                onPress={() => void onConnect(platform)}
+                              >
+                                Reconnect
+                              </Button>
+                            )}
                             <Button
+                              isIconOnly
                               size="sm"
                               variant="tertiary"
-                              className="h-6 min-h-6 px-1.5 text-[11px] text-warning"
-                              isDisabled={connecting !== null && !isConnecting}
-                              isPending={isConnecting}
-                              onPress={() => void onConnect(platform)}
+                              aria-label={`Disconnect @${account.username}`}
+                              className="size-6 min-w-6 rounded-full text-muted hover:text-danger"
+                              isPending={disconnecting === account._id}
+                              onPress={() =>
+                                setAccountToDisconnect({
+                                  id: account._id,
+                                  username: account.username,
+                                })
+                              }
                             >
-                              Reconnect
+                              <Icon icon="hugeicons:delete-02" width={13} />
                             </Button>
-                          )}
-                          <Button
-                            isIconOnly
-                            size="sm"
-                            variant="tertiary"
-                            aria-label={`Disconnect @${account.username}`}
-                            className="size-6 min-w-6 rounded-full text-muted hover:text-danger"
-                            isPending={disconnecting === account._id}
-                            onPress={() =>
-                              void onDisconnect(account._id, account.username)
-                            }
-                          >
-                            <Icon icon="hugeicons:delete-02" width={13} />
-                          </Button>
-                        </div>
-                      );
-                    })
-                  )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </section>
-      )}
-    </div>
+              );
+            })}
+          </section>
+        )}
+      </div>
+
+      <Modal
+        isOpen={accountToDisconnect !== null}
+        onOpenChange={(open) => {
+          if (!open && disconnecting === null) setAccountToDisconnect(null);
+        }}
+      >
+        <Modal.Backdrop
+          variant="blur"
+          isDismissable={disconnecting === null}
+          isKeyboardDismissDisabled={disconnecting !== null}
+        >
+          <Modal.Container placement="center" size="sm">
+            <Modal.Dialog>
+              <Modal.Header>
+                <Modal.Heading>Disconnect account?</Modal.Heading>
+                <p className="text-sm leading-relaxed text-muted">
+                  Disconnect @{accountToDisconnect?.username}? You can reconnect
+                  it anytime.
+                </p>
+              </Modal.Header>
+              <Modal.Footer>
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  isDisabled={disconnecting !== null}
+                  onPress={() => setAccountToDisconnect(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  isPending={disconnecting !== null}
+                  onPress={() => {
+                    if (accountToDisconnect) {
+                      void onDisconnect(accountToDisconnect.id);
+                    }
+                  }}
+                >
+                  Disconnect
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+    </>
   );
 }

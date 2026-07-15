@@ -101,7 +101,13 @@ export const beginExchange = mutation({
     }
 
     if (session.phase !== "authorize") {
-      return null;
+      const status =
+        session.phase === "completed" ? "completed" : "in_progress";
+      return {
+        status,
+        platform: session.platform,
+        returnTo: session.returnTo,
+      };
     }
 
     const codeVerifier = session.codeVerifier;
@@ -111,13 +117,43 @@ export const beginExchange = mutation({
     });
 
     return {
+      status: "exchange" as const,
       state: session.state,
       platform: session.platform,
       codeVerifier,
       returnTo: session.returnTo,
-      phase: "exchanging" as const,
       expiresAt: session.expiresAt,
     };
+  },
+});
+
+/** Keep a short-lived completion marker so repeated provider callbacks succeed. */
+export const complete = mutation({
+  args: { state: v.string(), serverSecret: v.string() },
+  handler: async (ctx, args) => {
+    requireOAuthServer(args.serverSecret);
+    const user = await requireUser(ctx);
+    const session = await ctx.db
+      .query("oauthSessions")
+      .withIndex("by_state", (q) => q.eq("state", args.state))
+      .unique();
+
+    if (
+      !session ||
+      session.teamId !== user.selectedTeamId ||
+      session.userId !== user.id
+    ) {
+      throw new Error("OAuth session not found");
+    }
+
+    if (session.phase === "authorize") {
+      throw new Error("OAuth exchange has not started");
+    }
+    if (session.phase === "exchanging") {
+      await ctx.db.patch(session._id, { phase: "completed" });
+    }
+
+    return { ok: true as const };
   },
 });
 

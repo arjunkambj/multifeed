@@ -23,6 +23,12 @@ function errorRedirect(code: string) {
   return redirect(connectionsUrl({ error: code }));
 }
 
+function connectedRedirect(returnTo: unknown, platform: string) {
+  return redirect(
+    new URL(connectedReturnPath(returnTo, platform), appOrigin()).toString(),
+  );
+}
+
 export async function GET(request: NextRequest) {
   const token = await getHexclaveConvexServerToken(request);
   if (token == null) {
@@ -73,6 +79,13 @@ export async function GET(request: NextRequest) {
 
     if (!session) {
       return errorRedirect("session_expired");
+    }
+
+    if (session.status === "completed") {
+      return connectedRedirect(session.returnTo, session.platform);
+    }
+    if (session.status === "in_progress") {
+      return redirect(connectionsUrl());
     }
 
     if (!isOAuthPlatform(session.platform)) {
@@ -137,16 +150,11 @@ export async function GET(request: NextRequest) {
       });
 
       await fetchMutation(
-        api.oauth.sessions.remove,
+        api.oauth.sessions.complete,
         { state, serverSecret },
         { token },
       );
-      return redirect(
-        new URL(
-          connectedReturnPath(session.returnTo, session.platform),
-          appOrigin(),
-        ).toString(),
-      );
+      return connectedRedirect(session.returnTo, session.platform);
     }
 
     const profile = await connector.fetchProfile(tokens.accessToken);
@@ -157,17 +165,12 @@ export async function GET(request: NextRequest) {
       accounts: [{ tokens, profile }],
     });
     await fetchMutation(
-      api.oauth.sessions.remove,
+      api.oauth.sessions.complete,
       { state, serverSecret },
       { token },
     );
 
-    return redirect(
-      new URL(
-        connectedReturnPath(session.returnTo, session.platform),
-        appOrigin(),
-      ).toString(),
-    );
+    return connectedRedirect(session.returnTo, session.platform);
   } catch (err) {
     const message = err instanceof Error ? err.message : "OAuth failed";
     console.error("[oauth/callback]", message);

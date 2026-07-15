@@ -158,6 +158,8 @@ export default defineSchema({
       v.literal("authorize"),
       /** Authorize consumed; token exchange in progress (single-use). */
       v.literal("exchanging"),
+      /** Account saved; retain briefly so repeated provider callbacks are safe. */
+      v.literal("completed"),
     ),
     createdAt: v.number(),
     expiresAt: v.number(),
