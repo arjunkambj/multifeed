@@ -13,6 +13,10 @@ export default async function DashboardLayout({
     redirect("/sign-in");
   }
 
+  if (!user.selectedTeam) {
+    redirect("/created-org");
+  }
+
   return (
     <DashboardShell
       user={{
