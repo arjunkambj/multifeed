@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 
 import Logo from "@/components/layout/Logo";
+import { policyLinks } from "@/components/marketing/policies/policy-links";
 
 const footerLinks = [
   {
@@ -22,10 +23,7 @@ const footerLinks = [
     title: "Resources",
   },
   {
-    links: [
-      { href: "/terms", name: "Terms" },
-      { href: "/privacy", name: "Privacy" },
-    ],
+    links: policyLinks,
     title: "Legal",
   },
 ] as const;

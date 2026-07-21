@@ -76,9 +76,9 @@ export function SettingsLayout() {
             </p>
             <a
               className="text-sm font-medium text-accent hover:underline"
-              href="mailto:support@multifeed.app"
+              href="mailto:support@themultifeed.com"
             >
-              support@multifeed.app
+              support@themultifeed.com
             </a>
           </div>
         </Tabs.Panel>

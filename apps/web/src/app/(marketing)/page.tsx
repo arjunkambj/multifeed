@@ -16,11 +16,13 @@ export const metadata: Metadata = {
   title: "Multi Feed | Plan and schedule social posts in one place",
   description:
     "Create, tailor, and schedule posts for Instagram, TikTok, YouTube, LinkedIn, X, Facebook, and Threads from one visual content calendar.",
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Multi Feed | Plan once. Show up everywhere.",
     description:
       "Create, tailor, and schedule social posts across seven platforms from one visual calendar.",
     siteName: "Multi Feed",
+    url: "/",
   },
   twitter: {
     card: "summary_large_image",

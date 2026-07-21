@@ -18,6 +18,8 @@ const bricolage = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://themultifeed.com"),
+  applicationName: "Multi Feed",
   title: "Multi Feed | Run social on autopilot with AI agents",
   description:
     "Plan, generate, and schedule posts automatically to 30+ social networks — then review everything in a visual calendar.",

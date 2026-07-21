@@ -45,7 +45,7 @@ OAuth redirect on every provider console:
 
 ```
 http://localhost:3000/api/oauth/callback
-https://<your-domain>/api/oauth/callback
+https://themultifeed.com/api/oauth/callback
 ```
 
 For local provider setups that require HTTPS, deploy `apps/oauth-relay` and set
