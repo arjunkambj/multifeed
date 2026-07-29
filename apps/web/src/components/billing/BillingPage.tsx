@@ -5,7 +5,7 @@ import { Button, Spinner, Switch, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { PLANS } from "@/constants/plans";
+import { FREE_TRIAL, PLANS } from "@/constants/plans";
 import type { BillingInterval, PlanKey } from "@/constants/plans";
 
 const intervalLabels = {
@@ -93,7 +93,7 @@ export function BillingPage() {
               <span className="text-sm text-muted">
                 {subscription
                   ? `${statusLabel(subscription.status)} · ${subscription.interval === "year" ? "Yearly" : "Monthly"}`
-                  : "Start a trial to activate billing."}
+                  : `${FREE_TRIAL.summary} Choose a plan to activate billing.`}
               </span>
             </div>
           </div>
@@ -216,7 +216,7 @@ export function BillingPage() {
                   {({ isPending: pending }) => (
                     <>
                       {pending ? <Spinner color="current" size="sm" /> : null}
-                      {isCurrent ? "Current plan" : "Start 7-day free trial"}
+                      {isCurrent ? "Current plan" : FREE_TRIAL.cta}
                     </>
                   )}
                 </Button>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { pricingPlans } from "@/constants/landing-page";
+import { FREE_TRIAL } from "@/constants/plans";
 
 export function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
@@ -27,8 +28,8 @@ export function Pricing() {
           A plan that fits the way you publish.
         </h2>
         <p className="text-base leading-relaxed text-muted sm:text-lg">
-          Start with the accounts and seats you need. Move up when your team or
-          client list grows.
+          {FREE_TRIAL.summary} Start with the accounts and seats you need, then
+          move up when your team or client list grows.
         </p>
         <div
           className="marketing-control mt-2 flex items-center gap-1 border border-border/50 bg-surface px-1.5 py-1"
