@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { BillingInterval, PlanKey } from "@/constants/plans";
+import type { BillingInterval, PlanKey } from "@multifeed/plans";
 
 type DodoEnvironment = "test_mode" | "live_mode";
 
@@ -28,7 +28,5 @@ export const getDodoEnvironment = (): DodoEnvironment =>
 
 export const getDodoApiKey = () => optionalEnv("DODO_PAYMENTS_API_KEY");
 
-export const getDodoProductId = (
-  planKey: PlanKey,
-  interval: BillingInterval,
-) => optionalEnv(productEnvNames[planKey][interval]);
+export const getDodoProductId = (planKey: PlanKey, interval: BillingInterval) =>
+  optionalEnv(productEnvNames[planKey][interval]);

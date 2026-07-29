@@ -6,20 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TeamMembersTable } from "@/components/team/TeamMembersTable";
 import { TeamStats } from "@/components/team/TeamStats";
 import { TeamTableSkeleton } from "@/components/team/TeamTableSkeleton";
-
-type TeamMember = {
-  id: string;
-  displayName: string | null;
-  lastActiveAt: string;
-  primaryEmail: string | null;
-  profileImageUrl: string | null;
-};
-
-type TeamInvitation = {
-  id: string;
-  expiresAt: string;
-  recipientEmail: string | null;
-};
+import { loadTeamData, teamDataQueryKey } from "@/lib/team-data";
 
 type TeamTableRow = {
   email: string | null;
@@ -38,33 +25,12 @@ const formatDate = (value: Date) =>
     year: "numeric",
   }).format(value);
 
-const loadTeamData = async ({ signal }: { signal: AbortSignal }) => {
-  const response = await fetch("/api/team-members", { signal });
-  const payload = (await response.json()) as
-    | { invitations: TeamInvitation[]; members: TeamMember[] }
-    | { error: string };
-
-  if (!response.ok) {
-    if ("error" in payload) {
-      throw new Error(payload.error);
-    }
-
-    throw new Error("Unable to load team members");
-  }
-
-  if (!("invitations" in payload) || !("members" in payload)) {
-    throw new Error("Missing team data response");
-  }
-
-  return payload;
-};
-
 export type { TeamTableRow };
 
 export function TeamMembersContent({ team }: { team: Team }) {
   const teamDataQuery = useQuery({
     queryFn: loadTeamData,
-    queryKey: ["team-data", team.id],
+    queryKey: teamDataQueryKey(team.id),
   });
   const isPending = teamDataQuery.isPending;
   const teamMembers = teamDataQuery.data?.members ?? [];
@@ -97,7 +63,7 @@ export function TeamMembersContent({ team }: { team: Team }) {
       <TeamStats
         invitationsCount={invitations.length}
         membersCount={teamMembers.length}
-        team={team}
+        teamSeatLimit={teamDataQuery.data?.entitlements.teamSeatLimit}
       />
 
       {isPending ? (

@@ -3,8 +3,8 @@ import { ConvexHttpClient } from "convex/browser";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
-import { getPlan } from "@/constants/plans";
-import type { BillingInterval, PlanKey } from "@/constants/plans";
+import { getPlan } from "@multifeed/plans";
+import type { BillingInterval, PlanKey } from "@multifeed/plans";
 import {
   getDodoApiKey,
   getDodoEnvironment,

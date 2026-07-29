@@ -25,6 +25,7 @@ const statusDot: Record<Doc<"connectedAccounts">["status"], string> = {
 
 export function ConnectionsPage() {
   const accounts = useQuery(api.oauth.accounts.list, {});
+  const entitlements = useQuery(api.billing.getEntitlements, {});
   const disconnect = useMutation(api.oauth.accounts.disconnect);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -39,6 +40,15 @@ export function ConnectionsPage() {
   const connected = searchParams.get("connected") ?? "";
   const oauthError = searchParams.get("error") ?? "";
   const flashKey = `${connected}\0${oauthError}`;
+  const connectedAccountsCount =
+    accounts?.filter((account) => account.status !== "revoked").length ?? 0;
+  const accountLimit = entitlements?.connectedAccountLimit;
+  const connectionUsage =
+    entitlements === undefined
+      ? "Loading plan limits…"
+      : accountLimit === null
+        ? `${connectedAccountsCount} connected · Unlimited on your plan`
+        : `${connectedAccountsCount} of ${accountLimit} connections used`;
 
   useEffect(() => {
     if (flashKey === "\0") return;
@@ -116,7 +126,7 @@ export function ConnectionsPage() {
       <div className="flex flex-col gap-6">
         <DashboardPageTitle
           title="Connections"
-          description="Connect and manage social accounts from one workspace. Tokens are encrypted for publishing."
+          description={`Connect and manage social accounts from one workspace. ${connectionUsage}.`}
         />
 
         {accounts === undefined ? (

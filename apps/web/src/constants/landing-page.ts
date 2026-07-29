@@ -1,4 +1,4 @@
-import { FREE_TRIAL, PLANS, type PlanKey } from "./plans";
+import { FREE_TRIAL, PLANS, type PlanKey } from "@multifeed/plans";
 
 export const brands = [
   ["TikTok", "https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg"],

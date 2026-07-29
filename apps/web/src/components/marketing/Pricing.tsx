@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { pricingPlans } from "@/constants/landing-page";
-import { FREE_TRIAL } from "@/constants/plans";
+import { FREE_TRIAL } from "@multifeed/plans";
 
 export function Pricing() {
   const [isYearly, setIsYearly] = useState(false);

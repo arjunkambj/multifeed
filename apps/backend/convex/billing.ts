@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { getPlanLimits, type PlanKey } from "@multifeed/plans";
 import type { Doc } from "./_generated/dataModel";
 import {
   internalMutation,
@@ -8,7 +9,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { requireUser } from "./hexclave/auth";
-import { billingInterval, planKey } from "./schema";
+import { billingInterval, planKey as planKeyValidator } from "./schema";
 
 /** Subscription statuses that grant product access. */
 export const ACTIVE_BILLING = new Set([
@@ -43,7 +44,18 @@ const EVENT_STATUS: Record<string, BillingStatus> = {
   "subscription.expired": "expired",
 };
 
-const PLAN_RANK = { creator: 0, growth: 1, agency: 2 } as const;
+const PLAN_RANK: Record<PlanKey, number> = {
+  creator: 0,
+  growth: 1,
+  agency: 2,
+};
+
+const entitlementValidator = v.object({
+  planKey: v.union(planKeyValidator, v.null()),
+  hasActivePlan: v.boolean(),
+  connectedAccountLimit: v.union(v.number(), v.null()),
+  teamSeatLimit: v.number(),
+});
 
 function str(...values: unknown[]) {
   for (const value of values) {
@@ -59,7 +71,7 @@ function parseTime(value: unknown) {
   return Date.parse(value);
 }
 
-function asPlan(value: unknown) {
+function asPlan(value: unknown): PlanKey | undefined {
   return value === "creator" || value === "growth" || value === "agency"
     ? value
     : undefined;
@@ -69,9 +81,21 @@ function asInterval(value: unknown) {
   return value === "month" || value === "year" ? value : undefined;
 }
 
-function statusRank(status: string) {
-  if (ACTIVE_BILLING.has(status)) return 2;
-  if (status === "pending") return 1;
+export function grantsPlanAccess(
+  sub: Pick<Doc<"billingSubscriptions">, "status" | "accessEndsAt">,
+  now = Date.now(),
+) {
+  return (
+    ACTIVE_BILLING.has(sub.status) ||
+    (sub.status === "cancelled" &&
+      sub.accessEndsAt !== undefined &&
+      sub.accessEndsAt > now)
+  );
+}
+
+function statusRank(sub: Doc<"billingSubscriptions">, now: number) {
+  if (grantsPlanAccess(sub, now)) return 2;
+  if (sub.status === "pending") return 1;
   return 0;
 }
 
@@ -79,6 +103,7 @@ export async function latestForTeam(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
 ) {
+  const now = Date.now();
   const rows = await Promise.all(
     STATUSES.map((status) =>
       ctx.db
@@ -96,8 +121,7 @@ export async function latestForTeam(
       .flatMap((row) => (row ? [row] : []))
       .sort(
         (a, b) =>
-          statusRank(b.status) - statusRank(a.status) ||
-          b.updatedAt - a.updatedAt,
+          statusRank(b, now) - statusRank(a, now) || b.updatedAt - a.updatedAt,
       )[0] ?? null
   );
 }
@@ -113,12 +137,9 @@ function snapshot(sub: Doc<"billingSubscriptions">) {
   };
 }
 
-export async function hasActive(
-  ctx: QueryCtx | MutationCtx,
-  teamId: string,
-) {
+export async function hasActive(ctx: QueryCtx | MutationCtx, teamId: string) {
   const sub = await latestForTeam(ctx, teamId);
-  return sub ? ACTIVE_BILLING.has(sub.status) : false;
+  return sub ? grantsPlanAccess(sub) : false;
 }
 
 export async function hasPlan(
@@ -128,9 +149,35 @@ export async function hasPlan(
 ) {
   const sub = await latestForTeam(ctx, teamId);
   const plan = asPlan(sub?.planKey);
-  if (!sub || !plan || !ACTIVE_BILLING.has(sub.status)) return false;
+  if (!sub || !plan || !grantsPlanAccess(sub)) return false;
   return PLAN_RANK[plan] >= PLAN_RANK[minimum];
 }
+
+export async function entitlementsForTeam(
+  ctx: QueryCtx | MutationCtx,
+  teamId: string,
+) {
+  const sub = await latestForTeam(ctx, teamId);
+  const plan = sub && grantsPlanAccess(sub) ? asPlan(sub.planKey) : undefined;
+  const limits = getPlanLimits(plan ?? null);
+
+  return {
+    planKey: plan ?? null,
+    hasActivePlan: plan !== undefined,
+    connectedAccountLimit: limits.connectedAccounts,
+    teamSeatLimit: limits.teamSeats,
+  };
+}
+
+/** Current plan limits for the authenticated team. */
+export const getEntitlements = query({
+  args: {},
+  returns: entitlementValidator,
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    return await entitlementsForTeam(ctx, user.selectedTeamId);
+  },
+});
 
 /** Current team subscription snapshot (or null). */
 export const getSubscription = query({
@@ -145,7 +192,7 @@ export const getSubscription = query({
 /** Persist pending checkout after Dodo session is created. */
 export const startCheckout = mutation({
   args: {
-    planKey,
+    planKey: planKeyValidator,
     interval: billingInterval,
     dodoProductId: v.string(),
     dodoCheckoutSessionId: v.optional(v.string()),

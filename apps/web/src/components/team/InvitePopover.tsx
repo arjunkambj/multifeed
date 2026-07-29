@@ -3,7 +3,7 @@
 import type { Team } from "@hexclave/next";
 
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Description,
@@ -15,19 +15,45 @@ import {
   toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { loadTeamData, teamDataQueryKey } from "@/lib/team-data";
 
 export function InvitePopover({ team }: { team: Team }) {
   const queryClient = useQueryClient();
+  const teamDataQuery = useQuery({
+    queryFn: loadTeamData,
+    queryKey: teamDataQueryKey(team.id),
+  });
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const membersCount = teamDataQuery.data?.members.length ?? 0;
+  const invitationsCount = teamDataQuery.data?.invitations.length ?? 0;
+  const seatLimit = teamDataQuery.data?.entitlements.teamSeatLimit;
+  const usedSeats = membersCount + invitationsCount;
+  const isAtLimit = seatLimit !== undefined && usedSeats >= seatLimit;
 
   const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSending(true);
 
     try {
-      await team.inviteUser({ email: email.trim() });
-      await queryClient.invalidateQueries({ queryKey: ["team-data", team.id] });
+      const response = await fetch("/api/team-members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const payload = (await response.json()) as
+        | { ok: true }
+        | { error: string };
+
+      if (!response.ok || !("ok" in payload)) {
+        throw new Error(
+          "error" in payload ? payload.error : "Could not send team invitation",
+        );
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: teamDataQueryKey(team.id),
+      });
       setEmail("");
       toast.success("Invite sent.", { timeout: 3000 });
     } catch (err) {
@@ -63,11 +89,19 @@ export function InvitePopover({ team }: { team: Team }) {
               <Label>Email address</Label>
               <Input autoComplete="email" placeholder="teammate@company.com" />
               <Description>Hexclave will email a team invitation.</Description>
+              {seatLimit !== undefined && (
+                <Description>
+                  {usedSeats} of {seatLimit} plan seats used
+                  {isAtLimit
+                    ? ". Upgrade your plan to invite more people."
+                    : "."}
+                </Description>
+              )}
             </TextField>
 
             <div className="flex justify-end">
               <Button
-                isDisabled={!email.trim() || isSending}
+                isDisabled={!email.trim() || isSending || isAtLimit}
                 isPending={isSending}
                 type="submit"
               >

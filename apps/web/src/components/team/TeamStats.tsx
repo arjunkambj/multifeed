@@ -1,12 +1,14 @@
 export function TeamStats({
   invitationsCount,
   membersCount,
-  team,
+  teamSeatLimit,
 }: {
   invitationsCount: number;
   membersCount: number;
-  team: { id: string };
+  teamSeatLimit: number | undefined;
 }) {
+  const usedSeats = invitationsCount + membersCount;
+
   return (
     <section className="grid gap-4 md:grid-cols-3">
       <div className="rounded-2xl bg-surface-secondary p-5">
@@ -22,9 +24,11 @@ export function TeamStats({
         </p>
       </div>
       <div className="rounded-2xl bg-surface-secondary p-5">
-        <p className="text-sm text-muted">Org ID</p>
-        <p className="mt-2 truncate font-mono text-sm font-medium text-foreground">
-          {team.id}
+        <p className="text-sm text-muted">Plan seats used</p>
+        <p className="mt-2 text-2xl font-semibold text-foreground">
+          {teamSeatLimit === undefined
+            ? "—"
+            : `${usedSeats} / ${teamSeatLimit}`}
         </p>
       </div>
     </section>

@@ -5,8 +5,8 @@ import { Button, Spinner, Switch, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { FREE_TRIAL, PLANS } from "@/constants/plans";
-import type { BillingInterval, PlanKey } from "@/constants/plans";
+import { FREE_TRIAL, PLANS } from "@multifeed/plans";
+import type { BillingInterval, PlanKey } from "@multifeed/plans";
 
 const intervalLabels = {
   month: "/month",
