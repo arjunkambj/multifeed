@@ -10,7 +10,7 @@ export default function Logo({
       className={`group flex cursor-pointer items-center gap-2 text-foreground transition-colors hover:text-accent${className ? ` ${className}` : ""}`}
     >
       <svg
-        aria-label={markOnly ? "Multi Feed" : undefined}
+        aria-label={markOnly ? "MultiFeed" : undefined}
         aria-hidden={!markOnly}
         className="size-8 -translate-y-px shrink-0"
         fill="none"
@@ -27,7 +27,7 @@ export default function Logo({
       </svg>
       {!markOnly && (
         <span className="font-display text-lg font-bold leading-none tracking-tight">
-          Multi Feed
+          MultiFeed
         </span>
       )}
     </div>

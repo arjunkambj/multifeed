@@ -1,4 +1,4 @@
-# Multi Feed
+# MultiFeed
 
 Social scheduling app built with Next.js, Convex, Hexclave, and Turborepo.
 

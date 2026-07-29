@@ -1,6 +1,6 @@
-# Multi Feed Web
+# MultiFeed Web
 
-`apps/web` is the public Multi Feed site.
+`apps/web` is the public MultiFeed site.
 
 ## Scope
 

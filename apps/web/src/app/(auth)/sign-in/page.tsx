@@ -99,7 +99,7 @@ export default function SignInPage() {
     <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
       <div className="text-center">
         <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
-          Welcome to Multi Feed
+          Welcome to MultiFeed
         </h1>
         <p className="mt-2 text-sm font-light text-muted">
           {step === "email"
@@ -236,7 +236,7 @@ export default function SignInPage() {
       </Button>
 
       <p className="text-center text-xs text-muted">
-        &copy; {new Date().getFullYear()} Multi Feed. All rights reserved.
+        &copy; {new Date().getFullYear()} MultiFeed. All rights reserved.
       </p>
     </div>
   );

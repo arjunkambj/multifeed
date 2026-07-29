@@ -34,7 +34,7 @@ export const faqItems = [
   },
   {
     content:
-      "Multi Feed supports text, images, videos, carousels, Reels, Shorts, and Stories where each connected platform allows them.",
+      "MultiFeed supports text, images, videos, carousels, Reels, Shorts, and Stories where each connected platform allows them.",
     title: "What kinds of posts can I schedule?",
   },
   {
@@ -45,7 +45,7 @@ export const faqItems = [
   {
     content:
       "Yes. Creator includes two seats, Growth includes five, and Agency includes fifteen, so your team can work from the same calendar.",
-    title: "Can my team use Multi Feed?",
+    title: "Can my team use MultiFeed?",
   },
 ] as const;
 
@@ -110,7 +110,7 @@ export const featureItems = [
   },
   {
     description:
-      "Connect your social profiles once. Multi Feed encrypts account tokens and keeps each channel ready when you are.",
+      "Connect your social profiles once. MultiFeed encrypts account tokens and keeps each channel ready when you are.",
     heading: "Secure account connections",
     image:
       "https://framerusercontent.com/images/y25C7HJ1wHWV4u0DZaY5UmLwI.png?scale-down-to=1024&width=1158&height=759",

@@ -127,7 +127,7 @@ export function Footer() {
               </p>
             </div>
             <p className="text-xs text-muted">
-              &copy; {new Date().getFullYear()} Multi Feed. All rights reserved.
+              &copy; {new Date().getFullYear()} MultiFeed. All rights reserved.
             </p>
           </div>
         </div>

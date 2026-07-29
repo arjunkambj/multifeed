@@ -18,7 +18,7 @@ export function WhyUS() {
         data-gsap-heading
       >
         <span className="text-sm font-semibold uppercase tracking-wide text-accent">
-          Why Multi Feed
+          Why MultiFeed
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Less time managing posts. More time making them matter.

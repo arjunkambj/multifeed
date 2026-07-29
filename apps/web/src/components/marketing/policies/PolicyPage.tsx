@@ -19,7 +19,7 @@ export function PolicyPage({ children, description, title }: PolicyPageProps) {
     <main className="min-h-screen bg-background px-5 py-8 text-foreground sm:px-8">
       <div className="mx-auto max-w-3xl">
         <header className="flex items-center justify-between border-b border-border pb-6">
-          <Link aria-label="Multi Feed home" href="/">
+          <Link aria-label="MultiFeed home" href="/">
             <Logo />
           </Link>
           <Link

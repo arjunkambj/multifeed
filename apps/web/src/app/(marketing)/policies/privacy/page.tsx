@@ -8,13 +8,13 @@ import {
 } from "@/components/marketing/policies/policy-links";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Multi Feed",
+  title: "Privacy Policy | MultiFeed",
   description:
-    "How Multi Feed collects, uses, stores, and shares personal and social-platform data.",
+    "How MultiFeed collects, uses, stores, and shares personal and social-platform data.",
   alternates: { canonical: "/policies/privacy" },
   openGraph: {
-    title: "Privacy Policy | Multi Feed",
-    description: "How Multi Feed handles personal and social-platform data.",
+    title: "Privacy Policy | MultiFeed",
+    description: "How MultiFeed handles personal and social-platform data.",
     url: "/policies/privacy",
   },
 };
@@ -22,17 +22,17 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <PolicyPage
-      description="This policy explains what information Multi Feed handles, why we use it, and the choices available to you when you use our website and social media management service."
+      description="This policy explains what information MultiFeed handles, why we use it, and the choices available to you when you use our website and social media management service."
       title="Privacy Policy"
     >
       <section>
         <h2>1. Scope and who we are</h2>
         <p>
-          This Privacy Policy applies to Multi Feed at{" "}
+          This Privacy Policy applies to MultiFeed at{" "}
           <a href={SITE_URL}>{SITE_URL}</a>, including its dashboard, account
           connections, scheduling, publishing, analytics, inbox, billing, and
-          support features. In this policy, “Multi Feed,” “we,” “us,” and “our”
-          refer to the operator of the Multi Feed service.
+          support features. In this policy, “MultiFeed,” “we,” “us,” and “our”
+          refer to the operator of the MultiFeed service.
         </p>
       </section>
 
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             subscription and transaction information. Our payment provider
-            processes payment-card details; Multi Feed receives records such as
+            processes payment-card details; MultiFeed receives records such as
             customer, subscription, product, payment status, and transaction
             identifiers; and
           </li>
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
       <section>
         <h2>3. Data from connected social platforms</h2>
         <p>
-          Multi Feed accesses platform data only after you choose to connect an
+          MultiFeed accesses platform data only after you choose to connect an
           account and approve the permissions shown by that platform. Depending
           on the service and permissions you approve, we may access:
         </p>
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
         </ul>
         <p>
           These connections may include Facebook, Instagram, Threads, LinkedIn,
-          TikTok, YouTube and Google APIs, and X. Multi Feed does not receive or
+          TikTok, YouTube and Google APIs, and X. MultiFeed does not receive or
           store the password you use to sign in to a social platform.
         </p>
       </section>
@@ -140,10 +140,10 @@ export default function PrivacyPage() {
       <section>
         <h2>5. Google user data and Limited Use</h2>
         <p>
-          Multi Feed uses Google user data only to provide or improve the
+          MultiFeed uses Google user data only to provide or improve the
           user-facing features you request, such as connecting a YouTube
           channel, uploading videos, reading channel information, and displaying
-          YouTube analytics. Multi Feed&apos;s use and transfer to any other app
+          YouTube analytics. MultiFeed&apos;s use and transfer to any other app
           of information received from Google APIs will adhere to the{" "}
           <a href="https://developers.google.com/terms/api-services-user-data-policy">
             Google API Services User Data Policy
@@ -171,7 +171,7 @@ export default function PrivacyPage() {
             or publish content;
           </li>
           <li>
-            other authorized members of your Multi Feed workspace, based on the
+            other authorized members of your MultiFeed workspace, based on the
             collaborative nature of the service;
           </li>
           <li>
@@ -192,7 +192,7 @@ export default function PrivacyPage() {
         <p>
           Where applicable law requires a legal basis, we process information to
           perform our contract with you, with your consent, for our legitimate
-          interests in operating and securing Multi Feed, and to comply with
+          interests in operating and securing MultiFeed, and to comply with
           legal obligations. You may withdraw consent for future processing at
           any time, including by disconnecting an integration.
         </p>
@@ -204,16 +204,16 @@ export default function PrivacyPage() {
           We keep information only as long as reasonably necessary to provide
           the service and meet security, dispute-resolution, accounting, and
           legal obligations. OAuth credentials and the related connected-account
-          record are deleted from Multi Feed when you disconnect that account.
+          record are deleted from MultiFeed when you disconnect that account.
           Some billing, security, and transaction records may be kept where law
           requires it or for legitimate fraud-prevention and recordkeeping
           needs.
         </p>
         <p>
-          To remove an integration or request deletion of your full Multi Feed
+          To remove an integration or request deletion of your full MultiFeed
           account and personal data, follow our{" "}
           <Link href="/policies/data-deletion">Data Deletion Instructions</Link>
-          . Deleting data from Multi Feed does not automatically delete a post
+          . Deleting data from MultiFeed does not automatically delete a post
           that has already been published on a third-party platform.
         </p>
       </section>
@@ -232,7 +232,7 @@ export default function PrivacyPage() {
       <section>
         <h2>10. International processing</h2>
         <p>
-          Multi Feed and its service providers may process information in
+          MultiFeed and its service providers may process information in
           countries other than your own. Where required, we use appropriate
           safeguards for international transfers of personal information.
         </p>
@@ -244,7 +244,7 @@ export default function PrivacyPage() {
           Depending on where you live, you may have rights to access, correct,
           export, delete, restrict, or object to the processing of your personal
           information, and to appeal or complain to a data-protection authority.
-          You can disconnect social accounts in Multi Feed and revoke access in
+          You can disconnect social accounts in MultiFeed and revoke access in
           the relevant platform&apos;s security settings. We may verify your
           identity before completing a request.
         </p>
@@ -253,7 +253,7 @@ export default function PrivacyPage() {
       <section>
         <h2>12. Children</h2>
         <p>
-          Multi Feed is intended for people who are at least 18 years old. We do
+          MultiFeed is intended for people who are at least 18 years old. We do
           not knowingly collect personal information from children. Contact us
           if you believe a child has provided information to the service.
         </p>
@@ -262,7 +262,7 @@ export default function PrivacyPage() {
       <section>
         <h2>13. Changes to this policy</h2>
         <p>
-          We may update this policy as Multi Feed changes. We will post the new
+          We may update this policy as MultiFeed changes. We will post the new
           version here, change the effective date, and provide additional notice
           when required by law or when a change materially affects how we use
           previously collected data.

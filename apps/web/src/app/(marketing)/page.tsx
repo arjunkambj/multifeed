@@ -13,20 +13,20 @@ import { MarketingAnimations } from "@/components/marketing/MarketingAnimations"
 import { UseCases } from "@/components/marketing/UseCases";
 
 export const metadata: Metadata = {
-  title: "Multi Feed | Plan and schedule social posts in one place",
+  title: "MultiFeed | Plan and schedule social posts in one place",
   description:
     "Create, tailor, and schedule posts for Instagram, TikTok, YouTube, LinkedIn, X, Facebook, and Threads from one visual content calendar.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Multi Feed | Plan once. Show up everywhere.",
+    title: "MultiFeed | Plan once. Show up everywhere.",
     description:
       "Create, tailor, and schedule social posts across seven platforms from one visual calendar.",
-    siteName: "Multi Feed",
+    siteName: "MultiFeed",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Multi Feed | Plan once. Show up everywhere.",
+    title: "MultiFeed | Plan once. Show up everywhere.",
     description:
       "Create, tailor, and schedule social posts across seven platforms from one visual calendar.",
   },

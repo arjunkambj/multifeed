@@ -559,6 +559,140 @@ export const listInRange = query({
   },
 });
 
+/** Overview KPIs for scheduled publishing activity in a selected date range. */
+export const overviewMetrics = query({
+  args: {
+    startMs: v.number(),
+    endMs: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    if (args.endMs < args.startMs) {
+      throw new Error("End date must be after start date");
+    }
+
+    const durationMs = args.endMs - args.startMs + 1;
+    const previousEndMs = args.startMs - 1;
+    const previousStartMs = previousEndMs - durationMs + 1;
+    const combinedStartMs = previousStartMs;
+    const teamId = user.selectedTeamId;
+
+    const [posts, targets, metricSnapshots, activeAccounts] =
+      await Promise.all([
+        ctx.db
+          .query("posts")
+          .withIndex("by_team_scheduledFor", (q) =>
+            q
+              .eq("teamId", teamId)
+              .gte("scheduledFor", combinedStartMs)
+              .lte("scheduledFor", args.endMs),
+          )
+          .take(2_000),
+        ctx.db
+          .query("postTargets")
+          .withIndex("by_team_scheduledFor", (q) =>
+            q
+              .eq("teamId", teamId)
+              .gte("scheduledFor", combinedStartMs)
+              .lte("scheduledFor", args.endMs),
+          )
+          .take(5_000),
+        ctx.db
+          .query("postMetrics")
+          .withIndex("by_team_time", (q) =>
+            q
+              .eq("teamId", teamId)
+              .gte("capturedAt", combinedStartMs)
+              .lte("capturedAt", args.endMs),
+          )
+          .take(5_000),
+        ctx.db
+          .query("connectedAccounts")
+          .withIndex("by_team_status", (q) =>
+            q.eq("teamId", teamId).eq("status", "active"),
+          )
+          .take(250),
+      ]);
+
+    const inCurrentRange = (timestamp: number | undefined) =>
+      timestamp != null &&
+      timestamp >= args.startMs &&
+      timestamp <= args.endMs;
+    const inPreviousRange = (timestamp: number | undefined) =>
+      timestamp != null &&
+      timestamp >= previousStartMs &&
+      timestamp <= previousEndMs;
+
+    const summarizePosts = (isInRange: typeof inCurrentRange) => {
+      const rangePosts = posts.filter((post) => isInRange(post.scheduledFor));
+      return {
+        scheduled: rangePosts.filter((post) =>
+          ["scheduled", "publishing"].includes(post.status),
+        ).length,
+        published: rangePosts.filter((post) => post.status === "published")
+          .length,
+      };
+    };
+
+    const summarizeTargets = (isInRange: typeof inCurrentRange) => {
+      const rangeTargets = targets.filter((target) =>
+        isInRange(target.scheduledFor),
+      );
+      const published = rangeTargets.filter(
+        (target) => target.status === "published",
+      ).length;
+      const failed = rangeTargets.filter(
+        (target) => target.status === "failed",
+      ).length;
+      const completed = published + failed;
+      return {
+        successRate: completed === 0 ? 0 : (published / completed) * 100,
+      };
+    };
+
+    const summarizeEngagement = (isInRange: typeof inCurrentRange) => {
+      const latestByTarget = new Map<
+        Id<"postTargets">,
+        (typeof metricSnapshots)[number]
+      >();
+      for (const snapshot of metricSnapshots) {
+        if (!isInRange(snapshot.capturedAt)) continue;
+        const previous = latestByTarget.get(snapshot.postTargetId);
+        if (!previous || previous.capturedAt < snapshot.capturedAt) {
+          latestByTarget.set(snapshot.postTargetId, snapshot);
+        }
+      }
+      return [...latestByTarget.values()].reduce(
+        (total, snapshot) =>
+          total +
+          (snapshot.likes ?? 0) +
+          (snapshot.comments ?? 0) +
+          (snapshot.shares ?? 0) +
+          (snapshot.saves ?? 0),
+        0,
+      );
+    };
+
+    const currentPosts = summarizePosts(inCurrentRange);
+    const previousPosts = summarizePosts(inPreviousRange);
+    const currentTargets = summarizeTargets(inCurrentRange);
+    const previousTargets = summarizeTargets(inPreviousRange);
+
+    return {
+      scheduledPosts: currentPosts.scheduled,
+      previousScheduledPosts: previousPosts.scheduled,
+      publishedPosts: currentPosts.published,
+      previousPublishedPosts: previousPosts.published,
+      publishingSuccessRate: currentTargets.successRate,
+      previousPublishingSuccessRate: previousTargets.successRate,
+      engagement: summarizeEngagement(inCurrentRange),
+      previousEngagement: summarizeEngagement(inPreviousRange),
+      activeChannels: new Set(activeAccounts.map((account) => account.platform))
+        .size,
+    };
+  },
+});
+
 export const listScheduled = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {

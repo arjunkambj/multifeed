@@ -82,7 +82,7 @@ export function Hero() {
           <div className="relative aspect-[16/10] w-full bg-surface-secondary/40">
             {/*
               Replace this empty frame with:
-              <Image src="/hero.png" alt="Multi Feed dashboard" fill className="object-cover object-top" />
+              <Image src="/hero.png" alt="MultiFeed dashboard" fill className="object-cover object-top" />
             */}
             <div className="absolute inset-4 rounded-xl border border-dashed border-border/60 bg-background/60 sm:inset-5 md:inset-6" />
           </div>

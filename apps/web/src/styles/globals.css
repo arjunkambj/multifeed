@@ -14,6 +14,25 @@
   animation: marquee 30s linear infinite;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .marketing-landing:not([data-gsap-ready]) [data-gsap-hero-copy] > * {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(28px);
+  }
+
+  .marketing-landing:not([data-gsap-ready]) [data-gsap-underline] {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .marketing-landing:not([data-gsap-ready]) [data-gsap-hero-visual] {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(48px) scale(0.975);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .marketing-marquee-track {
     animation: none;
@@ -196,7 +215,7 @@ html.lenis {
   }
 }
 
-/* FullCalendar — Multi Feed theme */
+/* FullCalendar — MultiFeed theme */
 .multifeed-calendar {
   --fc-border-color: var(--border);
   --fc-page-bg-color: transparent;
@@ -270,7 +289,6 @@ html.lenis {
 }
 
 .multifeed-calendar .fc-scrollgrid {
-  border: 0;
-  border-radius: 0;
+  border-radius: var(--radius-xl);
   overflow: hidden;
 }

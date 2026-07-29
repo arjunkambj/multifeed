@@ -7,13 +7,13 @@ import {
 } from "@/components/marketing/policies/policy-links";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Multi Feed",
+  title: "Terms of Service | MultiFeed",
   description:
-    "Terms governing access to and use of the Multi Feed social media management service.",
+    "Terms governing access to and use of the MultiFeed social media management service.",
   alternates: { canonical: "/policies/terms" },
   openGraph: {
-    title: "Terms of Service | Multi Feed",
-    description: "The terms governing your use of Multi Feed.",
+    title: "Terms of Service | MultiFeed",
+    description: "The terms governing your use of MultiFeed.",
     url: "/policies/terms",
   },
 };
@@ -21,13 +21,13 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <PolicyPage
-      description="These Terms of Service govern your access to and use of Multi Feed. By creating an account, connecting a social profile, or using the service, you agree to these terms."
+      description="These Terms of Service govern your access to and use of MultiFeed. By creating an account, connecting a social profile, or using the service, you agree to these terms."
       title="Terms of Service"
     >
       <section>
         <h2>1. The service</h2>
         <p>
-          Multi Feed, available at <a href={SITE_URL}>{SITE_URL}</a>, helps
+          MultiFeed, available at <a href={SITE_URL}>{SITE_URL}</a>, helps
           users and teams create, manage, schedule, publish, and review social
           media content across supported third-party platforms. Features may
           vary by plan, platform, region, account type, and third-party
@@ -49,7 +49,7 @@ export default function TermsPage() {
       <section>
         <h2>3. Connected accounts and permissions</h2>
         <p>
-          When you connect a social account, you authorize Multi Feed to access
+          When you connect a social account, you authorize MultiFeed to access
           the data and perform the actions covered by the permissions you
           approve. This may include reading basic profile, Page, channel,
           content, engagement, inbox, or analytics information and uploading or
@@ -58,7 +58,7 @@ export default function TermsPage() {
         </p>
         <p>
           You can withdraw this authorization by disconnecting the account from
-          Multi Feed or revoking access in the platform&apos;s settings. Some
+          MultiFeed or revoking access in the platform&apos;s settings. Some
           features will stop working after access is revoked.
         </p>
       </section>
@@ -66,11 +66,11 @@ export default function TermsPage() {
       <section>
         <h2>4. Your content</h2>
         <p>
-          You retain ownership of content you submit. You grant Multi Feed a
+          You retain ownership of content you submit. You grant MultiFeed a
           limited, worldwide, non-exclusive license to host, copy, process,
           adapt for technical requirements, transmit, and publish that content
           only as needed to operate the service and follow your instructions.
-          This license ends when the content is deleted from Multi Feed, except
+          This license ends when the content is deleted from MultiFeed, except
           where a copy must be retained by law or in a routine backup for a
           limited period.
         </p>
@@ -84,7 +84,7 @@ export default function TermsPage() {
 
       <section>
         <h2>5. Acceptable use</h2>
-        <p>You may not use Multi Feed to:</p>
+        <p>You may not use MultiFeed to:</p>
         <ul>
           <li>
             violate law, regulation, or a third-party platform&apos;s rules;
@@ -116,7 +116,7 @@ export default function TermsPage() {
         <h2>6. Teams</h2>
         <p>
           Workspace owners and administrators control membership and access. If
-          you use Multi Feed for an organization, you represent that you can
+          you use MultiFeed for an organization, you represent that you can
           bind that organization to these terms. Your organization may access,
           manage, export, or delete content and connected-account information in
           its workspace.
@@ -146,7 +146,7 @@ export default function TermsPage() {
           Social networks, payment providers, and other integrations are
           operated by third parties under their own terms and policies. Their
           APIs, permissions, review decisions, rate limits, formats, and
-          availability can change without our control. Multi Feed is not
+          availability can change without our control. MultiFeed is not
           responsible for a third party&apos;s service, content, or decision to
           restrict an account or application. You must comply with each
           platform&apos;s applicable terms.
@@ -156,11 +156,11 @@ export default function TermsPage() {
       <section>
         <h2>9. Our intellectual property</h2>
         <p>
-          Multi Feed and its software, design, branding, and documentation are
+          MultiFeed and its software, design, branding, and documentation are
           owned by us or our licensors and are protected by
           intellectual-property laws. These terms give you a limited, revocable,
           non-transferable right to use the service while your account is
-          active; they do not transfer ownership of Multi Feed to you.
+          active; they do not transfer ownership of MultiFeed to you.
         </p>
       </section>
 
@@ -178,7 +178,7 @@ export default function TermsPage() {
       <section>
         <h2>11. Suspension and termination</h2>
         <p>
-          You may stop using Multi Feed at any time. We may suspend or terminate
+          You may stop using MultiFeed at any time. We may suspend or terminate
           access if you materially breach these terms, create risk or harm, fail
           to pay applicable fees, or if law or a platform requires us to do so.
           Where reasonable, we will provide notice and an opportunity to correct
@@ -190,7 +190,7 @@ export default function TermsPage() {
       <section>
         <h2>12. Disclaimers</h2>
         <p>
-          To the fullest extent permitted by law, Multi Feed is provided “as is”
+          To the fullest extent permitted by law, MultiFeed is provided “as is”
           and “as available.” We disclaim implied warranties of merchantability,
           fitness for a particular purpose, non-infringement, and uninterrupted
           or error-free operation. We do not guarantee that a third-party
@@ -202,12 +202,12 @@ export default function TermsPage() {
       <section>
         <h2>13. Limitation of liability</h2>
         <p>
-          To the fullest extent permitted by law, Multi Feed and its operators,
+          To the fullest extent permitted by law, MultiFeed and its operators,
           affiliates, and service providers will not be liable for indirect,
           incidental, special, exemplary, consequential, or punitive damages, or
           for lost profits, revenue, data, goodwill, or business interruption.
           Our total liability for claims relating to the service will not exceed
-          the amount you paid to Multi Feed during the 12 months before the
+          the amount you paid to MultiFeed during the 12 months before the
           event giving rise to the claim. These limits do not apply where
           prohibited by law.
         </p>
@@ -218,7 +218,7 @@ export default function TermsPage() {
         <p>
           We may update these terms. We will post the revised version, change
           the effective date, and provide additional notice where required. By
-          continuing to use Multi Feed after revised terms take effect, you
+          continuing to use MultiFeed after revised terms take effect, you
           agree to them. If you do not agree, you must stop using the service.
         </p>
       </section>

@@ -5,14 +5,14 @@ import { PolicyPage } from "@/components/marketing/policies/PolicyPage";
 import { SUPPORT_EMAIL } from "@/components/marketing/policies/policy-links";
 
 export const metadata: Metadata = {
-  title: "Data Deletion Instructions | Multi Feed",
+  title: "Data Deletion Instructions | MultiFeed",
   description:
-    "How to disconnect social accounts or request deletion of a Multi Feed account and personal data.",
+    "How to disconnect social accounts or request deletion of a MultiFeed account and personal data.",
   alternates: { canonical: "/policies/data-deletion" },
   openGraph: {
-    title: "Data Deletion Instructions | Multi Feed",
+    title: "Data Deletion Instructions | MultiFeed",
     description:
-      "Disconnect an integration or request deletion of your Multi Feed data.",
+      "Disconnect an integration or request deletion of your MultiFeed data.",
     url: "/policies/data-deletion",
   },
 };
@@ -20,13 +20,13 @@ export const metadata: Metadata = {
 export default function DataDeletionPage() {
   return (
     <PolicyPage
-      description="You can remove a connected social account without closing your workspace, or ask us to delete your full Multi Feed account and personal data."
+      description="You can remove a connected social account without closing your workspace, or ask us to delete your full MultiFeed account and personal data."
       title="Data Deletion Instructions"
     >
       <section>
         <h2>Disconnect one social account</h2>
         <ol>
-          <li>Sign in to Multi Feed.</li>
+          <li>Sign in to MultiFeed.</li>
           <li>
             Open <Link href="/connections">Connections</Link>.
           </li>
@@ -38,7 +38,7 @@ export default function DataDeletionPage() {
         </ol>
         <p>
           Disconnecting deletes the OAuth access credentials and
-          connected-account record stored by Multi Feed. It also stops future
+          connected-account record stored by MultiFeed. It also stops future
           access through that connection. Posts already published to the social
           platform remain there until you delete them on that platform.
         </p>
@@ -49,21 +49,21 @@ export default function DataDeletionPage() {
         <p>
           You can also open the security or connected-app settings for Facebook,
           Instagram, Threads, LinkedIn, TikTok, Google/YouTube, or X and revoke
-          Multi Feed. Revoking access prevents future API access, but it may not
-          remove information previously stored in Multi Feed. To remove that
-          information too, disconnect the account in Multi Feed or submit the
+          MultiFeed. Revoking access prevents future API access, but it may not
+          remove information previously stored in MultiFeed. To remove that
+          information too, disconnect the account in MultiFeed or submit the
           deletion request below.
         </p>
       </section>
 
       <section>
-        <h2>Delete your full Multi Feed account and data</h2>
+        <h2>Delete your full MultiFeed account and data</h2>
         <ol>
           <li>
             Email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> from
-            the email address associated with your Multi Feed account.
+            the email address associated with your MultiFeed account.
           </li>
-          <li>Use the subject “Delete my Multi Feed account.”</li>
+          <li>Use the subject “Delete my MultiFeed account.”</li>
           <li>
             Include the name of your workspace and state whether you want to
             delete only your user profile or a workspace you own.
@@ -86,7 +86,7 @@ export default function DataDeletionPage() {
           Subject to your role and workspace permissions, deletion includes:
         </p>
         <ul>
-          <li>your Multi Feed profile and workspace membership;</li>
+          <li>your MultiFeed profile and workspace membership;</li>
           <li>
             connected social-profile data, granted permissions, and encrypted
             access and refresh tokens;

@@ -2,12 +2,12 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 const revealEase = "power3.out";
 
 export function MarketingAnimations() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const scope = document.querySelector<HTMLElement>(".marketing-landing");
 
     if (!scope) return;
@@ -17,8 +17,27 @@ export function MarketingAnimations() {
     const responsiveAnimations = gsap.matchMedia();
     const context = gsap.context(() => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        scope.dataset.gsapReady = "true";
         return;
       }
+
+      const heroCopy = gsap.utils.toArray<HTMLElement>(
+        "[data-gsap-hero-copy] > *",
+      );
+      const heroUnderline = gsap.utils.toArray<HTMLElement>(
+        "[data-gsap-underline]",
+      );
+      const heroVisual = gsap.utils.toArray<HTMLElement>(
+        "[data-gsap-hero-visual]",
+      );
+
+      gsap.set(heroCopy, { autoAlpha: 0, y: 28 });
+      gsap.set(heroUnderline, {
+        scaleX: 0,
+        transformOrigin: "left center",
+      });
+      gsap.set(heroVisual, { autoAlpha: 0, scale: 0.975, y: 48 });
+      scope.dataset.gsapReady = "true";
 
       gsap.from("[data-gsap-nav]", {
         autoAlpha: 0,
@@ -30,28 +49,27 @@ export function MarketingAnimations() {
       const hero = gsap.timeline({ defaults: { ease: revealEase } });
 
       hero
-        .from("[data-gsap-hero-copy] > *", {
-          autoAlpha: 0,
+        .to(heroCopy, {
+          autoAlpha: 1,
           duration: 0.72,
           stagger: 0.08,
-          y: 28,
+          y: 0,
         })
-        .from(
-          "[data-gsap-underline]",
+        .to(
+          heroUnderline,
           {
             duration: 0.55,
-            scaleX: 0,
-            transformOrigin: "left center",
+            scaleX: 1,
           },
           "-=0.3",
         )
-        .from(
-          "[data-gsap-hero-visual]",
+        .to(
+          heroVisual,
           {
-            autoAlpha: 0,
+            autoAlpha: 1,
             duration: 0.9,
-            scale: 0.975,
-            y: 48,
+            scale: 1,
+            y: 0,
           },
           "-=0.42",
         );
@@ -157,6 +175,7 @@ export function MarketingAnimations() {
     }, scope);
 
     return () => {
+      delete scope.dataset.gsapReady;
       responsiveAnimations.revert();
       context.revert();
     };
