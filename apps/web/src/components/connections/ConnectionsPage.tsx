@@ -47,9 +47,7 @@ export function ConnectionsPage() {
   const connectionUsage =
     entitlements === undefined
       ? "Loading plan limits…"
-      : accountLimit === null
-        ? `${connectedAccountsCount} connected · Unlimited on your plan`
-        : `${connectedAccountsCount} of ${accountLimit} connections used`;
+      : `${connectedAccountsCount} of ${accountLimit} connections used`;
 
   useEffect(() => {
     if (flashKey === "\0") return;

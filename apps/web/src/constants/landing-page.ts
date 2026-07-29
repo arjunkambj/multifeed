@@ -44,7 +44,7 @@ export const faqItems = [
   },
   {
     content:
-      "Yes. Creator includes two seats, Growth includes five, and Agency includes fifteen, so your team can work from the same calendar.",
+      "Creator is for solo work and does not include team seats. Growth includes five team seats, and Agency includes fifteen.",
     title: "Can my team use MultiFeed?",
   },
 ] as const;

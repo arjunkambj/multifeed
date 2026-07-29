@@ -4,8 +4,7 @@ export type PlanKey = (typeof PLAN_KEYS)[number];
 export type BillingInterval = "month" | "year";
 
 export interface PlanLimits {
-  /** `null` means unlimited. */
-  connectedAccounts: number | null;
+  connectedAccounts: number;
   /** Additional teammates; the workspace owner does not consume a seat. */
   teamSeats: number;
 }
@@ -33,15 +32,26 @@ export const NO_PLAN_LIMITS: PlanLimits = {
   teamSeats: 0,
 };
 
-const connectedAccountsFeature = (limit: number | null) =>
-  limit === null
-    ? "Unlimited connected accounts"
-    : `${limit} connected social accounts`;
+const connectedAccountsFeature = (limit: number) =>
+  `${limit} connected social accounts`;
 
-const teamSeatsFeature = (limit: number) => `${limit} team seats`;
+const teamSeatsFeature = (limit: number) =>
+  limit === 0 ? "No team seats" : `${limit} team seats`;
+
+const definePlan = ({
+  coreFeatures,
+  ...plan
+}: Omit<Plan, "features"> & { coreFeatures: string[] }): Plan => ({
+  ...plan,
+  features: [
+    connectedAccountsFeature(plan.limits.connectedAccounts),
+    ...coreFeatures,
+    teamSeatsFeature(plan.limits.teamSeats),
+  ],
+});
 
 const PLAN_BY_KEY: Record<PlanKey, Plan> = {
-  creator: {
+  creator: definePlan({
     key: "creator",
     name: "Creator",
     description:
@@ -52,20 +62,18 @@ const PLAN_BY_KEY: Record<PlanKey, Plan> = {
     },
     currency: "USD",
     limits: {
-      connectedAccounts: 15,
-      teamSeats: 2,
+      connectedAccounts: 10,
+      teamSeats: 0,
     },
-    features: [
-      connectedAccountsFeature(15),
+    coreFeatures: [
       "Unlimited scheduled posts",
       "Multi-account posting",
       "Image, video, and carousel posts",
       "Platform caption overrides",
       "Basic analytics refresh",
-      teamSeatsFeature(2),
     ],
-  },
-  growth: {
+  }),
+  growth: definePlan({
     key: "growth",
     name: "Growth",
     description: "For teams coordinating multiple brands and calendars.",
@@ -75,20 +83,18 @@ const PLAN_BY_KEY: Record<PlanKey, Plan> = {
     },
     currency: "USD",
     limits: {
-      connectedAccounts: 50,
+      connectedAccounts: 30,
       teamSeats: 5,
     },
-    features: [
-      connectedAccountsFeature(50),
+    coreFeatures: [
       "Everything in Creator",
       "Calendar and status views",
       "Shared inbox",
       "Advanced analytics history",
       "Priority metric refresh",
-      teamSeatsFeature(5),
     ],
-  },
-  agency: {
+  }),
+  agency: definePlan({
     key: "agency",
     name: "Agency",
     description: "For agencies managing high-volume client publishing.",
@@ -98,19 +104,17 @@ const PLAN_BY_KEY: Record<PlanKey, Plan> = {
     },
     currency: "USD",
     limits: {
-      connectedAccounts: null,
+      connectedAccounts: 100,
       teamSeats: 15,
     },
-    features: [
-      connectedAccountsFeature(null),
+    coreFeatures: [
       "Everything in Growth",
       "Bulk video scheduling",
       "Approval-ready team workflows",
       "API add-on available",
       "Priority support",
-      teamSeatsFeature(15),
     ],
-  },
+  }),
 };
 
 export const PLANS = PLAN_KEYS.map((key) => PLAN_BY_KEY[key]);

@@ -53,7 +53,7 @@ const PLAN_RANK: Record<PlanKey, number> = {
 const entitlementValidator = v.object({
   planKey: v.union(planKeyValidator, v.null()),
   hasActivePlan: v.boolean(),
-  connectedAccountLimit: v.union(v.number(), v.null()),
+  connectedAccountLimit: v.number(),
   teamSeatLimit: v.number(),
 });
 

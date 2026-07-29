@@ -38,7 +38,6 @@ export async function assertCanConnect(
   additionalAccounts = 1,
 ) {
   const limit = await accountLimitForTeam(ctx, teamId);
-  if (limit === null) return;
 
   const count = await countConnectedAccounts(ctx, teamId, limit);
   if (count + additionalAccounts > limit) {

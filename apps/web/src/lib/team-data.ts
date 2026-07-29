@@ -15,7 +15,7 @@ export type TeamInvitation = {
 export type TeamEntitlements = {
   planKey: "creator" | "growth" | "agency" | null;
   hasActivePlan: boolean;
-  connectedAccountLimit: number | null;
+  connectedAccountLimit: number;
   teamSeatLimit: number;
 };
 
