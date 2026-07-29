@@ -16,6 +16,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { loadTeamData, teamDataQueryKey } from "@/lib/team-data";
+import { countUsedTeamSeats } from "@/lib/team-seats";
 
 export function InvitePopover({ team }: { team: Team }) {
   const queryClient = useQueryClient();
@@ -28,7 +29,7 @@ export function InvitePopover({ team }: { team: Team }) {
   const membersCount = teamDataQuery.data?.members.length ?? 0;
   const invitationsCount = teamDataQuery.data?.invitations.length ?? 0;
   const seatLimit = teamDataQuery.data?.entitlements.teamSeatLimit;
-  const usedSeats = membersCount + invitationsCount;
+  const usedSeats = countUsedTeamSeats(membersCount, invitationsCount);
   const isAtLimit = seatLimit !== undefined && usedSeats >= seatLimit;
 
   const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {

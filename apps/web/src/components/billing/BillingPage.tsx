@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Button, Spinner, Switch, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useQuery } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache/hooks";
 import { api } from "@convex/_generated/api";
 import { FREE_TRIAL, PLANS } from "@multifeed/plans";
 import type { BillingInterval, PlanKey } from "@multifeed/plans";
@@ -11,6 +11,16 @@ import type { BillingInterval, PlanKey } from "@multifeed/plans";
 const intervalLabels = {
   month: "/month",
   year: "/month · yearly",
+} as const;
+
+const freePlan = {
+  name: "Free",
+  description: "For getting started with a single social account.",
+  features: [
+    "1 connected social account",
+    "Unlimited scheduled posts",
+    "No team seats",
+  ],
 } as const;
 
 const statusLabels: Record<string, string> = {
@@ -148,7 +158,53 @@ export function BillingPage() {
         </div>
       </div>
 
-      <section className="grid gap-4 lg:grid-cols-3 lg:gap-5">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 lg:gap-5">
+        <article className="flex flex-col overflow-hidden rounded-2xl bg-surface-secondary">
+          <div className="flex flex-1 flex-col p-5 sm:p-6">
+            <div className="flex flex-col gap-1">
+              <h3 className="font-display text-xl font-semibold tracking-tight text-foreground">
+                {freePlan.name}
+              </h3>
+              <p className="text-sm leading-relaxed text-muted">
+                {freePlan.description}
+              </p>
+            </div>
+
+            <div className="mt-6 flex items-baseline gap-1.5">
+              <span className="font-display text-4xl font-bold tracking-tight tabular-nums text-foreground">
+                $0
+              </span>
+              <span className="text-sm text-muted">/month</span>
+            </div>
+
+            <div className="my-5 h-px w-full bg-border/50" />
+
+            <ul className="flex flex-1 flex-col gap-2.5">
+              {freePlan.features.map((feature) => (
+                <li
+                  className="flex items-start gap-2.5 text-sm leading-snug text-foreground/90"
+                  key={feature}
+                >
+                  <Icon
+                    className="mt-0.5 shrink-0 text-accent"
+                    icon="ph:check"
+                    width={16}
+                  />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <Button
+              className="button mt-7 w-full max-w-sm self-center font-medium"
+              isDisabled
+              size="lg"
+              variant="secondary"
+            >
+              Free plan
+            </Button>
+          </div>
+        </article>
         {PLANS.map((plan) => {
           const isCurrent =
             subscription?.planKey === plan.key &&

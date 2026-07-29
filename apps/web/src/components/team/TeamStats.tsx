@@ -1,3 +1,5 @@
+import { countUsedTeamSeats } from "@/lib/team-seats";
+
 export function TeamStats({
   invitationsCount,
   membersCount,
@@ -7,7 +9,7 @@ export function TeamStats({
   membersCount: number;
   teamSeatLimit: number | undefined;
 }) {
-  const usedSeats = invitationsCount + membersCount;
+  const usedSeats = countUsedTeamSeats(membersCount, invitationsCount);
 
   return (
     <section className="grid gap-4 md:grid-cols-3">

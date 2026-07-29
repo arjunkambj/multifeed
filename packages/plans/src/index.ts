@@ -6,7 +6,7 @@ export type BillingInterval = "month" | "year";
 export interface PlanLimits {
   /** `null` means unlimited. */
   connectedAccounts: number | null;
-  /** Includes the workspace owner and pending invitations. */
+  /** Additional teammates; the workspace owner does not consume a seat. */
   teamSeats: number;
 }
 
@@ -30,7 +30,7 @@ export const FREE_TRIAL = {
 
 export const NO_PLAN_LIMITS: PlanLimits = {
   connectedAccounts: 1,
-  teamSeats: 1,
+  teamSeats: 0,
 };
 
 const connectedAccountsFeature = (limit: number | null) =>

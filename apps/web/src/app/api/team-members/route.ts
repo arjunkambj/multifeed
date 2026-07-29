@@ -9,6 +9,7 @@ import {
   hexclaveServerApp,
 } from "@/hexclave/server";
 import { assertSameOrigin } from "@/lib/oauth/env";
+import { countUsedTeamSeats } from "@/lib/team-seats";
 
 const responseOptions = {
   headers: { "Cache-Control": "private, no-store" },
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
     team.listUsers(),
     team.listInvitations(),
   ]);
-  const usedSeats = members.length + invitations.length;
+  const usedSeats = countUsedTeamSeats(members.length, invitations.length);
 
   if (usedSeats >= entitlements.teamSeatLimit) {
     return errorResponse(

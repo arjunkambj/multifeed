@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card, Separator, Skeleton } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useQuery } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache/hooks";
 import { api } from "@convex/_generated/api";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { OverviewDateRangePicker } from "@/components/overview/OverviewDateRangePicker";
