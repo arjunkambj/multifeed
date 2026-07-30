@@ -1,4 +1,6 @@
-export const SITE_URL = "https://themultifeed.com";
+import { clientEnv } from "@/env";
+
+export const SITE_URL = clientEnv.NEXT_PUBLIC_APP_URL;
 export const SUPPORT_EMAIL = "support@themultifeed.com";
 
 export const policyLinks = [

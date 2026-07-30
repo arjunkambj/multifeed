@@ -1,3 +1,5 @@
+import { clientEnv } from "@/env";
+
 function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Missing ${name}`);
@@ -11,35 +13,11 @@ function optionalEnv(name: string): string | undefined {
 
 /** Registered on every provider console. */
 export function oauthRedirectUri(): string {
-  const origin = appOrigin();
-  const value =
-    optionalEnv("OAUTH_REDIRECT_URI") ?? `${origin}/api/oauth/callback`;
-  const redirect = new URL(value);
-  const isDevelopmentHttpsRelay =
-    process.env.NODE_ENV !== "production" && redirect.protocol === "https:";
-  if (redirect.origin !== origin && !isDevelopmentHttpsRelay) {
-    throw new Error("OAUTH_REDIRECT_URI must use the configured app origin");
-  }
-  return redirect.toString();
+  return new URL("/api/oauth/callback", appOrigin()).toString();
 }
 
 export function appOrigin(): string {
-  const configured =
-    optionalEnv("APP_ORIGIN") ?? optionalEnv("NEXT_PUBLIC_APP_URL");
-  if (!configured && process.env.NODE_ENV === "production") {
-    throw new Error("Missing APP_ORIGIN or NEXT_PUBLIC_APP_URL");
-  }
-
-  const url = new URL(configured ?? "http://localhost:3000");
-  const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
-  if (
-    process.env.NODE_ENV === "production" &&
-    url.protocol !== "https:" &&
-    !isLocal
-  ) {
-    throw new Error("Production app origin must use HTTPS");
-  }
-  return url.origin;
+  return new URL(clientEnv.NEXT_PUBLIC_APP_URL).origin;
 }
 
 /** Shared only by Next.js route handlers and Convex OAuth mutations. */

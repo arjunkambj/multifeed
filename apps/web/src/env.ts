@@ -1,5 +1,6 @@
 type RequiredEnvName =
   | "NEXT_PUBLIC_CONVEX_URL"
+  | "NEXT_PUBLIC_APP_URL"
   | "NEXT_PUBLIC_HEXCLAVE_PROJECT_ID"
   | "NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY";
 
@@ -14,6 +15,10 @@ export const clientEnv = {
   NEXT_PUBLIC_CONVEX_URL: requiredEnv(
     process.env.NEXT_PUBLIC_CONVEX_URL,
     "NEXT_PUBLIC_CONVEX_URL",
+  ),
+  NEXT_PUBLIC_APP_URL: requiredEnv(
+    process.env.NEXT_PUBLIC_APP_URL,
+    "NEXT_PUBLIC_APP_URL",
   ),
   NEXT_PUBLIC_HEXCLAVE_PROJECT_ID: requiredEnv(
     process.env.NEXT_PUBLIC_HEXCLAVE_PROJECT_ID,

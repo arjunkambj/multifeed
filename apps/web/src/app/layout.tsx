@@ -4,6 +4,7 @@ import Providers from "@/components/Providers";
 import { HexclaveProvider, HexclaveTheme } from "@hexclave/next";
 import { hexclaveServerApp } from "@/hexclave/server";
 import { Bricolage_Grotesque, Inter, Figtree } from "next/font/google";
+import { clientEnv } from "@/env";
 
 const figtreeHeading = Figtree({
   subsets: ["latin"],
@@ -18,7 +19,7 @@ const bricolage = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://themultifeed.com"),
+  metadataBase: new URL(clientEnv.NEXT_PUBLIC_APP_URL),
   applicationName: "MultiFeed",
   title: "MultiFeed | Run social on autopilot with AI agents",
   description:

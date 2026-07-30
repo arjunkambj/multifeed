@@ -6,7 +6,6 @@ Social scheduling app built with Next.js, Convex, Hexclave, and Turborepo.
 
 - `apps/web`: Next.js app (marketing, dashboard, OAuth API routes)
 - `apps/backend`: Convex schema, mutations/queries, billing webhooks
-- `apps/oauth-relay`: optional Cloudflare Worker for HTTPS-to-localhost OAuth callbacks
 
 ## Local development
 
@@ -39,20 +38,12 @@ Samples live next to each app (do **not** put provider secrets in Convex, or Con
 | **Hexclave**      | `NEXT_PUBLIC_HEXCLAVE_PROJECT_ID`, `NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY`, `HEXCLAVE_SECRET_SERVER_KEY` |
 | **Dodo checkout** | `DODO_PAYMENTS_API_KEY`, `DODO_PAYMENTS_ENVIRONMENT`, `DODO_*_PRODUCT_ID` (6 product IDs)                      |
 | **OAuth**         | `OAUTH_SERVER_SECRET`, `META_*`, `THREADS_*`, `LINKEDIN_*`, `GOOGLE_*`, `TIKTOK_*`, `X_*`                      |
-| **Optional**      | `APP_ORIGIN`, `OAUTH_REDIRECT_URI`                                                                             |
 
 OAuth redirect on every provider console:
 
 ```
 http://localhost:3000/api/oauth/callback
-https://themultifeed.com/api/oauth/callback
 ```
-
-For local provider setups that require HTTPS, deploy `apps/oauth-relay` and set
-`OAUTH_REDIRECT_URI` to its configured HTTPS route. The Worker forwards the
-callback query to `http://localhost:3000/api/oauth/callback`. Its custom route is
-development-only: remove or disable it before serving the production callback
-from the same domain and path.
 
 Provider-console requirements:
 
