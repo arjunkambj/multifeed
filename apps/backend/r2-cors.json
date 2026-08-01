@@ -1,0 +1,17 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "http://localhost:3000",
+          "https://themultifeed.com",
+          "https://www.themultifeed.com"
+        ],
+        "methods": ["GET", "PUT", "HEAD"],
+        "headers": ["Content-Type"]
+      },
+      "exposeHeaders": ["ETag", "Content-Length", "Content-Type"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}

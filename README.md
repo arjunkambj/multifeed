@@ -80,6 +80,17 @@ npx convex env set DODO_PAYMENTS_WEBHOOK_KEY "whsec_..."
 # npx convex env set R2_BUCKET ...
 ```
 
+Browser uploads also require a CORS policy on the R2 bucket. The policy in
+`apps/backend/r2-cors.json` allows local development and the production app to
+upload media with presigned URLs. Apply it while authenticated to the
+Cloudflare account that owns the bucket:
+
+```bash
+cd apps/backend
+npx wrangler r2 bucket cors set <R2_BUCKET> --file r2-cors.json
+npx wrangler r2 bucket cors list <R2_BUCKET>
+```
+
 ### OAuth flow (reference)
 
 1. `POST /api/oauth/start` → `sessions.create` → provider URL
@@ -92,5 +103,5 @@ UI: `/connections`
 
 - Do not edit `apps/backend/convex/_generated`.
 - Do not use Convex HTTP for OAuth (Dodo webhook only).
-- Media: R2 backend ready; composer media picker still stubbed.
+- Media uploads use presigned R2 URLs and require the bucket CORS policy above.
 - “Post now” queues as `scheduled` with `scheduledFor: now` until a publisher exists.

@@ -81,9 +81,7 @@ export const confirmMediaUpload = mutation({
     // Ensure the object exists in our R2 component metadata.
     const meta = await r2.getMetadata(ctx, args.r2Key);
     if (!meta) {
-      throw new Error(
-        "Upload not found. Complete the upload before confirming.",
-      );
+      return null;
     }
 
     if (meta.size != null && meta.size > MAX_UPLOAD_BYTES) {
@@ -135,6 +133,37 @@ export const confirmMediaUpload = mutation({
       createdByUserId: user.id,
       createdAt: now,
     });
+  },
+});
+
+export const deleteMedia = mutation({
+  args: { mediaAssetId: v.id("mediaAssets") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const asset = await ctx.db.get(args.mediaAssetId);
+    if (!asset || asset.teamId !== user.selectedTeamId) {
+      throw new Error("Media not found");
+    }
+    if (!asset.r2Key) {
+      throw new Error("Media storage key not found");
+    }
+
+    const teamPosts = await ctx.db
+      .query("posts")
+      .withIndex("by_team_updated", (q) => q.eq("teamId", user.selectedTeamId))
+      .collect();
+    if (
+      teamPosts.some((post) => post.mediaAssetIds.includes(args.mediaAssetId))
+    ) {
+      throw new Error(
+        "Remove this media from its saved post before deleting it",
+      );
+    }
+
+    await r2.deleteObject(ctx, asset.r2Key);
+    await ctx.db.delete(asset._id);
+    return null;
   },
 });
 

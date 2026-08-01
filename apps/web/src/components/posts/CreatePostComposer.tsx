@@ -38,6 +38,7 @@ import {
   platformLabel,
 } from "@/lib/platform-meta";
 import { PlatformSettingsFields } from "./PlatformSettingsFields";
+import { PlatformPostPreview } from "./PlatformPostPreview";
 import { PostFormatPicker } from "./PostFormatPicker";
 import { PostMediaUploader } from "./PostMediaUploader";
 import {
@@ -471,7 +472,7 @@ function PostComposerForm({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <DashboardPageTitle
         title={
           editPostId
@@ -610,68 +611,78 @@ function PostComposerForm({
             </div>
           </section>
 
-          {postKind !== "text" && (
-            <section className="border-b border-border/70 pb-5">
-              <h2 className="mb-3 text-base font-semibold">Media</h2>
-              <PostMediaUploader
-                kind={postKind}
-                media={media}
-                onChange={setMedia}
-                onUploadingChange={setUploadingMedia}
-              />
-            </section>
-          )}
-
           {/* Content */}
           <section className="border-b border-border/70 pb-5">
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="post-title">Title</Label>
-                <Input
-                  id="post-title"
-                  fullWidth
-                  variant="secondary"
-                  placeholder="Optional calendar label"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <Label htmlFor="post-body">
-                    {postKind === "text" ? "Post text" : "Caption"}
-                  </Label>
-                  <span
-                    className={[
-                      "text-xs tabular-nums",
-                      overLimit ? "font-medium text-danger" : "text-muted",
-                    ].join(" ")}
-                  >
-                    {body.length}
-                    {strictestLimit != null ? ` / ${strictestLimit}` : ""}
-                  </span>
+              <div
+                className={
+                  postKind === "text"
+                    ? ""
+                    : "grid items-start gap-5 md:grid-cols-2"
+                }
+              >
+                {postKind !== "text" && (
+                  <div className="min-w-0">
+                    <h2 className="mb-3 text-base font-semibold">Media</h2>
+                    <PostMediaUploader
+                      kind={postKind}
+                      media={media}
+                      onChange={setMedia}
+                      onUploadingChange={setUploadingMedia}
+                    />
+                  </div>
+                )}
+
+                <div className="flex min-w-0 flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="post-title">Title</Label>
+                    <Input
+                      id="post-title"
+                      fullWidth
+                      variant="secondary"
+                      placeholder="Optional calendar label"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label htmlFor="post-body">
+                        {postKind === "text" ? "Post text" : "Caption"}
+                      </Label>
+                      <span
+                        className={[
+                          "text-xs tabular-nums",
+                          overLimit ? "font-medium text-danger" : "text-muted",
+                        ].join(" ")}
+                      >
+                        {body.length}
+                        {strictestLimit != null ? ` / ${strictestLimit}` : ""}
+                      </span>
+                    </div>
+                    <TextArea
+                      id="post-body"
+                      fullWidth
+                      variant="secondary"
+                      placeholder="What do you want to share?"
+                      value={body}
+                      onChange={(e) => setBody(e.target.value)}
+                      className="min-h-36"
+                    />
+                  </div>
+
+                  {overLimitAccounts.length > 0 && (
+                    <p className="text-xs text-danger">
+                      Too long for{" "}
+                      {overLimitAccounts
+                        .map((account) => `@${account.username}`)
+                        .join(", ")}
+                    </p>
+                  )}
                 </div>
-                <TextArea
-                  id="post-body"
-                  fullWidth
-                  variant="secondary"
-                  placeholder="What do you want to share?"
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  className="min-h-36"
-                />
               </div>
 
-              {overLimitAccounts.length > 0 && (
-                <p className="text-xs text-danger">
-                  Too long for{" "}
-                  {overLimitAccounts
-                    .map((account) => `@${account.username}`)
-                    .join(", ")}
-                </p>
-              )}
-
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 border-t border-border/70 pt-4">
                 <Button
                   size="sm"
                   variant={activeTool === "account" ? "primary" : "tertiary"}
@@ -714,7 +725,7 @@ function PostComposerForm({
               </div>
 
               {activeTool === "account" && (
-                <div className="flex flex-col gap-3 rounded-xl bg-surface-secondary p-3">
+                <div className="flex flex-col gap-5">
                   {selectedAccounts.length === 0 ? (
                     <p className="py-3 text-center text-sm text-muted">
                       Select an account to customize its caption and settings.
@@ -734,7 +745,7 @@ function PostComposerForm({
                       return (
                         <div
                           key={account._id}
-                          className="rounded-xl border border-border bg-surface p-3"
+                          className="border-b border-border/70 pb-5 last:border-b-0 last:pb-0"
                         >
                           <div className="mb-3 flex items-center gap-2">
                             <span
@@ -850,7 +861,7 @@ function PostComposerForm({
               )}
 
               {activeTool === "history" && (
-                <div className="flex flex-col gap-3 rounded-xl bg-surface-secondary p-3">
+                <div className="flex flex-col gap-3">
                   <Input
                     aria-label="Search past captions"
                     fullWidth
@@ -910,57 +921,29 @@ function PostComposerForm({
                 Select accounts above to preview.
               </p>
             ) : (
-              <div className="flex flex-col gap-3">
-                {[...selectedAccountIds].slice(0, 3).map((id) => {
+              <div className="flex items-start gap-4 overflow-x-auto pb-2">
+                {[...selectedAccountIds].map((id) => {
                   const acc = activeAccounts.find((a) => a._id === id);
                   if (!acc) return null;
-                  const brand = platformBrand(acc.platform);
+                  const options = targetOptions[id] ?? EMPTY_TARGET_OPTIONS;
+                  const platformSettings = {
+                    ...defaultPlatformSettings(acc.platform, postKind),
+                    ...options.platformSettings,
+                  };
                   return (
-                    <div
+                    <PlatformPostPreview
                       key={id}
-                      className="rounded-xl border border-border/70 p-4"
-                    >
-                      <div className="mb-3 flex items-center gap-2">
-                        <span
-                          className="flex size-8 items-center justify-center rounded-full text-white"
-                          style={{ backgroundColor: brand }}
-                        >
-                          <Icon
-                            icon={
-                              PLATFORM_META[acc.platform]?.icon ??
-                              "hugeicons:link-01"
-                            }
-                            width={14}
-                          />
-                        </span>
-                        <p className="min-w-0 truncate text-sm font-medium">
-                          @{acc.username}
-                        </p>
-                      </div>
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                        {targetOptions[id]?.bodyOverride.trim() ||
-                          body.trim() || (
-                            <span className="text-muted">Your caption…</span>
-                          )}
-                      </p>
-                      {targetOptions[id]?.referenceUrl.trim() && (
-                        <p className="mt-3 truncate rounded-lg bg-surface-secondary px-2.5 py-2 text-xs text-muted">
-                          References {targetOptions[id].referenceUrl}
-                        </p>
-                      )}
-                      {targetOptions[id]?.firstComment.trim() && (
-                        <p className="mt-3 border-l-2 border-border pl-3 text-xs text-muted">
-                          First comment: {targetOptions[id].firstComment}
-                        </p>
-                      )}
-                    </div>
+                      account={acc}
+                      body={options.bodyOverride.trim() || body.trim()}
+                      firstComment={options.firstComment.trim() || undefined}
+                      media={media}
+                      platformSettings={platformSettings}
+                      postKind={postKind}
+                      referenceUrl={options.referenceUrl.trim() || undefined}
+                      title={title}
+                    />
                   );
                 })}
-                {selectedAccountIds.size > 3 && (
-                  <p className="text-center text-xs text-muted">
-                    +{selectedAccountIds.size - 3} more
-                  </p>
-                )}
               </div>
             )}
           </section>
@@ -1011,9 +994,7 @@ function PostComposerForm({
                       <Label>Date</Label>
                       <DateField.Group fullWidth variant="secondary">
                         <DateField.Input>
-                          {(segment) => (
-                            <DateField.Segment segment={segment} />
-                          )}
+                          {(segment) => <DateField.Segment segment={segment} />}
                         </DateField.Input>
                         <DateField.Suffix>
                           <DatePicker.Trigger>
@@ -1066,9 +1047,7 @@ function PostComposerForm({
                       <Label>Time</Label>
                       <TimeField.Group fullWidth variant="secondary">
                         <TimeField.Input>
-                          {(segment) => (
-                            <TimeField.Segment segment={segment} />
-                          )}
+                          {(segment) => <TimeField.Segment segment={segment} />}
                         </TimeField.Input>
                       </TimeField.Group>
                     </TimeField>
@@ -1100,9 +1079,7 @@ function PostComposerForm({
                             const date = new Date();
                             date.setDate(date.getDate() + 1);
                             date.setHours(9, 0, 0, 0);
-                            setScheduleLocal(
-                              toLocalInputValue(date.getTime()),
-                            );
+                            setScheduleLocal(toLocalInputValue(date.getTime()));
                             return;
                           }
                           const offset =
