@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Modal, Spinner, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useMutation } from "convex/react";
-import { useQuery } from "convex-helpers/react/cache/hooks";
+import { useMutation, usePreloadedQuery, type Preloaded } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -24,9 +23,12 @@ const statusDot: Record<Doc<"connectedAccounts">["status"], string> = {
   error: "bg-danger",
 };
 
-export function ConnectionsPage() {
-  const accounts = useQuery(api.oauth.accounts.list, {});
-  const entitlements = useQuery(api.billing.getEntitlements, {});
+export function ConnectionsPage({
+  preloaded,
+}: {
+  preloaded: Preloaded<typeof api.oauth.accounts.getConnectionsPageData>;
+}) {
+  const { accounts, entitlements } = usePreloadedQuery(preloaded);
   const disconnect = useMutation(api.oauth.accounts.disconnect);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -41,13 +43,11 @@ export function ConnectionsPage() {
   const connected = searchParams.get("connected") ?? "";
   const oauthError = searchParams.get("error") ?? "";
   const flashKey = `${connected}\0${oauthError}`;
-  const connectedAccountsCount =
-    accounts?.filter((account) => account.status !== "revoked").length ?? 0;
-  const accountLimit = entitlements?.connectedAccountLimit;
-  const connectionUsage =
-    entitlements === undefined
-      ? "Loading plan limits…"
-      : `${connectedAccountsCount} of ${accountLimit} connections used`;
+  const connectedAccountsCount = accounts.filter(
+    (account) => account.status !== "revoked",
+  ).length;
+  const accountLimit = entitlements.connectedAccountLimit;
+  const connectionUsage = `${connectedAccountsCount} of ${accountLimit} connections used`;
 
   useEffect(() => {
     if (flashKey === "\0") return;
@@ -70,7 +70,6 @@ export function ConnectionsPage() {
     for (const platform of CONNECTABLE_PLATFORMS) {
       map.set(platform, []);
     }
-    if (!accounts) return map;
     for (const account of accounts) {
       const list = map.get(account.platform) ?? [];
       list.push(account);
@@ -128,138 +127,124 @@ export function ConnectionsPage() {
           description={`Connect and manage social accounts from one workspace. ${connectionUsage}.`}
         />
 
-        {accounts === undefined ? (
-          <div
-            className="flex min-h-52 flex-col items-center justify-center gap-3"
-            role="status"
-            aria-live="polite"
-            aria-busy="true"
-          >
-            <Spinner color="accent" size="lg" />
-            <p className="text-sm text-muted">Loading connections…</p>
-          </div>
-        ) : (
-          <section className="divide-y divide-border/70">
-            {CONNECTABLE_PLATFORMS.map((platform) => {
-              const meta = PLATFORM_META[platform] ?? {
-                label: platform,
-                icon: "hugeicons:link-01",
-                brand: "#666666",
-              };
-              const linked = byPlatform.get(platform) ?? [];
-              const isConnecting = connecting === platform;
-              const hasAccounts = linked.length > 0;
+        <section className="divide-y divide-border/70">
+          {CONNECTABLE_PLATFORMS.map((platform) => {
+            const meta = PLATFORM_META[platform] ?? {
+              label: platform,
+              icon: "hugeicons:link-01",
+              brand: "#666666",
+            };
+            const linked = byPlatform.get(platform) ?? [];
+            const isConnecting = connecting === platform;
+            const hasAccounts = linked.length > 0;
 
-              return (
-                <div
-                  key={platform}
-                  className="grid gap-3 py-3.5 first:pt-0 last:pb-0 md:grid-cols-[220px_minmax(0,1fr)] md:items-center"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <span
-                      className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white"
-                      style={{
-                        backgroundColor: meta.brand,
-                        color: meta.foreground ?? "#FFFFFF",
-                      }}
-                    >
-                      <Icon icon={meta.icon} width={16} />
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      className="justify-start"
-                      isDisabled={connecting !== null && !isConnecting}
-                      isPending={isConnecting}
-                      onPress={() => void onConnect(platform)}
-                    >
-                      {isConnecting ? (
-                        <>
-                          <Spinner color="current" size="sm" />
-                          Redirecting…
-                        </>
-                      ) : hasAccounts ? (
-                        `Add ${meta.label}`
-                      ) : (
-                        `Connect ${meta.label}`
-                      )}
-                    </Button>
-                  </div>
-
-                  <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    {linked.length === 0 ? (
-                      <p className="text-xs text-muted">
-                        No {meta.label} accounts connected
-                      </p>
+            return (
+              <div
+                key={platform}
+                className="grid gap-3 py-3.5 first:pt-0 last:pb-0 md:grid-cols-[220px_minmax(0,1fr)] md:items-center"
+              >
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span
+                    className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white"
+                    style={{
+                      backgroundColor: meta.brand,
+                      color: meta.foreground ?? "#FFFFFF",
+                    }}
+                  >
+                    <Icon icon={meta.icon} width={16} />
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    className="justify-start"
+                    isDisabled={connecting !== null && !isConnecting}
+                    isPending={isConnecting}
+                    onPress={() => void onConnect(platform)}
+                  >
+                    {isConnecting ? (
+                      <>
+                        <Spinner color="current" size="sm" />
+                        Redirecting…
+                      </>
+                    ) : hasAccounts ? (
+                      `Add ${meta.label}`
                     ) : (
-                      linked.map((account) => {
-                        const needsAttention = account.status !== "active";
-                        return (
-                          <div
-                            key={account._id}
-                            className={[
-                              "flex max-w-full items-center gap-2 rounded-full bg-surface-secondary py-1 pl-1.5 pr-1",
-                              needsAttention ? "ring-1 ring-warning/50" : "",
-                            ].join(" ")}
-                          >
-                            {account.avatarUrl ? (
-                              <RemoteAvatar
-                                src={account.avatarUrl}
-                                size={24}
-                                className="size-6 rounded-full object-cover"
-                              />
-                            ) : (
-                              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-semibold">
-                                {account.username.slice(0, 1).toUpperCase()}
-                              </span>
-                            )}
-                            <span
-                              className={`size-1.5 shrink-0 rounded-full ${statusDot[account.status] ?? "bg-muted"}`}
-                              title={account.status}
+                      `Connect ${meta.label}`
+                    )}
+                  </Button>
+                </div>
+
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  {linked.length === 0 ? (
+                    <p className="text-xs text-muted">
+                      No {meta.label} accounts connected
+                    </p>
+                  ) : (
+                    linked.map((account) => {
+                      const needsAttention = account.status !== "active";
+                      return (
+                        <div
+                          key={account._id}
+                          className={[
+                            "flex max-w-full items-center gap-2 rounded-full bg-surface-secondary py-1 pl-1.5 pr-1",
+                            needsAttention ? "ring-1 ring-warning/50" : "",
+                          ].join(" ")}
+                        >
+                          {account.avatarUrl ? (
+                            <RemoteAvatar
+                              src={account.avatarUrl}
+                              size={24}
+                              className="size-6 rounded-full object-cover"
                             />
-                            <p className="max-w-40 truncate text-xs font-medium">
-                              @{account.username}
-                            </p>
-                            {needsAttention && (
-                              <Button
-                                size="sm"
-                                variant="tertiary"
-                                className="h-6 min-h-6 px-1.5 text-[11px] text-warning"
-                                isDisabled={
-                                  connecting !== null && !isConnecting
-                                }
-                                isPending={isConnecting}
-                                onPress={() => void onConnect(platform)}
-                              >
-                                Reconnect
-                              </Button>
-                            )}
+                          ) : (
+                            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-semibold">
+                              {account.username.slice(0, 1).toUpperCase()}
+                            </span>
+                          )}
+                          <span
+                            className={`size-1.5 shrink-0 rounded-full ${statusDot[account.status] ?? "bg-muted"}`}
+                            title={account.status}
+                          />
+                          <p className="max-w-40 truncate text-xs font-medium">
+                            @{account.username}
+                          </p>
+                          {needsAttention && (
                             <Button
-                              isIconOnly
                               size="sm"
                               variant="tertiary"
-                              aria-label={`Disconnect @${account.username}`}
-                              className="size-6 min-w-6 rounded-full text-muted hover:text-danger"
-                              isPending={disconnecting === account._id}
-                              onPress={() =>
-                                setAccountToDisconnect({
-                                  id: account._id,
-                                  username: account.username,
-                                })
-                              }
+                              className="h-6 min-h-6 px-1.5 text-[11px] text-warning"
+                              isDisabled={connecting !== null && !isConnecting}
+                              isPending={isConnecting}
+                              onPress={() => void onConnect(platform)}
                             >
-                              <Icon icon="hugeicons:delete-02" width={13} />
+                              Reconnect
                             </Button>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
+                          )}
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            aria-label={`Disconnect @${account.username}`}
+                            className="size-6 min-w-6 rounded-full text-muted hover:text-danger"
+                            isPending={disconnecting === account._id}
+                            onPress={() =>
+                              setAccountToDisconnect({
+                                id: account._id,
+                                username: account.username,
+                              })
+                            }
+                          >
+                            <Icon icon="hugeicons:delete-02" width={13} />
+                          </Button>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
-              );
-            })}
-          </section>
-        )}
+              </div>
+            );
+          })}
+        </section>
       </div>
 
       <Modal

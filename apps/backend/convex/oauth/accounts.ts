@@ -1,6 +1,14 @@
 import { type Infer, v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
-import { mutation, query, type MutationCtx } from "../_generated/server";
+import {
+  internalMutation,
+  mutation,
+  query,
+  type MutationCtx,
+  type QueryCtx,
+} from "../_generated/server";
+import { internal } from "../_generated/api";
+import { entitlementsForTeam } from "../billing";
 import { requireUser } from "../hexclave/auth";
 import {
   capability,
@@ -12,6 +20,13 @@ import { assertCanConnect } from "./limits";
 import { requireOAuthServer } from "./server";
 
 const MAX_ACCOUNTS_PER_CONNECTION = 100;
+const CLEANUP_BATCH_SIZE = 200;
+const DISCONNECTABLE_TARGET_STATUSES = [
+  "draft",
+  "scheduled",
+  "publishing",
+  "failed",
+] as const;
 
 const accountInput = v.object({
   platform: platformValidator,
@@ -42,6 +57,26 @@ function stripSecrets(doc: Doc<"connectedAccounts">): PublicAccount {
   delete safe.encryptedAccessToken;
   delete safe.encryptedRefreshToken;
   return safe;
+}
+
+export async function listAccountsForTeam(
+  ctx: QueryCtx,
+  teamId: string,
+  selectedPlatform?: Doc<"connectedAccounts">["platform"],
+) {
+  const rows = selectedPlatform
+    ? await ctx.db
+        .query("connectedAccounts")
+        .withIndex("by_team_provider", (q) =>
+          q.eq("teamId", teamId).eq("platform", selectedPlatform),
+        )
+        .collect()
+    : await ctx.db
+        .query("connectedAccounts")
+        .withIndex("by_team_provider", (q) => q.eq("teamId", teamId))
+        .collect();
+
+  return rows.map(stripSecrets);
 }
 
 async function upsertAccount(
@@ -108,24 +143,20 @@ export const list = query({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const teamId = user.selectedTeamId;
-    const selectedPlatform = args.platform;
+    return await listAccountsForTeam(ctx, user.selectedTeamId, args.platform);
+  },
+});
 
-    if (selectedPlatform) {
-      const rows = await ctx.db
-        .query("connectedAccounts")
-        .withIndex("by_team_provider", (q) =>
-          q.eq("teamId", teamId).eq("platform", selectedPlatform),
-        )
-        .collect();
-      return rows.map(stripSecrets);
-    }
-
-    const rows = await ctx.db
-      .query("connectedAccounts")
-      .withIndex("by_team_provider", (q) => q.eq("teamId", teamId))
-      .collect();
-    return rows.map(stripSecrets);
+/** One consistent subscription for everything rendered on Connections. */
+export const getConnectionsPageData = query({
+  args: { nowMs: v.number() },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const [accounts, entitlements] = await Promise.all([
+      listAccountsForTeam(ctx, user.selectedTeamId),
+      entitlementsForTeam(ctx, user.selectedTeamId, args.nowMs),
+    ]);
+    return { accounts, entitlements };
   },
 });
 
@@ -197,10 +228,9 @@ export const saveMany = mutation({
       }),
     );
 
-    const accountIds = [];
-    for (const encrypted of encryptedAccounts) {
-      accountIds.push(
-        await upsertAccount(ctx, encrypted.existing, {
+    const accountIds = await Promise.all(
+      encryptedAccounts.map((encrypted) =>
+        upsertAccount(ctx, encrypted.existing, {
           ...encrypted.account,
           teamId: user.selectedTeamId,
           userId: user.id,
@@ -208,8 +238,8 @@ export const saveMany = mutation({
           encryptedRefreshToken: encrypted.encryptedRefreshToken,
           hasNewRefreshToken: encrypted.hasNewRefreshToken,
         }),
-      );
-    }
+      ),
+    );
 
     return { accountIds };
   },
@@ -226,41 +256,82 @@ export const disconnect = mutation({
       throw new Error("Account not found");
     }
 
+    await ctx.db.patch(args.accountId, {
+      status: "revoked",
+      encryptedAccessToken: undefined,
+      encryptedRefreshToken: undefined,
+      tokenExpiresAt: undefined,
+      refreshTokenExpiresAt: undefined,
+      errorMessage: undefined,
+      updatedAt: Date.now(),
+    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.oauth.accounts.cleanupDisconnectedAccount,
+      { accountId: args.accountId },
+    );
+    return { ok: true as const };
+  },
+});
+
+/** Bounded follow-up so disconnect latency does not scale with account history. */
+export const cleanupDisconnectedAccount = internalMutation({
+  args: { accountId: v.id("connectedAccounts") },
+  handler: async (ctx, args) => {
+    const [targetBatches, inbox] = await Promise.all([
+      Promise.all(
+        DISCONNECTABLE_TARGET_STATUSES.map((status) =>
+          ctx.db
+            .query("postTargets")
+            .withIndex("by_account_schedule", (q) =>
+              q.eq("connectedAccountId", args.accountId).eq("status", status),
+            )
+            .take(CLEANUP_BATCH_SIZE),
+        ),
+      ),
+      ctx.db
+        .query("inboxItems")
+        .withIndex("by_account_external", (q) =>
+          q.eq("connectedAccountId", args.accountId),
+        )
+        .take(CLEANUP_BATCH_SIZE),
+    ]);
     const now = Date.now();
 
-    // Clean up unpublished targets so the calendar/publisher do not hang.
-    const targets = await ctx.db
-      .query("postTargets")
-      .withIndex("by_account_schedule", (q) =>
-        q.eq("connectedAccountId", args.accountId),
-      )
-      .collect();
+    await Promise.all([
+      ...targetBatches.flat().map((target) =>
+        ctx.db.patch(target._id, {
+          status: "skipped",
+          failureCode: "account_disconnected",
+          failureMessage: "Connected account was disconnected",
+          updatedAt: now,
+        }),
+      ),
+      ...inbox.map((item) => ctx.db.delete(item._id)),
+    ]);
 
-    for (const target of targets) {
-      if (target.status === "published") {
-        // Keep published rows for metrics history; account row is removed.
-        continue;
+    const hasMore =
+      inbox.length === CLEANUP_BATCH_SIZE ||
+      targetBatches.some((batch) => batch.length === CLEANUP_BATCH_SIZE);
+    if (hasMore) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.oauth.accounts.cleanupDisconnectedAccount,
+        args,
+      );
+    } else {
+      const account = await ctx.db.get(args.accountId);
+      if (account?.status === "revoked") {
+        await ctx.db.delete(args.accountId);
       }
-      await ctx.db.patch(target._id, {
-        status: "skipped",
-        failureCode: "account_disconnected",
-        failureMessage: "Connected account was disconnected",
-        updatedAt: now,
-      });
     }
 
-    // Remove inbox items for this account.
-    const inbox = await ctx.db
-      .query("inboxItems")
-      .withIndex("by_account_external", (q) =>
-        q.eq("connectedAccountId", args.accountId),
-      )
-      .collect();
-    for (const item of inbox) {
-      await ctx.db.delete(item._id);
-    }
-
-    await ctx.db.delete(args.accountId);
-    return { ok: true as const };
+    return {
+      deletedInboxItems: inbox.length,
+      skippedTargets: targetBatches.reduce(
+        (count, batch) => count + batch.length,
+        0,
+      ),
+    };
   },
 });

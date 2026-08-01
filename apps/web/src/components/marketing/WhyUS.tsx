@@ -89,7 +89,7 @@ function WhyUSCard({
           href="/sign-in"
         >
           {point.cta}
-          <Icon icon="mdi:arrow-right" />
+          <Icon icon="mdi:arrow-right" width={16} />
         </Link>
       </div>
     </div>

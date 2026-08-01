@@ -135,12 +135,11 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      const accounts = [];
-      for (const option of options) {
-        accounts.push(
-          await connector.resolveAccount(tokens, option.id, option),
-        );
-      }
+      const accounts = await Promise.all(
+        options.map((option) =>
+          connector.resolveAccount!(tokens, option.id, option),
+        ),
+      );
 
       await saveConnectedAccounts({
         token,

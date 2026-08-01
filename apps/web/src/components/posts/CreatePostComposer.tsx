@@ -8,7 +8,7 @@ import {
   DatePicker,
   Input,
   Label,
-  Spinner,
+  Skeleton,
   Tabs,
   TextArea,
   TimeField,
@@ -31,6 +31,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { ComposerFormSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
   PLATFORM_META,
@@ -138,16 +139,13 @@ function PostComposerForm({
   onChooseDifferentFormat,
 }: ComposerFormProps) {
   const router = useRouter();
-  const accounts = useQuery(api.oauth.accounts.list, {});
   const sourcePostId = editPostId ?? duplicateFromId;
-  const sourcePost = useQuery(
-    api.posts.get,
-    sourcePostId ? { postId: sourcePostId } : "skip",
-  );
+  const composerData = useQuery(api.posts.composerData, { sourcePostId });
+  const accounts = composerData?.accounts;
+  const sourcePost = composerData?.sourcePost;
   const createPost = useMutation(api.posts.create);
   const updatePost = useMutation(api.posts.update);
   const prefilledFrom = useRef<string | null>(null);
-  const pastPosts = useQuery(api.posts.list, { limit: 50 });
 
   const [body, setBody] = useState("");
   const [title, setTitle] = useState("");
@@ -161,6 +159,10 @@ function PostComposerForm({
   >({});
   const [captionSearch, setCaptionSearch] = useState("");
   const [activeTool, setActiveTool] = useState<ComposerTool>(null);
+  const recentCaptions = useQuery(
+    api.posts.recentCaptions,
+    activeTool === "history" ? { limit: 50 } : "skip",
+  );
   const [scheduleMode, setScheduleMode] = useState<"now" | "schedule">(
     initialScheduledFor ? "schedule" : "now",
   );
@@ -323,15 +325,14 @@ function PostComposerForm({
   const pastCaptions = useMemo(() => {
     const seen = new Set<string>();
     const query = captionSearch.trim().toLowerCase();
-    return (pastPosts ?? [])
-      .map((post) => post.body.trim())
+    return (recentCaptions ?? [])
       .filter((caption) => {
         if (!caption || seen.has(caption)) return false;
         seen.add(caption);
         return !query || caption.toLowerCase().includes(query);
       })
       .slice(0, 12);
-  }, [captionSearch, pastPosts]);
+  }, [captionSearch, recentCaptions]);
 
   const overLimitAccounts = useMemo(
     () =>
@@ -459,14 +460,9 @@ function PostComposerForm({
 
   if (accounts === undefined || (sourcePostId && sourcePost === undefined)) {
     return (
-      <div
-        className="flex min-h-64 flex-col items-center justify-center gap-3"
-        role="status"
-        aria-live="polite"
-        aria-busy="true"
-      >
-        <Spinner color="accent" size="lg" />
-        <p className="text-sm text-muted">Loading composer…</p>
+      <div className="flex flex-col gap-6" aria-busy="true" role="status">
+        <span className="sr-only">Loading composer</span>
+        <ComposerFormSkeleton />
       </div>
     );
   }
@@ -587,7 +583,6 @@ function PostComposerForm({
                                 "hugeicons:link-01"
                               }
                               width={12}
-                              height={12}
                               style={{ color: brand }}
                               className="shrink-0 drop-shadow-[0_0_1px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_0_1px_rgba(0,0,0,0.8)]"
                             />
@@ -870,9 +865,11 @@ function PostComposerForm({
                     value={captionSearch}
                     onChange={(event) => setCaptionSearch(event.target.value)}
                   />
-                  {pastPosts === undefined ? (
-                    <div className="flex justify-center py-6">
-                      <Spinner color="accent" size="sm" />
+                  {recentCaptions === undefined ? (
+                    <div className="space-y-2 py-2">
+                      <Skeleton className="h-8 w-full rounded-lg" />
+                      <Skeleton className="h-8 w-4/5 rounded-lg" />
+                      <Skeleton className="h-8 w-3/5 rounded-lg" />
                     </div>
                   ) : pastCaptions.length === 0 ? (
                     <p className="py-4 text-center text-sm text-muted">

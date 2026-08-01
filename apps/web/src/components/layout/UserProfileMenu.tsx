@@ -95,7 +95,7 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
             shouldCloseOnSelect={false}
             textValue="Dark mode"
           >
-            <Icon icon="hugeicons:sun-03" className="size-5" />
+            <Icon icon="hugeicons:sun-03" width={20} />
             <Label>Dark mode</Label>
             <Switch
               aria-label="Toggle dark mode"
@@ -109,11 +109,11 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
             </Switch>
           </Dropdown.Item>
           <Dropdown.Item id="settings" textValue="Settings">
-            <Icon icon="hugeicons:settings-02" className="size-5" />
+            <Icon icon="hugeicons:settings-02" width={20} />
             <Label>Settings</Label>
           </Dropdown.Item>
           <Dropdown.Item id="logout" textValue="Logout">
-            <Icon icon="hugeicons:logout-03" className="size-5" />
+            <Icon icon="hugeicons:logout-03" width={20} />
             <Label>Logout</Label>
           </Dropdown.Item>
         </Dropdown.Menu>

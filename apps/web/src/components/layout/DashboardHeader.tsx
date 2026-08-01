@@ -23,7 +23,7 @@ export function DashboardHeader({
         className="inline-flex size-9 items-center justify-center rounded-3xl text-muted transition-colors hover:bg-surface-secondary hover:text-foreground"
         aria-label="Toggle sidebar"
       >
-        <Icon icon="hugeicons:sidebar-left" className="size-4.5" />
+        <Icon icon="hugeicons:sidebar-left" width={18} />
       </button>
       <div className="ml-auto flex items-center justify-end">
         <UserProfileMenu user={user} />

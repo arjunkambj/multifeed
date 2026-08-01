@@ -73,7 +73,7 @@ export function PasswordModal() {
   return (
     <Modal isOpen={isOpen} onOpenChange={handleOpenChange}>
       <Button type="button" variant="tertiary">
-        <Icon icon="solar:key-linear" className="size-4" />
+        <Icon icon="solar:key-linear" width={16} />
         {actionLabel}
       </Button>
       <Modal.Backdrop

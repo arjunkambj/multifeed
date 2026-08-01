@@ -1,18 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Chip, Input, Spinner, Tabs, toast } from "@heroui/react";
+import { Button, Card, Chip, Input, Tabs, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useMutation } from "convex/react";
-import { useQuery } from "convex-helpers/react/cache/hooks";
+import { useMutation, usePreloadedQuery, type Preloaded } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { format } from "date-fns";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { platformBrand, platformLabel } from "@/lib/platform-meta";
-
-export type PostLibraryFilter = "all" | "scheduled" | "published" | "draft";
+import type { PostLibraryFilter } from "@/lib/post-filters";
 
 const FILTERS: Array<{ id: PostLibraryFilter; label: string }> = [
   { id: "all", label: "All" },
@@ -58,21 +56,23 @@ const STATUS_TONE: Record<
   failed: "danger",
 };
 
-export function PostLibrary() {
+export function PostLibrary({
+  filter,
+  preloaded,
+}: {
+  filter: PostLibraryFilter;
+  preloaded: Preloaded<typeof api.posts.list>;
+}) {
   const router = useRouter();
   const removePost = useMutation(api.posts.remove);
-  const [filter, setFilter] = useState<PostLibraryFilter>("all");
-  const posts = useQuery(
-    api.posts.list,
-    filter === "all" ? { limit: 100 } : { status: filter, limit: 100 },
-  );
+  const posts = usePreloadedQuery(preloaded);
+  const [, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
   const copy = PAGE_COPY[filter];
 
   const visiblePosts = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!posts) return [];
     if (!query) return posts;
     return posts.filter((post) =>
       [
@@ -135,7 +135,15 @@ export function PostLibrary() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs
           selectedKey={filter}
-          onSelectionChange={(key) => setFilter(key as PostLibraryFilter)}
+          onSelectionChange={(key) => {
+            const next = key as PostLibraryFilter;
+            startTransition(() => {
+              router.replace(
+                next === "all" ? "/posts" : `/posts?status=${next}`,
+                { scroll: false },
+              );
+            });
+          }}
         >
           <Tabs.ListContainer>
             <Tabs.List aria-label="Filter posts by status">
@@ -160,11 +168,7 @@ export function PostLibrary() {
         </div>
       </div>
 
-      {posts === undefined ? (
-        <div className="flex min-h-48 items-center justify-center">
-          <Spinner />
-        </div>
-      ) : visiblePosts.length === 0 ? (
+      {visiblePosts.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <span className="flex size-12 items-center justify-center rounded-2xl bg-accent/10 text-accent">
             <Icon icon="hugeicons:note-01" width={24} />

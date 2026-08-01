@@ -1,25 +1,26 @@
 import { Suspense } from "react";
-import { Spinner } from "@heroui/react";
+import { preloadQuery } from "convex/nextjs";
+import { api } from "@convex/_generated/api";
 import { ConnectionsPage } from "@/components/connections/ConnectionsPage";
+import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
+import { requireDashboardSession } from "@/hexclave/dashboard-session";
+import { currentTimeBucket } from "@/lib/time-bucket";
 
-function ConnectionsLoading() {
-  return (
-    <div
-      className="flex min-h-52 flex-col items-center justify-center gap-3"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <Spinner color="accent" size="lg" />
-      <p className="text-sm text-muted">Loading connections…</p>
-    </div>
+async function ConnectionsContent() {
+  const { convexToken } = await requireDashboardSession();
+  const preloaded = await preloadQuery(
+    api.oauth.accounts.getConnectionsPageData,
+    { nowMs: currentTimeBucket() },
+    { token: convexToken },
   );
+
+  return <ConnectionsPage preloaded={preloaded} />;
 }
 
 export default function Page() {
   return (
-    <Suspense fallback={<ConnectionsLoading />}>
-      <ConnectionsPage />
+    <Suspense fallback={<DashboardLoadingSkeleton variant="connections" />}>
+      <ConnectionsContent />
     </Suspense>
   );
 }

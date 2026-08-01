@@ -1,12 +1,10 @@
 "use client";
 
-import type { Team } from "@hexclave/next";
-
 import { useQuery } from "@tanstack/react-query";
 import { TeamMembersTable } from "@/components/team/TeamMembersTable";
 import { TeamStats } from "@/components/team/TeamStats";
 import { TeamTableSkeleton } from "@/components/team/TeamTableSkeleton";
-import { loadTeamData, teamDataQueryKey } from "@/lib/team-data";
+import { loadTeamData, teamDataQueryKey, type TeamData } from "@/lib/team-data";
 
 type TeamTableRow = {
   email: string | null;
@@ -27,10 +25,17 @@ const formatDate = (value: Date) =>
 
 export type { TeamTableRow };
 
-export function TeamMembersContent({ team }: { team: Team }) {
+export function TeamMembersContent({
+  initialData,
+  teamId,
+}: {
+  initialData?: TeamData;
+  teamId: string;
+}) {
   const teamDataQuery = useQuery({
+    initialData,
     queryFn: loadTeamData,
-    queryKey: teamDataQueryKey(team.id),
+    queryKey: teamDataQueryKey(teamId),
   });
   const isPending = teamDataQuery.isPending;
   const teamMembers = teamDataQuery.data?.members ?? [];

@@ -18,9 +18,9 @@ export const hexclaveServerApp = new HexclaveServerApp({
   },
 });
 
-export const getHexclaveConvexServerToken = async (request: NextRequest) => {
+export const getHexclaveConvexServerToken = async (request?: NextRequest) => {
   const token = await hexclaveServerApp.getConvexHttpClientAuth({
-    tokenStore: request,
+    tokenStore: request ?? "nextjs-cookie",
   });
 
   return token.length ? token : null;

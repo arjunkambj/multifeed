@@ -19,7 +19,7 @@ import {
   Chip,
   ListBox,
   Select,
-  Spinner,
+  Skeleton,
   Tabs,
   toast,
 } from "@heroui/react";
@@ -31,6 +31,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { CalendarGridSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import {
   PLATFORM_META,
   platformBrand,
@@ -286,8 +287,8 @@ export function PostCalendar() {
 
           <div className="multifeed-calendar relative min-h-[640px]">
             {posts === undefined && range && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface/60">
-                <Spinner />
+              <div className="absolute inset-0 z-10 bg-surface">
+                <CalendarGridSkeleton />
               </div>
             )}
             <FullCalendar
@@ -343,8 +344,11 @@ export function PostCalendar() {
             </Card.Header>
             <Card.Content>
               {selectedPost === undefined && (
-                <div className="flex justify-center py-10">
-                  <Spinner />
+                <div className="space-y-4 py-2">
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                  <Skeleton className="h-4 w-3/5 rounded-lg" />
+                  <Skeleton className="h-4 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
                 </div>
               )}
 

@@ -1,21 +1,12 @@
-import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { hexclaveServerApp } from "@/hexclave/server";
+import { requireDashboardSession } from "@/hexclave/dashboard-session";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await hexclaveServerApp.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  if (!user.selectedTeam) {
-    redirect("/created-org");
-  }
+  const { user } = await requireDashboardSession();
 
   return (
     <DashboardShell

@@ -26,18 +26,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const token = await getHexclaveConvexServerToken(request);
+  const [token, body] = await Promise.all([
+    getHexclaveConvexServerToken(request),
+    request.json().catch(() => ({})) as Promise<{
+      platform?: unknown;
+      returnTo?: unknown;
+    }>,
+  ]);
   if (token == null) {
     return NextResponse.json(
       { error: "Unauthenticated" },
       { status: 401, ...responseOptions },
     );
   }
-
-  const body = (await request.json().catch(() => ({}))) as {
-    platform?: unknown;
-    returnTo?: unknown;
-  };
 
   if (typeof body.platform !== "string" || !isOAuthPlatform(body.platform)) {
     return NextResponse.json(

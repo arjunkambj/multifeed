@@ -7,6 +7,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { requireUser } from "./hexclave/auth";
+import { listAccountsForTeam } from "./oauth/accounts";
 import { platformSettings, postKind, postStatus } from "./schema";
 
 const targetInput = v.object({
@@ -28,6 +29,13 @@ const CALENDAR_COLORS = [
   "#059669",
 ];
 const MAX_TARGETS_PER_POST = 100;
+const CALENDAR_VISIBLE_STATUSES = [
+  "scheduled",
+  "publishing",
+  "published",
+  "failed",
+] as const;
+const OVERVIEW_TARGET_STATUSES = ["published", "failed"] as const;
 
 const POST_KIND_PLATFORMS = {
   text: ["facebook", "linkedin", "threads", "x"],
@@ -49,10 +57,15 @@ function colorForIndex(i: number) {
 }
 
 async function loadTargets(ctx: QueryCtx | MutationCtx, postId: Id<"posts">) {
-  return await ctx.db
+  const targets = await ctx.db
     .query("postTargets")
     .withIndex("by_post", (q) => q.eq("postId", postId))
-    .collect();
+    .take(MAX_TARGETS_PER_POST + 1);
+
+  if (targets.length > MAX_TARGETS_PER_POST) {
+    throw new Error(`Post exceeds the ${MAX_TARGETS_PER_POST} target limit`);
+  }
+  return targets;
 }
 
 async function assertMediaOwnedByTeam(
@@ -61,18 +74,16 @@ async function assertMediaOwnedByTeam(
   mediaAssetIds: Id<"mediaAssets">[] | undefined,
 ) {
   if (!mediaAssetIds?.length) return [];
-  const assets: Doc<"mediaAssets">[] = [];
-  for (const id of mediaAssetIds) {
-    const asset = await ctx.db.get(id);
+  const assets = await Promise.all(mediaAssetIds.map((id) => ctx.db.get(id)));
+  return assets.map((asset) => {
     if (!asset || asset.teamId !== teamId) {
       throw new Error("Invalid media asset");
     }
     if (asset.status !== "ready") {
       throw new Error("Media asset is not ready");
     }
-    assets.push(asset);
-  }
-  return assets;
+    return asset;
+  });
 }
 
 function validateMediaForKind(
@@ -148,15 +159,22 @@ async function replaceTargets(
   if (input.targets.length > MAX_TARGETS_PER_POST) {
     throw new Error(`Posts support up to ${MAX_TARGETS_PER_POST} targets`);
   }
-
-  const existing = await loadTargets(ctx, input.postId);
-  for (const row of existing) {
-    await ctx.db.delete(row._id);
+  if (
+    new Set(input.targets.map((target) => target.connectedAccountId)).size !==
+    input.targets.length
+  ) {
+    throw new Error("A connected account can only be targeted once per post");
   }
 
-  const now = Date.now();
-  for (const target of input.targets) {
-    const account = await ctx.db.get(target.connectedAccountId);
+  const [existing, accounts] = await Promise.all([
+    loadTargets(ctx, input.postId),
+    Promise.all(
+      input.targets.map((target) => ctx.db.get(target.connectedAccountId)),
+    ),
+  ]);
+  const targetsWithAccounts = input.targets.map((target, index) => {
+    const account = accounts[index];
+
     if (!account || account.teamId !== input.teamId) {
       throw new Error("Invalid connected account");
     }
@@ -170,23 +188,30 @@ async function replaceTargets(
         `${account.username} does not support this ${input.kind} post`,
       );
     }
+    return { account, target };
+  });
 
-    await ctx.db.insert("postTargets", {
-      teamId: input.teamId,
-      postId: input.postId,
-      connectedAccountId: target.connectedAccountId,
-      platform: account.platform,
-      status: input.status,
-      bodyOverride: target.bodyOverride,
-      firstComment: target.firstComment,
-      referenceUrl: target.referenceUrl,
-      platformSettings: target.platformSettings,
-      scheduledFor: input.scheduledFor,
-      attempts: 0,
-      metricSyncStatus: "idle",
-      updatedAt: now,
-    });
-  }
+  const now = Date.now();
+  await Promise.all([
+    ...existing.map((row) => ctx.db.delete(row._id)),
+    ...targetsWithAccounts.map(({ account, target }) =>
+      ctx.db.insert("postTargets", {
+        teamId: input.teamId,
+        postId: input.postId,
+        connectedAccountId: target.connectedAccountId,
+        platform: account.platform,
+        status: input.status,
+        bodyOverride: target.bodyOverride,
+        firstComment: target.firstComment,
+        referenceUrl: target.referenceUrl,
+        platformSettings: target.platformSettings,
+        scheduledFor: input.scheduledFor,
+        attempts: 0,
+        metricSyncStatus: "idle",
+        updatedAt: now,
+      }),
+    ),
+  ]);
 }
 
 function targetStatusFromPost(
@@ -196,39 +221,60 @@ function targetStatusFromPost(
   return status;
 }
 
-async function enrichPost(ctx: QueryCtx, post: Doc<"posts">) {
-  const targets = await loadTargets(ctx, post._id);
-  const mediaAssets = (
-    await Promise.all(post.mediaAssetIds.map((id) => ctx.db.get(id)))
-  ).filter((asset): asset is Doc<"mediaAssets"> => asset != null);
-  const accounts = await Promise.all(
-    targets.map(async (t) => {
-      const account = await ctx.db.get(t.connectedAccountId);
+async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
+  const targetsByPost = await Promise.all(
+    posts.map((post) => loadTargets(ctx, post._id)),
+  );
+  const accountIds = [
+    ...new Set(
+      targetsByPost.flatMap((targets) =>
+        targets.map((target) => target.connectedAccountId),
+      ),
+    ),
+  ];
+  const mediaIds = [...new Set(posts.flatMap((post) => post.mediaAssetIds))];
+  const [accounts, mediaAssets] = await Promise.all([
+    Promise.all(accountIds.map((id) => ctx.db.get(id))),
+    Promise.all(mediaIds.map((id) => ctx.db.get(id))),
+  ]);
+  const accountsById = new Map(
+    accounts.flatMap((account) => (account ? [[account._id, account]] : [])),
+  );
+  const mediaById = new Map(
+    mediaAssets.flatMap((asset) => (asset ? [[asset._id, asset]] : [])),
+  );
+
+  return posts.map((post, index) => ({
+    ...post,
+    targets: (targetsByPost[index] ?? []).map((target) => {
+      const account = accountsById.get(target.connectedAccountId);
       return {
-        targetId: t._id,
-        connectedAccountId: t.connectedAccountId,
-        platform: t.platform,
-        status: t.status,
-        bodyOverride: t.bodyOverride,
-        firstComment: t.firstComment,
-        referenceUrl: t.referenceUrl,
-        platformSettings: t.platformSettings,
-        scheduledFor: t.scheduledFor,
-        platformPostId: t.platformPostId,
-        platformPermalink: t.platformPermalink,
-        failureMessage: t.failureMessage,
+        targetId: target._id,
+        connectedAccountId: target.connectedAccountId,
+        platform: target.platform,
+        status: target.status,
+        bodyOverride: target.bodyOverride,
+        firstComment: target.firstComment,
+        referenceUrl: target.referenceUrl,
+        platformSettings: target.platformSettings,
+        scheduledFor: target.scheduledFor,
+        platformPostId: target.platformPostId,
+        platformPermalink: target.platformPermalink,
+        failureMessage: target.failureMessage,
         username: account?.username,
         displayName: account?.displayName,
         avatarUrl: account?.avatarUrl,
       };
     }),
-  );
+    mediaAssets: post.mediaAssetIds.flatMap((id) => {
+      const asset = mediaById.get(id);
+      return asset ? [asset] : [];
+    }),
+  }));
+}
 
-  return {
-    ...post,
-    targets: accounts,
-    mediaAssets,
-  };
+async function enrichPost(ctx: QueryCtx, post: Doc<"posts">) {
+  return (await enrichPosts(ctx, [post]))[0]!;
 }
 
 /**
@@ -412,13 +458,15 @@ export const update = mutation({
       args.status
     ) {
       const targets = await loadTargets(ctx, args.postId);
-      for (const t of targets) {
-        await ctx.db.patch(t._id, {
-          status: targetStatusFromPost(status),
-          scheduledFor,
-          updatedAt: now,
-        });
-      }
+      await Promise.all(
+        targets.map((target) =>
+          ctx.db.patch(target._id, {
+            status: targetStatusFromPost(status),
+            scheduledFor,
+            updatedAt: now,
+          }),
+        ),
+      );
     }
 
     return { ok: true as const };
@@ -462,14 +510,17 @@ export const reschedule = mutation({
     });
 
     const targets = await loadTargets(ctx, args.postId);
-    for (const t of targets) {
-      if (t.status === "published") continue;
-      await ctx.db.patch(t._id, {
-        scheduledFor: args.scheduledFor,
-        status: "scheduled",
-        updatedAt: now,
-      });
-    }
+    await Promise.all(
+      targets
+        .filter((target) => target.status !== "published")
+        .map((target) =>
+          ctx.db.patch(target._id, {
+            scheduledFor: args.scheduledFor,
+            status: "scheduled",
+            updatedAt: now,
+          }),
+        ),
+    );
 
     return { ok: true as const };
   },
@@ -484,7 +535,7 @@ export const remove = mutation({
       throw new Error("Post not found");
     }
     const targets = await loadTargets(ctx, args.postId);
-    for (const t of targets) await ctx.db.delete(t._id);
+    await Promise.all(targets.map((target) => ctx.db.delete(target._id)));
     await ctx.db.delete(args.postId);
     return { ok: true as const };
   },
@@ -528,7 +579,46 @@ export const list = query({
         .take(limit);
     }
 
-    return await Promise.all(posts.map((p) => enrichPost(ctx, p)));
+    return await enrichPosts(ctx, posts);
+  },
+});
+
+/** Small, bounded payload for the composer's optional caption-history tool. */
+export const recentCaptions = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const limit = Math.max(1, Math.min(args.limit ?? 50, 100));
+    const posts = await ctx.db
+      .query("posts")
+      .withIndex("by_team_updated", (q) => q.eq("teamId", user.selectedTeamId))
+      .order("desc")
+      .take(limit);
+
+    return posts.flatMap((post) => {
+      const body = post.body.trim();
+      return body ? [body] : [];
+    });
+  },
+});
+
+/** One subscription for the account picker and optional source post. */
+export const composerData = query({
+  args: { sourcePostId: v.optional(v.id("posts")) },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const [accounts, sourcePost] = await Promise.all([
+      listAccountsForTeam(ctx, user.selectedTeamId),
+      args.sourcePostId ? ctx.db.get(args.sourcePostId) : Promise.resolve(null),
+    ]);
+
+    return {
+      accounts,
+      sourcePost:
+        sourcePost?.teamId === user.selectedTeamId
+          ? await enrichPost(ctx, sourcePost)
+          : null,
+    };
   },
 });
 
@@ -542,20 +632,27 @@ export const listInRange = query({
     const user = await requireUser(ctx);
     if (args.endMs < args.startMs) return [];
 
-    const posts = await ctx.db
-      .query("posts")
-      .withIndex("by_team_scheduledFor", (q) =>
-        q
-          .eq("teamId", user.selectedTeamId)
-          .gte("scheduledFor", args.startMs)
-          .lte("scheduledFor", args.endMs),
+    const posts = (
+      await Promise.all(
+        CALENDAR_VISIBLE_STATUSES.map((status) =>
+          ctx.db
+            .query("posts")
+            .withIndex("by_team_schedule", (q) =>
+              q
+                .eq("teamId", user.selectedTeamId)
+                .eq("status", status)
+                .gte("scheduledFor", args.startMs)
+                .lte("scheduledFor", args.endMs),
+            )
+            .take(500),
+        ),
       )
-      .take(500);
+    )
+      .flat()
+      .sort((a, b) => (a.scheduledFor ?? 0) - (b.scheduledFor ?? 0))
+      .slice(0, 500);
 
-    const visiblePosts = posts.filter(
-      (p) => p.status !== "archived" && p.status !== "draft",
-    );
-    return await Promise.all(visiblePosts.map((p) => enrichPost(ctx, p)));
+    return await enrichPosts(ctx, posts);
   },
 });
 
@@ -577,8 +674,8 @@ export const overviewMetrics = query({
     const combinedStartMs = previousStartMs;
     const teamId = user.selectedTeamId;
 
-    const [posts, targets, metricSnapshots, activeAccounts] =
-      await Promise.all([
+    const [posts, targets, metricSnapshots, activeAccounts] = await Promise.all(
+      [
         ctx.db
           .query("posts")
           .withIndex("by_team_scheduledFor", (q) =>
@@ -588,15 +685,20 @@ export const overviewMetrics = query({
               .lte("scheduledFor", args.endMs),
           )
           .take(2_000),
-        ctx.db
-          .query("postTargets")
-          .withIndex("by_team_scheduledFor", (q) =>
-            q
-              .eq("teamId", teamId)
-              .gte("scheduledFor", combinedStartMs)
-              .lte("scheduledFor", args.endMs),
-          )
-          .take(5_000),
+        Promise.all(
+          OVERVIEW_TARGET_STATUSES.map((status) =>
+            ctx.db
+              .query("postTargets")
+              .withIndex("by_team_status_scheduledFor", (q) =>
+                q
+                  .eq("teamId", teamId)
+                  .eq("status", status)
+                  .gte("scheduledFor", combinedStartMs)
+                  .lte("scheduledFor", args.endMs),
+              )
+              .take(5_000),
+          ),
+        ).then((rows) => rows.flat()),
         ctx.db
           .query("postMetrics")
           .withIndex("by_team_time", (q) =>
@@ -612,12 +714,11 @@ export const overviewMetrics = query({
             q.eq("teamId", teamId).eq("status", "active"),
           )
           .take(250),
-      ]);
+      ],
+    );
 
     const inCurrentRange = (timestamp: number | undefined) =>
-      timestamp != null &&
-      timestamp >= args.startMs &&
-      timestamp <= args.endMs;
+      timestamp != null && timestamp >= args.startMs && timestamp <= args.endMs;
     const inPreviousRange = (timestamp: number | undefined) =>
       timestamp != null &&
       timestamp >= previousStartMs &&
@@ -706,6 +807,6 @@ export const listScheduled = query({
       .order("desc")
       .take(limit);
 
-    return await Promise.all(posts.map((p) => enrichPost(ctx, p)));
+    return await enrichPosts(ctx, posts);
   },
 });

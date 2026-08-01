@@ -119,7 +119,8 @@ export default function SignInPage() {
           <div className="relative">
             <Icon
               icon="solar:letter-linear"
-              className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted"
+              width={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
             />
             <Input
               type="email"

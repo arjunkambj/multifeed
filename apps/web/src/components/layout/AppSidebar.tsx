@@ -34,7 +34,8 @@ function NavItem({
     >
       <Icon
         icon={item.icon}
-        className={`size-[18px] shrink-0 ${active ? "[stroke-width:2]" : ""}`}
+        width={18}
+        className={`shrink-0 ${active ? "[stroke-width:2]" : ""}`}
       />
       {!collapsed && <span>{item.name}</span>}
     </Link>

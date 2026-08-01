@@ -35,7 +35,11 @@ const errorResponse = (message: string, status: number) =>
   NextResponse.json({ error: message }, { status, ...responseOptions });
 
 export async function POST(request: NextRequest) {
-  const user = await hexclaveServerApp.getUser({ tokenStore: request });
+  const [user, token, payload] = await Promise.all([
+    hexclaveServerApp.getUser({ tokenStore: request }),
+    getHexclaveConvexServerToken(request),
+    request.json().catch(() => ({})) as Promise<CheckoutPayload>,
+  ]);
 
   if (!user) {
     return errorResponse("Unauthorized", 401);
@@ -49,13 +53,9 @@ export async function POST(request: NextRequest) {
     return errorResponse("Billing requires a primary email", 400);
   }
 
-  const token = await getHexclaveConvexServerToken(request);
-
   if (!token) {
     return errorResponse("Unauthorized", 401);
   }
-
-  const payload = (await request.json().catch(() => ({}))) as CheckoutPayload;
 
   if (!isPlanKey(payload.planKey) || !isBillingInterval(payload.interval)) {
     return errorResponse("Invalid plan", 400);

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Button, Spinner, Switch, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useQuery } from "convex-helpers/react/cache/hooks";
+import { usePreloadedQuery, type Preloaded } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { FREE_TRIAL, PLANS } from "@multifeed/plans";
 import type { BillingInterval, PlanKey } from "@multifeed/plans";
@@ -50,10 +50,14 @@ function formatDate(value?: number) {
   }).format(new Date(value));
 }
 
-export function BillingPage() {
+export function BillingPage({
+  preloaded,
+}: {
+  preloaded: Preloaded<typeof api.billing.getSubscription>;
+}) {
   const [interval, setInterval] = useState<BillingInterval>("month");
   const [checkingOut, setCheckingOut] = useState<PlanKey | null>(null);
-  const subscription = useQuery(api.billing.getSubscription, {});
+  const subscription = usePreloadedQuery(preloaded);
   const isYearly = interval === "year";
   const activePlan = useMemo(
     () => PLANS.find((plan) => plan.key === subscription?.planKey),
@@ -94,7 +98,8 @@ export function BillingPage() {
           <div className="flex items-center gap-3">
             <Icon
               icon="solar:card-linear"
-              className="size-5 shrink-0 text-muted"
+              width={20}
+              className="shrink-0 text-muted"
             />
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-semibold text-foreground">
@@ -107,7 +112,6 @@ export function BillingPage() {
               </span>
             </div>
           </div>
-          {subscription === undefined && <Spinner color="current" size="sm" />}
           {subscription && (
             <span className="marketing-chip bg-surface px-3 py-1.5 text-sm font-medium text-foreground">
               {formatDate(subscription.currentPeriodEnd)

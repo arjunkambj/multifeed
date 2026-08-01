@@ -44,12 +44,6 @@ const EVENT_STATUS: Record<string, BillingStatus> = {
   "subscription.expired": "expired",
 };
 
-const PLAN_RANK: Record<PlanKey, number> = {
-  creator: 0,
-  growth: 1,
-  agency: 2,
-};
-
 const entitlementValidator = v.object({
   planKey: v.union(planKeyValidator, v.null()),
   hasActivePlan: v.boolean(),
@@ -83,7 +77,7 @@ function asInterval(value: unknown) {
 
 export function grantsPlanAccess(
   sub: Pick<Doc<"billingSubscriptions">, "status" | "accessEndsAt">,
-  now = Date.now(),
+  now: number,
 ) {
   return (
     ACTIVE_BILLING.has(sub.status) ||
@@ -102,8 +96,8 @@ function statusRank(sub: Doc<"billingSubscriptions">, now: number) {
 export async function latestForTeam(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
+  now: number,
 ) {
-  const now = Date.now();
   const rows = await Promise.all(
     STATUSES.map((status) =>
       ctx.db
@@ -137,28 +131,14 @@ function snapshot(sub: Doc<"billingSubscriptions">) {
   };
 }
 
-export async function hasActive(ctx: QueryCtx | MutationCtx, teamId: string) {
-  const sub = await latestForTeam(ctx, teamId);
-  return sub ? grantsPlanAccess(sub) : false;
-}
-
-export async function hasPlan(
-  ctx: QueryCtx | MutationCtx,
-  teamId: string,
-  minimum: keyof typeof PLAN_RANK,
-) {
-  const sub = await latestForTeam(ctx, teamId);
-  const plan = asPlan(sub?.planKey);
-  if (!sub || !plan || !grantsPlanAccess(sub)) return false;
-  return PLAN_RANK[plan] >= PLAN_RANK[minimum];
-}
-
 export async function entitlementsForTeam(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
+  now: number,
 ) {
-  const sub = await latestForTeam(ctx, teamId);
-  const plan = sub && grantsPlanAccess(sub) ? asPlan(sub.planKey) : undefined;
+  const sub = await latestForTeam(ctx, teamId, now);
+  const plan =
+    sub && grantsPlanAccess(sub, now) ? asPlan(sub.planKey) : undefined;
   const limits = getPlanLimits(plan ?? null);
 
   return {
@@ -171,20 +151,20 @@ export async function entitlementsForTeam(
 
 /** Current plan limits for the authenticated team. */
 export const getEntitlements = query({
-  args: {},
+  args: { nowMs: v.number() },
   returns: entitlementValidator,
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    return await entitlementsForTeam(ctx, user.selectedTeamId);
+    return await entitlementsForTeam(ctx, user.selectedTeamId, args.nowMs);
   },
 });
 
 /** Current team subscription snapshot (or null). */
 export const getSubscription = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { nowMs: v.number() },
+  handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const sub = await latestForTeam(ctx, user.selectedTeamId);
+    const sub = await latestForTeam(ctx, user.selectedTeamId, args.nowMs);
     return sub ? snapshot(sub) : null;
   },
 });
@@ -201,7 +181,7 @@ export const startCheckout = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const now = Date.now();
-    const current = await latestForTeam(ctx, user.selectedTeamId);
+    const current = await latestForTeam(ctx, user.selectedTeamId, now);
 
     const pending = {
       teamId: user.selectedTeamId,

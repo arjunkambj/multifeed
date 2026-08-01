@@ -9,7 +9,9 @@ import {
   hexclaveServerApp,
 } from "@/hexclave/server";
 import { assertSameOrigin } from "@/lib/oauth/env";
+import { loadServerTeamData } from "@/lib/team-data.server";
 import { countUsedTeamSeats } from "@/lib/team-seats";
+import { currentTimeBucket } from "@/lib/time-bucket";
 
 const responseOptions = {
   headers: { "Cache-Control": "private, no-store" },
@@ -47,10 +49,7 @@ export async function GET(request: NextRequest) {
     return errorResponse("No selected team", 400);
   }
 
-  const [canReadMembers, entitlements] = await Promise.all([
-    user.hasPermission(team, "$read_members"),
-    fetchQuery(api.billing.getEntitlements, {}, { token }),
-  ]);
+  const canReadMembers = await user.hasPermission(team, "$read_members");
 
   if (!canReadMembers) {
     return errorResponse(
@@ -59,27 +58,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const [members, invitations] = await Promise.all([
-    team.listUsers(),
-    team.listInvitations(),
-  ]);
-
   return NextResponse.json(
-    {
-      invitations: invitations.map((invitation) => ({
-        id: invitation.id,
-        recipientEmail: invitation.recipientEmail,
-        expiresAt: invitation.expiresAt.toISOString(),
-      })),
-      members: members.map((member) => ({
-        id: member.id,
-        displayName: member.displayName,
-        lastActiveAt: member.lastActiveAt.toISOString(),
-        primaryEmail: member.primaryEmail,
-        profileImageUrl: member.profileImageUrl,
-      })),
-      entitlements,
-    },
+    await loadServerTeamData(team, token),
     responseOptions,
   );
 }
@@ -112,7 +92,11 @@ export async function POST(request: NextRequest) {
 
   const [canInviteMembers, entitlements] = await Promise.all([
     user.hasPermission(team, "$invite_members"),
-    fetchQuery(api.billing.getEntitlements, {}, { token }),
+    fetchQuery(
+      api.billing.getEntitlements,
+      { nowMs: currentTimeBucket() },
+      { token },
+    ),
   ]);
 
   if (!canInviteMembers) {

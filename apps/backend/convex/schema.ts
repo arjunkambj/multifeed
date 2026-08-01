@@ -273,8 +273,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_post", ["postId"])
-    .index("by_team_status", ["teamId", "status"])
-    .index("by_team_scheduledFor", ["teamId", "scheduledFor"])
+    .index("by_team_status_scheduledFor", ["teamId", "status", "scheduledFor"])
     .index("by_account_schedule", [
       "connectedAccountId",
       "status",

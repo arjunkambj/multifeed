@@ -144,7 +144,7 @@ export function GeneralSettingsForm() {
               {isPending ? (
                 <Spinner color="current" size="sm" />
               ) : (
-                <Icon icon="solar:diskette-linear" className="size-4" />
+                <Icon icon="solar:diskette-linear" width={16} />
               )}
               Save changes
             </>

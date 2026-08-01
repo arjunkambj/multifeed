@@ -1,7 +1,5 @@
 "use client";
 
-import type { Team } from "@hexclave/next";
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,14 +13,21 @@ import {
   toast,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { loadTeamData, teamDataQueryKey } from "@/lib/team-data";
+import { loadTeamData, teamDataQueryKey, type TeamData } from "@/lib/team-data";
 import { countUsedTeamSeats } from "@/lib/team-seats";
 
-export function InvitePopover({ team }: { team: Team }) {
+export function InvitePopover({
+  initialData,
+  teamId,
+}: {
+  initialData?: TeamData;
+  teamId: string;
+}) {
   const queryClient = useQueryClient();
   const teamDataQuery = useQuery({
+    initialData,
     queryFn: loadTeamData,
-    queryKey: teamDataQueryKey(team.id),
+    queryKey: teamDataQueryKey(teamId),
   });
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -53,7 +58,7 @@ export function InvitePopover({ team }: { team: Team }) {
       }
 
       await queryClient.invalidateQueries({
-        queryKey: teamDataQueryKey(team.id),
+        queryKey: teamDataQueryKey(teamId),
       });
       setEmail("");
       toast.success("Invite sent.", { timeout: 3000 });
@@ -69,7 +74,7 @@ export function InvitePopover({ team }: { team: Team }) {
   return (
     <Popover>
       <Button>
-        <Icon icon="hugeicons:user-add-02" className="size-4" />
+        <Icon icon="hugeicons:user-add-02" width={16} />
         Invite member
       </Button>
       <Popover.Content className="w-90" placement="bottom end">
@@ -111,7 +116,7 @@ export function InvitePopover({ team }: { team: Team }) {
                     {isPending ? (
                       <Spinner color="current" size="sm" />
                     ) : (
-                      <Icon icon="hugeicons:mail-send-02" className="size-4" />
+                      <Icon icon="hugeicons:mail-send-02" width={16} />
                     )}
                     Send invite
                   </>

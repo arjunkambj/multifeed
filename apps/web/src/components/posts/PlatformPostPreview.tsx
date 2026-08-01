@@ -146,7 +146,7 @@ function MediaFrame({
 }
 
 function Glyph({ icon, size = 21 }: { icon: string; size?: number }) {
-  return <Icon aria-hidden icon={icon} width={size} height={size} />;
+  return <Icon aria-hidden icon={icon} width={size} />;
 }
 
 function LinkPreview({ url, dark = false }: { url: string; dark?: boolean }) {

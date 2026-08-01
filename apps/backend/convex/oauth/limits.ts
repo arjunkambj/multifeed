@@ -8,8 +8,9 @@ const COUNTED_ACCOUNT_STATUSES = ["active", "expired", "error"] as const;
 export async function accountLimitForTeam(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
+  now: number,
 ) {
-  const entitlements = await entitlementsForTeam(ctx, teamId);
+  const entitlements = await entitlementsForTeam(ctx, teamId, now);
   return entitlements.connectedAccountLimit;
 }
 
@@ -37,7 +38,7 @@ export async function assertCanConnect(
   teamId: string,
   additionalAccounts = 1,
 ) {
-  const limit = await accountLimitForTeam(ctx, teamId);
+  const limit = await accountLimitForTeam(ctx, teamId, Date.now());
 
   const count = await countConnectedAccounts(ctx, teamId, limit);
   if (count + additionalAccounts > limit) {

@@ -187,9 +187,7 @@ export const purgeExpired = internalMutation({
       .withIndex("by_expiresAt", (q) => q.lt("expiresAt", now))
       .take(200);
 
-    for (const session of expired) {
-      await ctx.db.delete(session._id);
-    }
+    await Promise.all(expired.map((session) => ctx.db.delete(session._id)));
 
     return { deleted: expired.length };
   },

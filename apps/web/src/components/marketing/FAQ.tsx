@@ -43,7 +43,7 @@ export function FAQ() {
             className={`${buttonVariants()} button mt-4 w-fit`}
             href="/sign-in"
           >
-            <Icon icon="mdi:chat-outline" />
+            <Icon icon="mdi:chat-outline" width={16} />
             Ask a question
           </Link>
         </div>
@@ -56,7 +56,7 @@ export function FAQ() {
                   <Accordion.Trigger className="text-base font-medium sm:text-lg">
                     {item.title}
                     <Accordion.Indicator>
-                      <Icon icon="mdi:chevron-down" />
+                      <Icon icon="mdi:chevron-down" width={16} />
                     </Accordion.Indicator>
                   </Accordion.Trigger>
                 </Accordion.Heading>
