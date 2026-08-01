@@ -3,13 +3,16 @@ import { getPlanLimits, type PlanKey } from "@multifeed/plans";
 import type { Doc } from "./_generated/dataModel";
 import {
   internalMutation,
-  mutation,
   query,
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
 import { requireUser } from "./hexclave/auth";
-import { billingInterval, planKey as planKeyValidator } from "./schema";
+import {
+  billingInterval,
+  billingStatus,
+  planKey as planKeyValidator,
+} from "./schema";
 
 /** Subscription statuses that grant product access. */
 export const ACTIVE_BILLING = new Set([
@@ -33,16 +36,27 @@ const STATUSES = [
 
 type BillingStatus = (typeof STATUSES)[number];
 
-const EVENT_STATUS: Record<string, BillingStatus> = {
-  "subscription.active": "active",
-  "subscription.updated": "updated",
-  "subscription.renewed": "renewed",
-  "subscription.plan_changed": "plan_changed",
-  "subscription.cancelled": "cancelled",
-  "subscription.on_hold": "on_hold",
-  "subscription.failed": "failed",
-  "subscription.expired": "expired",
-};
+const PROVIDER_STATUSES = [
+  "pending",
+  "active",
+  "cancelled",
+  "on_hold",
+  "failed",
+  "expired",
+] as const satisfies readonly BillingStatus[];
+
+type ProviderBillingStatus = (typeof PROVIDER_STATUSES)[number];
+
+const SUBSCRIPTION_EVENTS = new Set([
+  "subscription.active",
+  "subscription.updated",
+  "subscription.renewed",
+  "subscription.plan_changed",
+  "subscription.cancelled",
+  "subscription.on_hold",
+  "subscription.failed",
+  "subscription.expired",
+]);
 
 const entitlementValidator = v.object({
   planKey: v.union(planKeyValidator, v.null()),
@@ -50,6 +64,20 @@ const entitlementValidator = v.object({
   connectedAccountLimit: v.number(),
   teamSeatLimit: v.number(),
 });
+
+const subscriptionSnapshotValidator = v.union(
+  v.object({
+    planKey: planKeyValidator,
+    interval: billingInterval,
+    status: billingStatus,
+    hasPlanAccess: v.boolean(),
+    canStartCheckout: v.boolean(),
+    currentPeriodEnd: v.optional(v.number()),
+    accessEndsAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  }),
+  v.null(),
+);
 
 function str(...values: unknown[]) {
   for (const value of values) {
@@ -75,6 +103,20 @@ function asInterval(value: unknown) {
   return value === "month" || value === "year" ? value : undefined;
 }
 
+function webhookStatus(
+  eventType: string,
+  event: Record<string, unknown>,
+): ProviderBillingStatus | undefined {
+  if (!SUBSCRIPTION_EVENTS.has(eventType)) return undefined;
+
+  const status = str(event.status);
+  return status &&
+    status !== "pending" &&
+    PROVIDER_STATUSES.includes(status as ProviderBillingStatus)
+    ? (status as ProviderBillingStatus)
+    : undefined;
+}
+
 export function grantsPlanAccess(
   sub: Pick<Doc<"billingSubscriptions">, "status" | "accessEndsAt">,
   now: number,
@@ -87,10 +129,20 @@ export function grantsPlanAccess(
   );
 }
 
+/** Only terminal subscriptions may be replaced with a new checkout. */
+export function canStartCheckout(
+  sub: Pick<Doc<"billingSubscriptions">, "status" | "accessEndsAt">,
+  now: number,
+) {
+  return (
+    sub.status === "failed" ||
+    sub.status === "expired" ||
+    (sub.status === "cancelled" && !grantsPlanAccess(sub, now))
+  );
+}
+
 function statusRank(sub: Doc<"billingSubscriptions">, now: number) {
-  if (grantsPlanAccess(sub, now)) return 2;
-  if (sub.status === "pending") return 1;
-  return 0;
+  return grantsPlanAccess(sub, now) ? 1 : 0;
 }
 
 export async function latestForTeam(
@@ -112,7 +164,10 @@ export async function latestForTeam(
 
   return (
     rows
-      .flatMap((row) => (row ? [row] : []))
+      // Local checkout intent is never subscription truth.
+      .flatMap((row) =>
+        row?.dodoSubscriptionId && row.status !== "pending" ? [row] : [],
+      )
       .sort(
         (a, b) =>
           statusRank(b, now) - statusRank(a, now) || b.updatedAt - a.updatedAt,
@@ -120,11 +175,13 @@ export async function latestForTeam(
   );
 }
 
-function snapshot(sub: Doc<"billingSubscriptions">) {
+function snapshot(sub: Doc<"billingSubscriptions">, now: number) {
   return {
     planKey: sub.planKey,
     interval: sub.interval,
     status: sub.status,
+    hasPlanAccess: grantsPlanAccess(sub, now),
+    canStartCheckout: canStartCheckout(sub, now),
     currentPeriodEnd: sub.currentPeriodEnd,
     accessEndsAt: sub.accessEndsAt,
     updatedAt: sub.updatedAt,
@@ -162,48 +219,11 @@ export const getEntitlements = query({
 /** Current team subscription snapshot (or null). */
 export const getSubscription = query({
   args: { nowMs: v.number() },
+  returns: subscriptionSnapshotValidator,
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const sub = await latestForTeam(ctx, user.selectedTeamId, args.nowMs);
-    return sub ? snapshot(sub) : null;
-  },
-});
-
-/** Persist pending checkout after Dodo session is created. */
-export const startCheckout = mutation({
-  args: {
-    planKey: planKeyValidator,
-    interval: billingInterval,
-    dodoProductId: v.string(),
-    dodoCheckoutSessionId: v.optional(v.string()),
-    dodoCheckoutUrl: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    const now = Date.now();
-    const current = await latestForTeam(ctx, user.selectedTeamId, now);
-
-    const pending = {
-      teamId: user.selectedTeamId,
-      userId: user.id,
-      planKey: args.planKey,
-      interval: args.interval,
-      status: "pending" as const,
-      dodoProductId: args.dodoProductId,
-      dodoCheckoutSessionId: args.dodoCheckoutSessionId,
-      dodoCheckoutUrl: args.dodoCheckoutUrl,
-      updatedAt: now,
-    };
-
-    if (current?.status === "pending" && !current.dodoSubscriptionId) {
-      await ctx.db.patch(current._id, pending);
-      return current._id;
-    }
-
-    return await ctx.db.insert("billingSubscriptions", {
-      ...pending,
-      createdAt: now,
-    });
+    return sub ? snapshot(sub, args.nowMs) : null;
   },
 });
 
@@ -216,6 +236,7 @@ export const handleWebhook = internalMutation({
     rawEvent: v.any(),
     data: v.any(),
   },
+  returns: v.object({ duplicate: v.boolean() }),
   handler: async (ctx, args) => {
     const seen = await ctx.db
       .query("dodoWebhookEvents")
@@ -225,7 +246,7 @@ export const handleWebhook = internalMutation({
     if (seen) return { duplicate: true };
 
     const event = args.data as Record<string, unknown>;
-    const status = EVENT_STATUS[args.eventType];
+    const status = webhookStatus(args.eventType, event);
     const subscriptionId = str(event.subscription_id, event.subscriptionId);
 
     if (status) {
@@ -282,7 +303,14 @@ async function upsertSubscription(
   const dodoProductId =
     str(event.product_id, event.productId) ?? existing?.dodoProductId;
 
-  if (!teamId || !userId || !plan || !interval || !dodoProductId) {
+  if (
+    !dodoSubscriptionId ||
+    !teamId ||
+    !userId ||
+    !plan ||
+    !interval ||
+    !dodoProductId
+  ) {
     return null;
   }
 

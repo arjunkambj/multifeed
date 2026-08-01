@@ -277,7 +277,17 @@ export function PostMediaUploader({
         { timeout: 3000 },
       );
     } catch (caught) {
-      pendingUploads.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
+      const completedPreviewUrls = new Set(
+        uploaded.flatMap((asset) =>
+          asset.previewUrl ? [asset.previewUrl] : [],
+        ),
+      );
+      pendingUploads
+        .filter((asset) => !completedPreviewUrls.has(asset.previewUrl))
+        .forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
+      if (uploaded.length > 0) {
+        onChange([...media, ...uploaded]);
+      }
       setPendingMedia([]);
       toast.danger(
         caught instanceof Error ? caught.message : "Media upload failed",

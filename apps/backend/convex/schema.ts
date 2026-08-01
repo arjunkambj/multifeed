@@ -9,7 +9,7 @@ export const planKey = v.union(
 
 export const billingInterval = v.union(v.literal("month"), v.literal("year"));
 
-const billingStatus = v.union(
+export const billingStatus = v.union(
   v.literal("pending"),
   v.literal("active"),
   v.literal("renewed"),

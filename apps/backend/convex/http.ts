@@ -26,13 +26,24 @@ http.route({
       "webhook-timestamp": request.headers.get("webhook-timestamp") ?? "",
     };
 
+    let event: {
+      type: string;
+      timestamp?: string;
+      data?: unknown;
+    };
+
     try {
-      const event = new Webhook(webhookKey).verify(rawBody, headers) as {
+      event = new Webhook(webhookKey).verify(rawBody, headers) as {
         type: string;
         timestamp?: string;
         data?: unknown;
       };
+    } catch (error) {
+      console.error("[Dodo webhook] signature rejected", error);
+      return json({ error: "Invalid webhook" }, 401);
+    }
 
+    try {
       await ctx.runMutation(internal.billing.handleWebhook, {
         webhookId: headers["webhook-id"],
         eventType: event.type,
@@ -43,8 +54,8 @@ http.route({
 
       return json({ received: true });
     } catch (error) {
-      console.error("[Dodo webhook] rejected", error);
-      return json({ error: "Invalid webhook" }, 401);
+      console.error("[Dodo webhook] processing failed", error);
+      return json({ error: "Webhook processing failed" }, 500);
     }
   }),
 });

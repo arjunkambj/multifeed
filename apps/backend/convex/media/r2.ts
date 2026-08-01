@@ -64,18 +64,27 @@ export const confirmMediaUpload = mutation({
     /** Ignored — public URL is derived from R2 metadata server-side. */
     publicUrl: v.optional(v.string()),
   },
+  returns: v.union(v.id("mediaAssets"), v.null()),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const now = Date.now();
 
-    if (!args.filename.trim()) {
+    if (!args.filename.trim() || args.filename.length > 255) {
       throw new Error("Filename is required");
     }
-    if (args.sizeBytes < 0 || args.sizeBytes > MAX_UPLOAD_BYTES) {
+    if (
+      !Number.isFinite(args.sizeBytes) ||
+      args.sizeBytes < 0 ||
+      args.sizeBytes > MAX_UPLOAD_BYTES
+    ) {
       throw new Error("Invalid file size");
     }
-    if (!args.mimeType.includes("/")) {
+    if (args.mimeType.length > 255 || !args.mimeType.includes("/")) {
       throw new Error("Invalid MIME type");
+    }
+    for (const value of [args.width, args.height, args.durationMs]) {
+      if (value !== undefined && (!Number.isFinite(value) || value < 0)) {
+        throw new Error("Invalid media metadata");
+      }
     }
 
     // Ensure the object exists in our R2 component metadata.
@@ -93,7 +102,12 @@ export const confirmMediaUpload = mutation({
       .withIndex("by_r2_key", (q) => q.eq("r2Key", args.r2Key))
       .unique();
 
-    if (owned && owned.teamId !== user.selectedTeamId) {
+    if (!owned) {
+      // onUpload has not stamped ownership yet; let the client retry.
+      return null;
+    }
+
+    if (owned.teamId !== user.selectedTeamId) {
       throw new Error("Upload not found");
     }
 
@@ -102,25 +116,7 @@ export const confirmMediaUpload = mutation({
     const sizeBytes = meta.size ?? args.sizeBytes;
     const mimeType = meta.contentType ?? args.mimeType;
 
-    if (owned) {
-      await ctx.db.patch(owned._id, {
-        publicUrl,
-        kind: kindFromMime(mimeType),
-        filename: args.filename.trim(),
-        mimeType,
-        sizeBytes,
-        width: args.width,
-        height: args.height,
-        durationMs: args.durationMs,
-        status: "ready",
-      });
-      return owned._id;
-    }
-
-    // Fallback if onUpload did not run (e.g. older client path).
-    return await ctx.db.insert("mediaAssets", {
-      teamId: user.selectedTeamId,
-      r2Key: args.r2Key,
+    await ctx.db.patch(owned._id, {
       publicUrl,
       kind: kindFromMime(mimeType),
       filename: args.filename.trim(),
@@ -130,9 +126,8 @@ export const confirmMediaUpload = mutation({
       height: args.height,
       durationMs: args.durationMs,
       status: "ready",
-      createdByUserId: user.id,
-      createdAt: now,
     });
+    return owned._id;
   },
 });
 

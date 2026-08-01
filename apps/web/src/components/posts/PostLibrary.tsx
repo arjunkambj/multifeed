@@ -310,14 +310,16 @@ export function PostLibrary({
                     />
                     {post.status === "draft" ? "Continue" : "Duplicate"}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="tertiary"
-                    isPending={deleting === post._id}
-                    onPress={() => void onDelete(post._id)}
-                  >
-                    <Icon icon="hugeicons:delete-02" width={15} />
-                  </Button>
+                  {post.status !== "publishing" && (
+                    <Button
+                      size="sm"
+                      variant="tertiary"
+                      isPending={deleting === post._id}
+                      onPress={() => void onDelete(post._id)}
+                    >
+                      <Icon icon="hugeicons:delete-02" width={15} />
+                    </Button>
+                  )}
                 </div>
               </Card.Content>
             </Card>

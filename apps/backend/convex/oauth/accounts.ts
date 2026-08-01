@@ -278,6 +278,11 @@ export const disconnect = mutation({
 export const cleanupDisconnectedAccount = internalMutation({
   args: { accountId: v.id("connectedAccounts") },
   handler: async (ctx, args) => {
+    const account = await ctx.db.get(args.accountId);
+    if (!account || account.status !== "revoked") {
+      return { deletedInboxItems: 0, skippedTargets: 0 };
+    }
+
     const [targetBatches, inbox] = await Promise.all([
       Promise.all(
         DISCONNECTABLE_TARGET_STATUSES.map((status) =>
@@ -320,10 +325,7 @@ export const cleanupDisconnectedAccount = internalMutation({
         args,
       );
     } else {
-      const account = await ctx.db.get(args.accountId);
-      if (account?.status === "revoked") {
-        await ctx.db.delete(args.accountId);
-      }
+      await ctx.db.delete(args.accountId);
     }
 
     return {

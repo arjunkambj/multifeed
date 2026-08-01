@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Button, Spinner, Switch, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { usePreloadedQuery, type Preloaded } from "convex/react";
@@ -59,10 +59,10 @@ export function BillingPage({
   const [checkingOut, setCheckingOut] = useState<PlanKey | null>(null);
   const subscription = usePreloadedQuery(preloaded);
   const isYearly = interval === "year";
-  const activePlan = useMemo(
-    () => PLANS.find((plan) => plan.key === subscription?.planKey),
-    [subscription?.planKey],
-  );
+  const activePlan = subscription?.hasPlanAccess
+    ? PLANS.find((plan) => plan.key === subscription.planKey)
+    : undefined;
+  const checkoutBlocked = subscription?.canStartCheckout === false;
 
   const startCheckout = async (planKey: PlanKey) => {
     setCheckingOut(planKey);
@@ -114,9 +114,11 @@ export function BillingPage({
           </div>
           {subscription && (
             <span className="marketing-chip bg-surface px-3 py-1.5 text-sm font-medium text-foreground">
-              {formatDate(subscription.currentPeriodEnd)
+              {subscription.hasPlanAccess &&
+              subscription.status !== "cancelled" &&
+              formatDate(subscription.currentPeriodEnd)
                 ? `Renews ${formatDate(subscription.currentPeriodEnd)}`
-                : "Active"}
+                : statusLabel(subscription.status)}
             </span>
           )}
         </div>
@@ -211,7 +213,8 @@ export function BillingPage({
         </article>
         {PLANS.map((plan) => {
           const isCurrent =
-            subscription?.planKey === plan.key &&
+            subscription?.hasPlanAccess === true &&
+            subscription.planKey === plan.key &&
             subscription.interval === interval;
           const isPending = checkingOut === plan.key;
           const preferred = plan.key === "growth";
@@ -267,7 +270,9 @@ export function BillingPage({
 
                 <Button
                   className="button mt-7 w-full max-w-sm self-center font-medium"
-                  isDisabled={isCurrent || checkingOut !== null}
+                  isDisabled={
+                    isCurrent || checkoutBlocked || checkingOut !== null
+                  }
                   isPending={isPending}
                   onPress={() => startCheckout(plan.key)}
                   size="lg"
@@ -276,7 +281,11 @@ export function BillingPage({
                   {({ isPending: pending }) => (
                     <>
                       {pending ? <Spinner color="current" size="sm" /> : null}
-                      {isCurrent ? "Current plan" : FREE_TRIAL.cta}
+                      {isCurrent
+                        ? "Current plan"
+                        : checkoutBlocked
+                          ? "Existing subscription"
+                          : FREE_TRIAL.cta}
                     </>
                   )}
                 </Button>

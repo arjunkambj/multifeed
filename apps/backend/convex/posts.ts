@@ -18,6 +18,12 @@ const targetInput = v.object({
   platformSettings: v.optional(platformSettings),
 });
 
+const editablePostStatus = v.union(
+  v.literal("draft"),
+  v.literal("scheduled"),
+  v.literal("publishing"),
+);
+
 const CALENDAR_COLORS = [
   "#E85D04",
   "#1877F2",
@@ -74,6 +80,9 @@ async function assertMediaOwnedByTeam(
   mediaAssetIds: Id<"mediaAssets">[] | undefined,
 ) {
   if (!mediaAssetIds?.length) return [];
+  if (new Set(mediaAssetIds).size !== mediaAssetIds.length) {
+    throw new Error("A media file can only be attached once per post");
+  }
   const assets = await Promise.all(mediaAssetIds.map((id) => ctx.db.get(id)));
   return assets.map((asset) => {
     if (!asset || asset.teamId !== teamId) {
@@ -132,6 +141,9 @@ function accountSupportsKind(
     const mediaKind =
       assetKind === "image" || assetKind === "video" ? assetKind : undefined;
     return mediaKind != null && account.capabilities.includes(mediaKind);
+  }
+  if (kind === "image" && assets.length > 1) {
+    return account.capabilities.includes("carousel");
   }
   return account.capabilities.includes(kind);
 }
@@ -380,7 +392,7 @@ export const update = mutation({
     timezone: v.optional(v.string()),
     scheduledFor: v.optional(v.number()),
     clearSchedule: v.optional(v.boolean()),
-    status: v.optional(postStatus),
+    status: v.optional(editablePostStatus),
     mediaAssetIds: v.optional(v.array(v.id("mediaAssets"))),
     targets: v.optional(v.array(targetInput)),
     calendarColor: v.optional(v.string()),
@@ -390,6 +402,13 @@ export const update = mutation({
     const post = await ctx.db.get(args.postId);
     if (!post || post.teamId !== user.selectedTeamId) {
       throw new Error("Post not found");
+    }
+    if (
+      post.status === "publishing" ||
+      post.status === "published" ||
+      post.status === "archived"
+    ) {
+      throw new Error("This post can no longer be edited");
     }
 
     const kind = args.kind ?? post.kind;
@@ -406,9 +425,12 @@ export const update = mutation({
     }
 
     const now = Date.now();
-    const status = args.status ?? post.status;
+    const requestedStatus = args.status ?? post.status;
+    const status =
+      requestedStatus === "publishing" ? "scheduled" : requestedStatus;
     let scheduledFor = post.scheduledFor;
-    if (args.clearSchedule) scheduledFor = undefined;
+    if (requestedStatus === "publishing") scheduledFor = now;
+    else if (args.clearSchedule) scheduledFor = undefined;
     else if (args.scheduledFor !== undefined) scheduledFor = args.scheduledFor;
 
     if (status === "scheduled" && !scheduledFor) {
@@ -421,6 +443,17 @@ export const update = mutation({
       scheduledFor < now - 60_000
     ) {
       throw new Error("Scheduled time must be in the future");
+    }
+
+    const storedTargets =
+      args.targets === undefined
+        ? await loadTargets(ctx, args.postId)
+        : undefined;
+    if (
+      status !== "draft" &&
+      (args.targets ?? storedTargets ?? []).length === 0
+    ) {
+      throw new Error("Select at least one account");
     }
 
     await ctx.db.patch(args.postId, {
@@ -439,16 +472,28 @@ export const update = mutation({
       updatedAt: now,
     });
 
-    if (args.targets) {
-      if (status !== "draft" && args.targets.length === 0) {
-        throw new Error("Select at least one account");
-      }
+    const shouldReplaceTargets =
+      args.targets !== undefined ||
+      args.kind !== undefined ||
+      args.mediaAssetIds !== undefined;
+
+    if (shouldReplaceTargets) {
+      const targets =
+        args.targets ??
+        storedTargets!.map((target) => ({
+          connectedAccountId: target.connectedAccountId,
+          bodyOverride: target.bodyOverride,
+          firstComment: target.firstComment,
+          referenceUrl: target.referenceUrl,
+          platformSettings: target.platformSettings,
+        }));
+
       await replaceTargets(ctx, {
         teamId: user.selectedTeamId,
         postId: args.postId,
         status: targetStatusFromPost(status),
         scheduledFor,
-        targets: args.targets,
+        targets,
         kind,
         mediaAssets,
       });
@@ -457,7 +502,7 @@ export const update = mutation({
       args.clearSchedule ||
       args.status
     ) {
-      const targets = await loadTargets(ctx, args.postId);
+      const targets = storedTargets!;
       await Promise.all(
         targets.map((target) =>
           ctx.db.patch(target._id, {
@@ -486,25 +531,24 @@ export const reschedule = mutation({
       throw new Error("Post not found");
     }
 
+    if (
+      post.status === "publishing" ||
+      post.status === "published" ||
+      post.status === "archived"
+    ) {
+      throw new Error("This post can no longer be rescheduled");
+    }
+
     const now = Date.now();
     if (args.scheduledFor < now - 60_000) {
       throw new Error("Scheduled time must be in the future");
     }
 
-    const status =
-      post.status === "draft" || post.status === "failed"
-        ? "scheduled"
-        : post.status === "published" || post.status === "publishing"
-          ? post.status
-          : "scheduled";
-
-    if (status === "published") {
-      throw new Error("Published posts cannot be rescheduled");
-    }
+    const status = "scheduled" as const;
 
     await ctx.db.patch(args.postId, {
       scheduledFor: args.scheduledFor,
-      status: status === "publishing" ? "scheduled" : status,
+      status,
       updatedByUserId: user.id,
       updatedAt: now,
     });
@@ -534,7 +578,21 @@ export const remove = mutation({
     if (!post || post.teamId !== user.selectedTeamId) {
       throw new Error("Post not found");
     }
+    if (post.status === "publishing") {
+      throw new Error("A post being published cannot be deleted");
+    }
     const targets = await loadTargets(ctx, args.postId);
+    const metricSnapshots = await Promise.all(
+      targets.map((target) =>
+        ctx.db
+          .query("postMetrics")
+          .withIndex("by_target_time", (q) => q.eq("postTargetId", target._id))
+          .first(),
+      ),
+    );
+    if (metricSnapshots.some(Boolean)) {
+      throw new Error("Posts with analytics history cannot be deleted");
+    }
     await Promise.all(targets.map((target) => ctx.db.delete(target._id)));
     await ctx.db.delete(args.postId);
     return { ok: true as const };

@@ -123,6 +123,7 @@ export function PostCalendar() {
             platformBrand(post.targets[0]?.platform ?? "x"),
           borderColor: "transparent",
           textColor: "#fff",
+          editable: post.status === "scheduled" || post.status === "failed",
           extendedProps: {
             status: post.status,
             platforms,
@@ -428,15 +429,19 @@ export function PostCalendar() {
                   </div>
 
                   <div className="flex flex-wrap gap-2 pt-1">
-                    <Button
-                      size="sm"
-                      variant="tertiary"
-                      onPress={() =>
-                        router.push(`/posts/new?edit=${selectedPost._id}`)
-                      }
-                    >
-                      Edit
-                    </Button>
+                    {!["publishing", "published", "archived"].includes(
+                      selectedPost.status,
+                    ) && (
+                      <Button
+                        size="sm"
+                        variant="tertiary"
+                        onPress={() =>
+                          router.push(`/posts/new?edit=${selectedPost._id}`)
+                        }
+                      >
+                        Edit
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="tertiary"
@@ -453,13 +458,15 @@ export function PostCalendar() {
                     >
                       Close
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      onPress={() => void onDelete()}
-                    >
-                      Delete
-                    </Button>
+                    {selectedPost.status !== "publishing" && (
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onPress={() => void onDelete()}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
