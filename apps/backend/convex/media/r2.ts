@@ -9,6 +9,34 @@ export const r2 = new R2(components.r2);
 
 const MAX_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 MB
 
+export const mediaAssetOutputValidator = v.object({
+  _id: v.id("mediaAssets"),
+  _creationTime: v.number(),
+  teamId: v.string(),
+  storageId: v.optional(v.id("_storage")),
+  r2Key: v.optional(v.string()),
+  publicUrl: v.optional(v.string()),
+  externalUrl: v.optional(v.string()),
+  kind: v.union(
+    v.literal("image"),
+    v.literal("video"),
+    v.literal("document"),
+  ),
+  filename: v.string(),
+  mimeType: v.string(),
+  sizeBytes: v.number(),
+  width: v.optional(v.number()),
+  height: v.optional(v.number()),
+  durationMs: v.optional(v.number()),
+  status: v.union(
+    v.literal("uploading"),
+    v.literal("ready"),
+    v.literal("failed"),
+  ),
+  createdByUserId: v.string(),
+  createdAt: v.number(),
+});
+
 export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
   checkUpload: async (ctx) => {
     await requireUser(ctx);
@@ -116,7 +144,7 @@ export const confirmMediaUpload = mutation({
     const sizeBytes = meta.size ?? args.sizeBytes;
     const mimeType = meta.contentType ?? args.mimeType;
 
-    await ctx.db.patch(owned._id, {
+    await ctx.db.patch("mediaAssets", owned._id, {
       publicUrl,
       kind: kindFromMime(mimeType),
       filename: args.filename.trim(),
@@ -136,7 +164,7 @@ export const deleteMedia = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const asset = await ctx.db.get(args.mediaAssetId);
+    const asset = await ctx.db.get("mediaAssets", args.mediaAssetId);
     if (!asset || asset.teamId !== user.selectedTeamId) {
       throw new Error("Media not found");
     }
@@ -157,7 +185,7 @@ export const deleteMedia = mutation({
     }
 
     await r2.deleteObject(ctx, asset.r2Key);
-    await ctx.db.delete(asset._id);
+    await ctx.db.delete("mediaAssets", asset._id);
     return null;
   },
 });
@@ -171,6 +199,7 @@ export const listMedia = query({
     ),
     limit: v.optional(v.number()),
   },
+  returns: v.array(mediaAssetOutputValidator),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const limit = Math.max(1, Math.min(args.limit ?? 50, 100));

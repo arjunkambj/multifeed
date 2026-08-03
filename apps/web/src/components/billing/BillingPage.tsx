@@ -57,6 +57,7 @@ export function BillingPage({
 }) {
   const [interval, setInterval] = useState<BillingInterval>("month");
   const [checkingOut, setCheckingOut] = useState<PlanKey | null>(null);
+  const [openingPortal, setOpeningPortal] = useState(false);
   const subscription = usePreloadedQuery(preloaded);
   const isYearly = interval === "year";
   const activePlan = subscription?.hasPlanAccess
@@ -91,6 +92,31 @@ export function BillingPage({
     }
   };
 
+  const openCustomerPortal = async () => {
+    setOpeningPortal(true);
+    try {
+      const response = await fetch("/api/billing/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const payload = (await response.json()) as {
+        url?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.url) {
+        throw new Error(payload.error ?? "Could not open billing portal");
+      }
+
+      window.location.assign(payload.url);
+    } catch (err) {
+      setOpeningPortal(false);
+      toast.danger(err instanceof Error ? err.message : String(err), {
+        timeout: 3000,
+      });
+    }
+  };
+
   return (
     <div className="flex w-full flex-col gap-6">
       <section className="flex flex-col gap-3 rounded-2xl bg-surface-secondary p-5">
@@ -112,15 +138,29 @@ export function BillingPage({
               </span>
             </div>
           </div>
-          {subscription && (
-            <span className="marketing-chip bg-surface px-3 py-1.5 text-sm font-medium text-foreground">
-              {subscription.hasPlanAccess &&
-              subscription.status !== "cancelled" &&
-              formatDate(subscription.currentPeriodEnd)
-                ? `Renews ${formatDate(subscription.currentPeriodEnd)}`
-                : statusLabel(subscription.status)}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {subscription && (
+              <span className="marketing-chip bg-surface px-3 py-1.5 text-sm font-medium text-foreground">
+                {subscription.hasPlanAccess &&
+                subscription.status !== "cancelled" &&
+                formatDate(subscription.currentPeriodEnd)
+                  ? `Renews ${formatDate(subscription.currentPeriodEnd)}`
+                  : statusLabel(subscription.status)}
+              </span>
+            )}
+            {subscription?.dodoCustomerId && (
+              <Button
+                className="button font-medium"
+                isDisabled={openingPortal}
+                isPending={openingPortal}
+                onPress={openCustomerPortal}
+                size="sm"
+                variant="secondary"
+              >
+                Manage subscription
+              </Button>
+            )}
+          </div>
         </div>
       </section>
 

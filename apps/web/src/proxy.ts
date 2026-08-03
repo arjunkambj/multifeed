@@ -3,6 +3,10 @@ import type { NextRequest } from "next/server";
 
 import { hexclaveServerApp } from "@/hexclave/server";
 
+export const proxyConfig = {
+  matcher: ["/sign-in", "/sign-up"],
+};
+
 export const config = {
   matcher: ["/sign-in", "/sign-up"],
 };

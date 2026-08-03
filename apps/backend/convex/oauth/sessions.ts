@@ -44,6 +44,11 @@ export const create = mutation({
     returnTo: v.optional(v.string()),
     usePkce: v.optional(v.boolean()),
   },
+  returns: v.object({
+    state: v.string(),
+    codeVerifier: v.optional(v.string()),
+    platform: platformValidator,
+  }),
   handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
@@ -79,6 +84,22 @@ export const create = mutation({
  */
 export const beginExchange = mutation({
   args: { state: v.string(), serverSecret: v.string() },
+  returns: v.union(
+    v.null(),
+    v.object({
+      status: v.union(v.literal("completed"), v.literal("in_progress")),
+      platform: platformValidator,
+      returnTo: v.optional(v.string()),
+    }),
+    v.object({
+      status: v.literal("exchange"),
+      state: v.string(),
+      platform: platformValidator,
+      codeVerifier: v.optional(v.string()),
+      returnTo: v.optional(v.string()),
+      expiresAt: v.number(),
+    }),
+  ),
   handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
@@ -96,22 +117,22 @@ export const beginExchange = mutation({
     }
 
     if (session.expiresAt < Date.now()) {
-      await ctx.db.delete(session._id);
+      await ctx.db.delete("oauthSessions", session._id);
       return null;
     }
 
     if (session.phase !== "authorize") {
-      const status =
+      const status: "completed" | "in_progress" =
         session.phase === "completed" ? "completed" : "in_progress";
       return {
         status,
         platform: session.platform,
         returnTo: session.returnTo,
-      };
+      } as const;
     }
 
     const codeVerifier = session.codeVerifier;
-    await ctx.db.patch(session._id, {
+    await ctx.db.patch("oauthSessions", session._id, {
       phase: "exchanging",
       codeVerifier: undefined,
     });
@@ -130,6 +151,7 @@ export const beginExchange = mutation({
 /** Keep a short-lived completion marker so repeated provider callbacks succeed. */
 export const complete = mutation({
   args: { state: v.string(), serverSecret: v.string() },
+  returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
@@ -150,7 +172,7 @@ export const complete = mutation({
       throw new Error("OAuth exchange has not started");
     }
     if (session.phase === "exchanging") {
-      await ctx.db.patch(session._id, { phase: "completed" });
+      await ctx.db.patch("oauthSessions", session._id, { phase: "completed" });
     }
 
     return { ok: true as const };
@@ -159,6 +181,7 @@ export const complete = mutation({
 
 export const remove = mutation({
   args: { state: v.string(), serverSecret: v.string() },
+  returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
@@ -172,7 +195,7 @@ export const remove = mutation({
       throw new Error("OAuth session not found");
     }
 
-    await ctx.db.delete(session._id);
+    await ctx.db.delete("oauthSessions", session._id);
     return { ok: true as const };
   },
 });
@@ -180,6 +203,7 @@ export const remove = mutation({
 /** Cron: drop expired OAuth sessions. */
 export const purgeExpired = internalMutation({
   args: {},
+  returns: v.object({ deleted: v.number() }),
   handler: async (ctx) => {
     const now = Date.now();
     const expired = await ctx.db
@@ -187,7 +211,7 @@ export const purgeExpired = internalMutation({
       .withIndex("by_expiresAt", (q) => q.lt("expiresAt", now))
       .take(200);
 
-    await Promise.all(expired.map((session) => ctx.db.delete(session._id)));
+    await Promise.all(expired.map((session) => ctx.db.delete("oauthSessions", session._id)));
 
     return { deleted: expired.length };
   },

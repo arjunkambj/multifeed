@@ -21,7 +21,10 @@ const bricolage = Bricolage_Grotesque({
 export const metadata: Metadata = {
   metadataBase: new URL(clientEnv.NEXT_PUBLIC_APP_URL),
   applicationName: "MultiFeed",
-  title: "MultiFeed | Run social on autopilot with AI agents",
+  title: {
+    default: "MultiFeed | Run social on autopilot with AI agents",
+    template: "%s | MultiFeed",
+  },
   description:
     "Plan, generate, and schedule posts automatically to 30+ social networks — then review everything in a visual calendar.",
   icons: {

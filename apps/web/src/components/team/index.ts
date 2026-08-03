@@ -1,1 +1,1 @@
-export { TeamLayout } from "@/components/team/TeamLayout";
+export { TeamSection } from "./TeamSection";

@@ -28,6 +28,46 @@ const DISCONNECTABLE_TARGET_STATUSES = [
   "failed",
 ] as const;
 
+export const publicAccountValidator = v.object({
+  _id: v.id("connectedAccounts"),
+  _creationTime: v.number(),
+  teamId: v.string(),
+  platform: platformValidator,
+  providerAccountId: v.string(),
+  username: v.string(),
+  displayName: v.optional(v.string()),
+  avatarUrl: v.optional(v.string()),
+  status: v.union(
+    v.literal("active"),
+    v.literal("expired"),
+    v.literal("revoked"),
+    v.literal("error"),
+  ),
+  tokenType: v.optional(tokenType),
+  capabilities: v.array(capability),
+  scopes: v.array(v.string()),
+  tokenExpiresAt: v.optional(v.number()),
+  refreshTokenExpiresAt: v.optional(v.number()),
+  lastSyncedAt: v.optional(v.number()),
+  metadata: v.optional(v.any()),
+  errorMessage: v.optional(v.string()),
+  connectedByUserId: v.string(),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+const entitlementValidator = v.object({
+  planKey: v.union(
+    v.literal("creator"),
+    v.literal("growth"),
+    v.literal("agency"),
+    v.null(),
+  ),
+  hasActivePlan: v.boolean(),
+  connectedAccountLimit: v.number(),
+  teamSeatLimit: v.number(),
+});
+
 const accountInput = v.object({
   platform: platformValidator,
   providerAccountId: v.string(),
@@ -110,7 +150,7 @@ async function upsertAccount(
 
   if (existing) {
     // Convex removes fields set to `undefined` — never pass undefined refresh.
-    await ctx.db.patch(existing._id, {
+    await ctx.db.patch("connectedAccounts", existing._id, {
       ...baseFields,
       errorMessage: undefined,
       ...(input.hasNewRefreshToken
@@ -141,6 +181,7 @@ export const list = query({
   args: {
     platform: v.optional(platformValidator),
   },
+  returns: v.array(publicAccountValidator),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     return await listAccountsForTeam(ctx, user.selectedTeamId, args.platform);
@@ -150,6 +191,10 @@ export const list = query({
 /** One consistent subscription for everything rendered on Connections. */
 export const getConnectionsPageData = query({
   args: { nowMs: v.number() },
+  returns: v.object({
+    accounts: v.array(publicAccountValidator),
+    entitlements: entitlementValidator,
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const [accounts, entitlements] = await Promise.all([
@@ -169,6 +214,7 @@ export const saveMany = mutation({
     serverSecret: v.string(),
     accounts: v.array(accountInput),
   },
+  returns: v.object({ accountIds: v.array(v.id("connectedAccounts")) }),
   handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
@@ -249,14 +295,15 @@ export const disconnect = mutation({
   args: {
     accountId: v.id("connectedAccounts"),
   },
+  returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const account = await ctx.db.get(args.accountId);
+    const account = await ctx.db.get("connectedAccounts", args.accountId);
     if (!account || account.teamId !== user.selectedTeamId) {
       throw new Error("Account not found");
     }
 
-    await ctx.db.patch(args.accountId, {
+    await ctx.db.patch("connectedAccounts", args.accountId, {
       status: "revoked",
       encryptedAccessToken: undefined,
       encryptedRefreshToken: undefined,
@@ -277,8 +324,12 @@ export const disconnect = mutation({
 /** Bounded follow-up so disconnect latency does not scale with account history. */
 export const cleanupDisconnectedAccount = internalMutation({
   args: { accountId: v.id("connectedAccounts") },
+  returns: v.object({
+    deletedInboxItems: v.number(),
+    skippedTargets: v.number(),
+  }),
   handler: async (ctx, args) => {
-    const account = await ctx.db.get(args.accountId);
+    const account = await ctx.db.get("connectedAccounts", args.accountId);
     if (!account || account.status !== "revoked") {
       return { deletedInboxItems: 0, skippedTargets: 0 };
     }
@@ -305,14 +356,14 @@ export const cleanupDisconnectedAccount = internalMutation({
 
     await Promise.all([
       ...targetBatches.flat().map((target) =>
-        ctx.db.patch(target._id, {
+        ctx.db.patch("postTargets", target._id, {
           status: "skipped",
           failureCode: "account_disconnected",
           failureMessage: "Connected account was disconnected",
           updatedAt: now,
         }),
       ),
-      ...inbox.map((item) => ctx.db.delete(item._id)),
+      ...inbox.map((item) => ctx.db.delete("inboxItems", item._id)),
     ]);
 
     const hasMore =
@@ -325,7 +376,7 @@ export const cleanupDisconnectedAccount = internalMutation({
         args,
       );
     } else {
-      await ctx.db.delete(args.accountId);
+      await ctx.db.delete("connectedAccounts", args.accountId);
     }
 
     return {

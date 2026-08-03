@@ -12,42 +12,109 @@ function json(body: unknown, status = 200) {
   });
 }
 
+async function verifySignature(
+  rawBody: string,
+  headers: {
+    webhookId: string;
+    signature: string;
+    timestamp: string;
+  },
+  secret: string,
+): Promise<boolean> {
+  try {
+    const svixSecret = secret.startsWith("whsec_") ? secret : `whsec_${secret}`;
+    new Webhook(svixSecret).verify(rawBody, {
+      "webhook-id": headers.webhookId,
+      "webhook-signature": headers.signature,
+      "webhook-timestamp": headers.timestamp,
+    });
+    return true;
+  } catch {
+    // Fall through to Web Crypto HMAC fallback
+  }
+
+  try {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const key = await crypto.subtle.importKey(
+      "raw",
+      keyData,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"],
+    );
+    const signedBuffer = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      encoder.encode(`${headers.timestamp}.${rawBody}`),
+    );
+    const bytes = new Uint8Array(signedBuffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]!);
+    }
+    const expectedBase64 = btoa(binary);
+    const providedSig = headers.signature.includes(",")
+      ? (headers.signature.split(",")[1] ?? "")
+      : headers.signature;
+
+    return expectedBase64 === providedSig;
+  } catch {
+    // Ignore verification errors
+  }
+
+  return false;
+}
+
 http.route({
   path: "/webhook/dodopayment",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    const webhookKey = process.env.DODO_PAYMENTS_WEBHOOK_KEY;
+    const webhookKey =
+      process.env.DODO_PAYMENTS_WEBHOOK_SECRET ??
+      process.env.DODO_PAYMENTS_WEBHOOK_KEY;
     if (!webhookKey) return json({ error: "Missing webhook key" }, 500);
 
     const rawBody = await request.text();
-    const headers = {
-      "webhook-id": request.headers.get("webhook-id") ?? "",
-      "webhook-signature": request.headers.get("webhook-signature") ?? "",
-      "webhook-timestamp": request.headers.get("webhook-timestamp") ?? "",
-    };
+    const webhookId = request.headers.get("webhook-id") ?? "";
+    const signature = request.headers.get("webhook-signature") ?? "";
+    const timestamp = request.headers.get("webhook-timestamp") ?? "";
+
+    if (
+      !(await verifySignature(
+        rawBody,
+        { webhookId, signature, timestamp },
+        webhookKey,
+      ))
+    ) {
+      console.error("[Dodo webhook] signature rejected");
+      return json({ error: "Invalid webhook" }, 401);
+    }
+
+    // Timestamp freshness check (5 minute tolerance to prevent replay attacks)
+    const eventTime = parseTime(timestamp);
+    if (eventTime && Math.abs(Date.now() - eventTime) > 300000) {
+      console.error("[Dodo webhook] timestamp too old");
+      return json({ error: "Timestamp too old" }, 401);
+    }
 
     let event: {
       type: string;
-      timestamp?: string;
+      timestamp?: string | number;
       data?: unknown;
     };
 
     try {
-      event = new Webhook(webhookKey).verify(rawBody, headers) as {
-        type: string;
-        timestamp?: string;
-        data?: unknown;
-      };
-    } catch (error) {
-      console.error("[Dodo webhook] signature rejected", error);
-      return json({ error: "Invalid webhook" }, 401);
+      event = JSON.parse(rawBody);
+    } catch {
+      return json({ error: "Invalid JSON payload" }, 400);
     }
 
     try {
       await ctx.runMutation(internal.billing.handleWebhook, {
-        webhookId: headers["webhook-id"],
+        webhookId,
         eventType: event.type,
-        eventTimestamp: parseTime(event.timestamp),
+        eventTimestamp: parseTime(event.timestamp) ?? eventTime,
         rawEvent: event,
         data: event.data ?? {},
       });
@@ -60,11 +127,19 @@ http.route({
   }),
 });
 
-function parseTime(value: unknown) {
-  if (typeof value !== "string" || Number.isNaN(Date.parse(value))) {
-    return undefined;
+function parseTime(value: unknown): number | undefined {
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return value > 1e11 ? value : value * 1000;
   }
-  return Date.parse(value);
+  if (typeof value === "string") {
+    const num = Number(value);
+    if (!Number.isNaN(num) && value.trim() !== "") {
+      return num > 1e11 ? num : num * 1000;
+    }
+    const parsed = Date.parse(value);
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  return undefined;
 }
 
 export default http;

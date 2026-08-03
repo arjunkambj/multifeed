@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
-import { TeamLayout } from "@/components/team";
+import { TeamSection } from "@/components/team";
 import { requireDashboardSession } from "@/hexclave/dashboard-session";
 import { loadServerTeamData } from "@/lib/team-data.server";
 
@@ -15,7 +15,7 @@ async function TeamsContent() {
     : undefined;
 
   return (
-    <TeamLayout
+    <TeamSection
       canInviteMembers={canInviteMembers}
       canReadMembers={canReadMembers}
       initialData={initialData}

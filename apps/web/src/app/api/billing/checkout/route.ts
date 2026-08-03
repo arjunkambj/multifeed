@@ -3,7 +3,7 @@ import { fetchQuery } from "convex/nextjs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
-import type { BillingInterval, PlanKey } from "@multifeed/plans";
+import { FREE_TRIAL, type BillingInterval, type PlanKey } from "@multifeed/plans";
 import {
   getDodoApiKey,
   getDodoEnvironment,
@@ -104,6 +104,9 @@ export async function POST(request: NextRequest) {
   try {
     session = await client.checkoutSessions.create({
       product_cart: [{ product_id: productId, quantity: 1 }],
+      subscription_data: {
+        trial_period_days: FREE_TRIAL.days,
+      },
       customer: {
         email: user.primaryEmail,
         name: user.displayName,

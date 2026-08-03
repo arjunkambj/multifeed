@@ -36,16 +36,6 @@ const STATUSES = [
 
 type BillingStatus = (typeof STATUSES)[number];
 
-const PROVIDER_STATUSES = [
-  "pending",
-  "active",
-  "cancelled",
-  "on_hold",
-  "failed",
-  "expired",
-] as const satisfies readonly BillingStatus[];
-
-type ProviderBillingStatus = (typeof PROVIDER_STATUSES)[number];
 
 const SUBSCRIPTION_EVENTS = new Set([
   "subscription.active",
@@ -72,6 +62,7 @@ const subscriptionSnapshotValidator = v.union(
     status: billingStatus,
     hasPlanAccess: v.boolean(),
     canStartCheckout: v.boolean(),
+    dodoCustomerId: v.optional(v.string()),
     currentPeriodEnd: v.optional(v.number()),
     accessEndsAt: v.optional(v.number()),
     updatedAt: v.number(),
@@ -86,11 +77,19 @@ function str(...values: unknown[]) {
   return undefined;
 }
 
-function parseTime(value: unknown) {
-  if (typeof value !== "string" || Number.isNaN(Date.parse(value))) {
-    return undefined;
+function parseTime(value: unknown): number | undefined {
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return value > 1e11 ? value : value * 1000;
   }
-  return Date.parse(value);
+  if (typeof value === "string") {
+    const num = Number(value);
+    if (!Number.isNaN(num) && value.trim() !== "") {
+      return num > 1e11 ? num : num * 1000;
+    }
+    const parsed = Date.parse(value);
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  return undefined;
 }
 
 function asPlan(value: unknown): PlanKey | undefined {
@@ -106,15 +105,34 @@ function asInterval(value: unknown) {
 function webhookStatus(
   eventType: string,
   event: Record<string, unknown>,
-): ProviderBillingStatus | undefined {
+): BillingStatus | undefined {
   if (!SUBSCRIPTION_EVENTS.has(eventType)) return undefined;
 
-  const status = str(event.status);
-  return status &&
-    status !== "pending" &&
-    PROVIDER_STATUSES.includes(status as ProviderBillingStatus)
-    ? (status as ProviderBillingStatus)
-    : undefined;
+  const rawStatus = str(event.status);
+  if (rawStatus && (STATUSES as readonly string[]).includes(rawStatus)) {
+    return rawStatus as BillingStatus;
+  }
+
+  switch (eventType) {
+    case "subscription.active":
+      return "active";
+    case "subscription.renewed":
+      return "renewed";
+    case "subscription.plan_changed":
+      return "plan_changed";
+    case "subscription.updated":
+      return "updated";
+    case "subscription.cancelled":
+      return "cancelled";
+    case "subscription.on_hold":
+      return "on_hold";
+    case "subscription.failed":
+      return "failed";
+    case "subscription.expired":
+      return "expired";
+    default:
+      return undefined;
+  }
 }
 
 export function grantsPlanAccess(
@@ -182,6 +200,7 @@ function snapshot(sub: Doc<"billingSubscriptions">, now: number) {
     status: sub.status,
     hasPlanAccess: grantsPlanAccess(sub, now),
     canStartCheckout: canStartCheckout(sub, now),
+    dodoCustomerId: sub.dodoCustomerId,
     currentPeriodEnd: sub.currentPeriodEnd,
     accessEndsAt: sub.accessEndsAt,
     updatedAt: sub.updatedAt,
@@ -354,7 +373,7 @@ async function upsertSubscription(
   };
 
   if (existing) {
-    await ctx.db.patch(existing._id, record);
+    await ctx.db.patch("billingSubscriptions", existing._id, record);
     return existing._id;
   }
 

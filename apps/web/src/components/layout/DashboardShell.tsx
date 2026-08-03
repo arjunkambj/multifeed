@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
+import { Suspense, useState } from "react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 
@@ -20,7 +19,9 @@ export function DashboardShell({
 
   return (
     <div className="flex min-h-dvh bg-background">
-      <AppSidebar collapsed={collapsed} />
+      <Suspense fallback={<div className="w-16 shrink-0 bg-background" />}>
+        <AppSidebar collapsed={collapsed} />
+      </Suspense>
       <div className="my-2 mr-2 flex min-w-0 flex-1 flex-col overflow-hidden rounded-4xl bg-surface">
         <DashboardHeader
           user={user}

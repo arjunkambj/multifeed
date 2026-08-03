@@ -109,9 +109,9 @@ export function ComposerFormSkeleton() {
 }
 
 export function DashboardLoadingSkeleton({
-  variant,
+  variant = "overview",
 }: {
-  variant: DashboardLoadingVariant;
+  variant?: DashboardLoadingVariant;
 }) {
   let content: React.ReactNode;
 

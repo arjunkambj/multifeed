@@ -8,7 +8,9 @@ import {
 } from "./_generated/server";
 import { requireUser } from "./hexclave/auth";
 import { listAccountsForTeam } from "./oauth/accounts";
-import { platformSettings, postKind, postStatus } from "./schema";
+import { platform as platformValidator, platformSettings, postKind, postStatus } from "./schema";
+import { publicAccountValidator } from "./oauth/accounts";
+import { mediaAssetOutputValidator } from "./media/r2";
 
 const targetInput = v.object({
   connectedAccountId: v.id("connectedAccounts"),
@@ -16,6 +18,52 @@ const targetInput = v.object({
   firstComment: v.optional(v.string()),
   referenceUrl: v.optional(v.string()),
   platformSettings: v.optional(platformSettings),
+});
+
+const targetOutputValidator = v.object({
+  targetId: v.id("postTargets"),
+  connectedAccountId: v.id("connectedAccounts"),
+  platform: platformValidator,
+  status: v.union(
+    v.literal("draft"),
+    v.literal("scheduled"),
+    v.literal("publishing"),
+    v.literal("published"),
+    v.literal("failed"),
+    v.literal("skipped"),
+  ),
+  bodyOverride: v.optional(v.string()),
+  firstComment: v.optional(v.string()),
+  referenceUrl: v.optional(v.string()),
+  platformSettings: v.optional(platformSettings),
+  scheduledFor: v.optional(v.number()),
+  platformPostId: v.optional(v.string()),
+  platformPermalink: v.optional(v.string()),
+  failureMessage: v.optional(v.string()),
+  username: v.optional(v.string()),
+  displayName: v.optional(v.string()),
+  avatarUrl: v.optional(v.string()),
+});
+
+const enrichedPostValidator = v.object({
+  _id: v.id("posts"),
+  _creationTime: v.number(),
+  teamId: v.string(),
+  createdByUserId: v.string(),
+  updatedByUserId: v.optional(v.string()),
+  title: v.optional(v.string()),
+  body: v.string(),
+  kind: postKind,
+  status: postStatus,
+  scheduledFor: v.optional(v.number()),
+  timezone: v.string(),
+  mediaAssetIds: v.array(v.id("mediaAssets")),
+  notes: v.optional(v.string()),
+  calendarColor: v.optional(v.string()),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+  targets: v.array(targetOutputValidator),
+  mediaAssets: v.array(mediaAssetOutputValidator),
 });
 
 const editablePostStatus = v.union(
@@ -35,12 +83,6 @@ const CALENDAR_COLORS = [
   "#059669",
 ];
 const MAX_TARGETS_PER_POST = 100;
-const CALENDAR_VISIBLE_STATUSES = [
-  "scheduled",
-  "publishing",
-  "published",
-  "failed",
-] as const;
 const OVERVIEW_TARGET_STATUSES = ["published", "failed"] as const;
 
 const POST_KIND_PLATFORMS = {
@@ -83,7 +125,7 @@ async function assertMediaOwnedByTeam(
   if (new Set(mediaAssetIds).size !== mediaAssetIds.length) {
     throw new Error("A media file can only be attached once per post");
   }
-  const assets = await Promise.all(mediaAssetIds.map((id) => ctx.db.get(id)));
+  const assets = await Promise.all(mediaAssetIds.map((id) => ctx.db.get("mediaAssets", id)));
   return assets.map((asset) => {
     if (!asset || asset.teamId !== teamId) {
       throw new Error("Invalid media asset");
@@ -181,7 +223,7 @@ async function replaceTargets(
   const [existing, accounts] = await Promise.all([
     loadTargets(ctx, input.postId),
     Promise.all(
-      input.targets.map((target) => ctx.db.get(target.connectedAccountId)),
+      input.targets.map((target) => ctx.db.get("connectedAccounts", target.connectedAccountId)),
     ),
   ]);
   const targetsWithAccounts = input.targets.map((target, index) => {
@@ -205,7 +247,7 @@ async function replaceTargets(
 
   const now = Date.now();
   await Promise.all([
-    ...existing.map((row) => ctx.db.delete(row._id)),
+    ...existing.map((row) => ctx.db.delete("postTargets", row._id)),
     ...targetsWithAccounts.map(({ account, target }) =>
       ctx.db.insert("postTargets", {
         teamId: input.teamId,
@@ -246,8 +288,8 @@ async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
   ];
   const mediaIds = [...new Set(posts.flatMap((post) => post.mediaAssetIds))];
   const [accounts, mediaAssets] = await Promise.all([
-    Promise.all(accountIds.map((id) => ctx.db.get(id))),
-    Promise.all(mediaIds.map((id) => ctx.db.get(id))),
+    Promise.all(accountIds.map((id) => ctx.db.get("connectedAccounts", id))),
+    Promise.all(mediaIds.map((id) => ctx.db.get("mediaAssets", id))),
   ]);
   const accountsById = new Map(
     accounts.flatMap((account) => (account ? [[account._id, account]] : [])),
@@ -311,6 +353,7 @@ export const create = mutation({
     targets: v.array(targetInput),
     calendarColor: v.optional(v.string()),
   },
+  returns: v.object({ postId: v.id("posts") }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const now = Date.now();
@@ -397,9 +440,10 @@ export const update = mutation({
     targets: v.optional(v.array(targetInput)),
     calendarColor: v.optional(v.string()),
   },
+  returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const post = await ctx.db.get(args.postId);
+    const post = await ctx.db.get("posts", args.postId);
     if (!post || post.teamId !== user.selectedTeamId) {
       throw new Error("Post not found");
     }
@@ -456,7 +500,7 @@ export const update = mutation({
       throw new Error("Select at least one account");
     }
 
-    await ctx.db.patch(args.postId, {
+    await ctx.db.patch("posts", args.postId, {
       title:
         args.title !== undefined ? args.title.trim() || undefined : post.title,
       body: args.body ?? post.body,
@@ -505,7 +549,7 @@ export const update = mutation({
       const targets = storedTargets!;
       await Promise.all(
         targets.map((target) =>
-          ctx.db.patch(target._id, {
+          ctx.db.patch("postTargets", target._id, {
             status: targetStatusFromPost(status),
             scheduledFor,
             updatedAt: now,
@@ -524,9 +568,10 @@ export const reschedule = mutation({
     postId: v.id("posts"),
     scheduledFor: v.number(),
   },
+  returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const post = await ctx.db.get(args.postId);
+    const post = await ctx.db.get("posts", args.postId);
     if (!post || post.teamId !== user.selectedTeamId) {
       throw new Error("Post not found");
     }
@@ -546,7 +591,7 @@ export const reschedule = mutation({
 
     const status = "scheduled" as const;
 
-    await ctx.db.patch(args.postId, {
+    await ctx.db.patch("posts", args.postId, {
       scheduledFor: args.scheduledFor,
       status,
       updatedByUserId: user.id,
@@ -558,7 +603,7 @@ export const reschedule = mutation({
       targets
         .filter((target) => target.status !== "published")
         .map((target) =>
-          ctx.db.patch(target._id, {
+          ctx.db.patch("postTargets", target._id, {
             scheduledFor: args.scheduledFor,
             status: "scheduled",
             updatedAt: now,
@@ -572,9 +617,10 @@ export const reschedule = mutation({
 
 export const remove = mutation({
   args: { postId: v.id("posts") },
+  returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const post = await ctx.db.get(args.postId);
+    const post = await ctx.db.get("posts", args.postId);
     if (!post || post.teamId !== user.selectedTeamId) {
       throw new Error("Post not found");
     }
@@ -593,17 +639,18 @@ export const remove = mutation({
     if (metricSnapshots.some(Boolean)) {
       throw new Error("Posts with analytics history cannot be deleted");
     }
-    await Promise.all(targets.map((target) => ctx.db.delete(target._id)));
-    await ctx.db.delete(args.postId);
+    await Promise.all(targets.map((target) => ctx.db.delete("postTargets", target._id)));
+    await ctx.db.delete("posts", args.postId);
     return { ok: true as const };
   },
 });
 
 export const get = query({
   args: { postId: v.id("posts") },
+  returns: v.union(enrichedPostValidator, v.null()),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const post = await ctx.db.get(args.postId);
+    const post = await ctx.db.get("posts", args.postId);
     if (!post || post.teamId !== user.selectedTeamId) return null;
     return enrichPost(ctx, post);
   },
@@ -614,6 +661,7 @@ export const list = query({
     status: v.optional(postStatus),
     limit: v.optional(v.number()),
   },
+  returns: v.array(enrichedPostValidator),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const limit = Math.max(1, Math.min(args.limit ?? 50, 100));
@@ -644,6 +692,7 @@ export const list = query({
 /** Small, bounded payload for the composer's optional caption-history tool. */
 export const recentCaptions = query({
   args: { limit: v.optional(v.number()) },
+  returns: v.array(v.string()),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const limit = Math.max(1, Math.min(args.limit ?? 50, 100));
@@ -663,11 +712,15 @@ export const recentCaptions = query({
 /** One subscription for the account picker and optional source post. */
 export const composerData = query({
   args: { sourcePostId: v.optional(v.id("posts")) },
+  returns: v.object({
+    accounts: v.array(publicAccountValidator),
+    sourcePost: v.union(enrichedPostValidator, v.null()),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const [accounts, sourcePost] = await Promise.all([
       listAccountsForTeam(ctx, user.selectedTeamId),
-      args.sourcePostId ? ctx.db.get(args.sourcePostId) : Promise.resolve(null),
+      args.sourcePostId ? ctx.db.get("posts", args.sourcePostId) : Promise.resolve(null),
     ]);
 
     return {
@@ -686,29 +739,31 @@ export const listInRange = query({
     startMs: v.number(),
     endMs: v.number(),
   },
+  returns: v.array(enrichedPostValidator),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     if (args.endMs < args.startMs) return [];
 
-    const posts = (
-      await Promise.all(
-        CALENDAR_VISIBLE_STATUSES.map((status) =>
-          ctx.db
-            .query("posts")
-            .withIndex("by_team_schedule", (q) =>
-              q
-                .eq("teamId", user.selectedTeamId)
-                .eq("status", status)
-                .gte("scheduledFor", args.startMs)
-                .lte("scheduledFor", args.endMs),
-            )
-            .take(500),
-        ),
+    const rawPosts = await ctx.db
+      .query("posts")
+      .withIndex("by_team_scheduledFor", (q) =>
+        q
+          .eq("teamId", user.selectedTeamId)
+          .gte("scheduledFor", args.startMs)
+          .lte("scheduledFor", args.endMs),
       )
-    )
-      .flat()
-      .sort((a, b) => (a.scheduledFor ?? 0) - (b.scheduledFor ?? 0))
-      .slice(0, 500);
+      .take(500);
+
+    const visibleStatuses = new Set<Doc<"posts">["status"]>([
+      "scheduled",
+      "publishing",
+      "published",
+      "failed",
+    ]);
+
+    const posts = rawPosts
+      .filter((post) => visibleStatuses.has(post.status))
+      .sort((a, b) => (a.scheduledFor ?? 0) - (b.scheduledFor ?? 0));
 
     return await enrichPosts(ctx, posts);
   },
@@ -720,6 +775,17 @@ export const overviewMetrics = query({
     startMs: v.number(),
     endMs: v.number(),
   },
+  returns: v.object({
+    scheduledPosts: v.number(),
+    previousScheduledPosts: v.number(),
+    publishedPosts: v.number(),
+    previousPublishedPosts: v.number(),
+    publishingSuccessRate: v.number(),
+    previousPublishingSuccessRate: v.number(),
+    engagement: v.number(),
+    previousEngagement: v.number(),
+    activeChannels: v.number(),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     if (args.endMs < args.startMs) {
@@ -854,6 +920,7 @@ export const overviewMetrics = query({
 
 export const listScheduled = query({
   args: { limit: v.optional(v.number()) },
+  returns: v.array(enrichedPostValidator),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const limit = Math.max(1, Math.min(args.limit ?? 40, 100));
