@@ -18,13 +18,13 @@
     "@multifeed/typescript-config": "workspace:*",
     "@types/node": "^25.6.2",
     "eslint": "^10.3.0",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "dependencies": {
     "@convex-dev/r2": "^0.10.2",
     "@hexclave/next": "^1.0.71",
     "@multifeed/plans": "workspace:*",
-    "convex": "^1.42.3",
+    "convex": "^1.43.0",
     "svix": "^1.96.1",
     "zod": "4.4.3"
   }

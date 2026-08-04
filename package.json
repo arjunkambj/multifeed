@@ -12,7 +12,7 @@
     "@multifeed/typescript-config": "workspace:*",
     "prettier": "^3.8.1",
     "turbo": "^2.10.0",
-    "typescript": "5.9.2"
+    "typescript": "7.0.2"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
