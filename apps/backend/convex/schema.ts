@@ -116,6 +116,12 @@ export const tokenType = v.union(
 );
 
 export default defineSchema({
+  /** Shared mutation guards serialize aggregate invariants by logical scope. */
+  writeGuards: defineTable({
+    scope: v.string(),
+    updatedAt: v.number(),
+  }).index("by_scope", ["scope"]),
+
   billingSubscriptions: defineTable({
     teamId: v.string(),
     userId: v.string(),
@@ -234,7 +240,6 @@ export default defineSchema({
     scheduledFor: v.optional(v.number()),
     /** IANA timezone used when scheduling (e.g. America/New_York). */
     timezone: v.string(),
-    mediaAssetIds: v.array(v.id("mediaAssets")),
     /** Optional note for internal team context. */
     notes: v.optional(v.string()),
     /** Hex color hint for calendar chips. */
@@ -246,6 +251,14 @@ export default defineSchema({
     .index("by_team_schedule", ["teamId", "status", "scheduledFor"])
     .index("by_team_scheduledFor", ["teamId", "scheduledFor"])
     .index("by_team_updated", ["teamId", "updatedAt"]),
+
+  postMediaAssets: defineTable({
+    postId: v.id("posts"),
+    mediaAssetId: v.id("mediaAssets"),
+    position: v.number(),
+  })
+    .index("by_post_position", ["postId", "position"])
+    .index("by_media_asset", ["mediaAssetId"]),
 
   postTargets: defineTable({
     teamId: v.string(),

@@ -1,6 +1,6 @@
-import { ConvexError } from "convex/values";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { entitlementsForTeam } from "../billing";
+import { fail } from "../errors";
 
 const COUNTED_ACCOUNT_STATUSES = ["active", "expired", "error"] as const;
 
@@ -42,12 +42,10 @@ export async function assertCanConnect(
 
   const count = await countConnectedAccounts(ctx, teamId, limit);
   if (count + additionalAccounts > limit) {
-    throw new ConvexError({
-      code: "PLAN_LIMIT_REACHED",
-      resource: "connected_accounts",
-      current: count,
-      limit,
-      message: `Account limit reached (${count}/${limit}). Upgrade your plan to connect more accounts.`,
-    });
+    fail(
+      "PLAN_LIMIT_REACHED",
+      `Account limit reached (${count}/${limit}). Upgrade your plan to connect more accounts.`,
+      { resource: "connected_accounts", current: count, limit },
+    );
   }
 }

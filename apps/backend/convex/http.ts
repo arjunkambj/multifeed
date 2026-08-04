@@ -2,6 +2,7 @@ import { Webhook } from "svix";
 import { httpRouter } from "convex/server";
 import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
+import { parseTime } from "./billing";
 
 const http = httpRouter();
 
@@ -126,20 +127,5 @@ http.route({
     }
   }),
 });
-
-function parseTime(value: unknown): number | undefined {
-  if (typeof value === "number" && !Number.isNaN(value)) {
-    return value > 1e11 ? value : value * 1000;
-  }
-  if (typeof value === "string") {
-    const num = Number(value);
-    if (!Number.isNaN(num) && value.trim() !== "") {
-      return num > 1e11 ? num : num * 1000;
-    }
-    const parsed = Date.parse(value);
-    if (!Number.isNaN(parsed)) return parsed;
-  }
-  return undefined;
-}
 
 export default http;

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { fail } from "../errors";
 
 const HexclaveUserSchema = z.object({
   id: z.string(),
@@ -19,7 +20,7 @@ export async function getCurrentHexclaveUser(ctx: MutationCtx | QueryCtx) {
   }
 
   const user = HexclaveUserSchema.safeParse({
-    id: identity.subject,
+    id: identity.tokenIdentifier,
     email: identity.email,
     isAnonymous: identity.is_anonymous,
     isRestricted: identity.is_restricted,
@@ -40,6 +41,6 @@ export async function getCurrentHexclaveUser(ctx: MutationCtx | QueryCtx) {
 
 export async function requireUser(ctx: MutationCtx | QueryCtx) {
   const auth = await getCurrentHexclaveUser(ctx);
-  if (!auth.authenticated) throw new Error(auth.error);
+  if (!auth.authenticated) fail("UNAUTHENTICATED", auth.error);
   return auth.user;
 }

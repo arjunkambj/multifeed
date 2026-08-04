@@ -1,2 +1,0 @@
-- Prefers repository-specific skill/playbook guidance—especially framework best practices and performance audits—to be applied when reviewing or changing code. Confidence: 0.9
-- Prefers an explicit plan-approval step before implementation, then wants the approved plan applied directly. Confidence: 0.95

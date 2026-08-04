@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -23,6 +23,8 @@ export function InvitePopover({
   initialData?: TeamData;
   teamId: string;
 }) {
+  "use no memo";
+
   const queryClient = useQueryClient();
   const teamDataQuery = useQuery({
     initialData,
@@ -31,6 +33,7 @@ export function InvitePopover({
   });
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const sendingRef = useRef(false);
   const membersCount = teamDataQuery.data?.members.length ?? 0;
   const invitationsCount = teamDataQuery.data?.invitations.length ?? 0;
   const seatLimit = teamDataQuery.data?.entitlements.teamSeatLimit;
@@ -39,40 +42,42 @@ export function InvitePopover({
 
   const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isSending) return;
+    if (sendingRef.current) return;
+    sendingRef.current = true;
     setIsSending(true);
 
-    try {
-      const response = await fetch("/api/team-members", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+    void fetch("/api/team-members", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim() }),
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Could not send team invitation");
+        const payload = (await response.json()) as
+          | { ok: true }
+          | { error: string };
+        if (!("ok" in payload)) {
+          throw new Error(
+            "error" in payload
+              ? payload.error
+              : "Could not send team invitation",
+          );
+        }
+        await queryClient.invalidateQueries({
+          queryKey: teamDataQueryKey(teamId),
+        });
+        setEmail("");
+        toast.success("Invite sent.", { timeout: 3000 });
+      })
+      .catch((err) => {
+        toast.danger(err instanceof Error ? err.message : String(err), {
+          timeout: 3000,
+        });
+      })
+      .finally(() => {
+        sendingRef.current = false;
+        setIsSending(false);
       });
-      if (!response.ok) {
-        throw new Error("Could not send team invitation");
-      }
-      const payload = (await response.json()) as
-        | { ok: true }
-        | { error: string };
-
-      if (!("ok" in payload)) {
-        throw new Error(
-          "error" in payload ? payload.error : "Could not send team invitation",
-        );
-      }
-
-      await queryClient.invalidateQueries({
-        queryKey: teamDataQueryKey(teamId),
-      });
-      setEmail("");
-      toast.success("Invite sent.", { timeout: 3000 });
-    } catch (err) {
-      toast.danger(err instanceof Error ? err.message : String(err), {
-        timeout: 3000,
-      });
-    } finally {
-      setIsSending(false);
-    }
   };
 
   return (

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, mutation } from "../_generated/server";
+import { fail } from "../errors";
 import { requireUser } from "../hexclave/auth";
 import { platform as platformValidator } from "../schema";
 import { randomUrlSafe } from "./crypto";
@@ -165,11 +166,11 @@ export const complete = mutation({
       session.teamId !== user.selectedTeamId ||
       session.userId !== user.id
     ) {
-      throw new Error("OAuth session not found");
+      fail("NOT_FOUND", "OAuth session not found");
     }
 
     if (session.phase === "authorize") {
-      throw new Error("OAuth exchange has not started");
+      fail("CONFLICT", "OAuth exchange has not started");
     }
     if (session.phase === "exchanging") {
       await ctx.db.patch("oauthSessions", session._id, { phase: "completed" });
@@ -192,7 +193,7 @@ export const remove = mutation({
 
     if (!session) return { ok: true as const };
     if (session.teamId !== user.selectedTeamId || session.userId !== user.id) {
-      throw new Error("OAuth session not found");
+      fail("NOT_FOUND", "OAuth session not found");
     }
 
     await ctx.db.delete("oauthSessions", session._id);

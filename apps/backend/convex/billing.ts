@@ -36,7 +36,6 @@ const STATUSES = [
 
 type BillingStatus = (typeof STATUSES)[number];
 
-
 const SUBSCRIPTION_EVENTS = new Set([
   "subscription.active",
   "subscription.updated",
@@ -48,7 +47,7 @@ const SUBSCRIPTION_EVENTS = new Set([
   "subscription.expired",
 ]);
 
-const entitlementValidator = v.object({
+export const entitlementValidator = v.object({
   planKey: v.union(planKeyValidator, v.null()),
   hasActivePlan: v.boolean(),
   connectedAccountLimit: v.number(),
@@ -77,7 +76,7 @@ function str(...values: unknown[]) {
   return undefined;
 }
 
-function parseTime(value: unknown): number | undefined {
+export function parseTime(value: unknown): number | undefined {
   if (typeof value === "number" && !Number.isNaN(value)) {
     return value > 1e11 ? value : value * 1000;
   }
@@ -257,6 +256,7 @@ export const handleWebhook = internalMutation({
   },
   returns: v.object({ duplicate: v.boolean() }),
   handler: async (ctx, args) => {
+    await serializeWebhookWrites(ctx);
     const seen = await ctx.db
       .query("dodoWebhookEvents")
       .withIndex("by_webhook_id", (q) => q.eq("webhookId", args.webhookId))
@@ -287,6 +287,20 @@ export const handleWebhook = internalMutation({
     return { duplicate: false };
   },
 });
+
+async function serializeWebhookWrites(ctx: MutationCtx) {
+  const scope = "billing:webhooks";
+  const guard = await ctx.db
+    .query("writeGuards")
+    .withIndex("by_scope", (q) => q.eq("scope", scope))
+    .unique();
+  const now = Date.now();
+  if (guard) {
+    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
+  } else {
+    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
+  }
+}
 
 async function upsertSubscription(
   ctx: MutationCtx,

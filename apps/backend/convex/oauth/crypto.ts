@@ -1,3 +1,5 @@
+import { fail } from "../errors";
+
 /**
  * AES-256-GCM token encryption for connected account credentials.
  * Requires TOKEN_ENCRYPTION_KEY as 32-byte key encoded as base64 or 64-char hex.
@@ -6,7 +8,7 @@
 function getKeyBytes(): Uint8Array {
   const raw = process.env.TOKEN_ENCRYPTION_KEY;
   if (!raw) {
-    throw new Error("Missing TOKEN_ENCRYPTION_KEY");
+    fail("INTERNAL_ERROR", "Token encryption is not configured");
   }
 
   // hex (64 chars) or base64
@@ -20,7 +22,7 @@ function getKeyBytes(): Uint8Array {
 
   const binary = atob(raw);
   if (binary.length !== 32) {
-    throw new Error("TOKEN_ENCRYPTION_KEY must decode to 32 bytes");
+    fail("INTERNAL_ERROR", "Token encryption is misconfigured");
   }
   const bytes = new Uint8Array(32);
   for (let i = 0; i < 32; i++) bytes[i] = binary.charCodeAt(i);
@@ -66,7 +68,7 @@ export async function encryptSecret(plaintext: string): Promise<string> {
 export async function decryptSecret(payload: string): Promise<string> {
   const [ivB64, dataB64] = payload.split(".");
   if (!ivB64 || !dataB64) {
-    throw new Error("Invalid encrypted payload");
+    fail("INVALID_INPUT", "Invalid encrypted payload");
   }
   const key = await importKey();
   const ivRaw = base64ToBytes(ivB64);

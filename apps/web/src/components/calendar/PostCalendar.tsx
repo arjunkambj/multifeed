@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -31,7 +31,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { CalendarGridSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
+import { CalendarGridSkeleton } from "@/components/layout/CalendarGridSkeleton";
 import {
   PLATFORM_META,
   platformBrand,
@@ -75,10 +75,11 @@ export function PostCalendar() {
   );
   const [title, setTitle] = useState("");
 
-  const posts = useQuery(
+  const postsResult = useQuery(
     api.posts.listInRange,
     range ? { startMs: range.start, endMs: range.end } : "skip",
   );
+  const posts = postsResult?.posts;
   const selectedPost = useQuery(
     api.posts.get,
     selectedPostId ? { postId: selectedPostId } : "skip",
@@ -86,19 +87,15 @@ export function PostCalendar() {
   const reschedule = useMutation(api.posts.reschedule);
   const removePost = useMutation(api.posts.remove);
 
-  const platformOptions = useMemo(
-    () =>
-      [
-        ...new Set(
-          (posts ?? []).flatMap((post) =>
-            post.targets.map((target) => target.platform),
-          ),
-        ),
-      ].sort(),
-    [posts],
-  );
+  const platformOptions = [
+    ...new Set(
+      (posts ?? []).flatMap((post) =>
+        post.targets.map((target) => target.platform),
+      ),
+    ),
+  ].sort();
 
-  const events: EventInput[] = useMemo(() => {
+  const events: EventInput[] = (() => {
     if (!posts) return [];
     return posts.reduce<EventInput[]>((acc, post) => {
       if (
@@ -131,16 +128,16 @@ export function PostCalendar() {
       }
       return acc;
     }, []);
-  }, [platformFilter, posts]);
+  })();
 
-  const onDatesSet = useCallback((arg: DatesSetArg) => {
+  const onDatesSet = (arg: DatesSetArg) => {
     setRange({
       start: arg.start.getTime(),
       end: arg.end.getTime(),
     });
     setTitle(arg.view.title);
     setView(arg.view.type as CalendarView);
-  }, []);
+  };
 
   const changeView = (next: CalendarView) => {
     const api = calendarRef.current?.getApi();

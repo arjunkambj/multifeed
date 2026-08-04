@@ -1,3 +1,5 @@
+import { fail } from "../errors";
+
 const MIN_SECRET_LENGTH = 32;
 
 const constantTimeEqual = (left: string, right: string) => {
@@ -15,9 +17,9 @@ const constantTimeEqual = (left: string, right: string) => {
 export const requireOAuthServer = (providedSecret: string) => {
   const expectedSecret = process.env.OAUTH_SERVER_SECRET;
   if (!expectedSecret || expectedSecret.length < MIN_SECRET_LENGTH) {
-    throw new Error("OAUTH_SERVER_SECRET must be at least 32 characters");
+    fail("INTERNAL_ERROR", "OAuth server is not configured");
   }
   if (!constantTimeEqual(providedSecret, expectedSecret)) {
-    throw new Error("Unauthorized OAuth server request");
+    fail("FORBIDDEN", "Unauthorized OAuth server request");
   }
 };

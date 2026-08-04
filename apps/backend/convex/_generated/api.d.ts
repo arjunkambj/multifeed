@@ -10,6 +10,7 @@
 
 import type * as billing from "../billing.js";
 import type * as crons from "../crons.js";
+import type * as errors from "../errors.js";
 import type * as hexclave_auth from "../hexclave/auth.js";
 import type * as http from "../http.js";
 import type * as media_r2 from "../media/r2.js";
@@ -29,6 +30,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   billing: typeof billing;
   crons: typeof crons;
+  errors: typeof errors;
   "hexclave/auth": typeof hexclave_auth;
   http: typeof http;
   "media/r2": typeof media_r2;

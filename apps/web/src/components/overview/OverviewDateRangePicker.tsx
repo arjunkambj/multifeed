@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { Button, Input, Popover, RangeCalendar } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import {
@@ -49,11 +49,11 @@ export function OverviewDateRangePicker({ value, preset, onChange }: Props) {
   const maxDate = today(getLocalTimeZone());
   const maxInputDate = calendarDateToInputValue(maxDate);
 
-  const label = useMemo(() => {
-    if (preset) return DATE_RANGE_PRESETS[preset].label;
-    if (value.start.compare(value.end) === 0) return formatDate(value.start);
-    return `${formatDate(value.start)} – ${formatDate(value.end)}`;
-  }, [preset, value]);
+  const label = preset
+    ? DATE_RANGE_PRESETS[preset].label
+    : value.start.compare(value.end) === 0
+      ? formatDate(value.start)
+      : `${formatDate(value.start)} – ${formatDate(value.end)}`;
 
   const selectPreset = (nextPreset: DateRangePreset) => {
     const range = getPresetRange(nextPreset);
@@ -62,20 +62,17 @@ export function OverviewDateRangePicker({ value, preset, onChange }: Props) {
     setIsOpen(false);
   };
 
-  const selectRange = useCallback(
-    (range: RangeValue<DateValue>) => {
-      const nextRange = {
-        start: toCalendarDate(range.start),
-        end: toCalendarDate(range.end ?? range.start),
-      };
-      setDraft(nextRange);
-      if (range.end) {
-        onChange(nextRange, null);
-        setIsOpen(false);
-      }
-    },
-    [onChange],
-  );
+  const selectRange = (range: RangeValue<DateValue>) => {
+    const nextRange = {
+      start: toCalendarDate(range.start),
+      end: toCalendarDate(range.end ?? range.start),
+    };
+    setDraft(nextRange);
+    if (range.end) {
+      onChange(nextRange, null);
+      setIsOpen(false);
+    }
+  };
 
   const typeDate = (field: "start" | "end", input: string) => {
     if (input.length !== 10) return;

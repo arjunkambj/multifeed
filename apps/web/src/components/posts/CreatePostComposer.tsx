@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import {
   Button,
   Calendar,
@@ -31,7 +31,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { ComposerFormSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
+import { ComposerFormSkeleton } from "@/components/layout/ComposerFormSkeleton";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
   PLATFORM_META,
@@ -70,6 +70,8 @@ function fromLocalInputValue(value: string) {
   return Number.isNaN(ms) ? null : ms;
 }
 
+const currentTimestamp = () => Date.now();
+
 type Props = {
   initialScheduledFor?: number;
   /** Prefill from an existing post (calendar Duplicate). */
@@ -104,6 +106,140 @@ const normalizePlatformSettings = (settings: PlatformSettings) => ({
   altText: settings.altText?.trim() || undefined,
 });
 
+type ComposerState = {
+  body: string;
+  title: string;
+  notes: string;
+  postKind: PostKind;
+  media: ComposerMedia[];
+  uploadingMedia: boolean;
+  selected: Set<string>;
+  targetOptions: Record<string, TargetOptions>;
+  captionSearch: string;
+  activeTool: ComposerTool;
+  scheduleMode: "now" | "schedule";
+  scheduleLocal: string;
+  showNotes: boolean;
+  saving: "draft" | "schedule" | "now" | null;
+};
+
+type ComposerAction =
+  | { type: "bodyChanged"; value: string }
+  | { type: "titleChanged"; value: string }
+  | { type: "notesChanged"; value: string }
+  | { type: "postKindChanged"; value: PostKind }
+  | { type: "mediaChanged"; value: ComposerMedia[] }
+  | { type: "uploadingMediaChanged"; value: boolean }
+  | { type: "selectedChanged"; value: Set<string> }
+  | { type: "accountToggled"; accountId: string }
+  | { type: "targetOptionsChanged"; accountId: string; patch: Partial<TargetOptions> }
+  | { type: "captionSearchChanged"; value: string }
+  | { type: "toolChanged"; value: ComposerTool }
+  | { type: "scheduleModeChanged"; value: "now" | "schedule" }
+  | { type: "scheduleLocalChanged"; value: string }
+  | { type: "notesVisibilityToggled" }
+  | { type: "savingChanged"; value: ComposerState["saving"] }
+  | {
+      type: "sourceLoaded";
+      body: string;
+      title: string;
+      notes: string;
+      postKind: PostKind;
+      media: ComposerMedia[];
+      selected: Set<string>;
+      targetOptions: Record<string, TargetOptions>;
+      scheduleMode: "now" | "schedule";
+      scheduleLocal: string;
+      showNotes: boolean;
+    };
+
+const createComposerState = (
+  initialPostKind: PostKind,
+  initialScheduledFor?: number,
+): ComposerState => ({
+  body: "",
+  title: "",
+  notes: "",
+  postKind: initialPostKind,
+  media: [],
+  uploadingMedia: false,
+  selected: new Set(),
+  targetOptions: {},
+  captionSearch: "",
+  activeTool: null,
+  scheduleMode: initialScheduledFor ? "schedule" : "now",
+  scheduleLocal: toLocalInputValue(
+    initialScheduledFor ?? Date.now() + 60 * 60 * 1000,
+  ),
+  showNotes: false,
+  saving: null,
+});
+
+function composerReducer(
+  state: ComposerState,
+  action: ComposerAction,
+): ComposerState {
+  switch (action.type) {
+    case "bodyChanged":
+      return { ...state, body: action.value };
+    case "titleChanged":
+      return { ...state, title: action.value };
+    case "notesChanged":
+      return { ...state, notes: action.value };
+    case "postKindChanged":
+      return { ...state, postKind: action.value };
+    case "mediaChanged":
+      return { ...state, media: action.value };
+    case "uploadingMediaChanged":
+      return { ...state, uploadingMedia: action.value };
+    case "selectedChanged":
+      return { ...state, selected: action.value };
+    case "accountToggled": {
+      const selected = new Set(state.selected);
+      if (selected.has(action.accountId)) selected.delete(action.accountId);
+      else selected.add(action.accountId);
+      return { ...state, selected };
+    }
+    case "targetOptionsChanged":
+      return {
+        ...state,
+        targetOptions: {
+          ...state.targetOptions,
+          [action.accountId]: {
+            ...(state.targetOptions[action.accountId] ?? EMPTY_TARGET_OPTIONS),
+            ...action.patch,
+          },
+        },
+      };
+    case "captionSearchChanged":
+      return { ...state, captionSearch: action.value };
+    case "toolChanged":
+      return { ...state, activeTool: action.value };
+    case "scheduleModeChanged":
+      return { ...state, scheduleMode: action.value };
+    case "scheduleLocalChanged":
+      return { ...state, scheduleLocal: action.value };
+    case "notesVisibilityToggled":
+      return { ...state, showNotes: !state.showNotes };
+    case "savingChanged":
+      return { ...state, saving: action.value };
+    case "sourceLoaded":
+      return {
+        ...state,
+        body: action.body,
+        title: action.title,
+        notes: action.notes,
+        postKind: action.postKind,
+        media: action.media,
+        selected: action.selected,
+        targetOptions: action.targetOptions,
+        scheduleMode: action.scheduleMode,
+        scheduleLocal: action.scheduleLocal,
+        showNotes: action.showNotes,
+      };
+  }
+}
+
 export function CreatePostComposer(props: Props) {
   const isExistingPostFlow = Boolean(props.editPostId || props.duplicateFromId);
   const [selectedKind, setSelectedKind] = useState<PostKind | null>(null);
@@ -131,13 +267,19 @@ export function CreatePostComposer(props: Props) {
   );
 }
 
-function PostComposerForm({
+function PostComposerForm(props: ComposerFormProps) {
+  return usePostComposerForm(props);
+}
+
+function usePostComposerForm({
   initialScheduledFor,
   duplicateFromId,
   editPostId,
   initialPostKind,
   onChooseDifferentFormat,
 }: ComposerFormProps) {
+  "use no memo";
+
   const router = useRouter();
   const sourcePostId = editPostId ?? duplicateFromId;
   const composerData = useQuery(api.posts.composerData, { sourcePostId });
@@ -147,35 +289,35 @@ function PostComposerForm({
   const updatePost = useMutation(api.posts.update);
   const prefilledFrom = useRef<string | null>(null);
 
-  const [body, setBody] = useState("");
-  const [title, setTitle] = useState("");
-  const [notes, setNotes] = useState("");
-  const [postKind, setPostKind] = useState<PostKind>(initialPostKind);
-  const [media, setMedia] = useState<ComposerMedia[]>([]);
-  const [uploadingMedia, setUploadingMedia] = useState(false);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [targetOptions, setTargetOptions] = useState<
-    Record<string, TargetOptions>
-  >({});
-  const [captionSearch, setCaptionSearch] = useState("");
-  const [activeTool, setActiveTool] = useState<ComposerTool>(null);
+  const [state, dispatch] = useReducer(
+    composerReducer,
+    { initialPostKind, initialScheduledFor },
+    ({ initialPostKind: kind, initialScheduledFor: scheduledFor }) =>
+      createComposerState(kind, scheduledFor),
+  );
+  const {
+    body,
+    title,
+    notes,
+    postKind,
+    media,
+    uploadingMedia,
+    selected,
+    targetOptions,
+    captionSearch,
+    activeTool,
+    scheduleMode,
+    scheduleLocal,
+    showNotes,
+    saving,
+  } = state;
   const recentCaptions = useQuery(
     api.posts.recentCaptions,
     activeTool === "history" ? { limit: 50 } : "skip",
   );
-  const [scheduleMode, setScheduleMode] = useState<"now" | "schedule">(
-    initialScheduledFor ? "schedule" : "now",
-  );
-  const [scheduleLocal, setScheduleLocal] = useState(() =>
-    toLocalInputValue(initialScheduledFor ?? Date.now() + 60 * 60 * 1000),
-  );
   const [timezone] = useState(defaultTimezone);
-  const [showNotes, setShowNotes] = useState(false);
-  const [saving, setSaving] = useState<"draft" | "schedule" | "now" | null>(
-    null,
-  );
 
-  const scheduleParts = useMemo(() => {
+  const scheduleParts = (() => {
     const milliseconds = fromLocalInputValue(scheduleLocal);
     if (milliseconds === null) return null;
     const zoned = fromDate(new Date(milliseconds), timezone);
@@ -183,11 +325,11 @@ function PostComposerForm({
       date: new CalendarDate(zoned.year, zoned.month, zoned.day),
       time: new Time(zoned.hour, zoned.minute),
     };
-  }, [scheduleLocal, timezone]);
+  })();
 
   const updateSchedule = (date: DateValue | null, time: TimeValue | null) => {
     if (!date || !time) {
-      setScheduleLocal("");
+      dispatch({ type: "scheduleLocalChanged", value: "" });
       return;
     }
     const dateTime = new CalendarDateTime(
@@ -199,13 +341,13 @@ function PostComposerForm({
       time.second,
     );
     const milliseconds = toZoned(dateTime, timezone).toDate().getTime();
-    setScheduleLocal(toLocalInputValue(milliseconds));
+    dispatch({
+      type: "scheduleLocalChanged",
+      value: toLocalInputValue(milliseconds),
+    });
   };
 
-  const activeAccounts = useMemo(
-    () => (accounts ?? []).filter((a) => a.status === "active"),
-    [accounts],
-  );
+  const activeAccounts = (accounts ?? []).filter((a) => a.status === "active");
 
   // Prefill once when duplicating or editing an existing post.
   useEffect(() => {
@@ -213,10 +355,7 @@ function PostComposerForm({
     if (prefilledFrom.current === sourcePostId) return;
     prefilledFrom.current = sourcePostId;
 
-    setBody(sourcePost.body ?? "");
-    setPostKind(sourcePost.kind);
-    setMedia(
-      sourcePost.mediaAssets.map((asset) => ({
+    const nextMedia = sourcePost.mediaAssets.map((asset) => ({
         _id: asset._id,
         filename: asset.filename,
         mimeType: asset.mimeType,
@@ -226,17 +365,7 @@ function PostComposerForm({
         width: asset.width,
         height: asset.height,
         durationMs: asset.durationMs,
-      })),
-    );
-    setTitle(
-      sourcePost.title
-        ? duplicateFromId
-          ? `${sourcePost.title} (copy)`
-          : sourcePost.title
-        : "",
-    );
-    setNotes(sourcePost.notes ?? "");
-    setShowNotes(Boolean(sourcePost.notes));
+    }));
     const activeAccountsSet = new Set(
       (accounts ?? []).reduce<Id<"connectedAccounts">[]>((acc, a) => {
         if (a.status === "active") acc.push(a._id);
@@ -244,19 +373,14 @@ function PostComposerForm({
       }, []),
     );
     const activeIds = new Set(
-      (sourcePost.targets ?? []).reduce<Id<"connectedAccounts">[]>(
-        (acc, t) => {
-          if (activeAccountsSet.has(t.connectedAccountId)) {
-            acc.push(t.connectedAccountId);
-          }
-          return acc;
-        },
-        [],
-      ),
+      (sourcePost.targets ?? []).reduce<Id<"connectedAccounts">[]>((acc, t) => {
+        if (activeAccountsSet.has(t.connectedAccountId)) {
+          acc.push(t.connectedAccountId);
+        }
+        return acc;
+      }, []),
     );
-    setSelected(activeIds);
-    setTargetOptions(
-      Object.fromEntries(
+    const nextTargetOptions = Object.fromEntries(
         (sourcePost.targets ?? []).map((target) => [
           target.connectedAccountId,
           {
@@ -269,19 +393,32 @@ function PostComposerForm({
             },
           },
         ]),
-      ),
     );
     const nextSchedule =
       sourcePost.scheduledFor && sourcePost.scheduledFor > Date.now()
         ? sourcePost.scheduledFor
         : Date.now() + 60 * 60 * 1000;
-    setScheduleLocal(toLocalInputValue(nextSchedule));
-    setScheduleMode(
-      sourcePost.status === "scheduled" &&
+    dispatch({
+      type: "sourceLoaded",
+      body: sourcePost.body ?? "",
+      title: sourcePost.title
+        ? duplicateFromId
+          ? `${sourcePost.title} (copy)`
+          : sourcePost.title
+        : "",
+      notes: sourcePost.notes ?? "",
+      postKind: sourcePost.kind,
+      media: nextMedia,
+      selected: activeIds,
+      targetOptions: nextTargetOptions,
+      scheduleLocal: toLocalInputValue(nextSchedule),
+      scheduleMode:
+        sourcePost.status === "scheduled" &&
         Boolean(sourcePost.scheduledFor && sourcePost.scheduledFor > Date.now())
-        ? "schedule"
-        : "now",
-    );
+          ? "schedule"
+          : "now",
+      showNotes: Boolean(sourcePost.notes),
+    });
   }, [sourcePost, sourcePostId, duplicateFromId, accounts]);
 
   const storyMediaKind =
@@ -289,53 +426,40 @@ function PostComposerForm({
       ? media[0].kind
       : undefined;
 
-  const compatibleAccounts = useMemo(
-    () =>
-      activeAccounts.filter((account) =>
-        accountSupportsPostKind(account, postKind, storyMediaKind),
-      ),
-    [activeAccounts, postKind, storyMediaKind],
+  const compatibleAccounts = activeAccounts.filter((account) =>
+    accountSupportsPostKind(account, postKind, storyMediaKind),
   );
 
-  const selectedAccountIds = useMemo(() => {
+  const selectedAccountIds = (() => {
     const compatibleIds = new Set<string>(
       compatibleAccounts.map((account) => account._id),
     );
     return new Set([...selected].filter((id) => compatibleIds.has(id)));
-  }, [compatibleAccounts, selected]);
+  })();
 
-  const selectedPlatforms = useMemo(
-    () => [
-      ...new Set(
-        compatibleAccounts.reduce<string[]>((acc, account) => {
-          if (selectedAccountIds.has(account._id)) {
-            acc.push(account.platform);
-          }
-          return acc;
-        }, []),
-      ),
-    ],
-    [compatibleAccounts, selectedAccountIds],
-  );
+  const selectedPlatforms = [
+    ...new Set(
+      compatibleAccounts.reduce<string[]>((acc, account) => {
+        if (selectedAccountIds.has(account._id)) acc.push(account.platform);
+        return acc;
+      }, []),
+    ),
+  ];
 
-  const strictestLimit = useMemo(() => {
+  const strictestLimit = (() => {
     let min = Number.POSITIVE_INFINITY;
     for (const p of selectedPlatforms) {
       const lim = PLATFORM_META[p]?.maxChars;
       if (lim != null && lim < min) min = lim;
     }
     return Number.isFinite(min) ? min : null;
-  }, [selectedPlatforms]);
+  })();
 
-  const selectedAccounts = useMemo(
-    () =>
-      compatibleAccounts.filter((account) =>
-        selectedAccountIds.has(account._id),
-      ),
-    [compatibleAccounts, selectedAccountIds],
+  const selectedAccounts = compatibleAccounts.filter((account) =>
+    selectedAccountIds.has(account._id),
   );
 
-  const pastCaptions = useMemo(() => {
+  const pastCaptions = (() => {
     const seen = new Set<string>();
     const query = captionSearch.trim().toLowerCase();
     return (recentCaptions ?? [])
@@ -345,18 +469,13 @@ function PostComposerForm({
         return !query || caption.toLowerCase().includes(query);
       })
       .slice(0, 12);
-  }, [captionSearch, recentCaptions]);
+  })();
 
-  const overLimitAccounts = useMemo(
-    () =>
-      selectedAccounts.filter((account) => {
-        const limit = PLATFORM_META[account.platform]?.maxChars;
-        const effectiveBody =
-          targetOptions[account._id]?.bodyOverride.trim() || body;
-        return limit != null && effectiveBody.length > limit;
-      }),
-    [body, selectedAccounts, targetOptions],
-  );
+  const overLimitAccounts = selectedAccounts.filter((account) => {
+    const limit = PLATFORM_META[account.platform]?.maxChars;
+    const effectiveBody = targetOptions[account._id]?.bodyOverride.trim() || body;
+    return limit != null && effectiveBody.length > limit;
+  });
 
   const overLimit = overLimitAccounts.length > 0;
   const hasRequiredContent =
@@ -364,19 +483,18 @@ function PostComposerForm({
 
   const toggleAccount = (id: string) => {
     if (!compatibleAccounts.some((account) => account._id === id)) return;
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    dispatch({ type: "accountToggled", accountId: id });
   };
 
   const selectAll = () => {
-    setSelected(new Set(compatibleAccounts.map((account) => account._id)));
+    dispatch({
+      type: "selectedChanged",
+      value: new Set(compatibleAccounts.map((account) => account._id)),
+    });
   };
 
-  const clearAll = () => setSelected(new Set());
+  const clearAll = () =>
+    dispatch({ type: "selectedChanged", value: new Set() });
 
   const chooseDifferentFormat = () => {
     media.forEach((asset) => {
@@ -389,27 +507,26 @@ function PostComposerForm({
     accountId: string,
     patch: Partial<TargetOptions>,
   ) => {
-    setTargetOptions((current) => ({
-      ...current,
-      [accountId]: {
-        ...(current[accountId] ?? EMPTY_TARGET_OPTIONS),
-        ...patch,
-      },
-    }));
+    dispatch({ type: "targetOptionsChanged", accountId, patch });
   };
 
   const submit = async (mode: "draft" | "schedule" | "now") => {
-    setSaving(mode);
+    dispatch({ type: "savingChanged", value: mode });
+
+    const parsed = fromLocalInputValue(scheduleLocal);
+    const scheduledFor: number | undefined =
+      mode === "now"
+        ? currentTimestamp()
+        : parsed === null
+          ? undefined
+          : parsed;
+    if (mode === "schedule" && scheduledFor == null) {
+      dispatch({ type: "savingChanged", value: null });
+      toast.danger("Choose a valid schedule date and time", { timeout: 3000 });
+      return;
+    }
 
     try {
-      const parsed = fromLocalInputValue(scheduleLocal);
-      const scheduledFor: number | undefined =
-        mode === "now" ? Date.now() : parsed === null ? undefined : parsed;
-
-      if (mode === "schedule" && scheduledFor == null) {
-        throw new Error("Choose a valid schedule date and time");
-      }
-
       const targets = [...selectedAccountIds].map((connectedAccountId) => {
         const options = targetOptions[connectedAccountId];
         const account = activeAccounts.find(
@@ -453,7 +570,7 @@ function PostComposerForm({
 
       if (mode === "draft") {
         toast.success("Draft saved.", { timeout: 3000 });
-        setSaving(null);
+        dispatch({ type: "savingChanged", value: null });
         return;
       }
 
@@ -467,7 +584,7 @@ function PostComposerForm({
       toast.danger(err instanceof Error ? err.message : "Could not save post", {
         timeout: 3000,
       });
-      setSaving(null);
+      dispatch({ type: "savingChanged", value: null });
     }
   };
 
@@ -635,8 +752,12 @@ function PostComposerForm({
                     <PostMediaUploader
                       kind={postKind}
                       media={media}
-                      onChange={setMedia}
-                      onUploadingChange={setUploadingMedia}
+                      onChange={(value) =>
+                        dispatch({ type: "mediaChanged", value })
+                      }
+                      onUploadingChange={(value) =>
+                        dispatch({ type: "uploadingMediaChanged", value })
+                      }
                     />
                   </div>
                 )}
@@ -650,7 +771,9 @@ function PostComposerForm({
                       variant="secondary"
                       placeholder="Optional calendar label"
                       value={title}
-                      onChange={(e) => setTitle(e.target.value)}
+                      onChange={(e) =>
+                        dispatch({ type: "titleChanged", value: e.target.value })
+                      }
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -674,7 +797,9 @@ function PostComposerForm({
                       variant="secondary"
                       placeholder="What do you want to share?"
                       value={body}
-                      onChange={(e) => setBody(e.target.value)}
+                      onChange={(e) =>
+                        dispatch({ type: "bodyChanged", value: e.target.value })
+                      }
                       className="min-h-36"
                     />
                   </div>
@@ -695,9 +820,10 @@ function PostComposerForm({
                   size="sm"
                   variant={activeTool === "account" ? "primary" : "tertiary"}
                   onPress={() =>
-                    setActiveTool((current) =>
-                      current === "account" ? null : "account",
-                    )
+                    dispatch({
+                      type: "toolChanged",
+                      value: activeTool === "account" ? null : "account",
+                    })
                   }
                 >
                   <Icon icon="hugeicons:layers-01" width={15} />
@@ -707,9 +833,10 @@ function PostComposerForm({
                   size="sm"
                   variant={activeTool === "history" ? "primary" : "tertiary"}
                   onPress={() =>
-                    setActiveTool((current) =>
-                      current === "history" ? null : "history",
-                    )
+                    dispatch({
+                      type: "toolChanged",
+                      value: activeTool === "history" ? null : "history",
+                    })
                   }
                 >
                   <Icon icon="hugeicons:clock-01" width={15} />
@@ -718,7 +845,7 @@ function PostComposerForm({
                 <Button
                   size="sm"
                   variant="tertiary"
-                  onPress={() => setShowNotes((value) => !value)}
+                  onPress={() => dispatch({ type: "notesVisibilityToggled" })}
                 >
                   <Icon
                     icon={
@@ -876,7 +1003,12 @@ function PostComposerForm({
                     variant="secondary"
                     placeholder="Search past captions"
                     value={captionSearch}
-                    onChange={(event) => setCaptionSearch(event.target.value)}
+                    onChange={(event) =>
+                      dispatch({
+                        type: "captionSearchChanged",
+                        value: event.target.value,
+                      })
+                    }
                   />
                   {recentCaptions === undefined ? (
                     <div className="space-y-2 py-2">
@@ -895,8 +1027,8 @@ function PostComposerForm({
                           key={caption}
                           variant="tertiary"
                           onPress={() => {
-                            setBody(caption);
-                            setActiveTool(null);
+                            dispatch({ type: "bodyChanged", value: caption });
+                            dispatch({ type: "toolChanged", value: null });
                           }}
                           className="h-auto w-full justify-start rounded-xl border border-border bg-surface px-3 py-2 text-left text-sm leading-relaxed hover:border-accent/40"
                         >
@@ -917,7 +1049,9 @@ function PostComposerForm({
                     variant="secondary"
                     placeholder="Team reminders — not posted publicly"
                     value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    onChange={(e) =>
+                      dispatch({ type: "notesChanged", value: e.target.value })
+                    }
                   />
                 </div>
               )}
@@ -968,7 +1102,10 @@ function PostComposerForm({
                 className="w-full"
                 selectedKey={scheduleMode}
                 onSelectionChange={(key) =>
-                  setScheduleMode(key as "now" | "schedule")
+                  dispatch({
+                    type: "scheduleModeChanged",
+                    value: key as "now" | "schedule",
+                  })
                 }
               >
                 <Tabs.ListContainer className="w-full">
@@ -1089,16 +1226,20 @@ function PostComposerForm({
                             const date = new Date();
                             date.setDate(date.getDate() + 1);
                             date.setHours(9, 0, 0, 0);
-                            setScheduleLocal(toLocalInputValue(date.getTime()));
+                            dispatch({
+                              type: "scheduleLocalChanged",
+                              value: toLocalInputValue(date.getTime()),
+                            });
                             return;
                           }
                           const offset =
                             chip.kind === "1h"
                               ? 60 * 60 * 1000
                               : 7 * 24 * 60 * 60 * 1000;
-                          setScheduleLocal(
-                            toLocalInputValue(Date.now() + offset),
-                          );
+                          dispatch({
+                            type: "scheduleLocalChanged",
+                            value: toLocalInputValue(Date.now() + offset),
+                          });
                         }}
                       >
                         {chip.label}

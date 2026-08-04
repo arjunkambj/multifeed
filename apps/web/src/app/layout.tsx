@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "../styles/globals.css";
 import Providers from "@/components/Providers";
 import { HexclaveProvider, HexclaveTheme } from "@hexclave/next";
-import { hexclaveServerApp } from "@/hexclave/server";
+import { hexclaveClientApp } from "@/hexclave/client";
 import { Bricolage_Grotesque, Inter, Figtree } from "next/font/google";
 import { clientEnv } from "@/env";
 
@@ -56,7 +56,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="font-sans">
-        <HexclaveProvider app={hexclaveServerApp}>
+        <HexclaveProvider app={hexclaveClientApp}>
           <HexclaveTheme>
             <Providers>{children}</Providers>
           </HexclaveTheme>

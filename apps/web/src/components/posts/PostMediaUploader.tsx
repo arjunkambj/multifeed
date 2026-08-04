@@ -45,6 +45,15 @@ type PendingMedia = {
   progress: number;
 };
 
+function readPreviewUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error ?? new Error("Could not preview file"));
+    reader.readAsDataURL(file);
+  });
+}
+
 const mediaMetadata = (file: File, previewUrl: string) =>
   new Promise<MediaMeta>((resolve) => {
     if (file.type.startsWith("image/")) {
@@ -167,6 +176,8 @@ export function PostMediaUploader({
   onChange,
   onUploadingChange,
 }: Props) {
+  "use no memo";
+
   const inputRef = useRef<HTMLInputElement>(null);
   const uploadFile = useUploadFile(api.media.r2);
   const confirmMediaUpload = useMutation(api.media.r2.confirmMediaUpload);
@@ -197,7 +208,7 @@ export function PostMediaUploader({
     throw new Error(`Timed out while processing ${file.name}`);
   };
 
-  const uploadFiles = async (files: File[]) => {
+  const uploadFiles = (files: File[]) => {
     const room = maxFiles - media.length;
     const selectedFiles = files.slice(0, room);
     if (files.length > room) {
@@ -213,120 +224,141 @@ export function PostMediaUploader({
     const uploaded: ComposerMedia[] = [];
     let pendingUploads: PendingMedia[] = [];
 
-    try {
-      for (const file of selectedFiles) {
-        if (file.size > MAX_UPLOAD_BYTES) {
-          throw new Error(`${file.name} is larger than 100 MB`);
-        }
-        const isAllowed =
-          (kind === "image" && file.type.startsWith("image/")) ||
-          (kind === "video" && file.type.startsWith("video/")) ||
-          (kind === "story" &&
-            (file.type.startsWith("image/") || file.type.startsWith("video/")));
-        if (!isAllowed)
-          throw new Error(`${file.name} is not valid for this format`);
-      }
-
-      pendingUploads = selectedFiles.map((file, index) => ({
-        id: `${file.name}-${file.lastModified}-${index}`,
-        file,
-        previewUrl: URL.createObjectURL(file),
-        progress: 0,
-      }));
-      setPendingMedia(pendingUploads);
-
-      for (const pending of pendingUploads) {
-        const { file, id, previewUrl } = pending;
-        const details = await mediaMetadata(file, previewUrl);
-        let key: string;
-        try {
-          key = await uploadFile(file, {
-            onProgress: ({ loaded, total }) => {
-              const progress =
-                total > 0 ? Math.round((loaded / total) * 100) : 0;
-              setPendingMedia((current) =>
-                current.map((item) =>
-                  item.id === id ? { ...item, progress } : item,
-                ),
-              );
-            },
-          });
-        } catch (caught) {
-          throw uploadTransportError(file, caught);
-        }
-        const mediaAssetId = await confirmUpload(key, file, details);
-        uploaded.push({
-          _id: mediaAssetId,
-          filename: file.name,
-          mimeType: file.type,
-          kind: file.type.startsWith("image/") ? "image" : "video",
-          sizeBytes: file.size,
-          previewUrl,
-          ...details,
-        });
-      setPendingMedia((current) =>
-        current.map((item) =>
-          item.id === id ? { ...item, progress: 100 } : item,
-        ),
-      );
-    }
-    for (const pending of pendingUploads) {
-      URL.revokeObjectURL(pending.previewUrl);
-    }
-    onChange([...media, ...uploaded]);
-    setPendingMedia([]);
-    toast.success(
-        `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`,
-        { timeout: 3000 },
-      );
-    } catch (caught) {
-    const completedPreviewUrls = new Set(
-      uploaded.flatMap((asset) =>
-        asset.previewUrl ? [asset.previewUrl] : [],
-      ),
-    );
-    for (const asset of pendingUploads) {
-      if (!completedPreviewUrls.has(asset.previewUrl)) {
-        URL.revokeObjectURL(asset.previewUrl);
-      }
-    }
-    if (uploaded.length > 0) {
-      onChange([...media, ...uploaded]);
-    }
+    const finishUpload = (caught: unknown) => {
+      if (uploaded.length > 0) onChange([...media, ...uploaded]);
       setPendingMedia([]);
       toast.danger(
         caught instanceof Error ? caught.message : "Media upload failed",
         { timeout: 6000 },
       );
-    } finally {
       setUploading(false);
       onUploadingChange?.(false);
       if (inputRef.current) inputRef.current.value = "";
+    };
+
+    for (const file of selectedFiles) {
+      if (file.size > MAX_UPLOAD_BYTES) {
+        finishUpload(new Error(`${file.name} is larger than 100 MB`));
+        return;
+      }
+      const isAllowed =
+        (kind === "image" && file.type.startsWith("image/")) ||
+        (kind === "video" && file.type.startsWith("video/")) ||
+        (kind === "story" &&
+          (file.type.startsWith("image/") || file.type.startsWith("video/")));
+      if (!isAllowed) {
+        finishUpload(new Error(`${file.name} is not valid for this format`));
+        return;
+      }
     }
+
+    void (async () => {
+      try {
+        pendingUploads = await Promise.all(
+          selectedFiles.map(async (file, index) => ({
+            id: `${file.name}-${file.lastModified}-${index}`,
+            file,
+            previewUrl: await readPreviewUrl(file),
+            progress: 0,
+          })),
+        );
+        setPendingMedia(pendingUploads);
+      } catch (caught) {
+        finishUpload(caught);
+        return;
+      }
+
+      const uploadPending = (pending: PendingMedia) => {
+        const { file, id, previewUrl } = pending;
+        return mediaMetadata(file, previewUrl)
+          .then((details) =>
+            uploadFile(file, {
+              onProgress: ({ loaded, total }) => {
+                const progress =
+                  total > 0 ? Math.round((loaded / total) * 100) : 0;
+                setPendingMedia((current) =>
+                  current.map((item) =>
+                    item.id === id ? { ...item, progress } : item,
+                  ),
+                );
+              },
+            })
+              .catch((caught) =>
+                Promise.reject(uploadTransportError(file, caught)),
+              )
+              .then((key) => confirmUpload(key, file, details))
+              .then((mediaAssetId) => ({
+                _id: mediaAssetId,
+                filename: file.name,
+                mimeType: file.type,
+                kind: (file.type.startsWith("image/") ? "image" : "video") as
+                  | "image"
+                  | "video",
+                sizeBytes: file.size,
+                previewUrl,
+                ...details,
+              })),
+          )
+          .then((asset) => {
+            setPendingMedia((current) =>
+              current.map((item) =>
+                item.id === id ? { ...item, progress: 100 } : item,
+              ),
+            );
+            return asset;
+          });
+      };
+
+      const uploadSequence = pendingUploads.reduce<Promise<void>>(
+        (chain, pending) =>
+          chain.then(() =>
+            uploadPending(pending).then((asset) => {
+              uploaded.push(asset);
+            }),
+          ),
+        Promise.resolve(),
+      );
+
+      void uploadSequence
+        .then(() => {
+          onChange([...media, ...uploaded]);
+          setPendingMedia([]);
+          toast.success(
+            `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`,
+            { timeout: 3000 },
+          );
+        })
+        .catch(finishUpload)
+        .finally(() => {
+          setUploading(false);
+          onUploadingChange?.(false);
+          if (inputRef.current) inputRef.current.value = "";
+        });
+    })();
   };
 
-  const removeMedia = async (asset: ComposerMedia) => {
+  const removeMedia = (asset: ComposerMedia) => {
     if (deletingMediaId !== null) return;
     setDeletingMediaId(asset._id);
-    try {
-      await deleteMedia({ mediaAssetId: asset._id });
-      if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
-      onChange(media.filter((item) => item._id !== asset._id));
-      toast.success("Media deleted from storage.", { timeout: 3000 });
-    } catch (caught) {
-      toast.danger(
-        caught instanceof Error ? caught.message : "Could not delete media",
-        { timeout: 6000 },
-      );
-    } finally {
-      setDeletingMediaId(null);
-    }
+    void deleteMedia({ mediaAssetId: asset._id })
+      .then(() => {
+        onChange(media.filter((item) => item._id !== asset._id));
+        toast.success("Media deleted from storage.", { timeout: 3000 });
+      })
+      .catch((caught) => {
+        toast.danger(
+          caught instanceof Error ? caught.message : "Could not delete media",
+          { timeout: 6000 },
+        );
+      })
+      .finally(() => setDeletingMediaId(null));
   };
 
   return (
     <div className="flex flex-col gap-3">
       <input
         ref={inputRef}
+        aria-label="Select media files"
         className="sr-only"
         type="file"
         accept={acceptedMedia(kind)}

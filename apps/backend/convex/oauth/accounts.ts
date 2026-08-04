@@ -8,7 +8,8 @@ import {
   type QueryCtx,
 } from "../_generated/server";
 import { internal } from "../_generated/api";
-import { entitlementsForTeam } from "../billing";
+import { entitlementsForTeam, entitlementValidator } from "../billing";
+import { fail } from "../errors";
 import { requireUser } from "../hexclave/auth";
 import {
   capability,
@@ -20,6 +21,7 @@ import { assertCanConnect } from "./limits";
 import { requireOAuthServer } from "./server";
 
 const MAX_ACCOUNTS_PER_CONNECTION = 100;
+const MAX_ACCOUNTS_PER_TEAM = 100;
 const CLEANUP_BATCH_SIZE = 200;
 const DISCONNECTABLE_TARGET_STATUSES = [
   "draft",
@@ -27,6 +29,20 @@ const DISCONNECTABLE_TARGET_STATUSES = [
   "publishing",
   "failed",
 ] as const;
+
+async function serializeTeamAccountWrites(ctx: MutationCtx, teamId: string) {
+  const scope = `oauth:accounts:${teamId}`;
+  const guard = await ctx.db
+    .query("writeGuards")
+    .withIndex("by_scope", (q) => q.eq("scope", scope))
+    .unique();
+  const now = Date.now();
+  if (guard) {
+    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
+  } else {
+    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
+  }
+}
 
 export const publicAccountValidator = v.object({
   _id: v.id("connectedAccounts"),
@@ -54,18 +70,6 @@ export const publicAccountValidator = v.object({
   connectedByUserId: v.string(),
   createdAt: v.number(),
   updatedAt: v.number(),
-});
-
-const entitlementValidator = v.object({
-  planKey: v.union(
-    v.literal("creator"),
-    v.literal("growth"),
-    v.literal("agency"),
-    v.null(),
-  ),
-  hasActivePlan: v.boolean(),
-  connectedAccountLimit: v.number(),
-  teamSeatLimit: v.number(),
 });
 
 const accountInput = v.object({
@@ -110,11 +114,11 @@ export async function listAccountsForTeam(
         .withIndex("by_team_provider", (q) =>
           q.eq("teamId", teamId).eq("platform", selectedPlatform),
         )
-        .collect()
+        .take(MAX_ACCOUNTS_PER_TEAM)
     : await ctx.db
         .query("connectedAccounts")
         .withIndex("by_team_provider", (q) => q.eq("teamId", teamId))
-        .collect();
+        .take(MAX_ACCOUNTS_PER_TEAM);
 
   return rows.map(stripSecrets);
 }
@@ -218,12 +222,14 @@ export const saveMany = mutation({
   handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
+    await serializeTeamAccountWrites(ctx, user.selectedTeamId);
 
     if (
       args.accounts.length === 0 ||
       args.accounts.length > MAX_ACCOUNTS_PER_CONNECTION
     ) {
-      throw new Error(
+      fail(
+        "INVALID_INPUT",
         `A connection must contain between 1 and ${MAX_ACCOUNTS_PER_CONNECTION} accounts`,
       );
     }
@@ -232,7 +238,7 @@ export const saveMany = mutation({
       ({ platform, providerAccountId }) => `${platform}:${providerAccountId}`,
     );
     if (new Set(identities).size !== identities.length) {
-      throw new Error("A connection cannot contain duplicate accounts");
+      fail("INVALID_INPUT", "A connection cannot contain duplicate accounts");
     }
 
     const accountStates = await Promise.all(
@@ -250,9 +256,11 @@ export const saveMany = mutation({
       })),
     );
 
-    const additionalAccountCount = accountStates.filter(
-      ({ existing }) => existing === null || existing.status === "revoked",
-    ).length;
+    const additionalAccountCount = accountStates.reduce(
+      (count, { existing }) =>
+        count + (existing === null || existing.status === "revoked" ? 1 : 0),
+      0,
+    );
     if (additionalAccountCount > 0) {
       await assertCanConnect(ctx, user.selectedTeamId, additionalAccountCount);
     }
@@ -298,9 +306,10 @@ export const disconnect = mutation({
   returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
+    await serializeTeamAccountWrites(ctx, user.selectedTeamId);
     const account = await ctx.db.get("connectedAccounts", args.accountId);
     if (!account || account.teamId !== user.selectedTeamId) {
-      throw new Error("Account not found");
+      fail("NOT_FOUND", "Account not found");
     }
 
     await ctx.db.patch("connectedAccounts", args.accountId, {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Chip, Input, Tabs, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
@@ -71,7 +71,7 @@ export function PostLibrary({
   const [deleting, setDeleting] = useState<string | null>(null);
   const copy = PAGE_COPY[filter];
 
-  const visiblePosts = useMemo(() => {
+  const visiblePosts = (() => {
     const query = search.trim().toLowerCase();
     if (!query) return posts;
     return posts.filter((post) =>
@@ -87,22 +87,20 @@ export function PostLibrary({
         .filter(Boolean)
         .some((value) => value!.toLowerCase().includes(query)),
     );
-  }, [posts, search]);
+  })();
 
-  const onDelete = async (postId: string) => {
+  const onDelete = (postId: string) => {
     if (!window.confirm("Delete this post permanently?")) return;
     setDeleting(postId);
-    try {
-      await removePost({ postId: postId as Id<"posts"> });
-      toast.success("Post deleted.", { timeout: 3000 });
-    } catch (error) {
-      toast.danger(
-        error instanceof Error ? error.message : "Could not delete post",
-        { timeout: 3000 },
-      );
-    } finally {
-      setDeleting(null);
-    }
+    void removePost({ postId: postId as Id<"posts"> })
+      .then(() => toast.success("Post deleted.", { timeout: 3000 }))
+      .catch((error) => {
+        toast.danger(
+          error instanceof Error ? error.message : "Could not delete post",
+          { timeout: 3000 },
+        );
+      })
+      .finally(() => setDeleting(null));
   };
 
   return (
@@ -260,22 +258,25 @@ export function PostLibrary({
                   {post.status === "published" &&
                     post.targets.some((target) => target.platformPermalink) && (
                       <div className="mt-3 flex flex-wrap gap-2">
-                        {post.targets.reduce<React.ReactNode[]>((acc, target) => {
-                          if (target.platformPermalink) {
-                            acc.push(
-                              <a
-                                key={target.targetId}
-                                href={target.platformPermalink}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-xs font-medium text-accent hover:underline"
-                              >
-                                Open on {platformLabel(target.platform)}
-                              </a>,
-                            );
-                          }
-                          return acc;
-                        }, [])}
+                        {post.targets.reduce<React.ReactNode[]>(
+                          (acc, target) => {
+                            if (target.platformPermalink) {
+                              acc.push(
+                                <a
+                                  key={target.targetId}
+                                  href={target.platformPermalink}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-xs font-medium text-accent hover:underline"
+                                >
+                                  Open on {platformLabel(target.platform)}
+                                </a>,
+                              );
+                            }
+                            return acc;
+                          },
+                          [],
+                        )}
                       </div>
                     )}
                 </div>

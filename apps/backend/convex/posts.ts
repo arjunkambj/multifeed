@@ -7,6 +7,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { requireUser } from "./hexclave/auth";
+import { fail } from "./errors";
 import { listAccountsForTeam } from "./oauth/accounts";
 import { platform as platformValidator, platformSettings, postKind, postStatus } from "./schema";
 import { publicAccountValidator } from "./oauth/accounts";
@@ -83,6 +84,7 @@ const CALENDAR_COLORS = [
   "#059669",
 ];
 const MAX_TARGETS_PER_POST = 100;
+const MAX_MEDIA_ASSETS_PER_POST = 10;
 const OVERVIEW_TARGET_STATUSES = ["published", "failed"] as const;
 
 const POST_KIND_PLATFORMS = {
@@ -111,9 +113,27 @@ async function loadTargets(ctx: QueryCtx | MutationCtx, postId: Id<"posts">) {
     .take(MAX_TARGETS_PER_POST + 1);
 
   if (targets.length > MAX_TARGETS_PER_POST) {
-    throw new Error(`Post exceeds the ${MAX_TARGETS_PER_POST} target limit`);
+    fail("INVALID_INPUT", `Post exceeds the ${MAX_TARGETS_PER_POST} target limit`);
   }
   return targets;
+}
+
+async function loadMediaAssetIds(
+  ctx: QueryCtx | MutationCtx,
+  postId: Id<"posts">,
+) {
+  const links = await ctx.db
+    .query("postMediaAssets")
+    .withIndex("by_post_position", (q) => q.eq("postId", postId))
+    .take(MAX_MEDIA_ASSETS_PER_POST + 1);
+
+  if (links.length > MAX_MEDIA_ASSETS_PER_POST) {
+    fail(
+      "INVALID_INPUT",
+      `Post exceeds the ${MAX_MEDIA_ASSETS_PER_POST} media asset limit`,
+    );
+  }
+  return links.map((link) => link.mediaAssetId);
 }
 
 async function assertMediaOwnedByTeam(
@@ -122,19 +142,50 @@ async function assertMediaOwnedByTeam(
   mediaAssetIds: Id<"mediaAssets">[] | undefined,
 ) {
   if (!mediaAssetIds?.length) return [];
+  if (mediaAssetIds.length > MAX_MEDIA_ASSETS_PER_POST) {
+    fail(
+      "INVALID_INPUT",
+      `Posts support up to ${MAX_MEDIA_ASSETS_PER_POST} media assets`,
+    );
+  }
   if (new Set(mediaAssetIds).size !== mediaAssetIds.length) {
-    throw new Error("A media file can only be attached once per post");
+    fail("INVALID_INPUT", "A media file can only be attached once per post");
   }
   const assets = await Promise.all(mediaAssetIds.map((id) => ctx.db.get("mediaAssets", id)));
   return assets.map((asset) => {
     if (!asset || asset.teamId !== teamId) {
-      throw new Error("Invalid media asset");
+      fail("NOT_FOUND", "Invalid media asset");
     }
     if (asset.status !== "ready") {
-      throw new Error("Media asset is not ready");
+      fail("CONFLICT", "Media asset is not ready");
     }
     return asset;
   });
+}
+
+async function replaceMediaAssets(
+  ctx: MutationCtx,
+  postId: Id<"posts">,
+  mediaAssetIds: Id<"mediaAssets">[],
+) {
+  const existing = await ctx.db
+    .query("postMediaAssets")
+    .withIndex("by_post_position", (q) => q.eq("postId", postId))
+    .take(MAX_MEDIA_ASSETS_PER_POST + 1);
+
+  if (existing.length > MAX_MEDIA_ASSETS_PER_POST) {
+    fail(
+      "INVALID_INPUT",
+      `Post exceeds the ${MAX_MEDIA_ASSETS_PER_POST} media asset limit`,
+    );
+  }
+
+  await Promise.all([
+    ...existing.map((link) => ctx.db.delete("postMediaAssets", link._id)),
+    ...mediaAssetIds.map((mediaAssetId, position) =>
+      ctx.db.insert("postMediaAssets", { postId, mediaAssetId, position }),
+    ),
+  ]);
 }
 
 function validateMediaForKind(
@@ -142,28 +193,29 @@ function validateMediaForKind(
   assets: Doc<"mediaAssets">[],
 ) {
   if (kind === "text") {
-    if (assets.length > 0) throw new Error("Text posts cannot include media");
+    if (assets.length > 0) fail("INVALID_INPUT", "Text posts cannot include media");
     return;
   }
-  if (assets.length === 0) throw new Error(`Add media for this ${kind} post`);
+  if (assets.length === 0) fail("INVALID_INPUT", `Add media for this ${kind} post`);
 
   if (kind === "image") {
     if (assets.length > 10 || assets.some((asset) => asset.kind !== "image")) {
-      throw new Error("Image posts support up to 10 images");
+      fail("INVALID_INPUT", "Image posts support up to 10 images");
     }
     return;
   }
 
   if (assets.length !== 1) {
-    throw new Error(
+    fail(
+      "INVALID_INPUT",
       `${kind === "story" ? "Stories" : "Videos"} need one media file`,
     );
   }
   if (kind === "video" && assets[0]?.kind !== "video") {
-    throw new Error("Video posts need a video file");
+    fail("INVALID_INPUT", "Video posts need a video file");
   }
   if (kind === "story" && !["image", "video"].includes(assets[0]!.kind)) {
-    throw new Error("Stories need an image or video");
+    fail("INVALID_INPUT", "Stories need an image or video");
   }
 }
 
@@ -211,13 +263,13 @@ async function replaceTargets(
   },
 ) {
   if (input.targets.length > MAX_TARGETS_PER_POST) {
-    throw new Error(`Posts support up to ${MAX_TARGETS_PER_POST} targets`);
+    fail("INVALID_INPUT", `Posts support up to ${MAX_TARGETS_PER_POST} targets`);
   }
   if (
     new Set(input.targets.map((target) => target.connectedAccountId)).size !==
     input.targets.length
   ) {
-    throw new Error("A connected account can only be targeted once per post");
+    fail("INVALID_INPUT", "A connected account can only be targeted once per post");
   }
 
   const [existing, accounts] = await Promise.all([
@@ -230,15 +282,17 @@ async function replaceTargets(
     const account = accounts[index];
 
     if (!account || account.teamId !== input.teamId) {
-      throw new Error("Invalid connected account");
+      fail("NOT_FOUND", "Invalid connected account");
     }
     if (account.status !== "active") {
-      throw new Error(
+      fail(
+        "CONFLICT",
         `Account @${account.username} is ${account.status}. Reconnect it first.`,
       );
     }
     if (!accountSupportsKind(account, input.kind, input.mediaAssets)) {
-      throw new Error(
+      fail(
+        "CONFLICT",
         `${account.username} does not support this ${input.kind} post`,
       );
     }
@@ -276,9 +330,10 @@ function targetStatusFromPost(
 }
 
 async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
-  const targetsByPost = await Promise.all(
-    posts.map((post) => loadTargets(ctx, post._id)),
-  );
+  const [targetsByPost, mediaIdsByPost] = await Promise.all([
+    Promise.all(posts.map((post) => loadTargets(ctx, post._id))),
+    Promise.all(posts.map((post) => loadMediaAssetIds(ctx, post._id))),
+  ]);
   const accountIds = [
     ...new Set(
       targetsByPost.flatMap((targets) =>
@@ -286,7 +341,7 @@ async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
       ),
     ),
   ];
-  const mediaIds = [...new Set(posts.flatMap((post) => post.mediaAssetIds))];
+  const mediaIds = [...new Set(mediaIdsByPost.flat())];
   const [accounts, mediaAssets] = await Promise.all([
     Promise.all(accountIds.map((id) => ctx.db.get("connectedAccounts", id))),
     Promise.all(mediaIds.map((id) => ctx.db.get("mediaAssets", id))),
@@ -300,6 +355,7 @@ async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
 
   return posts.map((post, index) => ({
     ...post,
+    mediaAssetIds: mediaIdsByPost[index] ?? [],
     targets: (targetsByPost[index] ?? []).map((target) => {
       const account = accountsById.get(target.connectedAccountId);
       return {
@@ -320,7 +376,7 @@ async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
         avatarUrl: account?.avatarUrl,
       };
     }),
-    mediaAssets: post.mediaAssetIds.flatMap((id) => {
+    mediaAssets: (mediaIdsByPost[index] ?? []).flatMap((id) => {
       const asset = mediaById.get(id);
       return asset ? [asset] : [];
     }),
@@ -359,7 +415,7 @@ export const create = mutation({
     const now = Date.now();
 
     if (args.kind === "text" && !args.body.trim()) {
-      throw new Error("Add text before saving");
+      fail("INVALID_INPUT", "Add text before saving");
     }
 
     const mediaAssets = await assertMediaOwnedByTeam(
@@ -378,21 +434,22 @@ export const create = mutation({
       scheduledFor = now;
     } else if (args.status === "scheduled") {
       if (!scheduledFor) {
-        throw new Error("Pick a date and time to schedule");
+        fail("INVALID_INPUT", "Pick a date and time to schedule");
       }
       if (scheduledFor < now - 60_000) {
-        throw new Error("Scheduled time must be in the future");
+        fail("INVALID_INPUT", "Scheduled time must be in the future");
       }
     }
 
     if (status !== "draft" && args.targets.length === 0) {
-      throw new Error("Select at least one account");
+      fail("INVALID_INPUT", "Select at least one account");
     }
 
     if (status !== "draft" && scheduledFor == null) {
       scheduledFor = now;
     }
 
+    const mediaAssetIds = args.mediaAssetIds ?? [];
     const postId = await ctx.db.insert("posts", {
       teamId: user.selectedTeamId,
       createdByUserId: user.id,
@@ -403,11 +460,12 @@ export const create = mutation({
       status,
       scheduledFor: status === "draft" ? args.scheduledFor : scheduledFor,
       timezone: args.timezone,
-      mediaAssetIds: args.mediaAssetIds ?? [],
       calendarColor: args.calendarColor ?? colorForIndex(now % 8),
       createdAt: now,
       updatedAt: now,
     });
+
+    await replaceMediaAssets(ctx, postId, mediaAssetIds);
 
     if (args.targets.length > 0) {
       await replaceTargets(ctx, {
@@ -445,18 +503,19 @@ export const update = mutation({
     const user = await requireUser(ctx);
     const post = await ctx.db.get("posts", args.postId);
     if (!post || post.teamId !== user.selectedTeamId) {
-      throw new Error("Post not found");
+      fail("NOT_FOUND", "Post not found");
     }
     if (
       post.status === "publishing" ||
       post.status === "published" ||
       post.status === "archived"
     ) {
-      throw new Error("This post can no longer be edited");
+      fail("CONFLICT", "This post can no longer be edited");
     }
 
     const kind = args.kind ?? post.kind;
-    const mediaAssetIds = args.mediaAssetIds ?? post.mediaAssetIds;
+    const mediaAssetIds =
+      args.mediaAssetIds ?? (await loadMediaAssetIds(ctx, args.postId));
     const mediaAssets = await assertMediaOwnedByTeam(
       ctx,
       user.selectedTeamId,
@@ -465,7 +524,7 @@ export const update = mutation({
     validateMediaForKind(kind, mediaAssets);
     const body = args.body ?? post.body;
     if (kind === "text" && !body.trim()) {
-      throw new Error("Add text before saving");
+      fail("INVALID_INPUT", "Add text before saving");
     }
 
     const now = Date.now();
@@ -478,7 +537,7 @@ export const update = mutation({
     else if (args.scheduledFor !== undefined) scheduledFor = args.scheduledFor;
 
     if (status === "scheduled" && !scheduledFor) {
-      throw new Error("Scheduled posts need a date and time");
+      fail("INVALID_INPUT", "Scheduled posts need a date and time");
     }
 
     if (
@@ -486,7 +545,7 @@ export const update = mutation({
       scheduledFor != null &&
       scheduledFor < now - 60_000
     ) {
-      throw new Error("Scheduled time must be in the future");
+      fail("INVALID_INPUT", "Scheduled time must be in the future");
     }
 
     const storedTargets =
@@ -497,7 +556,7 @@ export const update = mutation({
       status !== "draft" &&
       (args.targets ?? storedTargets ?? []).length === 0
     ) {
-      throw new Error("Select at least one account");
+      fail("INVALID_INPUT", "Select at least one account");
     }
 
     await ctx.db.patch("posts", args.postId, {
@@ -510,11 +569,14 @@ export const update = mutation({
       timezone: args.timezone ?? post.timezone,
       scheduledFor,
       status,
-      mediaAssetIds,
       calendarColor: args.calendarColor ?? post.calendarColor,
       updatedByUserId: user.id,
       updatedAt: now,
     });
+
+    if (args.mediaAssetIds !== undefined) {
+      await replaceMediaAssets(ctx, args.postId, mediaAssetIds);
+    }
 
     const shouldReplaceTargets =
       args.targets !== undefined ||
@@ -573,7 +635,7 @@ export const reschedule = mutation({
     const user = await requireUser(ctx);
     const post = await ctx.db.get("posts", args.postId);
     if (!post || post.teamId !== user.selectedTeamId) {
-      throw new Error("Post not found");
+      fail("NOT_FOUND", "Post not found");
     }
 
     if (
@@ -581,12 +643,12 @@ export const reschedule = mutation({
       post.status === "published" ||
       post.status === "archived"
     ) {
-      throw new Error("This post can no longer be rescheduled");
+      fail("CONFLICT", "This post can no longer be rescheduled");
     }
 
     const now = Date.now();
     if (args.scheduledFor < now - 60_000) {
-      throw new Error("Scheduled time must be in the future");
+      fail("INVALID_INPUT", "Scheduled time must be in the future");
     }
 
     const status = "scheduled" as const;
@@ -599,17 +661,18 @@ export const reschedule = mutation({
     });
 
     const targets = await loadTargets(ctx, args.postId);
-    await Promise.all(
-      targets
-        .filter((target) => target.status !== "published")
-        .map((target) =>
-          ctx.db.patch("postTargets", target._id, {
-            scheduledFor: args.scheduledFor,
-            status: "scheduled",
-            updatedAt: now,
-          }),
-        ),
-    );
+    const targetUpdates = [];
+    for (const target of targets) {
+      if (target.status === "published") continue;
+      targetUpdates.push(
+        ctx.db.patch("postTargets", target._id, {
+          scheduledFor: args.scheduledFor,
+          status: "scheduled",
+          updatedAt: now,
+        }),
+      );
+    }
+    await Promise.all(targetUpdates);
 
     return { ok: true as const };
   },
@@ -622,10 +685,10 @@ export const remove = mutation({
     const user = await requireUser(ctx);
     const post = await ctx.db.get("posts", args.postId);
     if (!post || post.teamId !== user.selectedTeamId) {
-      throw new Error("Post not found");
+      fail("NOT_FOUND", "Post not found");
     }
     if (post.status === "publishing") {
-      throw new Error("A post being published cannot be deleted");
+      fail("CONFLICT", "A post being published cannot be deleted");
     }
     const targets = await loadTargets(ctx, args.postId);
     const metricSnapshots = await Promise.all(
@@ -637,9 +700,16 @@ export const remove = mutation({
       ),
     );
     if (metricSnapshots.some(Boolean)) {
-      throw new Error("Posts with analytics history cannot be deleted");
+      fail("CONFLICT", "Posts with analytics history cannot be deleted");
     }
     await Promise.all(targets.map((target) => ctx.db.delete("postTargets", target._id)));
+    const mediaLinks = await ctx.db
+      .query("postMediaAssets")
+      .withIndex("by_post_position", (q) => q.eq("postId", args.postId))
+      .take(MAX_MEDIA_ASSETS_PER_POST + 1);
+    await Promise.all(
+      mediaLinks.map((link) => ctx.db.delete("postMediaAssets", link._id)),
+    );
     await ctx.db.delete("posts", args.postId);
     return { ok: true as const };
   },
@@ -739,10 +809,13 @@ export const listInRange = query({
     startMs: v.number(),
     endMs: v.number(),
   },
-  returns: v.array(enrichedPostValidator),
+  returns: v.object({
+    posts: v.array(enrichedPostValidator),
+    truncated: v.boolean(),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    if (args.endMs < args.startMs) return [];
+    if (args.endMs < args.startMs) return { posts: [], truncated: false };
 
     const visibleStatuses: Doc<"posts">["status"][] = [
       "scheduled",
@@ -761,16 +834,18 @@ export const listInRange = query({
               .gte("scheduledFor", args.startMs)
               .lte("scheduledFor", args.endMs),
           )
-          .take(500),
+          .take(501),
       ),
     );
+
+    const truncated = postsByStatus.some((rows) => rows.length > 500);
 
     const posts = postsByStatus
       .flat()
       .sort((a, b) => (a.scheduledFor ?? 0) - (b.scheduledFor ?? 0))
       .slice(0, 500);
 
-    return await enrichPosts(ctx, posts);
+    return { posts: await enrichPosts(ctx, posts), truncated };
   },
 });
 
@@ -790,11 +865,12 @@ export const overviewMetrics = query({
     engagement: v.number(),
     previousEngagement: v.number(),
     activeChannels: v.number(),
+    truncated: v.boolean(),
   }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     if (args.endMs < args.startMs) {
-      throw new Error("End date must be after start date");
+      fail("INVALID_INPUT", "End date must be after start date");
     }
 
     const durationMs = args.endMs - args.startMs + 1;
@@ -803,8 +879,8 @@ export const overviewMetrics = query({
     const combinedStartMs = previousStartMs;
     const teamId = user.selectedTeamId;
 
-    const [posts, targets, metricSnapshots, activeAccounts] = await Promise.all(
-      [
+    const [posts, targetRows, metricSnapshots, activeAccounts] =
+      await Promise.all([
         ctx.db
           .query("posts")
           .withIndex("by_team_scheduledFor", (q) =>
@@ -813,7 +889,7 @@ export const overviewMetrics = query({
               .gte("scheduledFor", combinedStartMs)
               .lte("scheduledFor", args.endMs),
           )
-          .take(2_000),
+          .take(2_001),
         Promise.all(
           OVERVIEW_TARGET_STATUSES.map((status) =>
             ctx.db
@@ -825,9 +901,9 @@ export const overviewMetrics = query({
                   .gte("scheduledFor", combinedStartMs)
                   .lte("scheduledFor", args.endMs),
               )
-              .take(5_000),
+              .take(5_001),
           ),
-        ).then((rows) => rows.flat()),
+        ),
         ctx.db
           .query("postMetrics")
           .withIndex("by_team_time", (q) =>
@@ -836,16 +912,16 @@ export const overviewMetrics = query({
               .gte("capturedAt", combinedStartMs)
               .lte("capturedAt", args.endMs),
           )
-          .take(5_000),
+          .take(5_001),
         ctx.db
           .query("connectedAccounts")
           .withIndex("by_team_status", (q) =>
             q.eq("teamId", teamId).eq("status", "active"),
           )
-          .take(250),
-      ],
-    );
+          .take(251),
+      ]);
 
+    const targets = targetRows.flat();
     const inCurrentRange = (timestamp: number | undefined) =>
       timestamp != null && timestamp >= args.startMs && timestamp <= args.endMs;
     const inPreviousRange = (timestamp: number | undefined) =>
@@ -854,26 +930,26 @@ export const overviewMetrics = query({
       timestamp <= previousEndMs;
 
     const summarizePosts = (isInRange: typeof inCurrentRange) => {
-      const rangePosts = posts.filter((post) => isInRange(post.scheduledFor));
-      return {
-        scheduled: rangePosts.filter((post) =>
-          ["scheduled", "publishing"].includes(post.status),
-        ).length,
-        published: rangePosts.filter((post) => post.status === "published")
-          .length,
-      };
+      let scheduled = 0;
+      let published = 0;
+      for (const post of posts) {
+        if (!isInRange(post.scheduledFor)) continue;
+        if (post.status === "scheduled" || post.status === "publishing") {
+          scheduled += 1;
+        }
+        if (post.status === "published") published += 1;
+      }
+      return { scheduled, published };
     };
 
     const summarizeTargets = (isInRange: typeof inCurrentRange) => {
-      const rangeTargets = targets.filter((target) =>
-        isInRange(target.scheduledFor),
-      );
-      const published = rangeTargets.filter(
-        (target) => target.status === "published",
-      ).length;
-      const failed = rangeTargets.filter(
-        (target) => target.status === "failed",
-      ).length;
+      let published = 0;
+      let failed = 0;
+      for (const target of targets) {
+        if (!isInRange(target.scheduledFor)) continue;
+        if (target.status === "published") published += 1;
+        if (target.status === "failed") failed += 1;
+      }
       const completed = published + failed;
       return {
         successRate: completed === 0 ? 0 : (published / completed) * 100,
@@ -903,6 +979,12 @@ export const overviewMetrics = query({
       );
     };
 
+    const truncated =
+      posts.length > 2_000 ||
+      targetRows.some((rows) => rows.length > 5_000) ||
+      metricSnapshots.length > 5_000 ||
+      activeAccounts.length > 250;
+
     const currentPosts = summarizePosts(inCurrentRange);
     const previousPosts = summarizePosts(inPreviousRange);
     const currentTargets = summarizeTargets(inCurrentRange);
@@ -919,6 +1001,7 @@ export const overviewMetrics = query({
       previousEngagement: summarizeEngagement(inPreviousRange),
       activeChannels: new Set(activeAccounts.map((account) => account.platform))
         .size,
+      truncated,
     };
   },
 });

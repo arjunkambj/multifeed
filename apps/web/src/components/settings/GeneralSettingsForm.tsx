@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   Description,
@@ -30,52 +30,37 @@ export function GeneralSettingsForm() {
   );
   const [isSaving, setIsSaving] = useState(false);
 
-  const hasChanges = useMemo(
-    () =>
-      displayName.trim() !== (user.displayName ?? "") ||
-      email.trim() !== (user.primaryEmail ?? "") ||
-      organizationName.trim() !== (organization?.displayName ?? ""),
-    [
-      displayName,
-      email,
-      organization?.displayName,
-      organizationName,
-      user.displayName,
-      user.primaryEmail,
-    ],
-  );
+  const hasChanges =
+    displayName.trim() !== (user.displayName ?? "") ||
+    email.trim() !== (user.primaryEmail ?? "") ||
+    organizationName.trim() !== (organization?.displayName ?? "");
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSaving) return;
     setIsSaving(true);
 
-    try {
-      const updates = [
-        user.update({
-          displayName: cleanOptional(displayName),
-          primaryEmail: cleanOptional(email),
-        }),
-      ];
+    const updates = [
+      user.update({
+        displayName: cleanOptional(displayName),
+        primaryEmail: cleanOptional(email),
+      }),
+    ];
 
-      if (
-        organization &&
-        organizationName.trim() !== organization.displayName
-      ) {
-        updates.push(
-          organization.update({ displayName: organizationName.trim() }),
-        );
-      }
-
-      await Promise.all(updates);
-      toast.success("Changes saved.", { timeout: 3000 });
-    } catch (err) {
-      toast.danger(err instanceof Error ? err.message : String(err), {
-        timeout: 3000,
-      });
-    } finally {
-      setIsSaving(false);
+    if (organization && organizationName.trim() !== organization.displayName) {
+      updates.push(
+        organization.update({ displayName: organizationName.trim() }),
+      );
     }
+
+    void Promise.all(updates)
+      .then(() => toast.success("Changes saved.", { timeout: 3000 }))
+      .catch((err) => {
+        toast.danger(err instanceof Error ? err.message : String(err), {
+          timeout: 3000,
+        });
+      })
+      .finally(() => setIsSaving(false));
   };
 
   return (

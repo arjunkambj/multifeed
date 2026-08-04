@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   keepPreviousData,
   useQuery as usePointInTimeQuery,
@@ -99,10 +99,7 @@ export function OverviewDashboard() {
     getPresetRange("today"),
   );
   const [preset, setPreset] = useState<DateRangePreset | null>("today");
-  const queryRange = useMemo(
-    () => calendarDateRangeToMilliseconds(range),
-    [range],
-  );
+  const queryRange = calendarDateRangeToMilliseconds(range);
   const metricsQuery = usePointInTimeQuery({
     placeholderData: keepPreviousData,
     queryFn: () => convex.query(api.posts.overviewMetrics, queryRange),
@@ -136,11 +133,18 @@ export function OverviewDashboard() {
       {metrics === undefined ? (
         <MetricsSkeleton />
       ) : (
-        <section
-          aria-busy={metricsQuery.isFetching}
-          aria-label="Publishing KPIs"
-          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
-        >
+        <>
+          {metrics.truncated && (
+            <p className="mb-4 text-sm text-warning">
+              This range contains more data than the dashboard can summarize.
+              Narrow the date range for complete metrics.
+            </p>
+          )}
+          <section
+            aria-busy={metricsQuery.isFetching}
+            aria-label="Publishing KPIs"
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
+          >
           <MetricCard
             title="Scheduled posts"
             value={formatNumber(metrics.scheduledPosts)}
@@ -182,7 +186,8 @@ export function OverviewDashboard() {
             value={formatNumber(metrics.activeChannels)}
             icon="hugeicons:share-08"
           />
-        </section>
+          </section>
+        </>
       )}
     </div>
   );

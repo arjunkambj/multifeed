@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Button, Modal, Spinner, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMutation, usePreloadedQuery, type Preloaded } from "convex/react";
@@ -66,61 +66,57 @@ function ConnectionsPageInner({
     window.history.replaceState(null, "", "/connections");
   }, [connected, flashKey, oauthError, router]);
 
-  const byPlatform = useMemo(() => {
-    const map = new Map<string, NonNullable<typeof accounts>>();
-    for (const platform of CONNECTABLE_PLATFORMS) {
-      map.set(platform, []);
-    }
-    for (const account of accounts) {
-      const list = map.get(account.platform) ?? [];
-      list.push(account);
-      map.set(account.platform, list);
-    }
-    return map;
-  }, [accounts]);
+  const byPlatform = new Map<string, NonNullable<typeof accounts>>();
+  for (const platform of CONNECTABLE_PLATFORMS) {
+    byPlatform.set(platform, []);
+  }
+  for (const account of accounts) {
+    const list = byPlatform.get(account.platform) ?? [];
+    list.push(account);
+    byPlatform.set(account.platform, list);
+  }
 
-  const onConnect = async (platform: OAuthPlatform) => {
+  const onConnect = (platform: OAuthPlatform) => {
     setConnecting(platform);
-    try {
-      const response = await fetch("/api/oauth/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform, returnTo: "/connections" }),
+    void fetch("/api/oauth/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ platform, returnTo: "/connections" }),
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Could not start OAuth");
+        const payload = (await response.json()) as {
+          url?: string;
+          error?: string;
+        };
+        if (!payload.url) {
+          throw new Error(payload.error ?? "Could not start OAuth");
+        }
+        window.location.assign(payload.url);
+      })
+      .catch((err) => {
+        setConnecting(null);
+        toast.danger(
+          err instanceof Error ? err.message : "Could not start OAuth",
+          { timeout: 3000 },
+        );
       });
-      if (!response.ok) {
-        throw new Error("Could not start OAuth");
-      }
-      const payload = (await response.json()) as {
-        url?: string;
-        error?: string;
-      };
-      if (!payload.url) {
-        throw new Error(payload.error ?? "Could not start OAuth");
-      }
-      window.location.assign(payload.url);
-    } catch (err) {
-      setConnecting(null);
-      toast.danger(
-        err instanceof Error ? err.message : "Could not start OAuth",
-        { timeout: 3000 },
-      );
-    }
   };
 
-  const onDisconnect = async (accountId: Id<"connectedAccounts">) => {
+  const onDisconnect = (accountId: Id<"connectedAccounts">) => {
     setDisconnecting(accountId);
-    try {
-      await disconnect({ accountId });
-      setAccountToDisconnect(null);
-      toast.success("Account disconnected.", { timeout: 3000 });
-    } catch (err) {
-      toast.danger(
-        err instanceof Error ? err.message : "Could not disconnect account",
-        { timeout: 3000 },
-      );
-    } finally {
-      setDisconnecting(null);
-    }
+    void disconnect({ accountId })
+      .then(() => {
+        setAccountToDisconnect(null);
+        toast.success("Account disconnected.", { timeout: 3000 });
+      })
+      .catch((err) => {
+        toast.danger(
+          err instanceof Error ? err.message : "Could not disconnect account",
+          { timeout: 3000 },
+        );
+      })
+      .finally(() => setDisconnecting(null));
   };
 
   return (

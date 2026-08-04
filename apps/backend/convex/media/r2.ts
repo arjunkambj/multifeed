@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import { mutation, query } from "../_generated/server";
+import { fail } from "../errors";
 import { requireUser } from "../hexclave/auth";
 
 export const r2 = new R2(components.r2);
@@ -51,7 +52,7 @@ export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
       .unique();
     if (existing) {
       if (existing.teamId !== user.selectedTeamId) {
-        throw new Error("Upload key already registered");
+        fail("CONFLICT", "Upload key already registered");
       }
       return;
     }
@@ -97,21 +98,21 @@ export const confirmMediaUpload = mutation({
     const user = await requireUser(ctx);
 
     if (!args.filename.trim() || args.filename.length > 255) {
-      throw new Error("Filename is required");
+      fail("INVALID_INPUT", "Filename is required");
     }
     if (
       !Number.isFinite(args.sizeBytes) ||
       args.sizeBytes < 0 ||
       args.sizeBytes > MAX_UPLOAD_BYTES
     ) {
-      throw new Error("Invalid file size");
+      fail("INVALID_INPUT", "Invalid file size");
     }
     if (args.mimeType.length > 255 || !args.mimeType.includes("/")) {
-      throw new Error("Invalid MIME type");
+      fail("INVALID_INPUT", "Invalid MIME type");
     }
     for (const value of [args.width, args.height, args.durationMs]) {
       if (value !== undefined && (!Number.isFinite(value) || value < 0)) {
-        throw new Error("Invalid media metadata");
+        fail("INVALID_INPUT", "Invalid media metadata");
       }
     }
 
@@ -122,7 +123,7 @@ export const confirmMediaUpload = mutation({
     }
 
     if (meta.size != null && meta.size > MAX_UPLOAD_BYTES) {
-      throw new Error("File exceeds maximum size");
+      fail("INVALID_INPUT", "File exceeds maximum size");
     }
 
     const owned = await ctx.db
@@ -136,7 +137,7 @@ export const confirmMediaUpload = mutation({
     }
 
     if (owned.teamId !== user.selectedTeamId) {
-      throw new Error("Upload not found");
+      fail("NOT_FOUND", "Upload not found");
     }
 
     // Prefer server-side URL from R2; never trust an arbitrary client URL.
@@ -166,20 +167,21 @@ export const deleteMedia = mutation({
     const user = await requireUser(ctx);
     const asset = await ctx.db.get("mediaAssets", args.mediaAssetId);
     if (!asset || asset.teamId !== user.selectedTeamId) {
-      throw new Error("Media not found");
+      fail("NOT_FOUND", "Media not found");
     }
     if (!asset.r2Key) {
-      throw new Error("Media storage key not found");
+      fail("NOT_FOUND", "Media storage key not found");
     }
 
-    const teamPosts = await ctx.db
-      .query("posts")
-      .withIndex("by_team_updated", (q) => q.eq("teamId", user.selectedTeamId))
-      .collect();
-    if (
-      teamPosts.some((post) => post.mediaAssetIds.includes(args.mediaAssetId))
-    ) {
-      throw new Error(
+    const postMediaAsset = await ctx.db
+      .query("postMediaAssets")
+      .withIndex("by_media_asset", (q) =>
+        q.eq("mediaAssetId", args.mediaAssetId),
+      )
+      .first();
+    if (postMediaAsset) {
+      fail(
+        "CONFLICT",
         "Remove this media from its saved post before deleting it",
       );
     }

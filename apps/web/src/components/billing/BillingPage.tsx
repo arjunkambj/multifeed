@@ -57,7 +57,8 @@ export function BillingPage({
 }: {
   preloaded: Preloaded<typeof api.billing.getSubscription>;
 }) {
-  const [billingInterval, setBillingInterval] = useState<BillingInterval>("month");
+  const [billingInterval, setBillingInterval] =
+    useState<BillingInterval>("month");
   const [checkingOut, setCheckingOut] = useState<PlanKey | null>(null);
   const [openingPortal, setOpeningPortal] = useState(false);
   const subscription = usePreloadedQuery(preloaded);
@@ -67,62 +68,56 @@ export function BillingPage({
     : undefined;
   const checkoutBlocked = subscription?.canStartCheckout === false;
 
-  const startCheckout = async (planKey: PlanKey) => {
+  const startCheckout = (planKey: PlanKey) => {
     setCheckingOut(planKey);
 
-    try {
-      const response = await fetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planKey, interval: billingInterval }),
+    void fetch("/api/billing/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ planKey, interval: billingInterval }),
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Could not start checkout");
+        const payload = (await response.json()) as {
+          checkoutUrl?: string;
+          error?: string;
+        };
+        if (!payload.checkoutUrl) {
+          throw new Error(payload.error ?? "Could not start checkout");
+        }
+        window.location.assign(payload.checkoutUrl);
+      })
+      .catch((err) => {
+        setCheckingOut(null);
+        toast.danger(err instanceof Error ? err.message : String(err), {
+          timeout: 3000,
+        });
       });
-      if (!response.ok) {
-        throw new Error("Could not start checkout");
-      }
-      const payload = (await response.json()) as {
-        checkoutUrl?: string;
-        error?: string;
-      };
-
-      if (!payload.checkoutUrl) {
-        throw new Error(payload.error ?? "Could not start checkout");
-      }
-
-      window.location.assign(payload.checkoutUrl);
-    } catch (err) {
-      setCheckingOut(null);
-      toast.danger(err instanceof Error ? err.message : String(err), {
-        timeout: 3000,
-      });
-    }
   };
 
-  const openCustomerPortal = async () => {
+  const openCustomerPortal = () => {
     setOpeningPortal(true);
-    try {
-      const response = await fetch("/api/billing/portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    void fetch("/api/billing/portal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Could not open billing portal");
+        const payload = (await response.json()) as {
+          url?: string;
+          error?: string;
+        };
+        if (!payload.url) {
+          throw new Error(payload.error ?? "Could not open billing portal");
+        }
+        window.location.assign(payload.url);
+      })
+      .catch((err) => {
+        setOpeningPortal(false);
+        toast.danger(err instanceof Error ? err.message : String(err), {
+          timeout: 3000,
+        });
       });
-      if (!response.ok) {
-        throw new Error("Could not open billing portal");
-      }
-      const payload = (await response.json()) as {
-        url?: string;
-        error?: string;
-      };
-
-      if (!payload.url) {
-        throw new Error(payload.error ?? "Could not open billing portal");
-      }
-
-      window.location.assign(payload.url);
-    } catch (err) {
-      setOpeningPortal(false);
-      toast.danger(err instanceof Error ? err.message : String(err), {
-        timeout: 3000,
-      });
-    }
   };
 
   return (
