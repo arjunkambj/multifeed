@@ -7,10 +7,6 @@ export const proxyConfig = {
   matcher: ["/sign-in", "/sign-up"],
 };
 
-export const config = {
-  matcher: ["/sign-in", "/sign-up"],
-};
-
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next();
 

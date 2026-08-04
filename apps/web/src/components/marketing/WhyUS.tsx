@@ -1,5 +1,3 @@
-"use client";
-
 import { buttonVariants } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Image from "next/image";

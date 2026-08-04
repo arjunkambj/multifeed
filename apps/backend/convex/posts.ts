@@ -744,26 +744,31 @@ export const listInRange = query({
     const user = await requireUser(ctx);
     if (args.endMs < args.startMs) return [];
 
-    const rawPosts = await ctx.db
-      .query("posts")
-      .withIndex("by_team_scheduledFor", (q) =>
-        q
-          .eq("teamId", user.selectedTeamId)
-          .gte("scheduledFor", args.startMs)
-          .lte("scheduledFor", args.endMs),
-      )
-      .take(500);
-
-    const visibleStatuses = new Set<Doc<"posts">["status"]>([
+    const visibleStatuses: Doc<"posts">["status"][] = [
       "scheduled",
       "publishing",
       "published",
       "failed",
-    ]);
+    ];
+    const postsByStatus = await Promise.all(
+      visibleStatuses.map((status) =>
+        ctx.db
+          .query("posts")
+          .withIndex("by_team_schedule", (q) =>
+            q
+              .eq("teamId", user.selectedTeamId)
+              .eq("status", status)
+              .gte("scheduledFor", args.startMs)
+              .lte("scheduledFor", args.endMs),
+          )
+          .take(500),
+      ),
+    );
 
-    const posts = rawPosts
-      .filter((post) => visibleStatuses.has(post.status))
-      .sort((a, b) => (a.scheduledFor ?? 0) - (b.scheduledFor ?? 0));
+    const posts = postsByStatus
+      .flat()
+      .sort((a, b) => (a.scheduledFor ?? 0) - (b.scheduledFor ?? 0))
+      .slice(0, 500);
 
     return await enrichPosts(ctx, posts);
   },
