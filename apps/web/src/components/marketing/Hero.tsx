@@ -13,6 +13,7 @@ type MockPost = {
 };
 
 type MockDay = {
+  id: string;
   day: number;
   muted?: boolean;
   posts?: MockPost[];
@@ -20,7 +21,7 @@ type MockDay = {
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const MOCK_DAYS: MockDay[] = [
+const MOCK_DAYS: MockDay[] = ([
   { day: 28, muted: true },
   { day: 29, muted: true },
   { day: 30, muted: true },
@@ -92,7 +93,7 @@ const MOCK_DAYS: MockDay[] = [
   { day: 6, muted: true },
   { day: 7, muted: true },
   { day: 8, muted: true },
-];
+] as Omit<MockDay, "id">[]).map((d, i) => ({ ...d, id: `mock-day-${i + 1}-${d.day}` }));
 
 const PLATFORM_STYLES: Record<
   MockPost["platform"],
@@ -225,10 +226,10 @@ function CalendarMockup() {
                 {weekday}
               </div>
             ))}
-            {MOCK_DAYS.map((date, index) => (
+            {MOCK_DAYS.map((date) => (
               <div
                 className="min-w-0 overflow-hidden border-b border-r border-border/70 p-1.5 [&:nth-last-child(-n+7)]:border-b-0 [&:nth-child(7n)]:border-r-0 sm:p-2"
-                key={`${date.day}-${index}`}
+                key={date.id}
               >
                 <div className="mb-1 flex justify-end">
                   <span

@@ -98,9 +98,12 @@ export async function metaExchangeCode(input: {
   return {
     accessToken: longData.access_token,
     expiresAt,
-    scopes: (permissionsData.data ?? [])
-      .filter(({ status }) => status === "granted")
-      .flatMap(({ permission }) => (permission ? [permission] : [])),
+    scopes: (permissionsData.data ?? []).reduce<string[]>((acc, p) => {
+      if (p.status === "granted" && p.permission) {
+        acc.push(p.permission);
+      }
+      return acc;
+    }, []),
     tokenType: "user",
   };
 }
@@ -180,37 +183,42 @@ export async function metaListPages(
 }
 
 export function pagesToFacebookOptions(pages: MetaPage[]): AccountOption[] {
-  return pages
-    .filter(
-      (page) =>
-        Boolean(page.access_token) &&
-        (!page.tasks ||
-          page.tasks.includes("CREATE_CONTENT") ||
-          page.tasks.includes("MANAGE")),
-    )
-    .map((page) => ({
-      id: page.id,
-      label: page.name,
-      username: page.username ?? page.name,
-      avatarUrl: page.picture?.data?.url,
-      metadata: { pageAccessToken: page.access_token, pageId: page.id },
-    }));
+  return pages.reduce<AccountOption[]>((acc, page) => {
+    if (
+      page.access_token &&
+      (!page.tasks ||
+        page.tasks.includes("CREATE_CONTENT") ||
+        page.tasks.includes("MANAGE"))
+    ) {
+      acc.push({
+        id: page.id,
+        label: page.name,
+        username: page.username ?? page.name,
+        avatarUrl: page.picture?.data?.url,
+        metadata: { pageAccessToken: page.access_token, pageId: page.id },
+      });
+    }
+    return acc;
+  }, []);
 }
 
 export function pagesToInstagramOptions(pages: MetaPage[]): AccountOption[] {
-  return pages
-    .filter((p) => p.access_token && p.instagram_business_account?.id)
-    .map((page) => ({
-      id: page.instagram_business_account!.id,
-      label: page.name,
-      username: page.name,
-      avatarUrl: page.picture?.data?.url,
-      metadata: {
-        pageAccessToken: page.access_token,
-        pageId: page.id,
-        igUserId: page.instagram_business_account!.id,
-      },
-    }));
+  return pages.reduce<AccountOption[]>((acc, page) => {
+    if (page.access_token && page.instagram_business_account?.id) {
+      acc.push({
+        id: page.instagram_business_account.id,
+        label: page.name,
+        username: page.name,
+        avatarUrl: page.picture?.data?.url,
+        metadata: {
+          pageAccessToken: page.access_token,
+          pageId: page.id,
+          igUserId: page.instagram_business_account.id,
+        },
+      });
+    }
+    return acc;
+  }, []);
 }
 
 export async function metaFetchIgProfile(

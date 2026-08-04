@@ -26,10 +26,16 @@ export function MarketingMarquee() {
           className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-background to-transparent sm:w-24"
         />
         <div className="marketing-marquee-track flex">
-          {[...brands, ...brands, ...brands].map(([name, logo], index) => (
+          {[0, 1, 2].flatMap((setIndex) =>
+            brands.map(([name, logo]) => ({
+              id: `${name}-set-${setIndex}`,
+              name,
+              logo,
+            }))
+          ).map(({ id, name, logo }) => (
             <div
               className="flex shrink-0 items-center gap-4 px-10 sm:px-12"
-              key={`${name}-${index}`}
+              key={id}
             >
               <div className="relative h-8 w-28 sm:w-32">
                 <Image

@@ -237,12 +237,22 @@ function PostComposerForm({
     );
     setNotes(sourcePost.notes ?? "");
     setShowNotes(Boolean(sourcePost.notes));
+    const activeAccountsSet = new Set(
+      (accounts ?? []).reduce<Id<"connectedAccounts">[]>((acc, a) => {
+        if (a.status === "active") acc.push(a._id);
+        return acc;
+      }, []),
+    );
     const activeIds = new Set(
-      (sourcePost.targets ?? [])
-        .map((t) => t.connectedAccountId)
-        .filter((id) =>
-          (accounts ?? []).some((a) => a._id === id && a.status === "active"),
-        ),
+      (sourcePost.targets ?? []).reduce<Id<"connectedAccounts">[]>(
+        (acc, t) => {
+          if (activeAccountsSet.has(t.connectedAccountId)) {
+            acc.push(t.connectedAccountId);
+          }
+          return acc;
+        },
+        [],
+      ),
     );
     setSelected(activeIds);
     setTargetOptions(
@@ -297,9 +307,12 @@ function PostComposerForm({
   const selectedPlatforms = useMemo(
     () => [
       ...new Set(
-        compatibleAccounts
-          .filter((account) => selectedAccountIds.has(account._id))
-          .map((account) => account.platform),
+        compatibleAccounts.reduce<string[]>((acc, account) => {
+          if (selectedAccountIds.has(account._id)) {
+            acc.push(account.platform);
+          }
+          return acc;
+        }, []),
       ),
     ],
     [compatibleAccounts, selectedAccountIds],

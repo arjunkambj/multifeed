@@ -100,13 +100,11 @@ export function PostCalendar() {
 
   const events: EventInput[] = useMemo(() => {
     if (!posts) return [];
-    return posts
-      .filter(
-        (post) =>
-          platformFilter === "all" ||
-          post.targets.some((target) => target.platform === platformFilter),
-      )
-      .map((post) => {
+    return posts.reduce<EventInput[]>((acc, post) => {
+      if (
+        platformFilter === "all" ||
+        post.targets.some((target) => target.platform === platformFilter)
+      ) {
         const platforms = [
           ...new Set(post.targets.map((t) => t.platform)),
         ].join(", ");
@@ -114,7 +112,7 @@ export function PostCalendar() {
           post.title?.trim() ||
           post.body.trim().slice(0, 48) ||
           "Untitled post";
-        return {
+        acc.push({
           id: post._id,
           title: label,
           start: post.scheduledFor,
@@ -129,8 +127,10 @@ export function PostCalendar() {
             platforms,
             body: post.body,
           },
-        };
-      });
+        });
+      }
+      return acc;
+    }, []);
   }, [platformFilter, posts]);
 
   const onDatesSet = useCallback((arg: DatesSetArg) => {
@@ -338,142 +338,156 @@ export function PostCalendar() {
         </div>
 
         {selectedPostId && (
-          <Card className="border border-border bg-surface shadow-none xl:sticky xl:top-4 xl:self-start">
-            <Card.Header className="pb-2">
-              <Card.Title className="text-base">Post details</Card.Title>
-              <Card.Description>Review or jump into editing</Card.Description>
-            </Card.Header>
-            <Card.Content>
-              {selectedPost === undefined && (
-                <div className="space-y-4 py-2">
-                  <Skeleton className="h-5 w-24 rounded-full" />
-                  <Skeleton className="h-4 w-3/5 rounded-lg" />
-                  <Skeleton className="h-4 w-full rounded-lg" />
-                  <Skeleton className="h-10 w-full rounded-xl" />
-                </div>
-              )}
-
-              {selectedPost === null && (
-                <p className="text-sm text-muted">Post not found.</p>
-              )}
-
-              {selectedPost && (
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLE[selectedPost.status] ?? STATUS_STYLE.draft}`}
-                    >
-                      {selectedPost.status}
-                    </span>
-                    {selectedPost.scheduledFor && (
-                      <span className="text-xs text-muted">
-                        {format(
-                          new Date(selectedPost.scheduledFor),
-                          "EEE, MMM d · h:mm a",
-                        )}
-                      </span>
-                    )}
-                  </div>
-
-                  {selectedPost.title && (
-                    <h3 className="text-sm font-semibold">
-                      {selectedPost.title}
-                    </h3>
-                  )}
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {selectedPost.body || (
-                      <span className="text-muted">No caption</span>
-                    )}
-                  </p>
-
-                  <div className="flex flex-col gap-2">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted">
-                      Accounts
-                    </p>
-                    {selectedPost.targets.length === 0 ? (
-                      <p className="text-xs text-muted">No targets</p>
-                    ) : (
-                      selectedPost.targets.map((t) => (
-                        <div
-                          key={t.targetId}
-                          className="flex items-center gap-2 rounded-xl border border-border/60 px-2.5 py-2"
-                        >
-                          <span
-                            className="flex size-7 items-center justify-center rounded-full text-white"
-                            style={{
-                              backgroundColor: platformBrand(t.platform),
-                            }}
-                          >
-                            <Icon
-                              icon={
-                                PLATFORM_META[t.platform]?.icon ??
-                                "hugeicons:link-01"
-                              }
-                              width={12}
-                            />
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-medium">
-                              @{t.username ?? "account"}
-                            </p>
-                            <p className="truncate text-[11px] text-muted">
-                              {platformLabel(t.platform)}
-                            </p>
-                          </div>
-                          <Chip size="sm" variant="soft">
-                            {t.status}
-                          </Chip>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {!["publishing", "published", "archived"].includes(
-                      selectedPost.status,
-                    ) && (
-                      <Button
-                        size="sm"
-                        variant="tertiary"
-                        onPress={() =>
-                          router.push(`/posts/new?edit=${selectedPost._id}`)
-                        }
-                      >
-                        Edit
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="tertiary"
-                      onPress={() =>
-                        router.push(`/posts/new?from=${selectedPost._id}`)
-                      }
-                    >
-                      Duplicate
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="tertiary"
-                      onPress={() => setSelectedPostId(null)}
-                    >
-                      Close
-                    </Button>
-                    {selectedPost.status !== "publishing" && (
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onPress={() => void onDelete()}
-                      >
-                        Delete
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </Card.Content>
-          </Card>
+          <PostDetailsCard
+            selectedPost={selectedPost}
+            onClose={() => setSelectedPostId(null)}
+            onDelete={onDelete}
+            router={router}
+          />
         )}
       </div>
     </div>
+  );
+}
+
+function PostDetailsCard({
+  selectedPost,
+  onClose,
+  onDelete,
+  router,
+}: {
+  selectedPost: ReturnType<typeof useQuery<typeof api.posts.get>>;
+  onClose: () => void;
+  onDelete: () => Promise<void>;
+  router: ReturnType<typeof useRouter>;
+}) {
+  return (
+    <Card className="border border-border bg-surface shadow-none xl:sticky xl:top-4 xl:self-start">
+      <Card.Header className="pb-2">
+        <Card.Title className="text-base">Post details</Card.Title>
+        <Card.Description>Review or jump into editing</Card.Description>
+      </Card.Header>
+      <Card.Content>
+        {selectedPost === undefined && (
+          <div className="space-y-4 py-2">
+            <Skeleton className="h-5 w-24 rounded-full" />
+            <Skeleton className="h-4 w-3/5 rounded-lg" />
+            <Skeleton className="h-4 w-full rounded-lg" />
+            <Skeleton className="h-10 w-full rounded-xl" />
+          </div>
+        )}
+
+        {selectedPost === null && (
+          <p className="text-sm text-muted">Post not found.</p>
+        )}
+
+        {selectedPost && (
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLE[selectedPost.status] ?? STATUS_STYLE.draft}`}
+              >
+                {selectedPost.status}
+              </span>
+              {selectedPost.scheduledFor && (
+                <span className="text-xs text-muted">
+                  {format(
+                    new Date(selectedPost.scheduledFor),
+                    "EEE, MMM d · h:mm a",
+                  )}
+                </span>
+              )}
+            </div>
+
+            {selectedPost.title && (
+              <h3 className="text-sm font-semibold">{selectedPost.title}</h3>
+            )}
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">
+              {selectedPost.body || (
+                <span className="text-muted">No caption</span>
+              )}
+            </p>
+
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted">
+                Accounts
+              </p>
+              {selectedPost.targets.length === 0 ? (
+                <p className="text-xs text-muted">No targets</p>
+              ) : (
+                selectedPost.targets.map((t) => (
+                  <div
+                    key={t.targetId}
+                    className="flex items-center gap-2 rounded-xl border border-border/60 px-2.5 py-2"
+                  >
+                    <span
+                      className="flex size-7 items-center justify-center rounded-full text-white"
+                      style={{
+                        backgroundColor: platformBrand(t.platform),
+                      }}
+                    >
+                      <Icon
+                        icon={
+                          PLATFORM_META[t.platform]?.icon ?? "hugeicons:link-01"
+                        }
+                        width={12}
+                      />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-medium">
+                        @{t.username ?? "account"}
+                      </p>
+                      <p className="truncate text-[11px] text-muted">
+                        {platformLabel(t.platform)}
+                      </p>
+                    </div>
+                    <Chip size="sm" variant="soft">
+                      {t.status}
+                    </Chip>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              {!["publishing", "published", "archived"].includes(
+                selectedPost.status,
+              ) && (
+                <Button
+                  size="sm"
+                  variant="tertiary"
+                  onPress={() =>
+                    router.push(`/posts/new?edit=${selectedPost._id}`)
+                  }
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="tertiary"
+                onPress={() =>
+                  router.push(`/posts/new?from=${selectedPost._id}`)
+                }
+              >
+                Duplicate
+              </Button>
+              <Button size="sm" variant="tertiary" onPress={onClose}>
+                Close
+              </Button>
+              {selectedPost.status !== "publishing" && (
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onPress={() => void onDelete()}
+                >
+                  Delete
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </Card.Content>
+    </Card>
   );
 }

@@ -1,5 +1,4 @@
 import { config as base } from "@multifeed/eslint-config/base";
-import convexPlugin from "@convex-dev/eslint-plugin";
 
 export default [
   ...base,
@@ -11,5 +10,4 @@ export default [
       "@typescript-eslint/no-explicit-any": "off",
     },
   },
-  ...convexPlugin.configs.recommended,
 ];

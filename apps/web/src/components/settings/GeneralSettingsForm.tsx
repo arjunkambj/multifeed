@@ -47,6 +47,7 @@ export function GeneralSettingsForm() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSaving) return;
     setIsSaving(true);
 
     try {

@@ -264,30 +264,35 @@ export function PostMediaUploader({
           previewUrl,
           ...details,
         });
-        setPendingMedia((current) =>
-          current.map((item) =>
-            item.id === id ? { ...item, progress: 100 } : item,
-          ),
-        );
-      }
-      onChange([...media, ...uploaded]);
-      setPendingMedia([]);
-      toast.success(
+      setPendingMedia((current) =>
+        current.map((item) =>
+          item.id === id ? { ...item, progress: 100 } : item,
+        ),
+      );
+    }
+    for (const pending of pendingUploads) {
+      URL.revokeObjectURL(pending.previewUrl);
+    }
+    onChange([...media, ...uploaded]);
+    setPendingMedia([]);
+    toast.success(
         `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`,
         { timeout: 3000 },
       );
     } catch (caught) {
-      const completedPreviewUrls = new Set(
-        uploaded.flatMap((asset) =>
-          asset.previewUrl ? [asset.previewUrl] : [],
-        ),
-      );
-      pendingUploads
-        .filter((asset) => !completedPreviewUrls.has(asset.previewUrl))
-        .forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
-      if (uploaded.length > 0) {
-        onChange([...media, ...uploaded]);
+    const completedPreviewUrls = new Set(
+      uploaded.flatMap((asset) =>
+        asset.previewUrl ? [asset.previewUrl] : [],
+      ),
+    );
+    for (const asset of pendingUploads) {
+      if (!completedPreviewUrls.has(asset.previewUrl)) {
+        URL.revokeObjectURL(asset.previewUrl);
       }
+    }
+    if (uploaded.length > 0) {
+      onChange([...media, ...uploaded]);
+    }
       setPendingMedia([]);
       toast.danger(
         caught instanceof Error ? caught.message : "Media upload failed",
@@ -336,6 +341,11 @@ export function PostMediaUploader({
           variant="tertiary"
           isDisabled={uploading}
           onPress={() => inputRef.current?.click()}
+          aria-label={
+            media.length === 0 && pendingMedia.length === 0
+              ? "Add media"
+              : "Add another media file"
+          }
           className="h-24 w-36 shrink-0 flex-col gap-1.5 rounded-xl border border-dashed border-border bg-transparent px-3 py-3 hover:border-accent/50 hover:bg-surface-secondary"
         >
           <Icon icon="hugeicons:upload-04" width={20} />

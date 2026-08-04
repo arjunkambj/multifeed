@@ -41,13 +41,15 @@ function statusLabel(status: unknown) {
     : "Unknown";
 }
 
+const dateFormatter = new Intl.DateTimeFormat("en", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
 function formatDate(value?: number) {
   if (!value) return null;
-  return new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(value));
+  return dateFormatter.format(new Date(value));
 }
 
 export function BillingPage({
@@ -55,11 +57,11 @@ export function BillingPage({
 }: {
   preloaded: Preloaded<typeof api.billing.getSubscription>;
 }) {
-  const [interval, setInterval] = useState<BillingInterval>("month");
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>("month");
   const [checkingOut, setCheckingOut] = useState<PlanKey | null>(null);
   const [openingPortal, setOpeningPortal] = useState(false);
   const subscription = usePreloadedQuery(preloaded);
-  const isYearly = interval === "year";
+  const isYearly = billingInterval === "year";
   const activePlan = subscription?.hasPlanAccess
     ? PLANS.find((plan) => plan.key === subscription.planKey)
     : undefined;
@@ -72,14 +74,17 @@ export function BillingPage({
       const response = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planKey, interval }),
+        body: JSON.stringify({ planKey, interval: billingInterval }),
       });
+      if (!response.ok) {
+        throw new Error("Could not start checkout");
+      }
       const payload = (await response.json()) as {
         checkoutUrl?: string;
         error?: string;
       };
 
-      if (!response.ok || !payload.checkoutUrl) {
+      if (!payload.checkoutUrl) {
         throw new Error(payload.error ?? "Could not start checkout");
       }
 
@@ -99,12 +104,15 @@ export function BillingPage({
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
+      if (!response.ok) {
+        throw new Error("Could not open billing portal");
+      }
       const payload = (await response.json()) as {
         url?: string;
         error?: string;
       };
 
-      if (!response.ok || !payload.url) {
+      if (!payload.url) {
         throw new Error(payload.error ?? "Could not open billing portal");
       }
 
@@ -176,14 +184,14 @@ export function BillingPage({
                 ? "bg-surface-secondary text-foreground"
                 : "text-muted hover:text-foreground"
             }`}
-            onClick={() => setInterval("month")}
+            onClick={() => setBillingInterval("month")}
             type="button"
           >
             Monthly
           </button>
           <Switch
             isSelected={isYearly}
-            onChange={() => setInterval(isYearly ? "month" : "year")}
+            onChange={() => setBillingInterval(isYearly ? "month" : "year")}
           >
             <Switch.Control>
               <Switch.Thumb />
@@ -195,7 +203,7 @@ export function BillingPage({
                 ? "bg-surface-secondary text-foreground"
                 : "text-muted hover:text-foreground"
             }`}
-            onClick={() => setInterval("year")}
+            onClick={() => setBillingInterval("year")}
             type="button"
           >
             Yearly
@@ -255,7 +263,7 @@ export function BillingPage({
           const isCurrent =
             subscription?.hasPlanAccess === true &&
             subscription.planKey === plan.key &&
-            subscription.interval === interval;
+            subscription.interval === billingInterval;
           const isPending = checkingOut === plan.key;
           const preferred = plan.key === "growth";
 
@@ -283,10 +291,10 @@ export function BillingPage({
 
                 <div className="mt-6 flex items-baseline gap-1.5">
                   <span className="font-display text-4xl font-bold tracking-tight tabular-nums text-foreground">
-                    ${plan.prices[interval]}
+                    ${plan.prices[billingInterval]}
                   </span>
                   <span className="text-sm text-muted">
-                    {intervalLabels[interval]}
+                    {intervalLabels[billingInterval]}
                   </span>
                 </div>
 

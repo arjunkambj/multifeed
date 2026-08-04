@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 
-import { useCases } from "@/constants/landing-page";
+import { landingUseCases } from "@/constants/landing-page";
 
 export function UseCases() {
   return (
@@ -25,9 +25,9 @@ export function UseCases() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-        {useCases.map((useCase) => (
-          <div data-gsap-card key={useCase.audience}>
-            <UseCaseCard useCase={useCase} />
+        {landingUseCases.map((item) => (
+          <div data-gsap-card key={item.audience}>
+            <UseCaseCard item={item} />
           </div>
         ))}
       </div>
@@ -35,19 +35,19 @@ export function UseCases() {
   );
 }
 
-function UseCaseCard({ useCase }: { useCase: (typeof useCases)[number] }) {
+function UseCaseCard({ item }: { item: (typeof landingUseCases)[number] }) {
   return (
     <div className="marketing-surface flex h-full gap-4 border border-border/50 bg-surface p-5 sm:p-6">
       <div className="marketing-chip flex size-11 shrink-0 items-center justify-center bg-background text-accent">
-        <Icon icon={useCase.icon} width={22} />
+        <Icon icon={item.icon} width={22} />
       </div>
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium uppercase tracking-wide text-accent">
-          {useCase.audience}
+          {item.audience}
         </span>
-        <h3 className="text-lg font-semibold sm:text-xl">{useCase.title}</h3>
+        <h3 className="text-lg font-semibold sm:text-xl">{item.title}</h3>
         <p className="text-sm leading-relaxed text-muted">
-          {useCase.description}
+          {item.description}
         </p>
       </div>
     </div>

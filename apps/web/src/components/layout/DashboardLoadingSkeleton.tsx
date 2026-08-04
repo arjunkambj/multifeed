@@ -28,7 +28,7 @@ function PageHeaderSkeleton({ actions = 1 }: { actions?: number }) {
   );
 }
 
-export function ConnectionsRowsSkeleton() {
+function ConnectionsRowsSkeleton() {
   return (
     <section className="divide-y divide-border/70">
       {Array.from({ length: 7 }, (_, index) => (
@@ -47,7 +47,7 @@ export function ConnectionsRowsSkeleton() {
   );
 }
 
-export function PostsListSkeleton() {
+function PostsListSkeleton() {
   return (
     <div className="flex flex-col gap-3">
       {Array.from({ length: 4 }, (_, index) => (

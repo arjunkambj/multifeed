@@ -25,6 +25,9 @@ type MetricCardProps = {
   change?: number;
 };
 
+const numberFormatter = new Intl.NumberFormat("en-US");
+const formatNumber = (n: number) => numberFormatter.format(n);
+
 function percentageChange(current: number, previous: number) {
   if (previous === 0) return current === 0 ? 0 : 100;
   return ((current - previous) / previous) * 100;
@@ -140,7 +143,7 @@ export function OverviewDashboard() {
         >
           <MetricCard
             title="Scheduled posts"
-            value={metrics.scheduledPosts.toLocaleString()}
+            value={formatNumber(metrics.scheduledPosts)}
             icon="hugeicons:calendar-03"
             change={percentageChange(
               metrics.scheduledPosts,
@@ -149,7 +152,7 @@ export function OverviewDashboard() {
           />
           <MetricCard
             title="Published posts"
-            value={metrics.publishedPosts.toLocaleString()}
+            value={formatNumber(metrics.publishedPosts)}
             icon="hugeicons:sent"
             change={percentageChange(
               metrics.publishedPosts,
@@ -167,7 +170,7 @@ export function OverviewDashboard() {
           />
           <MetricCard
             title="Engagements"
-            value={metrics.engagement.toLocaleString()}
+            value={formatNumber(metrics.engagement)}
             icon="hugeicons:favourite"
             change={percentageChange(
               metrics.engagement,
@@ -176,7 +179,7 @@ export function OverviewDashboard() {
           />
           <MetricCard
             title="Active channels"
-            value={metrics.activeChannels.toLocaleString()}
+            value={formatNumber(metrics.activeChannels)}
             icon="hugeicons:share-08"
           />
         </section>

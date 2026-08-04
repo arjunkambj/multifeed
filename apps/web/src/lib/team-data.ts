@@ -30,11 +30,14 @@ export const teamDataQueryKey = (teamId: string) =>
 
 export const loadTeamData = async ({ signal }: { signal: AbortSignal }) => {
   const response = await fetch("/api/team-members", { signal });
-  const payload = (await response.json()) as TeamData | { error: string };
-
   if (!response.ok) {
+    throw new Error("Unable to load team members");
+  }
+  const payload = (await response.json()) as TeamData | { error?: string };
+
+  if ("error" in payload && payload.error) {
     throw new Error(
-      "error" in payload ? payload.error : "Unable to load team members",
+      payload.error,
     );
   }
 

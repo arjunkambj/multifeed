@@ -73,27 +73,50 @@ export default function SignInPage() {
   useEffect(() => {
     if (otp.length !== 6 || verificationPending.current) return;
     verificationPending.current = true;
+    let cancelled = false;
 
     const verify = async () => {
       setIsVerifying(true);
       try {
         const result = await app.signInWithMagicLink(otp + nonce);
-        if (result.status === "error") {
+        if (!cancelled && result.status === "error") {
           toast.danger("Invalid code. Please try again.", { timeout: 3000 });
         }
       } catch {
-        toast.danger("Something went wrong. Please try again.", {
-          timeout: 3000,
-        });
+        if (!cancelled) {
+          toast.danger("Something went wrong. Please try again.", {
+            timeout: 3000,
+          });
+        }
       } finally {
-        setOtp("");
-        setIsVerifying(false);
+        if (!cancelled) {
+          setOtp("");
+          setIsVerifying(false);
+        }
         verificationPending.current = false;
       }
     };
 
     void verify();
+    return () => {
+      cancelled = true;
+    };
   }, [app, nonce, otp]);
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    try {
+      await app.signInWithOAuth("google", {
+        returnTo: app.urls.afterSignIn,
+      });
+    } catch {
+      toast.danger("Could not continue with Google. Please try again.", {
+        timeout: 3000,
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
@@ -213,20 +236,7 @@ export default function SignInPage() {
         size="lg"
         fullWidth
         className="font-normal"
-        onPress={async () => {
-          setIsGoogleLoading(true);
-          try {
-            await app.signInWithOAuth("google", {
-              returnTo: app.urls.afterSignIn,
-            });
-          } catch {
-            toast.danger("Could not continue with Google. Please try again.", {
-              timeout: 3000,
-            });
-          } finally {
-            setIsGoogleLoading(false);
-          }
-        }}
+        onPress={handleGoogleSignIn}
       >
         {isGoogleLoading ? (
           <Spinner size="sm" />

@@ -112,12 +112,12 @@ export const featureItems = [
     description:
       "Connect your social profiles once. MultiFeed encrypts account tokens and keeps each channel ready when you are.",
     heading: "Secure account connections",
-    image:
-      "https://framerusercontent.com/images/y25C7HJ1wHWV4u0DZaY5UmLwI.png?scale-down-to=1024&width=1158&height=759",
+  image:
+    "https://framerusercontent.com/images/y25C7HJ1wHWV4u0DZaY5UmLwI.png?scale-down-to=1024&width=1158&height=759",
   },
 ] as const;
 
-export const useCases = [
+export const landingUseCases = [
   {
     audience: "Creators",
     description:

@@ -260,19 +260,22 @@ export function PostLibrary({
                   {post.status === "published" &&
                     post.targets.some((target) => target.platformPermalink) && (
                       <div className="mt-3 flex flex-wrap gap-2">
-                        {post.targets
-                          .filter((target) => target.platformPermalink)
-                          .map((target) => (
-                            <a
-                              key={target.targetId}
-                              href={target.platformPermalink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-xs font-medium text-accent hover:underline"
-                            >
-                              Open on {platformLabel(target.platform)}
-                            </a>
-                          ))}
+                        {post.targets.reduce<React.ReactNode[]>((acc, target) => {
+                          if (target.platformPermalink) {
+                            acc.push(
+                              <a
+                                key={target.targetId}
+                                href={target.platformPermalink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs font-medium text-accent hover:underline"
+                              >
+                                Open on {platformLabel(target.platform)}
+                              </a>,
+                            );
+                          }
+                          return acc;
+                        }, [])}
                       </div>
                     )}
                 </div>

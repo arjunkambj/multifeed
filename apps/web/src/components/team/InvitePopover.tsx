@@ -39,6 +39,7 @@ export function InvitePopover({
 
   const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSending) return;
     setIsSending(true);
 
     try {
@@ -47,11 +48,14 @@ export function InvitePopover({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
       });
+      if (!response.ok) {
+        throw new Error("Could not send team invitation");
+      }
       const payload = (await response.json()) as
         | { ok: true }
         | { error: string };
 
-      if (!response.ok || !("ok" in payload)) {
+      if (!("ok" in payload)) {
         throw new Error(
           "error" in payload ? payload.error : "Could not send team invitation",
         );

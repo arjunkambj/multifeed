@@ -16,12 +16,13 @@ type TeamTableRow = {
   subtitle: string;
 };
 
-const formatDate = (value: Date) =>
-  new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(value);
+const dateFormatter = new Intl.DateTimeFormat("en", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
+const formatDate = (value: Date) => dateFormatter.format(value);
 
 export type { TeamTableRow };
 

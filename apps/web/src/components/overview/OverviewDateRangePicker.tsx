@@ -33,12 +33,14 @@ function toCalendarDate(value: DateValue): CalendarDate {
   return value as CalendarDate;
 }
 
+const dateFormatter = new Intl.DateTimeFormat("en", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+
 function formatDate(date: CalendarDate) {
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(date.year, date.month - 1, date.day));
+  return dateFormatter.format(new Date(date.year, date.month - 1, date.day));
 }
 
 export function OverviewDateRangePicker({ value, preset, onChange }: Props) {

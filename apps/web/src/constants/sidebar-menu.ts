@@ -73,13 +73,3 @@ export const sidebarFooterItems: MenuItem[] = [
     icon: "hugeicons:settings-02",
   },
 ];
-
-export const routeLabels: Record<string, string> = {
-  "/overview": "Overview",
-  "/posts/new": "New Post",
-  "/calendar": "Calendar",
-  "/posts": "All Posts",
-  "/connections": "Connections",
-  "/teams": "Team",
-  "/settings": "Settings",
-};

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Modal, Spinner, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useMutation, usePreloadedQuery, type Preloaded } from "convex/react";
@@ -8,6 +8,7 @@ import { api } from "@convex/_generated/api";
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
   CONNECTABLE_PLATFORMS,
@@ -23,7 +24,7 @@ const statusDot: Record<Doc<"connectedAccounts">["status"], string> = {
   error: "bg-danger",
 };
 
-export function ConnectionsPage({
+function ConnectionsPageInner({
   preloaded,
 }: {
   preloaded: Preloaded<typeof api.oauth.accounts.getConnectionsPageData>;
@@ -62,7 +63,7 @@ export function ConnectionsPage({
       }
     }
 
-    router.replace("/connections", { scroll: false });
+    window.history.replaceState(null, "", "/connections");
   }, [connected, flashKey, oauthError, router]);
 
   const byPlatform = useMemo(() => {
@@ -86,11 +87,14 @@ export function ConnectionsPage({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ platform, returnTo: "/connections" }),
       });
+      if (!response.ok) {
+        throw new Error("Could not start OAuth");
+      }
       const payload = (await response.json()) as {
         url?: string;
         error?: string;
       };
-      if (!response.ok || !payload.url) {
+      if (!payload.url) {
         throw new Error(payload.error ?? "Could not start OAuth");
       }
       window.location.assign(payload.url);
@@ -294,5 +298,15 @@ export function ConnectionsPage({
         </Modal.Backdrop>
       </Modal>
     </>
+  );
+}
+
+export function ConnectionsPage(props: {
+  preloaded: Preloaded<typeof api.oauth.accounts.getConnectionsPageData>;
+}) {
+  return (
+    <Suspense fallback={<DashboardLoadingSkeleton variant="connections" />}>
+      <ConnectionsPageInner {...props} />
+    </Suspense>
   );
 }
