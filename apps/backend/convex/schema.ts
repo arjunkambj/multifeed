@@ -250,7 +250,8 @@ export default defineSchema({
     .index("by_team_status", ["teamId", "status"])
     .index("by_team_schedule", ["teamId", "status", "scheduledFor"])
     .index("by_team_scheduledFor", ["teamId", "scheduledFor"])
-    .index("by_team_updated", ["teamId", "updatedAt"]),
+    .index("by_team_updated", ["teamId", "updatedAt"])
+    .index("by_status_scheduledFor", ["status", "scheduledFor"]),
 
   postMediaAssets: defineTable({
     postId: v.id("posts"),

@@ -6,6 +6,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { requireUser } from "./hexclave/auth";
 import { fail } from "./errors";
 import { listAccountsForTeam } from "./oauth/accounts";
@@ -388,9 +389,7 @@ async function enrichPost(ctx: QueryCtx, post: Doc<"posts">) {
 }
 
 /**
- * Create draft, scheduled, or "post now" (queued as scheduled immediately).
- * Until a publisher worker exists, "publishing" is stored as scheduled@now
- * so the post appears on the calendar and scheduled list.
+ * Create draft, scheduled, or "post now" (publishes immediately via scheduler).
  */
 export const create = mutation({
   args: {
@@ -425,9 +424,8 @@ export const create = mutation({
     );
     validateMediaForKind(args.kind, mediaAssets);
 
-    // "Post now" → schedule for immediate publish once a worker exists.
-    // Storing as `scheduled` keeps the post visible in list/calendar UIs.
-    const status = args.status === "publishing" ? "scheduled" : args.status;
+    // "Post now" publishes immediately; scheduled posts publish when due.
+    const status = args.status;
     let scheduledFor = args.scheduledFor;
 
     if (args.status === "publishing") {
@@ -476,6 +474,12 @@ export const create = mutation({
         targets: args.targets,
         kind: args.kind,
         mediaAssets,
+      });
+    }
+
+    if (status === "publishing") {
+      await ctx.scheduler.runAfter(0, internal.publishing.publishPost, {
+        postId,
       });
     }
 
@@ -529,8 +533,7 @@ export const update = mutation({
 
     const now = Date.now();
     const requestedStatus = args.status ?? post.status;
-    const status =
-      requestedStatus === "publishing" ? "scheduled" : requestedStatus;
+    const status = requestedStatus;
     let scheduledFor = post.scheduledFor;
     if (requestedStatus === "publishing") scheduledFor = now;
     else if (args.clearSchedule) scheduledFor = undefined;
@@ -618,6 +621,12 @@ export const update = mutation({
           }),
         ),
       );
+    }
+
+    if (status === "publishing") {
+      await ctx.scheduler.runAfter(0, internal.publishing.publishPost, {
+        postId: args.postId,
+      });
     }
 
     return { ok: true as const };

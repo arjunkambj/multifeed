@@ -564,7 +564,7 @@ function usePostComposerForm({
         ? await updatePost({
             postId: editPostId,
             ...payload,
-            status: status === "publishing" ? "scheduled" : status,
+            status,
           }).then(() => ({ postId: editPostId }))
         : await createPost({ ...payload, status });
 
@@ -574,9 +574,8 @@ function usePostComposerForm({
         return;
       }
 
-      // "Post now" is stored as scheduled@now until a publisher worker exists.
       toast.success(
-        mode === "schedule" ? "Post scheduled." : "Post queued for publishing.",
+        mode === "schedule" ? "Post scheduled." : "Post publishing.",
         { timeout: 3000 },
       );
       router.push(`/calendar?highlight=${result.postId}`);

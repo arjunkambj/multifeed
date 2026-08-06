@@ -10,4 +10,11 @@ crons.interval(
   internal.oauth.sessions.purgeExpired,
 );
 
+/** Publish due scheduled posts every minute. */
+crons.interval(
+  "publish due posts",
+  { minutes: 1 },
+  internal.publishing.publishDuePosts,
+);
+
 export default crons;
