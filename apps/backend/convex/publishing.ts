@@ -1,10 +1,12 @@
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
-import { internalMutation } from "./_generated/server";
+import { internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { decryptSecret } from "./oauth/crypto";
 
 const BATCH = 100;
+const MAX_TARGETS_PER_POST = 100;
+const MAX_MEDIA_PER_POST = 10;
 
 async function refreshAccessTokenForPlatform(
   platform: string,
@@ -81,7 +83,10 @@ export const publishPost = internalMutation({
     if (!post) return null;
     if (post.status === "published" || post.status === "archived" || post.status === "failed") return null;
     if (post.status === "scheduled" && post.scheduledFor != null && post.scheduledFor > Date.now()) return null;
-    const targets = await ctx.db.query("postTargets").withIndex("by_post", (q) => q.eq("postId", post._id)).collect();
+    const targets = await ctx.db
+      .query("postTargets")
+      .withIndex("by_post", (q) => q.eq("postId", post._id))
+      .take(MAX_TARGETS_PER_POST + 1);
     if (targets.length === 0) {
       await ctx.db.patch("posts", post._id, { status: "published", updatedAt: Date.now() });
       return null;
@@ -112,36 +117,45 @@ export const publishDuePosts = internalMutation({
       const alreadyPublishing = post.status === "publishing";
       if (!alreadyPublishing) {
         await ctx.db.patch("posts", post._id, { status: "publishing", updatedAt: now });
-        const tgs = await ctx.db.query("postTargets").withIndex("by_post", (q) => q.eq("postId", post._id)).collect();
+        const tgs = await ctx.db
+          .query("postTargets")
+          .withIndex("by_post", (q) => q.eq("postId", post._id))
+          .take(MAX_TARGETS_PER_POST + 1);
         for (const tg of tgs) if (tg.status === "scheduled") await ctx.db.patch("postTargets", tg._id, { status: "publishing", updatedAt: now });
       }
-      const tgs = await ctx.db.query("postTargets").withIndex("by_post", (q) => q.eq("postId", post._id)).collect();
+      const tgs = await ctx.db
+        .query("postTargets")
+        .withIndex("by_post", (q) => q.eq("postId", post._id))
+        .take(MAX_TARGETS_PER_POST + 1);
       for (const tg of tgs) if (tg.status !== "published" && tg.status !== "skipped" && tg.status !== "failed") await ctx.scheduler.runAfter(0, internal.publishing.actions.publishOneTarget, { postId: post._id, targetId: tg._id });
     }
     return { processed: due.length, hasMore: due.length === BATCH };
   },
 });
 
-export const getPostForPublish = internalMutation({
+export const getPostForPublish = internalQuery({
   args: { postId: v.id("posts") },
   returns: v.union(v.any(), v.null()),
   handler: async (ctx, args) => ctx.db.get("posts", args.postId),
 });
-export const getTargetForPublish = internalMutation({
+export const getTargetForPublish = internalQuery({
   args: { targetId: v.id("postTargets") },
   returns: v.union(v.any(), v.null()),
   handler: async (ctx, args) => ctx.db.get("postTargets", args.targetId),
 });
-export const getAccountForPublish = internalMutation({
+export const getAccountForPublish = internalQuery({
   args: { accountId: v.id("connectedAccounts") },
   returns: v.union(v.any(), v.null()),
   handler: async (ctx, args) => ctx.db.get("connectedAccounts", args.accountId),
 });
-export const getMediaForPost = internalMutation({
+export const getMediaForPost = internalQuery({
   args: { postId: v.id("posts") },
   returns: v.array(v.any()),
   handler: async (ctx, args) => {
-    const links = await ctx.db.query("postMediaAssets").withIndex("by_post_position", (q) => q.eq("postId", args.postId)).collect();
+    const links = await ctx.db
+      .query("postMediaAssets")
+      .withIndex("by_post_position", (q) => q.eq("postId", args.postId))
+      .take(MAX_MEDIA_PER_POST + 1);
     const assets = await Promise.all(links.map((l) => ctx.db.get("mediaAssets", l.mediaAssetId)));
     return assets.filter((a): a is Doc<"mediaAssets"> => a !== null) as unknown as Array<unknown>;
   },
@@ -212,7 +226,10 @@ export const reconcilePostStatus = internalMutation({
   args: { postId: v.id("posts") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const targets = await ctx.db.query("postTargets").withIndex("by_post", (q) => q.eq("postId", args.postId)).collect();
+    const targets = await ctx.db
+      .query("postTargets")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .take(MAX_TARGETS_PER_POST + 1);
     if (targets.length === 0) return null;
     const hasPublished = targets.some((t) => t.status === "published");
     const hasFailed = targets.some((t) => t.status === "failed");

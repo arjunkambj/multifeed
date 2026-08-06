@@ -58,14 +58,14 @@ async function postFirstComment(
 export const publishOneTarget = internalAction({
   args: { postId: v.id("posts"), targetId: v.id("postTargets") },
   returns: v.null(),
-  handler: async (ctx: any, args: { postId: any; targetId: any }) => {
-    const post = (await ctx.runMutation(internal.publishing.getPostForPublish, { postId: args.postId })) as Doc<"posts"> | null;
+  handler: async (ctx, args) => {
+    const post = (await ctx.runQuery(internal.publishing.getPostForPublish, { postId: args.postId })) as Doc<"posts"> | null;
     if (!post) return null;
-    const target = (await ctx.runMutation(internal.publishing.getTargetForPublish, { targetId: args.targetId })) as Doc<"postTargets"> | null;
+    const target = (await ctx.runQuery(internal.publishing.getTargetForPublish, { targetId: args.targetId })) as Doc<"postTargets"> | null;
     if (!target) return null;
     if (target.status === "published" || target.status === "skipped") return null;
     if (target.postId !== post._id) return null;
-    const account = (await ctx.runMutation(internal.publishing.getAccountForPublish, { accountId: target.connectedAccountId })) as Doc<"connectedAccounts"> | null;
+    const account = (await ctx.runQuery(internal.publishing.getAccountForPublish, { accountId: target.connectedAccountId })) as Doc<"connectedAccounts"> | null;
     if (!account || account.status !== "active") {
       await ctx.runMutation(internal.publishing.markTargetFailed, { targetId: target._id, failureCode: "account_inactive", failureMessage: account ? `Account @${account.username} is ${account.status}` : "Account not found" });
       return null;
@@ -76,7 +76,7 @@ export const publishOneTarget = internalAction({
       await ctx.runMutation(internal.publishing.markTargetFailed, { targetId: target._id, failureCode: "no_token", failureMessage: "No access token for account" });
       return null;
     }
-    const media = (await ctx.runMutation(internal.publishing.getMediaForPost, { postId: post._id })) as Doc<"mediaAssets">[];
+    const media = (await ctx.runQuery(internal.publishing.getMediaForPost, { postId: post._id })) as Doc<"mediaAssets">[];
     await ctx.runMutation(internal.publishing.markTargetPublishing, { targetId: target._id });
     try {
       let result: { platformPostId: string; permalink?: string };
