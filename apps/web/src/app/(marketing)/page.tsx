@@ -15,12 +15,12 @@ import { UseCases } from "@/components/marketing/UseCases";
 export const metadata: Metadata = {
   title: "MultiFeed | Plan and schedule social posts in one place",
   description:
-    "Create, tailor, and schedule posts for Instagram, TikTok, YouTube, LinkedIn, X, Facebook, and Threads from one visual content calendar.",
+    "Draft once, customize captions and formats natively for every channel, and schedule across Instagram, TikTok, LinkedIn, YouTube, X, Facebook, and Threads from one visual calendar.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "MultiFeed | Plan once. Show up everywhere.",
     description:
-      "Create, tailor, and schedule social posts across seven platforms from one visual calendar.",
+      "Draft once, customize captions and formats natively for every channel, and schedule across seven platforms from one visual calendar.",
     siteName: "MultiFeed",
     url: "/",
   },
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MultiFeed | Plan once. Show up everywhere.",
     description:
-      "Create, tailor, and schedule social posts across seven platforms from one visual calendar.",
+      "Draft once, customize captions and formats natively for every channel, and schedule across seven platforms from one visual calendar.",
   },
 };
 

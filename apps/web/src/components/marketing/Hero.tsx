@@ -287,7 +287,10 @@ export function Hero() {
       >
         <div>
           <Chip className="marketing-chip border border-border/60 bg-surface px-3 py-1 text-accent">
-            7 social platforms · 1 visual calendar
+            <span className="inline-flex items-center gap-1.5">
+              <Icon icon="hugeicons:sparkles" width={13} />
+              <span>Unified social scheduling · 7 platforms in 1 calendar</span>
+            </span>
           </Chip>
         </div>
 
@@ -304,29 +307,54 @@ export function Hero() {
         </h1>
 
         <p className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-          Create, tailor, and schedule posts for Instagram, TikTok, YouTube,
-          LinkedIn, X, Facebook, and Threads—without juggling seven different
-          tools.
+          Draft your content once, fine-tune native captions and video formats
+          for every channel, and schedule weeks of posts across Instagram,
+          TikTok, LinkedIn, YouTube, X, Facebook, and Threads—without switching
+          tabs.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Link
-            className={`${buttonVariants({ size: "lg" })} button`}
+            className={`${buttonVariants({ size: "lg" })} button inline-flex items-center gap-2`}
             href="/sign-in"
           >
-            Plan your first post
+            <span>Start 7-day free trial</span>
+            <Icon icon="hugeicons:arrow-right-01" width={16} />
           </Link>
           <Link
             className={`${buttonVariants({ size: "lg", variant: "tertiary" })} button`}
-            href="#pricing"
+            href="#features"
           >
-            Compare plans
+            See how it works
           </Link>
         </div>
 
-        <p className="max-w-xl text-sm leading-relaxed text-muted">
-          Review every caption, format, and publish time before it goes live.
-        </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-1 text-xs text-muted">
+          <span className="inline-flex items-center gap-1.5 font-medium">
+            <Icon
+              className="text-accent"
+              icon="hugeicons:checkmark-circle-02"
+              width={14}
+            />
+            7-day free trial
+          </span>
+          <span className="inline-flex items-center gap-1.5 font-medium">
+            <Icon
+              className="text-accent"
+              icon="hugeicons:checkmark-circle-02"
+              width={14}
+            />
+            No credit card required
+          </span>
+          <span className="inline-flex items-center gap-1.5 font-medium">
+            <Icon
+              className="text-accent"
+              icon="hugeicons:checkmark-circle-02"
+              width={14}
+            />
+            Connect all 7 channels
+          </span>
+        </div>
       </div>
 
       <div
