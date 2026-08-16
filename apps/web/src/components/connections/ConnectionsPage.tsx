@@ -16,6 +16,7 @@ import {
   type OAuthPlatform,
 } from "@/lib/platform-meta";
 import { oauthErrorMessage } from "@/lib/oauth/env";
+import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 
 const statusDot: Record<Doc<"connectedAccounts">["status"], string> = {
   active: "bg-success",
@@ -181,7 +182,7 @@ function ConnectionsPageInner({
                     </p>
                   ) : (
                     linked.map((account) => {
-                      const needsAttention = account.status !== "active";
+                      const needsAttention = accountNeedsReconnect(account);
                       return (
                         <div
                           key={account._id}

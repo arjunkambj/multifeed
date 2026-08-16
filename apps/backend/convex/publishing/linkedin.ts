@@ -1,29 +1,19 @@
 "use node";
 
 import type { Doc } from "../_generated/dataModel";
+import { effectiveCaption, linkedinAuthorUrn, publishedFromAttempt, ResumablePublishError } from "./helpers";
 
-const TIMEOUT_MS = 15_000;
+const TIMEOUT_MS = 8 * 60 * 1000;
+const LINKEDIN_VERSION = "202601";
+const VIDEO_CHUNK = 2 * 1024 * 1024;
 
-function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {
-  return (target.bodyOverride?.trim() ?? post.body.trim()).trim();
-}
-
-function getAuthorUrn(account: Doc<"connectedAccounts">): string {
-  const meta = account.metadata as Record<string, unknown> | undefined;
-  if (meta) {
-    const candidate =
-      (meta.authorUrn as string | undefined) ??
-      (meta.author as string | undefined) ??
-      (meta.urn as string | undefined);
-    if (typeof candidate === "string" && candidate.startsWith("urn:li:")) {
-      return candidate;
-    }
-    const orgId = (meta.organizationId ?? meta.organizationUrn) as string | undefined;
-    if (typeof orgId === "string" && orgId) {
-      return orgId.startsWith("urn:li:") ? orgId : `urn:li:organization:${orgId}`;
-    }
-  }
-  return `urn:li:person:${account.providerAccountId}`;
+function headers(accessToken: string, extra?: Record<string, string>) {
+  return {
+    Authorization: `Bearer ${accessToken}`,
+    "X-Restli-Protocol-Version": "2.0.0",
+    "LinkedIn-Version": LINKEDIN_VERSION,
+    ...extra,
+  };
 }
 
 async function parseJson<T>(res: Response): Promise<T> {
@@ -41,87 +31,156 @@ function extractError(payload: unknown, fallback: string): string {
   if (typeof p.detail === "string") return p.detail;
   if (typeof p.error_description === "string") return p.error_description;
   if (typeof p.error === "string") return p.error;
-  if (typeof p.serviceErrorCode === "string" && typeof p.message === "string") {
-    return `${p.serviceErrorCode}: ${p.message}`;
-  }
   return fallback;
 }
 
-async function registerUpload(
+function asArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+}
+
+async function initializeUpload(
   accessToken: string,
-  authorUrn: string,
-  recipe: string,
-): Promise<{ asset: string; uploadUrl: string }> {
-  const res = await fetch("https://api.linkedin.com/v2/assets?action=registerUpload", {
+  author: string,
+  kind: "image" | "video",
+  fileSizeBytes?: number,
+) {
+  const endpoint = kind === "video" ? "videos" : "images";
+  const res = await fetch(`https://api.linkedin.com/rest/${endpoint}?action=initializeUpload`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-      "X-Restli-Protocol-Version": "2.0.0",
-    },
+    headers: headers(accessToken, { "Content-Type": "application/json" }),
     body: JSON.stringify({
-      registerUploadRequest: {
-        recipes: [recipe],
-        owner: authorUrn,
-        serviceRelationships: [
-          { relationshipType: "OWNER", identifier: "urn:li:userGeneratedContent" },
-        ],
+      initializeUploadRequest: {
+        owner: author,
+        ...(kind === "video"
+          ? {
+              fileSizeBytes,
+              uploadCaptions: false,
+              uploadThumbnail: false,
+            }
+          : {}),
       },
     }),
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-
   const json = await parseJson<{
     value?: {
-      asset?: string;
-      uploadMechanism?: {
-        "com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"?: { uploadUrl?: string };
-      };
+      uploadUrl?: string;
+      image?: string;
+      video?: string;
+      uploadInstructions?: Array<{ uploadUrl?: string }>;
     };
     message?: string;
-    detail?: string;
   }>(res);
-
-  const asset = json.value?.asset;
-  const uploadUrl =
-    json.value?.uploadMechanism?.["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]?.uploadUrl;
-
-  if (!res.ok || !asset || !uploadUrl) {
-    throw new Error(extractError(json, `LinkedIn registerUpload failed: ${res.status}`));
+  const uploadUrl = json.value?.uploadInstructions?.[0]?.uploadUrl ?? json.value?.uploadUrl;
+  const urn = json.value?.video ?? json.value?.image;
+  if (!res.ok || !uploadUrl || !urn) {
+    throw new Error(extractError(json, `LinkedIn initializeUpload failed: ${res.status}`));
   }
-
-  return { asset, uploadUrl };
+  return { uploadUrl, urn };
 }
 
-async function putBytes(
-  uploadUrl: string,
-  bytes: Uint8Array,
-  mimeType: string,
-  accessToken: string,
-): Promise<void> {
+async function uploadImage(uploadUrl: string, bytes: Uint8Array, accessToken: string, mimeType: string) {
   const res = await fetch(uploadUrl, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": mimeType || "application/octet-stream",
-    },
-    body: bytes as any,
+    headers: headers(accessToken, { "Content-Type": mimeType || "application/octet-stream" }),
+    body: asArrayBuffer(bytes),
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`LinkedIn media upload failed: ${res.status} ${text.slice(0, 500)}`);
+    throw new Error(`LinkedIn image upload failed: ${res.status} ${text.slice(0, 500)}`);
   }
 }
 
-async function downloadBytes(url: string): Promise<{ bytes: Uint8Array; mimeType: string }> {
-  const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
-  if (!res.ok) throw new Error(`Media download failed: ${res.status} ${res.statusText}`);
-  const mimeType = res.headers.get("content-type") ?? "application/octet-stream";
-  const bytes = new Uint8Array(await res.arrayBuffer());
-  if (bytes.length === 0) throw new Error("Media download returned empty body");
-  return { bytes, mimeType };
+async function uploadVideo(
+  uploadUrl: string,
+  sourceUrl: string,
+  sizeBytes: number,
+  accessToken: string,
+  urn: string,
+) {
+  const etags: string[] = [];
+  for (let start = 0; start < sizeBytes; start += VIDEO_CHUNK) {
+    const end = Math.min(start + VIDEO_CHUNK, sizeBytes) - 1;
+    const source = await fetch(sourceUrl, {
+      headers: {
+        Range: `bytes=${start}-${end}`,
+        "accept-encoding": "identity",
+      },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (source.status !== 206) {
+      throw new Error(
+        source.status === 200
+          ? "Media storage did not return the requested video range"
+          : `LinkedIn video download failed: ${source.status}`,
+      );
+    }
+    const chunk = new Uint8Array(await source.arrayBuffer());
+    const upload = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: headers(accessToken, { "Content-Type": "application/octet-stream" }),
+      body: asArrayBuffer(chunk),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!upload.ok) {
+      const text = await upload.text().catch(() => "");
+      throw new Error(`LinkedIn video upload failed: ${upload.status} ${text.slice(0, 500)}`);
+    }
+    const etag = upload.headers.get("etag");
+    if (!etag) throw new Error("LinkedIn video upload did not return an etag");
+    etags.push(etag);
+  }
+  const finalize = await fetch("https://api.linkedin.com/rest/videos?action=finalizeUpload", {
+    method: "POST",
+    headers: headers(accessToken, { "Content-Type": "application/json" }),
+    body: JSON.stringify({
+      finalizeUploadRequest: {
+        video: urn,
+        uploadToken: "",
+        uploadedPartIds: etags,
+      },
+    }),
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  if (!finalize.ok) {
+    const json = await parseJson<Record<string, unknown>>(finalize);
+    throw new Error(extractError(json, `LinkedIn finalizeUpload failed: ${finalize.status}`));
+  }
+}
+
+async function waitForImageGrace() {
+  await new Promise((resolve) => setTimeout(resolve, 8000));
+}
+
+async function waitForVideo(accessToken: string, urn: string) {
+  for (let attempt = 0; attempt < 24; attempt += 1) {
+    const res = await fetch(`https://api.linkedin.com/rest/videos/${encodeURIComponent(urn)}`, {
+      headers: headers(accessToken),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    const json = await parseJson<{ status?: string; processingFailureReason?: string; message?: string }>(res);
+    if (json.status === "AVAILABLE" || json.status === "READY") return;
+    if (json.status === "FAILED" || json.processingFailureReason) {
+      throw new Error(json.processingFailureReason ?? extractError(json, "LinkedIn video processing failed"));
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+  throw new ResumablePublishError("LinkedIn video is still processing");
+}
+
+function postContent(mediaIds: string[]) {
+  if (mediaIds.length === 0) return {};
+  if (mediaIds.length === 1) {
+    return { content: { media: { id: mediaIds[0] } } };
+  }
+  return {
+    content: {
+      multiImage: {
+        images: mediaIds.map((id) => ({ id })),
+      },
+    },
+  };
 }
 
 export async function publishToLinkedIn(params: {
@@ -130,75 +189,81 @@ export async function publishToLinkedIn(params: {
   account: Doc<"connectedAccounts">;
   media: Doc<"mediaAssets">[];
   accessToken: string;
+  existingAttempt?: Record<string, unknown>;
+  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
 }): Promise<{ platformPostId: string; permalink?: string }> {
-  const { post, target, account, media, accessToken } = params;
+  const { post, target, account, media, accessToken, existingAttempt, saveAttempt } = params;
+  const alreadyPublished = publishedFromAttempt(existingAttempt);
+  if (alreadyPublished) return alreadyPublished;
+  const text = effectiveCaption(post.body, target.bodyOverride);
+  const author = linkedinAuthorUrn(
+    account.providerAccountId,
+    account.metadata as Record<string, unknown> | undefined,
+  );
+  const existingIds = Array.isArray(existingAttempt?.mediaIds)
+    ? existingAttempt.mediaIds.filter((id): id is string => typeof id === "string")
+    : [];
+  const mediaIds: string[] = existingIds;
 
-  const text = effectiveBody(post, target);
-  const author = getAuthorUrn(account);
-
-  const uploaded: Array<{ asset: string; title: string }> = [];
-
-  for (const asset of media) {
-    const url = asset.publicUrl ?? asset.externalUrl;
-    if (!url) throw new Error(`LinkedIn media URL missing for ${asset.filename}`);
-    const recipe =
-      asset.kind === "video"
-        ? "urn:li:digitalmediaRecipe:feedshare-video"
-        : "urn:li:digitalmediaRecipe:feedshare-image";
-
-    const { asset: urn, uploadUrl } = await registerUpload(accessToken, author, recipe);
-    const { bytes } = await downloadBytes(url);
-    const mime = asset.mimeType || (asset.kind === "video" ? "video/mp4" : "image/jpeg");
-    await putBytes(uploadUrl, bytes, mime, accessToken);
-    uploaded.push({ asset: urn, title: asset.filename });
+  if (existingIds.length > 0 && media.some((asset) => asset.kind === "video")) {
+    await Promise.all(
+      existingIds
+        .filter((urn) => urn.includes(":video:"))
+        .map((urn) => waitForVideo(accessToken, urn)),
+    );
   }
 
-  const shareMediaCategory =
-    uploaded.length === 0 ? "NONE" : media.some((m) => m.kind === "video") ? "VIDEO" : "IMAGE";
-
-  const shareContent: Record<string, unknown> = {
-    shareCommentary: { text },
-    shareMediaCategory,
-  };
-
-  if (uploaded.length > 0) {
-    shareContent.media = uploaded.map((u) => ({
-      status: "READY",
-      media: u.asset,
-      description: u.title ? { text: u.title.slice(0, 300) } : undefined,
-      title: u.title ? { text: u.title.slice(0, 200) } : undefined,
-    }));
+  if (mediaIds.length === 0) {
+    for (const asset of media) {
+      const url = asset.publicUrl ?? asset.externalUrl;
+      if (!url) throw new Error(`LinkedIn media URL missing for ${asset.filename}`);
+      if (asset.kind === "video") {
+        const { uploadUrl, urn } = await initializeUpload(accessToken, author, "video", asset.sizeBytes);
+        await uploadVideo(uploadUrl, url, asset.sizeBytes, accessToken, urn);
+        mediaIds.push(urn);
+        await saveAttempt?.({ kind: "linkedin", mediaIds: [...mediaIds] });
+        await waitForVideo(accessToken, urn);
+      } else {
+        const source = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+        if (!source.ok) throw new Error(`Media download failed: ${source.status}`);
+        const bytes = new Uint8Array(await source.arrayBuffer());
+        const { uploadUrl, urn } = await initializeUpload(accessToken, author, "image");
+        await uploadImage(uploadUrl, bytes, accessToken, asset.mimeType);
+        mediaIds.push(urn);
+        await saveAttempt?.({ kind: "linkedin", mediaIds: [...mediaIds] });
+        await waitForImageGrace();
+      }
+    }
   }
 
-  const body = {
+  const payload = {
     author,
+    commentary: text,
+    visibility: "PUBLIC",
+    distribution: {
+      feedDistribution: "MAIN_FEED",
+      targetEntities: [] as string[],
+      thirdPartyDistributionChannels: [] as string[],
+    },
+    ...postContent(mediaIds),
     lifecycleState: "PUBLISHED",
-    specificContent: { "com.linkedin.ugc.ShareContent": shareContent },
-    visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" },
+    isReshareDisabledByAuthor: false,
   };
 
-  const res = await fetch("https://api.linkedin.com/v2/ugcPosts", {
+  const res = await fetch("https://api.linkedin.com/rest/posts", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-      "X-Restli-Protocol-Version": "2.0.0",
-    },
-    body: JSON.stringify(body),
+    headers: headers(accessToken, { "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-
-  const json = await parseJson<{ id?: string; message?: string; detail?: string }>(res);
-
-  if (!res.ok || !json.id) {
+  const json = await parseJson<{ id?: string; message?: string }>(res);
+  const id = res.headers.get("x-restli-id") ?? json.id;
+  if ((!res.ok && res.status !== 201) || !id) {
     throw new Error(extractError(json, `LinkedIn post failed: ${res.status}`));
   }
-
-  return {
-    platformPostId: json.id,
-    permalink: `https://www.linkedin.com/feed/update/${encodeURIComponent(json.id)}`,
-  };
+  const permalink = `https://www.linkedin.com/feed/update/${encodeURIComponent(id)}`;
+  await saveAttempt?.({ kind: "linkedin", platformPostId: id, permalink, mediaIds });
+  return { platformPostId: id, permalink };
 }
 
-// Alias for callers using lowercase naming.
 export const publishToLinkedin = publishToLinkedIn;

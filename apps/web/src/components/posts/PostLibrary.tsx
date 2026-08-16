@@ -16,6 +16,7 @@ const FILTERS: Array<{ id: PostLibraryFilter; label: string }> = [
   { id: "all", label: "All" },
   { id: "scheduled", label: "Scheduled" },
   { id: "published", label: "Posted" },
+  { id: "failed", label: "Failed" },
   { id: "draft", label: "Drafts" },
 ];
 
@@ -37,6 +38,11 @@ const PAGE_COPY: Record<
     title: "Posted",
     description: "Published posts and their account-level delivery links.",
     empty: "Published posts will collect here after delivery.",
+  },
+  failed: {
+    title: "Failed",
+    description: "Deliveries that did not go live and can be retried.",
+    empty: "Failed deliveries will collect here.",
   },
   draft: {
     title: "Drafts",
@@ -65,10 +71,12 @@ export function PostLibrary({
 }) {
   const router = useRouter();
   const removePost = useMutation(api.posts.remove);
+  const retryFailed = useMutation(api.posts.retryFailed);
   const posts = usePreloadedQuery(preloaded);
   const [, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState<string | null>(null);
   const copy = PAGE_COPY[filter];
 
   const visiblePosts = (() => {
@@ -251,6 +259,9 @@ export function PostLibrary({
                               aria-label="Custom caption"
                             />
                           )}
+                          {target.failureMessage && (
+                            <span className="text-danger">· {target.failureMessage}</span>
+                          )}
                         </span>
                       ))
                     )}
@@ -291,6 +302,36 @@ export function PostLibrary({
                     >
                       <Icon icon="hugeicons:calendar-03" width={15} />
                       View
+                    </Button>
+                  )}
+                  {(post.status === "failed" ||
+                    post.targets.some((target) => target.status === "failed")) && (
+                    <Button
+                      size="sm"
+                      variant="tertiary"
+                      isPending={retrying === post._id}
+                      onPress={async () => {
+                        setRetrying(post._id);
+                        try {
+                          const result = await retryFailed({ postId: post._id });
+                          toast.success(
+                            result.retried === 1
+                              ? "Retrying 1 failed delivery."
+                              : `Retrying ${result.retried} failed deliveries.`,
+                          );
+                        } catch (error) {
+                          toast.danger(
+                            error instanceof Error
+                              ? error.message
+                              : "Could not retry this post",
+                          );
+                        } finally {
+                          setRetrying(null);
+                        }
+                      }}
+                    >
+                      <Icon icon="hugeicons:refresh" width={15} />
+                      Retry
                     </Button>
                   )}
                   <Button

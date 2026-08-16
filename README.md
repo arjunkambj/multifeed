@@ -51,10 +51,10 @@ Provider-console requirements:
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Facebook  | Business-type app with Facebook Login for Business; create a User access token configuration containing the requested Page permissions and set its ID as `META_FACEBOOK_CONFIG_ID`            |
 | Instagram | Instagram API with Facebook Login for Business; create a User access token configuration containing the requested `instagram_*`/Page permissions and set its ID as `META_INSTAGRAM_CONFIG_ID` |
-| Threads   | Threads use case with its own Threads App ID/secret; permissions `threads_basic`, `threads_content_publish`, `threads_manage_insights`                                                        |
+| Threads   | Threads use case with its own Threads App ID/secret; permissions `threads_basic`, `threads_content_publish`, `threads_manage_replies`, `threads_manage_insights`                                                        |
 | LinkedIn  | Sign In with LinkedIn using OpenID Connect plus Share on LinkedIn; programmatic refresh tokens require Marketing Developer Platform approval                                                  |
 | YouTube   | Enable YouTube Data API v3 and YouTube Analytics API; configure the OAuth consent screen for the requested scopes                                                                             |
-| TikTok    | Login Kit and Content Posting API with approved `user.info.basic`, `user.info.profile`, and `video.publish` scopes                                                                            |
+| TikTok    | Login Kit and Content Posting API with approved `user.info.basic`, `user.info.profile`, `video.publish`, and `video.upload` scopes                                                                            |
 | X         | OAuth 2.0 enabled with exact callback URL; use a confidential client secret when available                                                                                                    |
 
 ### Backend / Convex — summary
@@ -66,6 +66,7 @@ Set on the **deployment** (Dashboard or `npx convex env set` from `apps/backend`
 | **Auth**              | `NEXT_PUBLIC_HEXCLAVE_PROJECT_ID` (same as web)                                    |
 | **Token crypto**      | `TOKEN_ENCRYPTION_KEY` (`openssl rand -hex 32`)                                    |
 | **OAuth server auth** | `OAUTH_SERVER_SECRET` (same 64-char hex value as `apps/web`)                       |
+| **Social app secrets** | `X_*`, `LINKEDIN_*`, `GOOGLE_*`, `TIKTOK_*`, `META_*`, `THREADS_*` (same values as `apps/web`) |
 | **Dodo webhook**      | `DODO_PAYMENTS_WEBHOOK_KEY` → `https://<CONVEX_SITE_URL>/webhook/dodopayment`      |
 | **Limits (prod)**     | `BILLING_SOFT_LIMITS=false`                                                        |
 | **R2 media**          | `R2_BUCKET`, `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_TOKEN` |

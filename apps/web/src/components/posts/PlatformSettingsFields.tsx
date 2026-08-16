@@ -54,9 +54,7 @@ export function PlatformSettingsFields({
   const showTitle = platform === "youtube";
   const showVisibility = ["youtube", "tiktok"].includes(platform);
   const showAltText = kind === "image" && platform !== "tiktok";
-  const showComments = ["facebook", "instagram", "tiktok", "youtube"].includes(
-    platform,
-  );
+  const showComments = platform === "tiktok";
 
   return (
     <div className="flex flex-col gap-3 border-t border-border/70 pt-3">

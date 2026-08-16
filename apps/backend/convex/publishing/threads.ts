@@ -1,12 +1,13 @@
 "use node";
 
 import type { Doc } from "../_generated/dataModel";
+import { effectiveCaption, publishedFromAttempt, ResumablePublishError } from "./helpers";
 
 const GRAPH = "https://graph.threads.net/v1.0";
 const TIMEOUT = 30_000;
 
 function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {
-  return (target.bodyOverride?.trim() || post.body?.trim() || "").trim();
+  return effectiveCaption(post.body, target.bodyOverride);
 }
 
 async function gfetch(url: string, init: RequestInit): Promise<Record<string, string>> {
@@ -29,8 +30,12 @@ export async function publishToThreads(params: {
   account: Doc<"connectedAccounts">;
   media: Doc<"mediaAssets">[];
   accessToken: string;
+  existingAttempt?: Record<string, unknown>;
+  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
 }): Promise<{ platformPostId: string; permalink?: string }> {
-  const { post, target, media, accessToken } = params;
+  const { post, target, media, accessToken, existingAttempt, saveAttempt } = params;
+  const alreadyPublished = publishedFromAttempt(existingAttempt);
+  if (alreadyPublished) return alreadyPublished;
   const text = effectiveBody(post, target);
   const userId = params.account.providerAccountId;
   if (!userId) throw new Error("Threads user ID missing");
@@ -56,11 +61,48 @@ export async function publishToThreads(params: {
     return data.id as string;
   }
 
+  async function permalinkFor(id: string): Promise<string | undefined> {
+    const data = await gfetch(
+      `${GRAPH}/${id}?fields=permalink&access_token=${encodeURIComponent(accessToken)}`,
+      { method: "GET" },
+    ).catch(() => ({} as Record<string, string>));
+    return typeof data.permalink === "string" ? data.permalink : undefined;
+  }
+
+  async function waitForContainer(creationId: string) {
+    for (let attempt = 0; attempt < 15; attempt += 1) {
+      const data = await gfetch(
+        `${GRAPH}/${creationId}?fields=status,error_message&access_token=${encodeURIComponent(accessToken)}`,
+        { method: "GET" },
+      ).catch(() => ({ status: "IN_PROGRESS" } as Record<string, string>));
+      const status = String(data.status ?? "").toUpperCase();
+      if (status === "PUBLISHED") return "published" as const;
+      if (status === "FINISHED") return "ready" as const;
+      if (status === "ERROR" || status === "EXPIRED") {
+        throw new Error(data.error_message || `Threads media processing failed (${status})`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 4000));
+    }
+    throw new ResumablePublishError("Threads media is still processing");
+  }
+
+  async function finish(cid: string) {
+    await saveAttempt?.({ kind: "threads", creationId: cid });
+    const state = await waitForContainer(cid);
+    const id = state === "published" ? cid : await publishContainer(cid);
+    const permalink = await permalinkFor(id);
+    await saveAttempt?.({ kind: "threads", platformPostId: id, permalink, creationId: cid });
+    return { platformPostId: id, permalink };
+  }
+
+  if (typeof existingAttempt?.creationId === "string") {
+    return finish(existingAttempt.creationId);
+  }
+
   // Text-only
   if (post.kind === "text" && media.length === 0) {
     const cid = await createContainer({ media_type: "TEXT", text });
-    const id = await publishContainer(cid);
-    return { platformPostId: id };
+    return finish(cid);
   }
 
   // Image
@@ -71,8 +113,7 @@ export async function publishToThreads(params: {
         media[0]!.publicUrl ?? (media[0] as unknown as { externalUrl?: string }).externalUrl;
       if (!url) throw new Error("Image URL missing");
       const cid = await createContainer({ media_type: "IMAGE", image_url: url, text });
-      const id = await publishContainer(cid);
-      return { platformPostId: id };
+      return finish(cid);
     }
     // Carousel — create each child with is_carousel_item=true
     const children: string[] = [];
@@ -86,13 +127,13 @@ export async function publishToThreads(params: {
       });
       children.push(cid);
     }
+    await Promise.all(children.map((childId) => waitForContainer(childId)));
     const cid = await createContainer({
       media_type: "CAROUSEL",
       children: children.join(","),
       text,
     });
-    const id = await publishContainer(cid);
-    return { platformPostId: id };
+    return finish(cid);
   }
 
   // Video (including story as video)
@@ -102,21 +143,7 @@ export async function publishToThreads(params: {
     const url = m.publicUrl ?? (m as unknown as { externalUrl?: string }).externalUrl;
     if (!url) throw new Error("Video URL missing");
     const cid = await createContainer({ media_type: "VIDEO", video_url: url, text });
-    // Threads video may need processing — poll publish with backoff
-    for (let attempt = 0; attempt < 10; attempt++) {
-      try {
-        const id = await publishContainer(cid);
-        return { platformPostId: id };
-      } catch (e) {
-        const msg = (e instanceof Error ? e.message : String(e)).toLowerCase();
-        if (msg.includes("not ready") || msg.includes("processing") || msg.includes("media not ready")) {
-          await new Promise((r) => setTimeout(r, 4000));
-          continue;
-        }
-        throw e;
-      }
-    }
-    throw new Error("Threads video not ready");
+    return finish(cid);
   }
 
   // Fallback for text kind with attached media treated as image/video

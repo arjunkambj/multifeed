@@ -13,6 +13,7 @@ import { listAccountsForTeam } from "./oauth/accounts";
 import { platform as platformValidator, platformSettings, postKind, postStatus } from "./schema";
 import { publicAccountValidator } from "./oauth/accounts";
 import { mediaAssetOutputValidator } from "./media/r2";
+import { missingPublishScopes } from "./publishing/helpers";
 
 const targetInput = v.object({
   connectedAccountId: v.id("connectedAccounts"),
@@ -284,6 +285,13 @@ async function replaceTargets(
 
     if (!account || account.teamId !== input.teamId) {
       fail("NOT_FOUND", "Invalid connected account");
+    }
+    const missingScopes = missingPublishScopes(account.platform, account.scopes);
+    if (missingScopes.length > 0) {
+      fail(
+        "CONFLICT",
+        `Reconnect @${account.username} to grant updated ${account.platform} permissions`,
+      );
     }
     if (account.status !== "active") {
       fail(
@@ -684,6 +692,51 @@ export const reschedule = mutation({
     await Promise.all(targetUpdates);
 
     return { ok: true as const };
+  },
+});
+
+export const retryFailed = mutation({
+  args: { postId: v.id("posts") },
+  returns: v.object({ retried: v.number() }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const post = await ctx.db.get("posts", args.postId);
+    if (!post || post.teamId !== user.selectedTeamId) {
+      fail("NOT_FOUND", "Post not found");
+    }
+    if (post.status === "publishing" || post.status === "archived") {
+      fail("CONFLICT", "This post cannot be retried right now");
+    }
+
+    const now = Date.now();
+    const targets = await loadTargets(ctx, args.postId);
+    const failed = targets.filter((target) => target.status === "failed");
+    if (failed.length === 0) {
+      fail("CONFLICT", "There are no failed deliveries to retry");
+    }
+
+    await Promise.all(
+      failed.map((target) =>
+        ctx.db.patch("postTargets", target._id, {
+          status: "scheduled",
+          failureCode: undefined,
+          failureMessage: undefined,
+          publishAttempt: undefined,
+          scheduledFor: now,
+          updatedAt: now,
+        }),
+      ),
+    );
+    await ctx.db.patch("posts", args.postId, {
+      status: "scheduled",
+      scheduledFor: now,
+      updatedByUserId: user.id,
+      updatedAt: now,
+    });
+    await ctx.scheduler.runAfter(0, internal.publishing.publishPost, {
+      postId: args.postId,
+    });
+    return { retried: failed.length };
   },
 });
 

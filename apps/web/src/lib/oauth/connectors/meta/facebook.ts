@@ -55,7 +55,9 @@ export const facebookConnector: SocialConnector = {
 
     const tokens: TokenBundle = {
       accessToken: pageAccessToken,
+      refreshToken: userTokens.accessToken,
       expiresAt: userTokens.expiresAt,
+      refreshTokenExpiresAt: userTokens.expiresAt,
       scopes: SCOPES,
       tokenType: "page",
     };

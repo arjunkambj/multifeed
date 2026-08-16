@@ -1,13 +1,13 @@
 "use node";
 
 import type { Doc } from "../_generated/dataModel";
-import { decryptSecret } from "../oauth/crypto";
+import { effectiveCaption, publishedFromAttempt, ResumablePublishError } from "./helpers";
 
 const GRAPH = "https://graph.facebook.com/v24.0";
-const TIMEOUT_MS = 15_000;
+const TIMEOUT_MS = 60_000;
 
 function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {
-  return (target.bodyOverride?.trim() || post.body?.trim() || "").trim();
+  return effectiveCaption(post.body, target.bodyOverride);
 }
 
 function mediaUrl(asset: Doc<"mediaAssets">): string {
@@ -16,7 +16,10 @@ function mediaUrl(asset: Doc<"mediaAssets">): string {
   return url;
 }
 
-async function graphFetch(url: string, init: RequestInit): Promise<Record<string, string>> {
+async function graphFetch(
+  url: string,
+  init: RequestInit,
+): Promise<Record<string, string> & { status?: { video_status?: string } }> {
   const res = await fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
   const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok) {
@@ -33,19 +36,18 @@ async function graphFetch(url: string, init: RequestInit): Promise<Record<string
   return json as Record<string, string>;
 }
 
-export async function decryptToken(account: Doc<"connectedAccounts">): Promise<string> {
-  if (!account.encryptedAccessToken) throw new Error("Missing access token");
-  return decryptSecret(account.encryptedAccessToken);
-}
-
 export async function publishToFacebook(params: {
   post: Doc<"posts">;
   target: Doc<"postTargets">;
   account: Doc<"connectedAccounts">;
   media: Doc<"mediaAssets">[];
   accessToken: string;
+  existingAttempt?: Record<string, unknown>;
+  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
 }): Promise<{ platformPostId: string; permalink?: string }> {
-  const { post, target, account, media, accessToken } = params;
+  const { post, target, account, media, accessToken, existingAttempt, saveAttempt } = params;
+  const alreadyPublished = publishedFromAttempt(existingAttempt);
+  if (alreadyPublished) return alreadyPublished;
   const body = effectiveBody(post, target);
   const pageId =
     account.providerAccountId ??
@@ -60,10 +62,77 @@ export async function publishToFacebook(params: {
     });
     const id = data.id ?? data.post_id;
     if (!id) throw new Error("Facebook: no post id returned");
+    await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://facebook.com/${id}` });
     return { platformPostId: id, permalink: `https://facebook.com/${id}` };
   }
 
-  if (post.kind === "image" || post.kind === "story") {
+  const isStory = post.kind === "story" || target.platformSettings?.placement === "story";
+  if (isStory) {
+    if (media.length === 0) throw new Error("Facebook stories require media");
+    const asset = media[0]!;
+    const url = mediaUrl(asset);
+    if (asset.kind === "video" || post.kind === "video") {
+      let videoId = typeof existingAttempt?.videoId === "string" ? existingAttempt.videoId : undefined;
+      if (!videoId) {
+        const start = await graphFetch(`${GRAPH}/${pageId}/video_stories`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ upload_phase: "start", access_token: accessToken }),
+        });
+        videoId = start.video_id;
+        const uploadUrl = start.upload_url;
+        if (!videoId || !uploadUrl) throw new Error("Facebook story video start failed");
+        await saveAttempt?.({ kind: "facebook_story_video", videoId, pageId });
+        const uploadRes = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { Authorization: `OAuth ${accessToken}`, file_url: url },
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        });
+        if (!uploadRes.ok) {
+          throw new Error(`Facebook story video upload failed: ${uploadRes.status}`);
+        }
+      }
+      for (let attempt = 0; attempt < 24; attempt += 1) {
+        const status = await graphFetch(
+          `${GRAPH}/${videoId}?fields=status&access_token=${encodeURIComponent(accessToken)}`,
+          { method: "GET" },
+        ).catch(() => ({ status: { video_status: "in_progress" } }));
+        const videoStatus = String(status.status?.video_status ?? "").toLowerCase();
+        if (videoStatus === "error") throw new Error("Facebook story video processing failed");
+        if (videoStatus === "upload_complete" || videoStatus === "ready") break;
+        if (attempt === 23) throw new ResumablePublishError("Facebook story video is still processing");
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+      const finish = await graphFetch(`${GRAPH}/${pageId}/video_stories`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          upload_phase: "finish",
+          video_id: videoId,
+          access_token: accessToken,
+        }),
+      });
+      const id = finish.post_id ?? videoId;
+      await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://www.facebook.com/stories/${id}` });
+      return { platformPostId: id, permalink: `https://www.facebook.com/stories/${id}` };
+    }
+    const photo = await graphFetch(`${GRAPH}/${pageId}/photos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ url, published: "false", access_token: accessToken }),
+    });
+    if (!photo.id) throw new Error("Facebook story photo upload failed");
+    const published = await graphFetch(`${GRAPH}/${pageId}/photo_stories`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ photo_id: photo.id, access_token: accessToken }),
+    });
+    const id = published.post_id ?? photo.id;
+    await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://www.facebook.com/stories/${id}` });
+    return { platformPostId: id, permalink: `https://www.facebook.com/stories/${id}` };
+  }
+
+  if (post.kind === "image") {
     if (media.length === 0) throw new Error("Facebook image post requires media");
     if (media.length === 1) {
       const url = mediaUrl(media[0]!);
@@ -74,7 +143,8 @@ export async function publishToFacebook(params: {
       });
       const id = data.id ?? data.post_id;
       if (!id) throw new Error("Facebook photo: no id");
-      return { platformPostId: id, permalink: `https://facebook.com/${id}` };
+      await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://facebook.com/${id}` });
+    return { platformPostId: id, permalink: `https://facebook.com/${id}` };
     }
     const uploaded: string[] = [];
     for (const m of media) {
@@ -96,6 +166,7 @@ export async function publishToFacebook(params: {
     });
     const id = data.id ?? data.post_id;
     if (!id) throw new Error("Facebook carousel publish failed");
+    await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://facebook.com/${id}` });
     return { platformPostId: id, permalink: `https://facebook.com/${id}` };
   }
 
@@ -110,6 +181,7 @@ export async function publishToFacebook(params: {
     });
     const id = data.id;
     if (!id) throw new Error("Facebook video: no id");
+    await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://facebook.com/${id}` });
     return { platformPostId: id, permalink: `https://facebook.com/${id}` };
   }
 
@@ -122,8 +194,12 @@ export async function publishToInstagram(params: {
   account: Doc<"connectedAccounts">;
   media: Doc<"mediaAssets">[];
   accessToken: string;
+  existingAttempt?: Record<string, unknown>;
+  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
 }): Promise<{ platformPostId: string; permalink?: string }> {
-  const { post, target, media, accessToken } = params;
+  const { post, target, media, accessToken, existingAttempt, saveAttempt } = params;
+  const alreadyPublished = publishedFromAttempt(existingAttempt);
+  if (alreadyPublished) return alreadyPublished;
   const body = effectiveBody(post, target);
   const igUserId =
     (params.account.metadata as Record<string, unknown> | undefined)?.igUserId ??
@@ -154,9 +230,48 @@ export async function publishToInstagram(params: {
     return data.id as string;
   }
 
+  async function permalinkFor(id: string) {
+    const data = await graphFetch(
+      `${GRAPH}/${id}?fields=permalink&access_token=${encodeURIComponent(accessToken)}`,
+      { method: "GET" },
+    ).catch(() => ({} as Record<string, string>));
+    return typeof data.permalink === "string"
+      ? data.permalink
+      : `https://www.instagram.com/p/${id}`;
+  }
+
+  async function waitForContainer(creationId: string) {
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      const status = await graphFetch(
+        `${GRAPH}/${creationId}?fields=status_code&access_token=${encodeURIComponent(accessToken)}`,
+        { method: "GET" },
+      ).catch(() => ({ status_code: "IN_PROGRESS" }));
+      const code = String(status.status_code ?? "").toUpperCase();
+      if (code === "PUBLISHED") return "published" as const;
+      if (code === "FINISHED") return "ready" as const;
+      if (code === "ERROR" || code === "EXPIRED") {
+        throw new Error(`Instagram media processing failed (${code})`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+    throw new ResumablePublishError("Instagram media is still processing");
+  }
+
+  async function finishContainer(creationId: string) {
+    const state = await waitForContainer(creationId);
+    const id = state === "published" ? creationId : await publishContainer(creationId);
+    const permalink = await permalinkFor(id);
+    await saveAttempt?.({ kind: "instagram", platformPostId: id, permalink, creationId });
+    return { platformPostId: id, permalink };
+  }
+
+  if (typeof existingAttempt?.creationId === "string") {
+    return finishContainer(existingAttempt.creationId);
+  }
+
   if (post.kind === "text") throw new Error("Instagram requires an image or video");
 
-  if (post.kind === "image" && media.length === 1) {
+  if ((post.kind === "image" || isStory) && media.length === 1 && media[0]!.kind !== "video") {
     const url = mediaUrl(media[0]!);
     const creationId = await createContainer({
       image_url: url,
@@ -164,8 +279,8 @@ export async function publishToInstagram(params: {
       ...(isStory ? { media_type: "STORIES" } : {}),
       ...(target.platformSettings?.altText ? { alt_text: target.platformSettings.altText } : {}),
     });
-    const id = await publishContainer(creationId);
-    return { platformPostId: id, permalink: `https://www.instagram.com/p/${id}` };
+    await saveAttempt?.({ kind: "instagram", creationId });
+    return finishContainer(creationId);
   }
 
   if (post.kind === "image" && media.length > 1) {
@@ -175,16 +290,17 @@ export async function publishToInstagram(params: {
       const cid = await createContainer({ image_url: url, is_carousel_item: "true" });
       childIds.push(cid);
     }
+    await Promise.all(childIds.map((childId) => waitForContainer(childId)));
     const creationId = await createContainer({
       caption: body,
       media_type: "CAROUSEL",
       children: childIds.join(","),
     });
-    const id = await publishContainer(creationId);
-    return { platformPostId: id, permalink: `https://www.instagram.com/p/${id}` };
+    await saveAttempt?.({ kind: "instagram", creationId, childIds });
+    return finishContainer(creationId);
   }
 
-  if (post.kind === "video" || isReel || isStory) {
+  if (post.kind === "video" || isReel || (isStory && media[0]?.kind === "video")) {
     const m = media[0];
     if (!m) throw new Error("Video missing");
     const url = mediaUrl(m);
@@ -194,20 +310,8 @@ export async function publishToInstagram(params: {
       media_type: isStory ? "STORIES" : isReel ? "REELS" : "VIDEO",
       ...(isReel && target.platformSettings?.shareToFeed === false ? { share_to_feed: "false" } : {}),
     });
-    for (let attempt = 0; attempt < 6; attempt++) {
-      try {
-        const id = await publishContainer(creationId);
-        return { platformPostId: id, permalink: `https://www.instagram.com/p/${id}` };
-      } catch (e) {
-        const msg = e instanceof Error ? e.message.toLowerCase() : "";
-        if (msg.includes("not ready") || msg.includes("processing") || msg.includes("media is not ready")) {
-          await new Promise((r) => setTimeout(r, 5000));
-          continue;
-        }
-        throw e;
-      }
-    }
-    throw new Error("Instagram video not ready for publish");
+    await saveAttempt?.({ kind: "instagram", creationId });
+    return finishContainer(creationId);
   }
 
   throw new Error(`Instagram: unsupported kind ${post.kind}`);

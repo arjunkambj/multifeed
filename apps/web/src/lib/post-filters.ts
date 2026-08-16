@@ -2,6 +2,7 @@ export const POST_LIBRARY_FILTERS = [
   "all",
   "scheduled",
   "published",
+  "failed",
   "draft",
 ] as const;
 

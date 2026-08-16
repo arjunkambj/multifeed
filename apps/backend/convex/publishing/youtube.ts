@@ -1,17 +1,12 @@
 "use node";
 
 import type { Doc } from "../_generated/dataModel";
+import { effectiveCaption, publishedFromAttempt, youtubePrivacy } from "./helpers";
 
-const TIMEOUT = 30_000;
+const TIMEOUT = 8 * 60 * 1000;
 
 function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {
-  return (target.bodyOverride?.trim() || post.body?.trim() || "").trim();
-}
-
-function toYouTubePrivacy(visibility?: string): string {
-  if (visibility === "private") return "private";
-  if (visibility === "unlisted") return "unlisted";
-  return "public";
+  return effectiveCaption(post.body, target.bodyOverride);
 }
 
 export async function publishToYoutube(params: {
@@ -20,8 +15,17 @@ export async function publishToYoutube(params: {
   account: Doc<"connectedAccounts">;
   media: Doc<"mediaAssets">[];
   accessToken: string;
+  existingAttempt?: Record<string, unknown>;
+  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
 }): Promise<{ platformPostId: string; permalink?: string }> {
-  const { post, target, media, accessToken } = params;
+  const { post, target, media, accessToken, existingAttempt, saveAttempt } = params;
+  const alreadyPublished = publishedFromAttempt(existingAttempt);
+  if (alreadyPublished) return alreadyPublished;
+  if (existingAttempt?.kind === "youtube") {
+    throw new Error(
+      "YouTube may have already received this upload. Check the channel before retrying.",
+    );
+  }
 
   if (post.kind !== "video") throw new Error("Unsupported kind for YouTube");
 
@@ -47,15 +51,13 @@ export async function publishToYoutube(params: {
   };
 
   const status: Record<string, unknown> = {
-    privacyStatus: toYouTubePrivacy(target.platformSettings?.visibility),
+    privacyStatus: youtubePrivacy(target.platformSettings?.visibility),
     selfDeclaredMadeForKids: target.platformSettings?.madeForKids ?? false,
   };
-  if (typeof target.platformSettings?.notifySubscribers === "boolean") {
-    status.notifySubscribers = target.platformSettings.notifySubscribers;
-  }
+  const notifySubscribers = target.platformSettings?.notifySubscribers ?? true;
 
   const initRes = await fetch(
-    "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
+    `https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status&notifySubscribers=${notifySubscribers ? "true" : "false"}`,
     {
       method: "POST",
       headers: {
@@ -83,20 +85,22 @@ export async function publishToYoutube(params: {
 
   const uploadUrl = initRes.headers.get("Location") ?? initRes.headers.get("location");
   if (!uploadUrl) throw new Error("YouTube: no upload URL");
+  await saveAttempt?.({ kind: "youtube", uploadStarted: true });
 
   const dl = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT) });
   if (!dl.ok) throw new Error(`Video download failed: ${dl.status}`);
-  const bytes = new Uint8Array(await dl.arrayBuffer());
+  if (!dl.body) throw new Error("Video download returned an empty body");
 
   const putRes = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
       "Content-Type": asset.mimeType || "video/mp4",
-      "Content-Length": String(bytes.byteLength),
+      "Content-Length": String(asset.sizeBytes),
     },
-    body: bytes as unknown as never,
+    body: dl.body,
+    duplex: "half",
     signal: AbortSignal.timeout(TIMEOUT),
-  });
+  } as RequestInit);
 
   const putJson = (await putRes.json().catch(() => ({}))) as {
     id?: string;
@@ -106,5 +110,7 @@ export async function publishToYoutube(params: {
     throw new Error(putJson.error?.message ?? `YouTube upload failed: ${putRes.status}`);
   }
 
-  return { platformPostId: putJson.id, permalink: `https://www.youtube.com/watch?v=${putJson.id}` };
+  const permalink = `https://www.youtube.com/watch?v=${putJson.id}`;
+  await saveAttempt?.({ kind: "youtube", platformPostId: putJson.id, permalink });
+  return { platformPostId: putJson.id, permalink };
 }

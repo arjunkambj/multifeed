@@ -8,7 +8,7 @@
     "dev": "convex dev",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-strip-types --test publishing-helpers.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +22,8 @@
     "typescript": "7.0.2"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1083.0",
+    "@aws-sdk/s3-request-presigner": "3.1083.0",
     "@convex-dev/r2": "^0.10.2",
     "@hexclave/next": "^1.0.71",
     "@multifeed/plans": "workspace:*",

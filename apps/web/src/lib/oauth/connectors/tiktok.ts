@@ -2,7 +2,7 @@ import { requireEnv } from "../env";
 import { oauthFetch } from "./http";
 import type { SocialConnector, TokenBundle } from "./types";
 
-const SCOPES = ["user.info.basic", "user.info.profile", "video.publish"];
+const SCOPES = ["user.info.basic", "user.info.profile", "video.publish", "video.upload"];
 const TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
 
 const credentials = () => ({
@@ -34,7 +34,7 @@ const tokenBundle = (data: TokenResponse, fallbackRefreshToken?: string) => ({
 
 export const tiktokConnector: SocialConnector = {
   platform: "tiktok",
-  capabilities: ["image", "video"],
+  capabilities: ["image", "video", "carousel"],
   requiresPkce: false,
 
   buildAuthorizeUrl(input) {

@@ -38,6 +38,7 @@ import {
   platformBrand,
   platformLabel,
 } from "@/lib/platform-meta";
+import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import { PlatformSettingsFields } from "./PlatformSettingsFields";
 import { PlatformPostPreview } from "./PlatformPostPreview";
 import { PostFormatPicker } from "./PostFormatPicker";
@@ -347,7 +348,9 @@ function usePostComposerForm({
     });
   };
 
-  const activeAccounts = (accounts ?? []).filter((a) => a.status === "active");
+  const activeAccounts = (accounts ?? []).filter(
+    (account) => !accountNeedsReconnect(account),
+  );
 
   // Prefill once when duplicating or editing an existing post.
   useEffect(() => {
@@ -368,7 +371,7 @@ function usePostComposerForm({
     }));
     const activeAccountsSet = new Set(
       (accounts ?? []).reduce<Id<"connectedAccounts">[]>((acc, a) => {
-        if (a.status === "active") acc.push(a._id);
+        if (!accountNeedsReconnect(a)) acc.push(a._id);
         return acc;
       }, []),
     );
@@ -649,13 +652,15 @@ function usePostComposerForm({
             <div className="mt-3">
               {activeAccounts.length === 0 ? (
                 <p className="text-sm text-muted">
-                  No accounts connected.{" "}
+                  {(accounts ?? []).length > 0
+                    ? "Connected accounts need a reconnect before they can publish."
+                    : "No accounts connected."}{" "}
                   <button
                     type="button"
                     className="font-medium text-accent hover:underline"
                     onClick={() => router.push("/connections")}
                   >
-                    Connect accounts
+                    {(accounts ?? []).length > 0 ? "Reconnect accounts" : "Connect accounts"}
                   </button>
                 </p>
               ) : compatibleAccounts.length === 0 ? (
@@ -935,7 +940,9 @@ function usePostComposerForm({
                                 }
                               />
                             </div>
-                            <div className="grid gap-3 sm:grid-cols-2">
+                            {(["x", "facebook", "instagram", "linkedin", "threads"] as const).includes(
+                              account.platform as "x",
+                            ) && (
                               <div className="flex flex-col gap-1.5">
                                 <Label htmlFor={`comment-${account._id}`}>
                                   First comment
@@ -953,16 +960,18 @@ function usePostComposerForm({
                                   }
                                 />
                               </div>
+                            )}
+                            {account.platform === "x" && (
                               <div className="flex flex-col gap-1.5">
                                 <Label htmlFor={`reference-${account._id}`}>
-                                  Referenced post URL
+                                  Reply to post URL
                                 </Label>
                                 <Input
                                   id={`reference-${account._id}`}
                                   type="url"
                                   fullWidth
                                   variant="secondary"
-                                  placeholder="Reply or quote URL"
+                                  placeholder="https://x.com/.../status/..."
                                   value={options.referenceUrl}
                                   onChange={(event) =>
                                     updateTargetOptions(account._id, {
@@ -971,7 +980,7 @@ function usePostComposerForm({
                                   }
                                 />
                               </div>
-                            </div>
+                            )}
                             <PlatformSettingsFields
                               accountId={account._id}
                               platform={account.platform}

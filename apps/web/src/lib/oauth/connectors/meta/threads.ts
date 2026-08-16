@@ -9,6 +9,7 @@ import {
 const SCOPES = [
   "threads_basic",
   "threads_content_publish",
+  "threads_manage_replies",
   "threads_manage_insights",
 ];
 

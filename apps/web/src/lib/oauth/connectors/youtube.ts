@@ -19,7 +19,7 @@ function credentials() {
 
 export const youtubeConnector: SocialConnector = {
   platform: "youtube",
-  capabilities: ["video", "image", "text", "analytics"],
+  capabilities: ["video", "analytics"],
   requiresPkce: false,
 
   buildAuthorizeUrl(input) {

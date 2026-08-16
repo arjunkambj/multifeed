@@ -75,7 +75,9 @@ export const instagramConnector: SocialConnector = {
     const profile = await metaFetchIgProfile(pageAccessToken, igUserId);
     const tokens: TokenBundle = {
       accessToken: pageAccessToken,
+      refreshToken: userTokens.accessToken,
       expiresAt: userTokens.expiresAt,
+      refreshTokenExpiresAt: userTokens.expiresAt,
       scopes: SCOPES,
       tokenType: "page",
     };

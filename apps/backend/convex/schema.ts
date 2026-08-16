@@ -85,6 +85,14 @@ const targetStatus = v.union(
   v.literal("skipped"),
 );
 
+export const targetClaimStatus = v.union(
+  v.literal("claimed"),
+  v.literal("resume"),
+  v.literal("busy"),
+  v.literal("done"),
+  v.literal("missing"),
+);
+
 const metricSyncStatus = v.union(
   v.literal("idle"),
   v.literal("queued"),
@@ -279,6 +287,7 @@ export default defineSchema({
     platformPermalink: v.optional(v.string()),
     failureCode: v.optional(v.string()),
     failureMessage: v.optional(v.string()),
+    publishAttempt: v.optional(v.any()),
     attempts: v.number(),
     metricSyncStatus,
     metricSyncError: v.optional(v.string()),

@@ -2,7 +2,7 @@ import { optionalEnv, requireEnv } from "../env";
 import { oauthFetch } from "./http";
 import type { SocialConnector } from "./types";
 
-const SCOPES = ["tweet.read", "tweet.write", "users.read", "offline.access"];
+const SCOPES = ["tweet.read", "tweet.write", "media.write", "users.read", "offline.access"];
 
 function credentials() {
   return {
@@ -25,7 +25,7 @@ function authHeader(
 
 export const xConnector: SocialConnector = {
   platform: "x",
-  capabilities: ["text", "image", "video", "analytics"],
+  capabilities: ["text", "image", "video", "carousel", "analytics"],
   requiresPkce: true,
 
   buildAuthorizeUrl(input) {

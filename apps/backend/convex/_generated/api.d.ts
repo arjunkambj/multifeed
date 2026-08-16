@@ -22,10 +22,12 @@ import type * as oauth_sessions from "../oauth/sessions.js";
 import type * as posts from "../posts.js";
 import type * as publishing from "../publishing.js";
 import type * as publishing_actions from "../publishing/actions.js";
+import type * as publishing_helpers from "../publishing/helpers.js";
 import type * as publishing_linkedin from "../publishing/linkedin.js";
 import type * as publishing_meta from "../publishing/meta.js";
 import type * as publishing_threads from "../publishing/threads.js";
 import type * as publishing_tiktok from "../publishing/tiktok.js";
+import type * as publishing_tokenRefresh from "../publishing/tokenRefresh.js";
 import type * as publishing_x from "../publishing/x.js";
 import type * as publishing_youtube from "../publishing/youtube.js";
 
@@ -50,10 +52,12 @@ declare const fullApi: ApiFromModules<{
   posts: typeof posts;
   publishing: typeof publishing;
   "publishing/actions": typeof publishing_actions;
+  "publishing/helpers": typeof publishing_helpers;
   "publishing/linkedin": typeof publishing_linkedin;
   "publishing/meta": typeof publishing_meta;
   "publishing/threads": typeof publishing_threads;
   "publishing/tiktok": typeof publishing_tiktok;
+  "publishing/tokenRefresh": typeof publishing_tokenRefresh;
   "publishing/x": typeof publishing_x;
   "publishing/youtube": typeof publishing_youtube;
 }>;
