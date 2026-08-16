@@ -1,4 +1,4 @@
-import { FREE_TRIAL, PLANS, type PlanKey } from "@multifeed/plans";
+import { PLANS, type PlanKey } from "@multifeed/plans";
 
 export const brands = [
   ["TikTok", "https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg"],
@@ -156,7 +156,7 @@ const planBadges: Record<PlanKey, string> = {
 
 export const pricingPlans = PLANS.map((plan) => ({
   badge: planBadges[plan.key],
-  cta: FREE_TRIAL.cta,
+  cta: "Choose this plan",
   description: plan.description,
   features: plan.features,
   monthlyPrice: `$${plan.prices.month}`,

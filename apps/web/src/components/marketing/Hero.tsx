@@ -318,7 +318,7 @@ export function Hero() {
             className={`${buttonVariants({ size: "lg" })} button inline-flex items-center gap-2`}
             href="/sign-in"
           >
-            <span>Start 7-day free trial</span>
+            <span>Start publishing</span>
             <Icon icon="hugeicons:arrow-right-01" width={16} />
           </Link>
           <Link
@@ -336,7 +336,7 @@ export function Hero() {
               icon="hugeicons:checkmark-circle-02"
               width={14}
             />
-            7-day free trial
+            Cancel anytime
           </span>
           <span className="inline-flex items-center gap-1.5 font-medium">
             <Icon
@@ -344,7 +344,7 @@ export function Hero() {
               icon="hugeicons:checkmark-circle-02"
               width={14}
             />
-            No credit card required
+            Simple monthly or yearly billing
           </span>
           <span className="inline-flex items-center gap-1.5 font-medium">
             <Icon

@@ -6,6 +6,8 @@ node_modules
 .pnp.js
 images
 
+ref-app
+
 # Local env files
 .env
 .env.local

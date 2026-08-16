@@ -127,7 +127,7 @@ export default function TermsPage() {
         <h2>7. Plans, billing, and cancellation</h2>
         <p>
           Paid plans renew for the billing interval selected at checkout unless
-          canceled. Prices, taxes, plan limits, trial terms, and billing dates
+          canceled. Prices, taxes, plan limits, and billing dates
           are shown before purchase. You authorize our payment provider to
           charge the applicable amount. You may cancel before renewal to prevent
           the next recurring charge; access may continue through the paid

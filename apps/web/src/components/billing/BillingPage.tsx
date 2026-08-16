@@ -5,7 +5,7 @@ import { Button, Spinner, Switch, toast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { usePreloadedQuery, type Preloaded } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { FREE_TRIAL, PLANS } from "@multifeed/plans";
+import { PLANS } from "@multifeed/plans";
 import type { BillingInterval, PlanKey } from "@multifeed/plans";
 
 const intervalLabels = {
@@ -137,7 +137,7 @@ export function BillingPage({
               <span className="text-sm text-muted">
                 {subscription
                   ? `${statusLabel(subscription.status)} · ${subscription.interval === "year" ? "Yearly" : "Monthly"}`
-                  : `${FREE_TRIAL.summary} Choose a plan to activate billing.`}
+                  : "Choose a plan to activate billing."}
               </span>
             </div>
           </div>
@@ -328,7 +328,7 @@ export function BillingPage({
                         ? "Current plan"
                         : checkoutBlocked
                           ? "Existing subscription"
-                          : FREE_TRIAL.cta}
+                          : "Choose this plan"}
                     </>
                   )}
                 </Button>

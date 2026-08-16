@@ -19,14 +19,6 @@ export interface Plan {
   features: string[];
 }
 
-const TRIAL_DAYS = 7;
-
-export const FREE_TRIAL = {
-  cta: `Start ${TRIAL_DAYS}-day free trial`,
-  days: TRIAL_DAYS,
-  summary: `Every plan starts with a ${TRIAL_DAYS}-day free trial.`,
-} as const;
-
 export const NO_PLAN_LIMITS: PlanLimits = {
   connectedAccounts: 1,
   teamSeats: 0,
