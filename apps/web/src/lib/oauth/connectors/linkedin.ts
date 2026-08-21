@@ -133,7 +133,10 @@ export const linkedinConnector: SocialConnector = {
       displayName: data.name,
       avatarUrl: data.picture,
       tokenType: "user",
-      metadata: { email: data.email },
+      metadata: {
+        email: data.email,
+        authorUrn: `urn:li:person:${data.sub}`,
+      },
     };
   },
 };

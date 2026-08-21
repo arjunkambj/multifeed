@@ -49,10 +49,10 @@ Provider-console requirements:
 
 | Provider  | Required setup                                                                                                                                                                                |
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Facebook  | Business-type app with Facebook Login for Business; create a User access token configuration containing the requested Page permissions and set its ID as `META_FACEBOOK_CONFIG_ID`            |
-| Instagram | Instagram API with Facebook Login for Business; create a User access token configuration containing the requested `instagram_*`/Page permissions and set its ID as `META_INSTAGRAM_CONFIG_ID` |
-| Threads   | Threads use case with its own Threads App ID/secret; permissions `threads_basic`, `threads_content_publish`, `threads_manage_replies`, `threads_manage_insights`                                                        |
-| LinkedIn  | Sign In with LinkedIn using OpenID Connect plus Share on LinkedIn; programmatic refresh tokens require Marketing Developer Platform approval                                                  |
+| Facebook  | Business-type app with Facebook Login for Business; Graph API **v26.0**. Create a User access token configuration containing the requested Page permissions (`pages_manage_posts`, `pages_show_list`, `pages_read_engagement`, plus `pages_manage_engagement` for first comments) and set its ID as `META_FACEBOOK_CONFIG_ID` |
+| Instagram | Instagram API with Facebook Login for Business; Graph API **v26.0**. Create a User access token configuration containing the requested `instagram_*`/Page permissions and set its ID as `META_INSTAGRAM_CONFIG_ID` |
+| Threads   | Threads use case with its own Threads App ID/secret; Graph **v1.0**; permissions `threads_basic`, `threads_content_publish`, `threads_manage_replies`, `threads_manage_insights` |
+| LinkedIn  | Sign In with LinkedIn using OpenID Connect plus Share on LinkedIn (`LinkedIn-Version: 202608`); programmatic refresh tokens require Marketing Developer Platform approval |
 | YouTube   | Enable YouTube Data API v3 and YouTube Analytics API; configure the OAuth consent screen for the requested scopes                                                                             |
 | TikTok    | Login Kit and Content Posting API with approved `user.info.basic`, `user.info.profile`, `video.publish`, and `video.upload` scopes                                                                            |
 | X         | OAuth 2.0 enabled with exact callback URL; use a confidential client secret when available                                                                                                    |

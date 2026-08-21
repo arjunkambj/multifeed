@@ -9,6 +9,7 @@ import {
   ResumablePublishError,
   linkedinAuthorUrn,
   tiktokChunkPlan,
+  tiktokInteractionDisabled,
   tiktokPrivacyLevel,
   tweetIdFromUrl,
   youtubePrivacy,
@@ -30,6 +31,9 @@ test("tiktok privacy and chunking match Content Posting API rules", () => {
     chunkSize: 10 * 1024 * 1024,
     totalChunkCount: 8,
   });
+  assert.equal(tiktokInteractionDisabled(undefined), false);
+  assert.equal(tiktokInteractionDisabled(true), false);
+  assert.equal(tiktokInteractionDisabled(false), true);
 });
 
 test("youtube privacy maps composer visibility", () => {

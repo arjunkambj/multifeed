@@ -1,9 +1,10 @@
 "use node";
 
 import type { Doc } from "../_generated/dataModel";
+import { THREADS_GRAPH } from "./apiVersions";
 import { effectiveCaption, publishedFromAttempt, ResumablePublishError } from "./helpers";
 
-const GRAPH = "https://graph.threads.net/v1.0";
+const GRAPH = THREADS_GRAPH;
 const TIMEOUT = 30_000;
 
 function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {

@@ -22,6 +22,7 @@ import type * as oauth_sessions from "../oauth/sessions.js";
 import type * as posts from "../posts.js";
 import type * as publishing from "../publishing.js";
 import type * as publishing_actions from "../publishing/actions.js";
+import type * as publishing_apiVersions from "../publishing/apiVersions.js";
 import type * as publishing_helpers from "../publishing/helpers.js";
 import type * as publishing_linkedin from "../publishing/linkedin.js";
 import type * as publishing_meta from "../publishing/meta.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   posts: typeof posts;
   publishing: typeof publishing;
   "publishing/actions": typeof publishing_actions;
+  "publishing/apiVersions": typeof publishing_apiVersions;
   "publishing/helpers": typeof publishing_helpers;
   "publishing/linkedin": typeof publishing_linkedin;
   "publishing/meta": typeof publishing_meta;

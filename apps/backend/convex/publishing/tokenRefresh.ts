@@ -1,6 +1,7 @@
 "use node";
 
 import type { Doc } from "../_generated/dataModel";
+import { META_GRAPH } from "./apiVersions";
 
 export type RefreshedToken = {
   accessToken: string;
@@ -25,7 +26,7 @@ async function refreshMetaPageToken(
   if (!appId || !appSecret) throw new Error("Convex is missing META_APP_ID or META_APP_SECRET");
 
   const exchanged = await fetchJson(
-    `https://graph.facebook.com/v24.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${encodeURIComponent(appId)}&client_secret=${encodeURIComponent(appSecret)}&fb_exchange_token=${encodeURIComponent(userToken)}`,
+    `${META_GRAPH}/oauth/access_token?grant_type=fb_exchange_token&client_id=${encodeURIComponent(appId)}&client_secret=${encodeURIComponent(appSecret)}&fb_exchange_token=${encodeURIComponent(userToken)}`,
   );
   const nextUserToken =
     exchanged.ok && typeof exchanged.json.access_token === "string"
@@ -37,7 +38,7 @@ async function refreshMetaPageToken(
       : undefined;
 
   const pages = await fetchJson(
-    `https://graph.facebook.com/v24.0/me/accounts?fields=id,access_token,instagram_business_account&limit=100&access_token=${encodeURIComponent(nextUserToken)}`,
+    `${META_GRAPH}/me/accounts?fields=id,access_token,instagram_business_account&limit=100&access_token=${encodeURIComponent(nextUserToken)}`,
   );
   if (!pages.ok || !Array.isArray(pages.json.data)) return null;
 

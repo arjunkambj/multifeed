@@ -1,10 +1,10 @@
 "use node";
 
 import type { Doc } from "../_generated/dataModel";
+import { LINKEDIN_VERSION } from "./apiVersions";
 import { effectiveCaption, linkedinAuthorUrn, publishedFromAttempt, ResumablePublishError } from "./helpers";
 
 const TIMEOUT_MS = 8 * 60 * 1000;
-const LINKEDIN_VERSION = "202601";
 const VIDEO_CHUNK = 2 * 1024 * 1024;
 
 function headers(accessToken: string, extra?: Record<string, string>) {

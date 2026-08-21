@@ -1,7 +1,7 @@
 "use node";
 
 import type { Doc } from "../_generated/dataModel";
-import { effectiveCaption, interpretTikTokStatus, ResumablePublishError, tiktokChunkPlan, tiktokPrivacyLevel } from "./helpers";
+import { effectiveCaption, interpretTikTokStatus, ResumablePublishError, tiktokChunkPlan, tiktokInteractionDisabled, tiktokPrivacyLevel } from "./helpers";
 
 const TIMEOUT = 8 * 60 * 1000;
 function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {
@@ -151,9 +151,9 @@ export async function publishToTiktok(params: {
           post_info: {
             title,
             privacy_level: tiktokPrivacyLevel(settings?.visibility),
-            disable_duet: !settings?.allowDuet,
-            disable_stitch: !settings?.allowStitch,
-            disable_comment: !settings?.allowComments,
+            disable_duet: tiktokInteractionDisabled(settings?.allowDuet),
+            disable_stitch: tiktokInteractionDisabled(settings?.allowStitch),
+            disable_comment: tiktokInteractionDisabled(settings?.allowComments),
             video_cover_timestamp_ms: 1000,
           },
           source_info: {
@@ -196,7 +196,7 @@ export async function publishToTiktok(params: {
             title,
             description: title,
             privacy_level: tiktokPrivacyLevel(settings?.visibility),
-            disable_comment: !settings?.allowComments,
+            disable_comment: tiktokInteractionDisabled(settings?.allowComments),
           },
           source_info: {
             source: "PULL_FROM_URL",

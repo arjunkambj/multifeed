@@ -1,9 +1,14 @@
+import {
+  META_GRAPH,
+  META_OAUTH_DIALOG,
+  THREADS_GRAPH,
+  THREADS_GRAPH_VERSIONED,
+} from "../../api-versions";
 import { requireEnv } from "../../env";
 import { oauthFetch } from "../http";
 import type { AccountOption, AccountProfile, TokenBundle } from "../types";
 
-const GRAPH = "https://graph.facebook.com/v24.0";
-const THREADS_GRAPH = "https://graph.threads.net";
+const GRAPH = META_GRAPH;
 
 export function metaAppCredentials() {
   return {
@@ -33,7 +38,7 @@ export function metaAuthorizeUrl(input: {
     response_type: "code",
     return_scopes: "true",
   });
-  return `https://www.facebook.com/v24.0/dialog/oauth?${params}`;
+  return `${META_OAUTH_DIALOG}?${params}`;
 }
 
 export async function metaExchangeCode(input: {
@@ -144,40 +149,108 @@ export type MetaPage = {
   instagram_business_account?: { id: string };
 };
 
-export async function metaListPages(
-  userAccessToken: string,
+const PAGE_FIELDS =
+  "id,name,username,access_token,tasks,picture.type(large),instagram_business_account";
+
+async function metaFetchPageCollection(
+  startUrl: string,
+  onError: "throw" | "ignore",
 ): Promise<MetaPage[]> {
   const pages: MetaPage[] = [];
   const seenCursors = new Set<string>();
-  let after: string | undefined;
+  let url: string | undefined = startUrl;
 
-  do {
-    const params = new URLSearchParams({
-      fields:
-        "id,name,username,access_token,tasks,picture.type(large),instagram_business_account",
-      access_token: userAccessToken,
-      limit: "100",
-    });
-    if (after) params.set("after", after);
-
-    const res = await oauthFetch(`${GRAPH}/me/accounts?${params}`);
+  while (url) {
+    const res = await oauthFetch(url);
     const data = (await res.json()) as {
       data?: MetaPage[];
       paging?: { cursors?: { after?: string }; next?: string };
       error?: { message?: string };
     };
     if (!res.ok) {
+      if (onError === "ignore") return pages;
       throw new Error(data.error?.message ?? "Failed to list Facebook Pages");
     }
-
     pages.push(...(data.data ?? []));
     const nextCursor = data.paging?.next
       ? data.paging.cursors?.after
       : undefined;
     if (!nextCursor || seenCursors.has(nextCursor)) break;
     seenCursors.add(nextCursor);
-    after = nextCursor;
-  } while (after);
+    const next = new URL(url);
+    next.searchParams.set("after", nextCursor);
+    url = next.toString();
+  }
+
+  return pages;
+}
+
+export async function metaListPages(
+  userAccessToken: string,
+): Promise<MetaPage[]> {
+  const seen = new Set<string>();
+  const pages: MetaPage[] = [];
+
+  const addPages = (batch: MetaPage[]) => {
+    for (const page of batch) {
+      if (!page.id || seen.has(page.id)) continue;
+      seen.add(page.id);
+      pages.push(page);
+    }
+  };
+
+  const accounts = new URLSearchParams({
+    fields: PAGE_FIELDS,
+    access_token: userAccessToken,
+    limit: "100",
+  });
+  addPages(
+    await metaFetchPageCollection(`${GRAPH}/me/accounts?${accounts}`, "throw"),
+  );
+
+  // Pages granted through Business Manager often never appear on /me/accounts.
+  try {
+    const businessIds: string[] = [];
+    const seenBiz = new Set<string>();
+    let bizUrl: string | undefined = `${GRAPH}/me/businesses?${new URLSearchParams({
+      access_token: userAccessToken,
+      limit: "100",
+    })}`;
+    while (bizUrl) {
+      const bizRes = await oauthFetch(bizUrl);
+      const bizData = (await bizRes.json()) as {
+        data?: Array<{ id?: string }>;
+        paging?: { next?: string; cursors?: { after?: string } };
+      };
+      if (!bizRes.ok) break;
+      for (const business of bizData.data ?? []) {
+        if (business.id) businessIds.push(business.id);
+      }
+      const after = bizData.paging?.next ? bizData.paging.cursors?.after : undefined;
+      if (!after || seenBiz.has(after)) break;
+      seenBiz.add(after);
+      const next = new URL(bizUrl);
+      next.searchParams.set("after", after);
+      bizUrl = next.toString();
+    }
+    for (const businessId of businessIds) {
+      const pageParams = new URLSearchParams({
+        fields: PAGE_FIELDS,
+        access_token: userAccessToken,
+        limit: "100",
+      });
+      for (const edge of ["owned_pages", "client_pages"] as const) {
+        addPages(
+          await metaFetchPageCollection(
+            `${GRAPH}/${businessId}/${edge}?${pageParams}`,
+            "ignore",
+          ),
+        );
+      }
+    }
+  } catch {
+    // business_management is optional; skip when the app is not approved for it
+  }
 
   return pages;
 }
@@ -369,7 +442,7 @@ export async function threadsFetchProfile(
     fields: "id,username,name,threads_profile_picture_url",
     access_token: accessToken,
   });
-  const res = await oauthFetch(`${THREADS_GRAPH}/v1.0/me?${params}`);
+  const res = await oauthFetch(`${THREADS_GRAPH_VERSIONED}/me?${params}`);
   const data = (await res.json()) as {
     id?: string;
     username?: string;

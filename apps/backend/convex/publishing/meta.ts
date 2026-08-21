@@ -1,9 +1,10 @@
 "use node";
 
 import type { Doc } from "../_generated/dataModel";
+import { META_GRAPH } from "./apiVersions";
 import { effectiveCaption, publishedFromAttempt, ResumablePublishError } from "./helpers";
 
-const GRAPH = "https://graph.facebook.com/v24.0";
+const GRAPH = META_GRAPH;
 const TIMEOUT_MS = 60_000;
 
 function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {
@@ -36,6 +37,27 @@ async function graphFetch(
   return json as Record<string, string>;
 }
 
+async function facebookPermalink(id: string, accessToken: string, fallback: string) {
+  const data = await graphFetch(
+    `${GRAPH}/${id}?fields=permalink_url&access_token=${encodeURIComponent(accessToken)}`,
+    { method: "GET" },
+  ).catch(() => ({} as Record<string, string>));
+  return typeof data.permalink_url === "string" && data.permalink_url
+    ? data.permalink_url
+    : fallback;
+}
+
+async function facebookPublished(
+  id: string,
+  accessToken: string,
+  saveAttempt: ((attempt: Record<string, unknown>) => Promise<void>) | undefined,
+  fallback: string,
+) {
+  const permalink = await facebookPermalink(id, accessToken, fallback);
+  await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink });
+  return { platformPostId: id, permalink };
+}
+
 export async function publishToFacebook(params: {
   post: Doc<"posts">;
   target: Doc<"postTargets">;
@@ -62,8 +84,7 @@ export async function publishToFacebook(params: {
     });
     const id = data.id ?? data.post_id;
     if (!id) throw new Error("Facebook: no post id returned");
-    await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://facebook.com/${id}` });
-    return { platformPostId: id, permalink: `https://facebook.com/${id}` };
+    return facebookPublished(id, accessToken, saveAttempt, `https://facebook.com/${id}`);
   }
 
   const isStory = post.kind === "story" || target.platformSettings?.placement === "story";
@@ -113,8 +134,12 @@ export async function publishToFacebook(params: {
         }),
       });
       const id = finish.post_id ?? videoId;
-      await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://www.facebook.com/stories/${id}` });
-      return { platformPostId: id, permalink: `https://www.facebook.com/stories/${id}` };
+      return facebookPublished(
+        id,
+        accessToken,
+        saveAttempt,
+        `https://www.facebook.com/stories/${id}`,
+      );
     }
     const photo = await graphFetch(`${GRAPH}/${pageId}/photos`, {
       method: "POST",
@@ -128,8 +153,12 @@ export async function publishToFacebook(params: {
       body: new URLSearchParams({ photo_id: photo.id, access_token: accessToken }),
     });
     const id = published.post_id ?? photo.id;
-    await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://www.facebook.com/stories/${id}` });
-    return { platformPostId: id, permalink: `https://www.facebook.com/stories/${id}` };
+    return facebookPublished(
+      id,
+      accessToken,
+      saveAttempt,
+      `https://www.facebook.com/stories/${id}`,
+    );
   }
 
   if (post.kind === "image") {
@@ -143,8 +172,7 @@ export async function publishToFacebook(params: {
       });
       const id = data.id ?? data.post_id;
       if (!id) throw new Error("Facebook photo: no id");
-      await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://facebook.com/${id}` });
-    return { platformPostId: id, permalink: `https://facebook.com/${id}` };
+      return facebookPublished(id, accessToken, saveAttempt, `https://facebook.com/${id}`);
     }
     const uploaded: string[] = [];
     for (const m of media) {
@@ -166,8 +194,7 @@ export async function publishToFacebook(params: {
     });
     const id = data.id ?? data.post_id;
     if (!id) throw new Error("Facebook carousel publish failed");
-    await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://facebook.com/${id}` });
-    return { platformPostId: id, permalink: `https://facebook.com/${id}` };
+    return facebookPublished(id, accessToken, saveAttempt, `https://facebook.com/${id}`);
   }
 
   if (post.kind === "video") {
@@ -181,8 +208,7 @@ export async function publishToFacebook(params: {
     });
     const id = data.id;
     if (!id) throw new Error("Facebook video: no id");
-    await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink: `https://facebook.com/${id}` });
-    return { platformPostId: id, permalink: `https://facebook.com/${id}` };
+    return facebookPublished(id, accessToken, saveAttempt, `https://facebook.com/${id}`);
   }
 
   throw new Error(`Facebook: unsupported kind ${post.kind}`);
@@ -307,8 +333,10 @@ export async function publishToInstagram(params: {
     const creationId = await createContainer({
       video_url: url,
       caption: body,
-      media_type: isStory ? "STORIES" : isReel ? "REELS" : "VIDEO",
-      ...(isReel && target.platformSettings?.shareToFeed === false ? { share_to_feed: "false" } : {}),
+      media_type: isStory ? "STORIES" : "REELS",
+      ...(!isStory && isReel && target.platformSettings?.shareToFeed === false
+        ? { share_to_feed: "false" }
+        : {}),
     });
     await saveAttempt?.({ kind: "instagram", creationId });
     return finishContainer(creationId);

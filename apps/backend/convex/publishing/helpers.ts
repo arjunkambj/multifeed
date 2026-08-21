@@ -7,6 +7,11 @@ export function tiktokPrivacyLevel(visibility?: string) {
   return "PUBLIC_TO_EVERYONE";
 }
 
+/** TikTok disables an interaction only when the composer explicitly turns it off. */
+export function tiktokInteractionDisabled(enabled?: boolean) {
+  return enabled === false;
+}
+
 const TIKTOK_MAX_SINGLE_CHUNK = 64 * 1024 * 1024;
 const TIKTOK_CHUNK_SIZE = 10 * 1024 * 1024;
 

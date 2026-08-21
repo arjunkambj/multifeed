@@ -7,6 +7,7 @@ import { internal } from "../_generated/api";
 import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { decryptSecret } from "../oauth/crypto";
+import { LINKEDIN_VERSION, META_GRAPH, THREADS_GRAPH } from "./apiVersions";
 import { isResumablePublishError } from "./helpers";
 import { refreshAccessTokenForPlatform } from "./tokenRefresh";
 
@@ -69,7 +70,7 @@ async function postFirstComment(
 
   if (platform === "facebook" || platform === "instagram") {
     const res = await fetch(
-      `https://graph.facebook.com/v24.0/${platformPostId}/comments`,
+      `${META_GRAPH}/${platformPostId}/comments`,
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -98,7 +99,7 @@ async function postFirstComment(
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
           "X-Restli-Protocol-Version": "2.0.0",
-          "LinkedIn-Version": "202601",
+          "LinkedIn-Version": LINKEDIN_VERSION,
         },
         body: JSON.stringify({
           actor,
@@ -114,7 +115,7 @@ async function postFirstComment(
 
   if (platform === "threads") {
     const userId = account.providerAccountId;
-    const createRes = await fetch(`https://graph.threads.net/v1.0/${userId}/threads`, {
+    const createRes = await fetch(`${THREADS_GRAPH}/${userId}/threads`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
@@ -130,7 +131,7 @@ async function postFirstComment(
       throw new Error(`Threads first comment failed: ${createRes.status}`);
     }
     const publishRes = await fetch(
-      `https://graph.threads.net/v1.0/${userId}/threads_publish`,
+      `${THREADS_GRAPH}/${userId}/threads_publish`,
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
