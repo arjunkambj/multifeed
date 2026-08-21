@@ -14,12 +14,10 @@ export function Pricing() {
   return (
     <section
       className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
-      data-gsap-section
       id="pricing"
     >
       <div
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-        data-gsap-heading
       >
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Pricing
@@ -67,7 +65,7 @@ export function Pricing() {
 
       <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-3 md:gap-5">
         {pricingPlans.map((plan) => (
-          <div className="h-full" data-gsap-card key={plan.name}>
+          <div className="h-full" key={plan.name}>
             <PricingCard isYearly={isYearly} plan={plan} />
           </div>
         ))}

@@ -6,11 +6,9 @@ export function UseCases() {
   return (
     <section
       className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
-      data-gsap-section
     >
       <div
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-        data-gsap-heading
       >
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Built for real workflows
@@ -26,7 +24,7 @@ export function UseCases() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         {landingUseCases.map((item) => (
-          <div data-gsap-card key={item.audience}>
+          <div key={item.audience}>
             <UseCaseCard item={item} />
           </div>
         ))}

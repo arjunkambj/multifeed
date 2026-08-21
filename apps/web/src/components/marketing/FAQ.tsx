@@ -11,12 +11,10 @@ export function FAQ() {
   return (
     <section
       className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
-      data-gsap-section
       id="faq"
     >
       <div
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-        data-gsap-heading
       >
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           FAQ
@@ -33,7 +31,6 @@ export function FAQ() {
       <div className="mx-auto flex w-full flex-col items-start justify-between gap-10 md:flex-row md:gap-12">
         <div
           className="flex w-full max-w-sm flex-col gap-2 md:sticky md:top-28"
-          data-gsap-card
         >
           <h3 className="text-xl font-medium sm:text-2xl">Still unsure?</h3>
           <p className="leading-relaxed text-muted-foreground">
@@ -49,7 +46,7 @@ export function FAQ() {
           </Link>
         </div>
 
-        <div className="flex w-full max-w-2xl justify-center" data-gsap-card>
+        <div className="flex w-full max-w-2xl justify-center">
           <Accordion className="w-full" multiple>
             {faqItems.map((item, index) => (
               <AccordionItem key={item.title} value={`${index}`}>

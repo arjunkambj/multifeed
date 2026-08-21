@@ -9,12 +9,10 @@ export function Features() {
   return (
     <section
       className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
-      data-gsap-section
       id="features"
     >
       <div
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-        data-gsap-heading
       >
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Features
@@ -31,7 +29,7 @@ export function Features() {
       <div className="flex flex-col gap-4 md:gap-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
           {firstRow.map((item) => (
-            <div className="h-full" data-gsap-card key={item.heading}>
+            <div className="h-full" key={item.heading}>
               <FeatureCard item={item} />
             </div>
           ))}
@@ -39,7 +37,7 @@ export function Features() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
           {secondRow.map((item) => (
-            <div className="h-full" data-gsap-card key={item.heading}>
+            <div className="h-full" key={item.heading}>
               <FeatureCard item={item} />
             </div>
           ))}
@@ -54,7 +52,6 @@ function FeatureCard({ item }: { item: (typeof featureItems)[number] }) {
     <div className="rounded-2xl flex h-full flex-col overflow-hidden border border-border/50 bg-card">
       <div
         className="relative h-52 w-full scale-[1.06] md:h-56"
-        data-gsap-depth
       >
         <Image
           alt={item.heading}

@@ -9,11 +9,9 @@ export function WhyUS() {
   return (
     <section
       className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
-      data-gsap-section
     >
       <div
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-        data-gsap-heading
       >
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Why MultiFeed
@@ -31,14 +29,13 @@ export function WhyUS() {
         {whyUsPoints.map((point, index) => (
           <div
             className="md:sticky motion-reduce:md:static"
-            data-gsap-stack-card
             key={point.title}
             style={{
               top: `calc(6rem + ${index * 1.75}rem)`,
               zIndex: index + 1,
             }}
           >
-            <div data-gsap-card>
+            <div>
               <WhyUSCard point={point} reversed={index % 2 === 1} />
             </div>
           </div>
@@ -58,13 +55,11 @@ function WhyUSCard({
   return (
     <div
       className="rounded-2xl flex w-full flex-col justify-between gap-6 overflow-hidden border border-border/50 bg-card p-5 sm:p-6 md:flex-row md:gap-10 md:p-10"
-      data-gsap-stack-surface
     >
       <div
         className={`rounded-2xl relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden bg-muted md:w-80 lg:w-96 ${
           reversed ? "md:order-2" : ""
         }`}
-        data-gsap-depth
       >
         <Image
           alt={point.title}

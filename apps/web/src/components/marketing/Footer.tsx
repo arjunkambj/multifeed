@@ -34,10 +34,9 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="mx-auto w-full max-w-7xl bg-background" data-gsap-section>
+    <footer className="mx-auto w-full max-w-7xl bg-background">
       <div
         className="flex flex-col items-center gap-4 border border-border bg-background px-6 py-16 text-center sm:px-10 sm:py-20"
-        data-gsap-heading
       >
         <h3 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Ready to trade seven tabs for one calendar?
@@ -57,7 +56,6 @@ export function Footer() {
       <div className="grid grid-cols-1 border-x border-border md:grid-cols-[1.1fr_1.7fr]">
         <div
           className="flex flex-col gap-3 px-4 py-10 sm:px-6 md:border-r md:border-border"
-          data-gsap-card
         >
           <Logo />
           <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -80,7 +78,6 @@ export function Footer() {
 
         <div
           className="grid grid-cols-2 gap-10 px-4 py-10 sm:px-6 md:pl-10 lg:grid-cols-3"
-          data-gsap-card
         >
           {footerLinks.map((section) => (
             <div className="flex flex-col gap-4" key={section.title}>
@@ -104,7 +101,6 @@ export function Footer() {
 
       <div
         className="flex flex-col items-start justify-between gap-4 border border-border px-4 py-6 sm:flex-row sm:items-center sm:px-6"
-        data-gsap-card
       >
         <p className="text-xs text-muted-foreground">
           &copy; {new Date().getFullYear()} MultiFeed. All rights reserved.

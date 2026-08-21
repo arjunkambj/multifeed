@@ -58,7 +58,6 @@ export function Navbar() {
       className={`rounded-2xl sticky top-2 z-50 mx-auto mt-2 w-[min(48rem,calc(100%-2rem))] border border-border/50 backdrop-blur-lg transition-colors duration-300 dark:shadow-lg dark:shadow-black/20 ${
         isScrolled ? "bg-white/55 dark:bg-card/80" : "bg-card/95"
       }`}
-      data-gsap-nav
     >
       <nav className="grid h-14 w-full grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 sm:px-5">
         <div className="justify-self-start">

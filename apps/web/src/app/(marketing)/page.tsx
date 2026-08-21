@@ -9,7 +9,6 @@ import { Features } from "@/components/marketing/Feature";
 import { Pricing } from "@/components/marketing/Pricing";
 import { MarketingMarquee } from "@/components/marketing/MarketingMarquee";
 import { WhyUS } from "@/components/marketing/WhyUS";
-import { MarketingAnimations } from "@/components/marketing/MarketingAnimations";
 import { UseCases } from "@/components/marketing/UseCases";
 
 export const metadata: Metadata = {
@@ -35,7 +34,6 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main className="marketing-landing flex w-full flex-col bg-background">
-      <MarketingAnimations />
       <Navbar />
       <Hero />
       <MarketingMarquee />

@@ -284,7 +284,6 @@ export function Hero() {
     >
       <div
         className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-5 text-center lg:mt-4"
-        data-gsap-hero-copy
       >
         <div>
           <Badge variant="outline" className="h-auto border-border/60 bg-card px-3 py-1 text-primary">
@@ -302,7 +301,6 @@ export function Hero() {
             <span
               aria-hidden
               className="absolute inset-x-0 -bottom-1 h-[0.18em] rounded-full bg-primary sm:-bottom-1.5"
-              data-gsap-underline
             />
           </span>
         </h1>
@@ -360,7 +358,6 @@ export function Hero() {
 
       <div
         className="relative z-10 mx-auto w-full max-w-5xl"
-        data-gsap-hero-visual
       >
         <div className="rounded-2xl overflow-hidden border border-border/60 bg-card shadow-xl shadow-foreground/5 dark:shadow-black/30">
           {/* Window chrome */}

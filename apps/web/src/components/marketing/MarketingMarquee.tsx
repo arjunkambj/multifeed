@@ -6,16 +6,14 @@ export function MarketingMarquee() {
   return (
     <section
       className="w-full overflow-hidden pb-16 md:pb-20"
-      data-gsap-section
     >
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6" data-gsap-heading>
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
         <p className="mb-8 text-center text-sm font-medium uppercase tracking-wide text-muted-foreground">
           One workflow for every channel your audience follows
         </p>
       </div>
       <div
         className="relative mx-auto max-w-4xl overflow-hidden"
-        data-gsap-card
       >
         <div
           aria-hidden
