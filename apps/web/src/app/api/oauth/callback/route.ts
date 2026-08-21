@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
 import { getHexclaveConvexServerToken } from "@/hexclave/server";
 import { getConnector, isOAuthPlatform } from "@/lib/oauth/connectors/registry";
+import type { TokenBundle } from "@/lib/oauth/connectors/types";
 import {
   appOrigin,
   connectedReturnPath,
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
 
     const connector = getConnector(session.platform);
     const redirectUri = oauthRedirectUri();
-    let tokens;
+    let tokens: TokenBundle;
     try {
       tokens = await connector.exchangeCode({
         code,

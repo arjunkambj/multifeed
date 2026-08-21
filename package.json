@@ -21,7 +21,13 @@
   "pnpm": {
     "overrides": {
       "postcss": "8.5.25",
-      "sharp": "0.35.3"
+      "sharp": "0.35.3",
+      "@typescript-eslint/typescript-estree>typescript": "~6.0.3",
+      "@typescript-eslint/utils>typescript": "~6.0.3",
+      "@typescript-eslint/parser>typescript": "~6.0.3",
+      "@typescript-eslint/type-utils>typescript": "~6.0.3",
+      "@typescript-eslint/project-service>typescript": "~6.0.3",
+      "@typescript-eslint/tsconfig-utils>typescript": "~6.0.3"
     }
   }
 }

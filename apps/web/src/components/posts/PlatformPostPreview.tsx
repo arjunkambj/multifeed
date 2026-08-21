@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image, { type ImageLoader } from "next/image";
 import { Icon } from "@iconify/react";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
@@ -690,7 +691,7 @@ export function PlatformPostPreview(props: Props) {
   const previewProps = { ...props, displayName };
   const placement = props.platformSettings.placement;
 
-  let preview;
+  let preview: ReactNode;
   switch (props.account.platform) {
     case "facebook":
       preview = <FacebookPreview {...previewProps} />;
