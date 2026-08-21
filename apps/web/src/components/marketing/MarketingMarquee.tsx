@@ -9,7 +9,7 @@ export function MarketingMarquee() {
       data-gsap-section
     >
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6" data-gsap-heading>
-        <p className="mb-8 text-center text-sm font-medium uppercase tracking-wide text-muted">
+        <p className="mb-8 text-center text-sm font-medium uppercase tracking-wide text-muted-foreground">
           One workflow for every channel your audience follows
         </p>
       </div>

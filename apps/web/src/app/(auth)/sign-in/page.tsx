@@ -3,7 +3,15 @@
 import { useHexclaveApp } from "@hexclave/next";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
-import { Button, Input, InputOTP, Spinner, toast } from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function SignInPage() {
   const app = useHexclaveApp();
@@ -27,7 +35,7 @@ export default function SignInPage() {
 
     const normalizedEmail = email.trim();
     if (!normalizedEmail) {
-      toast.danger("Please enter your email address.", { timeout: 3000 });
+      toast.error("Please enter your email address.");
       return;
     }
 
@@ -38,23 +46,17 @@ export default function SignInPage() {
         callbackUrl: `${window.location.origin}${app.urls.magicLinkCallback}`,
       });
       if (result.status === "error") {
-        toast.danger("Could not send verification code. Please try again.", {
-          timeout: 3000,
-        });
+        toast.error("Could not send verification code. Please try again.");
       } else {
         setEmail(normalizedEmail);
         setNonce(result.data.nonce);
         setOtp("");
         setStep("otp");
         setResendCooldown(20);
-        toast.success("Verification code sent. Check your email.", {
-          timeout: 3000,
-        });
+        toast.success("Verification code sent. Check your email.");
       }
     } catch {
-      toast.danger("Something went wrong. Please try again.", {
-        timeout: 3000,
-      });
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsEmailLoading(false);
     }
@@ -80,13 +82,11 @@ export default function SignInPage() {
       try {
         const result = await app.signInWithMagicLink(otp + nonce);
         if (!cancelled && result.status === "error") {
-          toast.danger("Invalid code. Please try again.", { timeout: 3000 });
+          toast.error("Invalid code. Please try again.");
         }
       } catch {
         if (!cancelled) {
-          toast.danger("Something went wrong. Please try again.", {
-            timeout: 3000,
-          });
+          toast.error("Something went wrong. Please try again.");
         }
       } finally {
         if (!cancelled) {
@@ -110,9 +110,7 @@ export default function SignInPage() {
         returnTo: app.urls.afterSignIn,
       });
     } catch {
-      toast.danger("Could not continue with Google. Please try again.", {
-        timeout: 3000,
-      });
+      toast.error("Could not continue with Google. Please try again.");
     } finally {
       setIsGoogleLoading(false);
     }
@@ -124,7 +122,7 @@ export default function SignInPage() {
         <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
           Welcome to MultiFeed
         </h1>
-        <p className="mt-2 text-sm font-light text-muted">
+        <p className="mt-2 text-sm font-light text-muted-foreground">
           {step === "email"
             ? "Sign in to run social on autopilot"
             : `We sent a code to ${email}`}
@@ -143,7 +141,7 @@ export default function SignInPage() {
             <Icon
               icon="solar:letter-linear"
               width={20}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <Input
               type="email"
@@ -151,48 +149,46 @@ export default function SignInPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              fullWidth
               className="h-10 text-base pl-10"
             />
           </div>
 
           <Button
             type="submit"
-            isDisabled={isEmailLoading}
+            disabled={isEmailLoading}
             size="lg"
-            fullWidth
-            className="font-normal"
+            className="w-full font-normal"
           >
-            {isEmailLoading ? <Spinner size="sm" /> : null}
+            {isEmailLoading ? <Spinner className="size-4" /> : null}
             {isEmailLoading ? "Sending..." : "Continue with Email"}
           </Button>
         </form>
       ) : (
         <div className="flex flex-col items-center gap-5 pt-1">
-          <p className="text-center text-sm text-muted font-light">
+          <p className="text-center text-sm text-muted-foreground font-light">
             Enter the 6-character code from your email
           </p>
           <InputOTP
             maxLength={6}
             value={otp}
             onChange={(value) => setOtp(value.toUpperCase())}
-            isDisabled={isVerifying}
-            className="w-full justify-center gap-3"
+            disabled={isVerifying}
+            containerClassName="justify-center gap-2"
           >
-            <InputOTP.Group>
+            <InputOTPGroup className="gap-2">
               {[0, 1, 2, 3, 4, 5].map((index) => (
-                <InputOTP.Slot key={index} index={index} />
+                <InputOTPSlot key={index} index={index} className="rounded-xl" />
               ))}
-            </InputOTP.Group>
+            </InputOTPGroup>
           </InputOTP>
           {isVerifying ? (
-            <div className="flex items-center gap-2 text-sm text-muted">
-              <Spinner size="sm" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Spinner className="size-4" />
               Verifying...
             </div>
           ) : null}
           <div className="flex flex-col items-center gap-2 text-sm">
-            <p className="text-xs text-muted">
+            <p className="text-xs text-muted-foreground">
               {resendCooldown > 0
                 ? `Resend available in ${resendCooldown}s`
                 : "Didn't get the code?"}
@@ -206,7 +202,7 @@ export default function SignInPage() {
               >
                 {isEmailLoading ? "Sending..." : "Resend code"}
               </button>
-              <span className="text-muted">|</span>
+              <span className="text-muted-foreground">|</span>
               <button
                 type="button"
                 onClick={() => {
@@ -226,27 +222,26 @@ export default function SignInPage() {
 
       <div className="flex items-center gap-3">
         <span className="h-px flex-1 bg-border" />
-        <span className="text-xs text-muted font-medium">OR</span>
+        <span className="text-xs text-muted-foreground font-medium">OR</span>
         <span className="h-px flex-1 bg-border" />
       </div>
 
       <Button
-        variant="tertiary"
-        isDisabled={isGoogleLoading}
+        variant="outline"
+        disabled={isGoogleLoading}
         size="lg"
-        fullWidth
-        className="font-normal"
-        onPress={handleGoogleSignIn}
+        className="w-full font-normal"
+        onClick={handleGoogleSignIn}
       >
         {isGoogleLoading ? (
-          <Spinner size="sm" />
+          <Spinner className="size-4" />
         ) : (
           <Icon icon="logos:google-icon" width={18} />
         )}
         {isGoogleLoading ? "Redirecting..." : "Continue with Google"}
       </Button>
 
-      <p className="text-center text-xs text-muted">
+      <p className="text-center text-xs text-muted-foreground">
         &copy; {new Date().getFullYear()} MultiFeed. All rights reserved.
       </p>
     </div>

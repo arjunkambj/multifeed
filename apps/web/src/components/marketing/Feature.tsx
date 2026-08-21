@@ -16,13 +16,13 @@ export function Features() {
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         data-gsap-heading
       >
-        <span className="text-sm font-semibold uppercase tracking-wide text-accent">
+        <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Features
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Create once. Tailor every channel.
         </h2>
-        <p className="text-base leading-relaxed text-muted sm:text-lg">
+        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
           Move from first draft to scheduled post without copying, pasting, or
           losing track of what goes live next.
         </p>
@@ -51,7 +51,7 @@ export function Features() {
 
 function FeatureCard({ item }: { item: (typeof featureItems)[number] }) {
   return (
-    <div className="marketing-surface flex h-full flex-col overflow-hidden border border-border/50 bg-surface">
+    <div className="rounded-2xl flex h-full flex-col overflow-hidden border border-border/50 bg-card">
       <div
         className="relative h-52 w-full scale-[1.06] md:h-56"
         data-gsap-depth
@@ -67,7 +67,7 @@ function FeatureCard({ item }: { item: (typeof featureItems)[number] }) {
       </div>
       <div className="flex flex-col gap-2 p-5 sm:p-6">
         <h3 className="text-lg font-semibold sm:text-xl">{item.heading}</h3>
-        <p className="text-sm leading-relaxed text-muted">{item.description}</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{item.description}</p>
       </div>
     </div>
   );

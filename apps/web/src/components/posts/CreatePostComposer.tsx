@@ -1,28 +1,14 @@
 "use client";
 
 import { useEffect, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Calendar,
-  DateField,
-  DatePicker,
-  Input,
-  Label,
-  Skeleton,
-  Tabs,
-  TextArea,
-  TimeField,
-  toast,
-} from "@heroui/react";
-import type { TimeValue } from "@heroui/react";
-import type { DateValue } from "@internationalized/date";
-import {
-  CalendarDate,
-  CalendarDateTime,
-  fromDate,
-  Time,
-  toZoned,
-} from "@internationalized/date";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { Icon } from "@iconify/react";
 import { useMutation } from "convex/react";
 import { useQuery } from "convex-helpers/react/cache/hooks";
@@ -321,27 +307,21 @@ function usePostComposerForm({
   const scheduleParts = (() => {
     const milliseconds = fromLocalInputValue(scheduleLocal);
     if (milliseconds === null) return null;
-    const zoned = fromDate(new Date(milliseconds), timezone);
+    const value = new Date(milliseconds);
+    const pad = (n: number) => String(n).padStart(2, "0");
     return {
-      date: new CalendarDate(zoned.year, zoned.month, zoned.day),
-      time: new Time(zoned.hour, zoned.minute),
+      date: `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`,
+      time: `${pad(value.getHours())}:${pad(value.getMinutes())}`,
     };
   })();
 
-  const updateSchedule = (date: DateValue | null, time: TimeValue | null) => {
+  const updateSchedule = (date: string | null, time: string | null) => {
     if (!date || !time) {
       dispatch({ type: "scheduleLocalChanged", value: "" });
       return;
     }
-    const dateTime = new CalendarDateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-      time.second,
-    );
-    const milliseconds = toZoned(dateTime, timezone).toDate().getTime();
+    const milliseconds = new Date(`${date}T${time}`).getTime();
+    if (Number.isNaN(milliseconds)) return;
     dispatch({
       type: "scheduleLocalChanged",
       value: toLocalInputValue(milliseconds),
@@ -525,7 +505,7 @@ function usePostComposerForm({
           : parsed;
     if (mode === "schedule" && scheduledFor == null) {
       dispatch({ type: "savingChanged", value: null });
-      toast.danger("Choose a valid schedule date and time", { timeout: 3000 });
+      toast.error("Choose a valid schedule date and time");
       return;
     }
 
@@ -572,20 +552,17 @@ function usePostComposerForm({
         : await createPost({ ...payload, status });
 
       if (mode === "draft") {
-        toast.success("Draft saved.", { timeout: 3000 });
+        toast.success("Draft saved.");
         dispatch({ type: "savingChanged", value: null });
         return;
       }
 
       toast.success(
         mode === "schedule" ? "Post scheduled." : "Post publishing.",
-        { timeout: 3000 },
       );
       router.push(`/calendar?highlight=${result.postId}`);
     } catch (err) {
-      toast.danger(err instanceof Error ? err.message : "Could not save post", {
-        timeout: 3000,
-      });
+      toast.error(err instanceof Error ? err.message : "Could not save post");
       dispatch({ type: "savingChanged", value: null });
     }
   };
@@ -614,8 +591,8 @@ function usePostComposerForm({
           onChooseDifferentFormat ? (
             <Button
               size="sm"
-              variant="tertiary"
-              onPress={chooseDifferentFormat}
+              variant="outline"
+              onClick={chooseDifferentFormat}
             >
               <Icon icon="hugeicons:arrow-left-01" width={15} />
               Change type
@@ -632,17 +609,17 @@ function usePostComposerForm({
               <h2 className="text-base font-semibold">
                 Publish to
                 {compatibleAccounts.length > 0 && (
-                  <span className="ml-2 text-sm font-normal text-muted">
+                  <span className="ml-2 text-sm font-normal text-muted-foreground">
                     {selectedAccountIds.size}/{compatibleAccounts.length}
                   </span>
                 )}
               </h2>
               {compatibleAccounts.length > 0 && (
                 <div className="flex gap-1">
-                  <Button size="sm" variant="tertiary" onPress={selectAll}>
+                  <Button size="sm" variant="outline" onClick={selectAll}>
                     Select all
                   </Button>
-                  <Button size="sm" variant="tertiary" onPress={clearAll}>
+                  <Button size="sm" variant="outline" onClick={clearAll}>
                     Clear
                   </Button>
                 </div>
@@ -651,24 +628,24 @@ function usePostComposerForm({
 
             <div className="mt-3">
               {activeAccounts.length === 0 ? (
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted-foreground">
                   {(accounts ?? []).length > 0
                     ? "Connected accounts need a reconnect before they can publish."
                     : "No accounts connected."}{" "}
                   <button
                     type="button"
-                    className="font-medium text-accent hover:underline"
+                    className="font-medium text-primary hover:underline"
                     onClick={() => router.push("/connections")}
                   >
                     {(accounts ?? []).length > 0 ? "Reconnect accounts" : "Connect accounts"}
                   </button>
                 </p>
               ) : compatibleAccounts.length === 0 ? (
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted-foreground">
                   No accounts support this format.{" "}
                   <button
                     type="button"
-                    className="font-medium text-accent hover:underline"
+                    className="font-medium text-primary hover:underline"
                     onClick={() => router.push("/connections")}
                   >
                     Manage connections
@@ -686,13 +663,13 @@ function usePostComposerForm({
                       <Button
                         key={account._id}
                         size="sm"
-                        variant="tertiary"
-                        onPress={() => toggleAccount(account._id)}
+                        variant="outline"
+                        onClick={() => toggleAccount(account._id)}
                         aria-label={`${label} on ${platformName} (@${account.username})`}
                         className={
                           isOn
-                            ? "h-10 gap-2 rounded-full bg-accent/10 py-0 pl-1 pr-3 ring-1 ring-accent/40"
-                            : "h-10 gap-2 rounded-full bg-surface-secondary py-0 pl-1 pr-3 hover:bg-surface-tertiary"
+                            ? "h-10 gap-2 rounded-full bg-primary/10 py-0 pl-1 pr-3 ring-1 ring-primary/40"
+                            : "h-10 gap-2 rounded-full bg-muted py-0 pl-1 pr-3 hover:bg-secondary"
                         }
                       >
                         <span className="relative size-8 shrink-0">
@@ -703,7 +680,7 @@ function usePostComposerForm({
                               className="size-8 rounded-full object-cover"
                             />
                           ) : (
-                            <span className="flex size-8 items-center justify-center rounded-full bg-surface text-xs font-semibold text-foreground">
+                            <span className="flex size-8 items-center justify-center rounded-full bg-card text-xs font-semibold text-foreground">
                               {label.slice(0, 1).toUpperCase()}
                             </span>
                           )}
@@ -729,7 +706,7 @@ function usePostComposerForm({
                           <Icon
                             icon="hugeicons:tick-02"
                             width={14}
-                            className="shrink-0 text-accent"
+                            className="shrink-0 text-primary"
                           />
                         )}
                       </Button>
@@ -771,9 +748,7 @@ function usePostComposerForm({
                     <Label htmlFor="post-title">Title</Label>
                     <Input
                       id="post-title"
-                      fullWidth
-                      variant="secondary"
-                      placeholder="Optional calendar label"
+                                            placeholder="Optional calendar label"
                       value={title}
                       onChange={(e) =>
                         dispatch({ type: "titleChanged", value: e.target.value })
@@ -788,18 +763,16 @@ function usePostComposerForm({
                       <span
                         className={[
                           "text-xs tabular-nums",
-                          overLimit ? "font-medium text-danger" : "text-muted",
+                          overLimit ? "font-medium text-red-600" : "text-muted-foreground",
                         ].join(" ")}
                       >
                         {body.length}
                         {strictestLimit != null ? ` / ${strictestLimit}` : ""}
                       </span>
                     </div>
-                    <TextArea
+                    <Textarea
                       id="post-body"
-                      fullWidth
-                      variant="secondary"
-                      placeholder="What do you want to share?"
+                                            placeholder="What do you want to share?"
                       value={body}
                       onChange={(e) =>
                         dispatch({ type: "bodyChanged", value: e.target.value })
@@ -809,7 +782,7 @@ function usePostComposerForm({
                   </div>
 
                   {overLimitAccounts.length > 0 && (
-                    <p className="text-xs text-danger">
+                    <p className="text-xs text-red-600">
                       Too long for{" "}
                       {overLimitAccounts
                         .map((account) => `@${account.username}`)
@@ -822,8 +795,8 @@ function usePostComposerForm({
               <div className="flex flex-wrap gap-2 border-t border-border/70 pt-4">
                 <Button
                   size="sm"
-                  variant={activeTool === "account" ? "primary" : "tertiary"}
-                  onPress={() =>
+                  variant={activeTool === "account" ? "default" : "outline"}
+                  onClick={() =>
                     dispatch({
                       type: "toolChanged",
                       value: activeTool === "account" ? null : "account",
@@ -835,8 +808,8 @@ function usePostComposerForm({
                 </Button>
                 <Button
                   size="sm"
-                  variant={activeTool === "history" ? "primary" : "tertiary"}
-                  onPress={() =>
+                  variant={activeTool === "history" ? "default" : "outline"}
+                  onClick={() =>
                     dispatch({
                       type: "toolChanged",
                       value: activeTool === "history" ? null : "history",
@@ -848,8 +821,8 @@ function usePostComposerForm({
                 </Button>
                 <Button
                   size="sm"
-                  variant="tertiary"
-                  onPress={() => dispatch({ type: "notesVisibilityToggled" })}
+                  variant="outline"
+                  onClick={() => dispatch({ type: "notesVisibilityToggled" })}
                 >
                   <Icon
                     icon={
@@ -866,7 +839,7 @@ function usePostComposerForm({
               {activeTool === "account" && (
                 <div className="flex flex-col gap-5">
                   {selectedAccounts.length === 0 ? (
-                    <p className="py-3 text-center text-sm text-muted">
+                    <p className="py-3 text-center text-sm text-muted-foreground">
                       Select an account to customize its caption and settings.
                     </p>
                   ) : (
@@ -907,15 +880,15 @@ function usePostComposerForm({
                               <p className="truncate text-sm font-medium">
                                 @{account.username}
                               </p>
-                              <p className="text-xs text-muted">
+                              <p className="text-xs text-muted-foreground">
                                 {platformLabel(account.platform)}
                               </p>
                             </div>
                             <span
                               className={
                                 limit != null && effectiveLength > limit
-                                  ? "text-xs font-medium text-danger"
-                                  : "text-xs text-muted"
+                                  ? "text-xs font-medium text-red-600"
+                                  : "text-xs text-muted-foreground"
                               }
                             >
                               {effectiveLength}
@@ -927,11 +900,9 @@ function usePostComposerForm({
                               <Label htmlFor={`caption-${account._id}`}>
                                 Custom caption
                               </Label>
-                              <TextArea
+                              <Textarea
                                 id={`caption-${account._id}`}
-                                fullWidth
-                                variant="secondary"
-                                placeholder="Leave blank to use the main caption"
+                                                                placeholder="Leave blank to use the main caption"
                                 value={options.bodyOverride}
                                 onChange={(event) =>
                                   updateTargetOptions(account._id, {
@@ -949,9 +920,7 @@ function usePostComposerForm({
                                 </Label>
                                 <Input
                                   id={`comment-${account._id}`}
-                                  fullWidth
-                                  variant="secondary"
-                                  placeholder="Optional follow-up"
+                                                                    placeholder="Optional follow-up"
                                   value={options.firstComment}
                                   onChange={(event) =>
                                     updateTargetOptions(account._id, {
@@ -969,9 +938,7 @@ function usePostComposerForm({
                                 <Input
                                   id={`reference-${account._id}`}
                                   type="url"
-                                  fullWidth
-                                  variant="secondary"
-                                  placeholder="https://x.com/.../status/..."
+                                                                    placeholder="https://x.com/.../status/..."
                                   value={options.referenceUrl}
                                   onChange={(event) =>
                                     updateTargetOptions(account._id, {
@@ -1007,9 +974,7 @@ function usePostComposerForm({
                 <div className="flex flex-col gap-3">
                   <Input
                     aria-label="Search past captions"
-                    fullWidth
-                    variant="secondary"
-                    placeholder="Search past captions"
+                                        placeholder="Search past captions"
                     value={captionSearch}
                     onChange={(event) =>
                       dispatch({
@@ -1025,7 +990,7 @@ function usePostComposerForm({
                       <Skeleton className="h-8 w-3/5 rounded-lg" />
                     </div>
                   ) : pastCaptions.length === 0 ? (
-                    <p className="py-4 text-center text-sm text-muted">
+                    <p className="py-4 text-center text-sm text-muted-foreground">
                       No matching captions yet.
                     </p>
                   ) : (
@@ -1033,12 +998,12 @@ function usePostComposerForm({
                       {pastCaptions.map((caption) => (
                         <Button
                           key={caption}
-                          variant="tertiary"
-                          onPress={() => {
+                          variant="outline"
+                          onClick={() => {
                             dispatch({ type: "bodyChanged", value: caption });
                             dispatch({ type: "toolChanged", value: null });
                           }}
-                          className="h-auto w-full justify-start rounded-xl border border-border bg-surface px-3 py-2 text-left text-sm leading-relaxed hover:border-accent/40"
+                          className="h-auto w-full justify-start rounded-xl border border-border bg-card px-3 py-2 text-left text-sm leading-relaxed hover:border-primary/40"
                         >
                           <span className="line-clamp-2">{caption}</span>
                         </Button>
@@ -1051,11 +1016,9 @@ function usePostComposerForm({
               {showNotes && (
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="post-notes">Internal notes</Label>
-                  <TextArea
+                  <Textarea
                     id="post-notes"
-                    fullWidth
-                    variant="secondary"
-                    placeholder="Team reminders — not posted publicly"
+                                        placeholder="Team reminders — not posted publicly"
                     value={notes}
                     onChange={(e) =>
                       dispatch({ type: "notesChanged", value: e.target.value })
@@ -1069,7 +1032,7 @@ function usePostComposerForm({
           <section>
             <h2 className="mb-3 text-base font-semibold">Preview</h2>
             {selectedAccountIds.size === 0 ? (
-              <p className="text-sm text-muted">
+              <p className="text-sm text-muted-foreground">
                 Select accounts above to preview.
               </p>
             ) : (
@@ -1108,107 +1071,60 @@ function usePostComposerForm({
             <div className="flex flex-col gap-3">
               <Tabs
                 className="w-full"
-                selectedKey={scheduleMode}
-                onSelectionChange={(key) =>
+                value={scheduleMode}
+                onValueChange={(key) =>
                   dispatch({
                     type: "scheduleModeChanged",
                     value: key as "now" | "schedule",
                   })
                 }
               >
-                <Tabs.ListContainer className="w-full">
-                  <Tabs.List
-                    aria-label="Publishing time"
-                    className="grid w-full grid-cols-2"
-                  >
-                    <Tabs.Tab id="now">
-                      Post now
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                    <Tabs.Tab id="schedule">
-                      Schedule
-                      <Tabs.Indicator />
-                    </Tabs.Tab>
-                  </Tabs.List>
-                </Tabs.ListContainer>
+                <TabsList
+                  aria-label="Publishing time"
+                  className="grid w-full grid-cols-2"
+                >
+                  <TabsTrigger value="now">Post now</TabsTrigger>
+                  <TabsTrigger value="schedule">Schedule</TabsTrigger>
+                </TabsList>
               </Tabs>
 
               {scheduleMode === "schedule" && (
                 <>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_112px] lg:grid-cols-1">
-                    <DatePicker
-                      className="w-full"
-                      value={scheduleParts?.date ?? null}
-                      onChange={(date: DateValue | null) =>
-                        updateSchedule(
-                          date,
-                          scheduleParts?.time ?? new Time(12, 0),
-                        )
-                      }
-                    >
-                      <Label>Date</Label>
-                      <DateField.Group fullWidth variant="secondary">
-                        <DateField.Input>
-                          {(segment) => <DateField.Segment segment={segment} />}
-                        </DateField.Input>
-                        <DateField.Suffix>
-                          <DatePicker.Trigger>
-                            <DatePicker.TriggerIndicator />
-                          </DatePicker.Trigger>
-                        </DateField.Suffix>
-                      </DateField.Group>
-                      <DatePicker.Popover
-                        className="max-w-none"
-                        placement="bottom end"
-                      >
-                        <Calendar aria-label="Schedule date">
-                          <Calendar.Header>
-                            <Calendar.YearPickerTrigger>
-                              <Calendar.YearPickerTriggerHeading />
-                              <Calendar.YearPickerTriggerIndicator />
-                            </Calendar.YearPickerTrigger>
-                            <Calendar.NavButton slot="previous" />
-                            <Calendar.NavButton slot="next" />
-                          </Calendar.Header>
-                          <Calendar.Grid>
-                            <Calendar.GridHeader>
-                              {(day) => (
-                                <Calendar.HeaderCell>{day}</Calendar.HeaderCell>
-                              )}
-                            </Calendar.GridHeader>
-                            <Calendar.GridBody>
-                              {(date) => <Calendar.Cell date={date} />}
-                            </Calendar.GridBody>
-                          </Calendar.Grid>
-                          <Calendar.YearPickerGrid>
-                            <Calendar.YearPickerGridBody>
-                              {({ year }) => (
-                                <Calendar.YearPickerCell year={year} />
-                              )}
-                            </Calendar.YearPickerGridBody>
-                          </Calendar.YearPickerGrid>
-                        </Calendar>
-                      </DatePicker.Popover>
-                    </DatePicker>
+                    <div className="flex w-full flex-col gap-1.5">
+                      <Label htmlFor="schedule-date">Date</Label>
+                      <Input
+                        id="schedule-date"
+                        type="date"
+                        className="w-full"
+                        value={scheduleParts?.date ?? ""}
+                        onChange={(event) =>
+                          updateSchedule(
+                            event.currentTarget.value || null,
+                            scheduleParts?.time ?? "12:00",
+                          )
+                        }
+                      />
+                    </div>
 
-                    <TimeField
-                      granularity="minute"
-                      hourCycle={12}
-                      value={scheduleParts?.time ?? null}
-                      onChange={(time: TimeValue | null) =>
-                        updateSchedule(scheduleParts?.date ?? null, time)
-                      }
-                    >
-                      <Label>Time</Label>
-                      <TimeField.Group fullWidth variant="secondary">
-                        <TimeField.Input>
-                          {(segment) => <TimeField.Segment segment={segment} />}
-                        </TimeField.Input>
-                      </TimeField.Group>
-                    </TimeField>
+                    <div className="flex w-full flex-col gap-1.5">
+                      <Label htmlFor="schedule-time">Time</Label>
+                      <Input
+                        id="schedule-time"
+                        type="time"
+                        className="w-full"
+                        value={scheduleParts?.time ?? ""}
+                        onChange={(event) =>
+                          updateSchedule(
+                            scheduleParts?.date ?? null,
+                            event.currentTarget.value || null,
+                          )
+                        }
+                      />
+                    </div>
                   </div>
                   {fromLocalInputValue(scheduleLocal) && (
-                    <p className="text-xs text-muted">
+                    <p className="text-xs text-muted-foreground">
                       {format(
                         new Date(fromLocalInputValue(scheduleLocal)!),
                         "EEE, MMM d · h:mm a",
@@ -1227,9 +1143,9 @@ function usePostComposerForm({
                       <Button
                         key={chip.label}
                         size="sm"
-                        variant="tertiary"
-                        className="rounded-full bg-surface-secondary"
-                        onPress={() => {
+                        variant="outline"
+                        className="rounded-full bg-muted"
+                        onClick={() => {
                           if (chip.kind === "tomorrow") {
                             const date = new Date();
                             date.setDate(date.getDate() + 1);
@@ -1259,35 +1175,38 @@ function usePostComposerForm({
 
               <div className="mt-1 flex flex-col gap-2 border-t border-border/70 pt-3">
                 <Button
-                  fullWidth
-                  variant="primary"
-                  isPending={saving === scheduleMode}
-                  isDisabled={
+                  className="w-full"
+                  variant="default"
+                  disabled={
                     !!saving ||
                     uploadingMedia ||
                     !hasRequiredContent ||
                     selectedAccountIds.size === 0 ||
                     overLimit
                   }
-                  onPress={() => void submit(scheduleMode)}
+                  onClick={() => void submit(scheduleMode)}
                 >
-                  <Icon
-                    icon={
-                      scheduleMode === "schedule"
-                        ? "hugeicons:calendar-check-in-01"
-                        : "hugeicons:sent"
-                    }
-                    width={16}
-                  />
+                  {saving === scheduleMode ? (
+                    <Spinner className="size-4" />
+                  ) : (
+                    <Icon
+                      icon={
+                        scheduleMode === "schedule"
+                          ? "hugeicons:calendar-check-in-01"
+                          : "hugeicons:sent"
+                      }
+                      width={16}
+                    />
+                  )}
                   {scheduleMode === "schedule" ? "Schedule post" : "Post now"}
                 </Button>
                 <Button
-                  fullWidth
-                  variant="tertiary"
-                  isPending={saving === "draft"}
-                  isDisabled={!!saving || uploadingMedia || !hasRequiredContent}
-                  onPress={() => void submit("draft")}
+                  className="w-full"
+                  variant="outline"
+                  disabled={!!saving || uploadingMedia || !hasRequiredContent}
+                  onClick={() => void submit("draft")}
                 >
+                  {saving === "draft" ? <Spinner className="size-4" /> : null}
                   Save to drafts
                 </Button>
               </div>

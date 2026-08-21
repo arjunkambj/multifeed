@@ -5,7 +5,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { Toast } from "@heroui/react";
+import { Toaster } from "sonner";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { ThemeProvider } from "next-themes";
@@ -42,7 +42,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <ConvexProvider client={convex}>
         <ConvexQueryCacheProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-            <Toast.Provider />
+            <Toaster />
             {children}
           </ThemeProvider>
         </ConvexQueryCacheProvider>

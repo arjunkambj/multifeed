@@ -31,7 +31,7 @@ export function TeamSection({
       {canReadMembers ? (
         <TeamMembersContent initialData={initialData} teamId={team.id} />
       ) : (
-        <div className="rounded-4xl border border-border bg-background/40 p-5 text-sm text-muted">
+        <div className="rounded-4xl border border-border bg-background/40 p-5 text-sm text-muted-foreground">
           You do not have permission to read team members.
         </div>
       )}

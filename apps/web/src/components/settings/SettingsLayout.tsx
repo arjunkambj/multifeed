@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { Tabs } from "@heroui/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import type { Preloaded } from "convex/react";
@@ -34,8 +34,8 @@ export function SettingsLayout({
 
       <Tabs
         className="w-full"
-        selectedKey={selectedTab}
-        onSelectionChange={(key) => {
+        value={selectedTab}
+        onValueChange={(key) => {
           const next = String(key);
           startTransition(() => {
             if (!isSettingsTab(next) || next === "general") {
@@ -45,49 +45,42 @@ export function SettingsLayout({
             router.replace(`/settings?tab=${next}`, { scroll: false });
           });
         }}
-        variant="primary"
       >
-        <Tabs.ListContainer>
-          <Tabs.List
-            aria-label="Settings sections"
-            className="w-fit *:min-w-28 *:gap-2 *:px-4"
-          >
-            {settingsTabs.map((tab) => (
-              <Tabs.Tab id={tab.id} key={tab.id}>
-                <Icon icon={tab.icon} width={16} />
-                {tab.label}
-                <Tabs.Indicator />
-              </Tabs.Tab>
-            ))}
-          </Tabs.List>
-        </Tabs.ListContainer>
+        <TabsList className="w-fit *:min-w-28 *:gap-2 *:px-4">
+          {settingsTabs.map((tab) => (
+            <TabsTrigger key={tab.id} value={tab.id}>
+              <Icon icon={tab.icon} width={16} />
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-        <Tabs.Panel className="w-full pt-4" id="general">
+        <TabsContent className="w-full pt-4" value="general">
           {selectedTab === "general" ? <GeneralSettingsForm /> : null}
-        </Tabs.Panel>
+        </TabsContent>
 
-        <Tabs.Panel className="w-full pt-4" id="billing">
+        <TabsContent className="w-full pt-4" value="billing">
           {selectedTab === "billing" && preloadedSubscription ? (
             <BillingPage preloaded={preloadedSubscription} />
           ) : null}
-        </Tabs.Panel>
+        </TabsContent>
 
-        <Tabs.Panel className="w-full pt-4" id="support">
+        <TabsContent className="w-full pt-4" value="support">
           {selectedTab === "support" ? (
-            <div className="flex max-w-xl flex-col gap-3 rounded-2xl bg-surface-secondary p-5">
-              <p className="text-sm leading-relaxed text-muted">
+            <div className="flex max-w-xl flex-col gap-3 rounded-2xl bg-muted p-5">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 Need help with posting, billing, or your workspace? Reach out
                 and we&apos;ll get you unstuck.
               </p>
               <a
-                className="text-sm font-medium text-accent hover:underline"
+                className="text-sm font-medium text-primary hover:underline"
                 href="mailto:support@themultifeed.com"
               >
                 support@themultifeed.com
               </a>
             </div>
           ) : null}
-        </Tabs.Panel>
+        </TabsContent>
       </Tabs>
     </div>
   );

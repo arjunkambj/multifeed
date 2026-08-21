@@ -1,4 +1,4 @@
-import { Skeleton } from "@heroui/react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function PageHeaderSkeleton({ actions = 1 }: { actions?: number }) {
   return (

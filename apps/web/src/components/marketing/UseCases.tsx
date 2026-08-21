@@ -12,13 +12,13 @@ export function UseCases() {
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         data-gsap-heading
       >
-        <span className="text-sm font-semibold uppercase tracking-wide text-accent">
+        <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Built for real workflows
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           One calendar, however you run social.
         </h2>
-        <p className="text-base leading-relaxed text-muted sm:text-lg">
+        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
           Keep publishing organized whether you work alone, with a team, or
           across a full client roster.
         </p>
@@ -37,16 +37,16 @@ export function UseCases() {
 
 function UseCaseCard({ item }: { item: (typeof landingUseCases)[number] }) {
   return (
-    <div className="marketing-surface flex h-full gap-4 border border-border/50 bg-surface p-5 sm:p-6">
-      <div className="marketing-chip flex size-11 shrink-0 items-center justify-center bg-background text-accent">
+    <div className="rounded-2xl flex h-full gap-4 border border-border/50 bg-card p-5 sm:p-6">
+      <div className="rounded-full flex size-11 shrink-0 items-center justify-center bg-background text-primary">
         <Icon icon={item.icon} width={22} />
       </div>
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium uppercase tracking-wide text-accent">
+        <span className="text-sm font-medium uppercase tracking-wide text-primary">
           {item.audience}
         </span>
         <h3 className="text-lg font-semibold sm:text-xl">{item.title}</h3>
-        <p className="text-sm leading-relaxed text-muted">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           {item.description}
         </p>
       </div>

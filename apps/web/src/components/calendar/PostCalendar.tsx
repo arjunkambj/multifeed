@@ -13,16 +13,25 @@ import type {
   DateSelectArg,
   EventInput,
 } from "@fullcalendar/core";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
-  Button,
   Card,
-  Chip,
-  ListBox,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   Select,
-  Skeleton,
-  Tabs,
-  toast,
-} from "@heroui/react";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@iconify/react";
 import { useMutation } from "convex/react";
 import { useQuery } from "convex-helpers/react/cache/hooks";
@@ -52,11 +61,11 @@ const VIEWS: { id: CalendarView; label: string; icon: string }[] = [
 ];
 
 const STATUS_STYLE: Record<string, string> = {
-  scheduled: "bg-accent/15 text-accent",
-  publishing: "bg-warning/15 text-warning",
-  published: "bg-success/15 text-success",
-  failed: "bg-danger/15 text-danger",
-  draft: "bg-default text-muted",
+  scheduled: "bg-primary/15 text-primary",
+  publishing: "bg-amber-500/15 text-amber-500",
+  published: "bg-emerald-500/15 text-emerald-600",
+  failed: "bg-red-500/15 text-red-600",
+  draft: "bg-muted text-muted-foreground",
 };
 
 export function PostCalendar() {
@@ -169,13 +178,10 @@ export function PostCalendar() {
         postId: info.event.id as Id<"posts">,
         scheduledFor: start.getTime(),
       });
-      toast.success("Post rescheduled.", { timeout: 3000 });
+      toast.success("Post rescheduled.");
     } catch (error) {
       info.revert();
-      toast.danger(
-        error instanceof Error ? error.message : "Could not reschedule post",
-        { timeout: 3000 },
-      );
+      toast.error(error instanceof Error ? error.message : "Could not reschedule post");
     }
   };
 
@@ -184,12 +190,9 @@ export function PostCalendar() {
     try {
       await removePost({ postId: selectedPostId });
       setSelectedPostId(null);
-      toast.success("Post deleted.", { timeout: 3000 });
+      toast.success("Post deleted.");
     } catch (error) {
-      toast.danger(
-        error instanceof Error ? error.message : "Could not delete post",
-        { timeout: 3000 },
-      );
+      toast.error(error instanceof Error ? error.message : "Could not delete post");
     }
   };
 
@@ -200,9 +203,8 @@ export function PostCalendar() {
         description="Month, week, day, and list — drag to reschedule."
         actions={
           <Button
-            variant="primary"
             size="sm"
-            onPress={() => router.push("/posts/new")}
+            onClick={() => router.push("/posts/new")}
           >
             <Icon icon="hugeicons:add-01" width={16} />
             New post
@@ -220,13 +222,13 @@ export function PostCalendar() {
         <div className="flex min-w-0 flex-col gap-4 overflow-hidden">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-1">
-              <Button size="sm" variant="tertiary" onPress={goPrev}>
+              <Button size="sm" variant="outline" onClick={goPrev}>
                 <Icon icon="hugeicons:arrow-left-01" width={16} />
               </Button>
-              <Button size="sm" variant="tertiary" onPress={goToday}>
+              <Button size="sm" variant="outline" onClick={goToday}>
                 Today
               </Button>
-              <Button size="sm" variant="tertiary" onPress={goNext}>
+              <Button size="sm" variant="outline" onClick={goNext}>
                 <Icon icon="hugeicons:arrow-right-01" width={16} />
               </Button>
               <h2 className="ml-2 text-base font-semibold tracking-tight">
@@ -235,57 +237,40 @@ export function PostCalendar() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Select
-                aria-label="Filter calendar by platform"
-                className="w-40"
-                variant="secondary"
                 value={platformFilter}
-                onChange={(value) => setPlatformFilter(String(value ?? "all"))}
+                onValueChange={(value) => setPlatformFilter(String(value ?? "all"))}
               >
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    <ListBox.Item id="all" textValue="All platforms">
-                      All platforms
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    {platformOptions.map((platform) => (
-                      <ListBox.Item
-                        key={platform}
-                        id={platform}
-                        textValue={platformLabel(platform)}
-                      >
-                        {platformLabel(platform)}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
+                <SelectTrigger aria-label="Filter calendar by platform" className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All platforms</SelectItem>
+                  {platformOptions.map((platform) => (
+                    <SelectItem key={platform} value={platform}>
+                      {platformLabel(platform)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
               <Tabs
-                selectedKey={view}
-                onSelectionChange={(key) => changeView(key as CalendarView)}
+                value={view}
+                onValueChange={(key) => changeView(key as CalendarView)}
               >
-                <Tabs.ListContainer>
-                  <Tabs.List aria-label="Calendar view">
-                    {VIEWS.map((item) => (
-                      <Tabs.Tab key={item.id} id={item.id}>
-                        <Icon icon={item.icon} width={14} />
-                        {item.label}
-                        <Tabs.Indicator />
-                      </Tabs.Tab>
-                    ))}
-                  </Tabs.List>
-                </Tabs.ListContainer>
+                <TabsList aria-label="Calendar view">
+                  {VIEWS.map((item) => (
+                    <TabsTrigger key={item.id} value={item.id}>
+                      <Icon icon={item.icon} width={14} />
+                      {item.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
               </Tabs>
             </div>
           </div>
 
           <div className="multifeed-calendar relative min-h-[640px]">
             {posts === undefined && range && (
-              <div className="absolute inset-0 z-10 bg-surface">
+              <div className="absolute inset-0 z-10 bg-card">
                 <CalendarGridSkeleton />
               </div>
             )}
@@ -359,12 +344,12 @@ function PostDetailsCard({
   router: ReturnType<typeof useRouter>;
 }) {
   return (
-    <Card className="border border-border bg-surface shadow-none xl:sticky xl:top-4 xl:self-start">
-      <Card.Header className="pb-2">
-        <Card.Title className="text-base">Post details</Card.Title>
-        <Card.Description>Review or jump into editing</Card.Description>
-      </Card.Header>
-      <Card.Content>
+    <Card className="border border-border bg-card shadow-none xl:sticky xl:top-4 xl:self-start">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Post details</CardTitle>
+        <CardDescription>Review or jump into editing</CardDescription>
+      </CardHeader>
+      <CardContent>
         {selectedPost === undefined && (
           <div className="space-y-4 py-2">
             <Skeleton className="h-5 w-24 rounded-full" />
@@ -375,7 +360,7 @@ function PostDetailsCard({
         )}
 
         {selectedPost === null && (
-          <p className="text-sm text-muted">Post not found.</p>
+          <p className="text-sm text-muted-foreground">Post not found.</p>
         )}
 
         {selectedPost && (
@@ -387,7 +372,7 @@ function PostDetailsCard({
                 {selectedPost.status}
               </span>
               {selectedPost.scheduledFor && (
-                <span className="text-xs text-muted">
+                <span className="text-xs text-muted-foreground">
                   {format(
                     new Date(selectedPost.scheduledFor),
                     "EEE, MMM d · h:mm a",
@@ -401,16 +386,16 @@ function PostDetailsCard({
             )}
             <p className="whitespace-pre-wrap text-sm leading-relaxed">
               {selectedPost.body || (
-                <span className="text-muted">No caption</span>
+                <span className="text-muted-foreground">No caption</span>
               )}
             </p>
 
             <div className="flex flex-col gap-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Accounts
               </p>
               {selectedPost.targets.length === 0 ? (
-                <p className="text-xs text-muted">No targets</p>
+                <p className="text-xs text-muted-foreground">No targets</p>
               ) : (
                 selectedPost.targets.map((t) => (
                   <div
@@ -434,13 +419,13 @@ function PostDetailsCard({
                       <p className="truncate text-xs font-medium">
                         @{t.username ?? "account"}
                       </p>
-                      <p className="truncate text-[11px] text-muted">
+                      <p className="truncate text-[11px] text-muted-foreground">
                         {platformLabel(t.platform)}
                       </p>
                     </div>
-                    <Chip size="sm" variant="soft">
-                      {t.status}
-                    </Chip>
+                    <Badge variant="secondary">
+
+                      </Badge>
                   </div>
                 ))
               )}
@@ -452,8 +437,8 @@ function PostDetailsCard({
               ) && (
                 <Button
                   size="sm"
-                  variant="tertiary"
-                  onPress={() =>
+                  variant="outline"
+                  onClick={() =>
                     router.push(`/posts/new?edit=${selectedPost._id}`)
                   }
                 >
@@ -462,21 +447,21 @@ function PostDetailsCard({
               )}
               <Button
                 size="sm"
-                variant="tertiary"
-                onPress={() =>
+                variant="outline"
+                onClick={() =>
                   router.push(`/posts/new?from=${selectedPost._id}`)
                 }
               >
                 Duplicate
               </Button>
-              <Button size="sm" variant="tertiary" onPress={onClose}>
+              <Button size="sm" variant="outline" onClick={onClose}>
                 Close
               </Button>
               {selectedPost.status !== "publishing" && (
                 <Button
                   size="sm"
-                  variant="danger"
-                  onPress={() => void onDelete()}
+                  variant="destructive"
+                  onClick={() => void onDelete()}
                 >
                   Delete
                 </Button>
@@ -484,7 +469,7 @@ function PostDetailsCard({
             </div>
           </div>
         )}
-      </Card.Content>
+      </CardContent>
     </Card>
   );
 }

@@ -1,4 +1,4 @@
-import { buttonVariants } from "@heroui/react";
+import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,13 +15,13 @@ export function WhyUS() {
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         data-gsap-heading
       >
-        <span className="text-sm font-semibold uppercase tracking-wide text-accent">
+        <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Why MultiFeed
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Less time managing posts. More time making them matter.
         </h2>
-        <p className="text-base leading-relaxed text-muted sm:text-lg">
+        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
           Replace scattered drafts, native schedulers, and status messages with
           one clear publishing workflow.
         </p>
@@ -57,11 +57,11 @@ function WhyUSCard({
 }) {
   return (
     <div
-      className="marketing-surface flex w-full flex-col justify-between gap-6 overflow-hidden border border-border/50 bg-surface p-5 sm:p-6 md:flex-row md:gap-10 md:p-10"
+      className="rounded-2xl flex w-full flex-col justify-between gap-6 overflow-hidden border border-border/50 bg-card p-5 sm:p-6 md:flex-row md:gap-10 md:p-10"
       data-gsap-stack-surface
     >
       <div
-        className={`marketing-media relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden bg-surface-secondary md:w-80 lg:w-96 ${
+        className={`rounded-2xl relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden bg-muted md:w-80 lg:w-96 ${
           reversed ? "md:order-2" : ""
         }`}
         data-gsap-depth
@@ -75,15 +75,15 @@ function WhyUSCard({
         />
       </div>
       <div className="flex flex-1 flex-col justify-center gap-3 md:max-w-lg">
-        <span className="text-sm font-medium uppercase tracking-wide text-accent">
+        <span className="text-sm font-medium uppercase tracking-wide text-primary">
           {point.subheading}
         </span>
         <h3 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
           {point.title}
         </h3>
-        <p className="leading-relaxed text-muted">{point.description}</p>
+        <p className="leading-relaxed text-muted-foreground">{point.description}</p>
         <Link
-          className={`${buttonVariants({ size: "lg" })} button mt-2 w-fit`}
+          className={`${buttonVariants({ size: "lg" })} mt-2 w-fit`}
           href="/sign-in"
         >
           {point.cta}

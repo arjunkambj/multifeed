@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Spinner, Switch, toast } from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 import { Icon } from "@iconify/react";
 import { usePreloadedQuery, type Preloaded } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -89,9 +92,7 @@ export function BillingPage({
       })
       .catch((err) => {
         setCheckingOut(null);
-        toast.danger(err instanceof Error ? err.message : String(err), {
-          timeout: 3000,
-        });
+        toast.error(err instanceof Error ? err.message : String(err));
       });
   };
 
@@ -114,27 +115,25 @@ export function BillingPage({
       })
       .catch((err) => {
         setOpeningPortal(false);
-        toast.danger(err instanceof Error ? err.message : String(err), {
-          timeout: 3000,
-        });
+        toast.error(err instanceof Error ? err.message : String(err));
       });
   };
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <section className="flex flex-col gap-3 rounded-2xl bg-surface-secondary p-5">
+      <section className="flex flex-col gap-3 rounded-2xl bg-muted p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Icon
               icon="solar:card-linear"
               width={20}
-              className="shrink-0 text-muted"
+              className="shrink-0 text-muted-foreground"
             />
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-semibold text-foreground">
                 {activePlan ? activePlan.name : "No active plan"}
               </span>
-              <span className="text-sm text-muted">
+              <span className="text-sm text-muted-foreground">
                 {subscription
                   ? `${statusLabel(subscription.status)} · ${subscription.interval === "year" ? "Yearly" : "Monthly"}`
                   : "Choose a plan to activate billing."}
@@ -143,7 +142,7 @@ export function BillingPage({
           </div>
           <div className="flex items-center gap-2">
             {subscription && (
-              <span className="marketing-chip bg-surface px-3 py-1.5 text-sm font-medium text-foreground">
+              <span className="rounded-full bg-card px-3 py-1.5 text-sm font-medium text-foreground">
                 {subscription.hasPlanAccess &&
                 subscription.status !== "cancelled" &&
                 formatDate(subscription.currentPeriodEnd)
@@ -153,13 +152,13 @@ export function BillingPage({
             )}
             {subscription?.dodoCustomerId && (
               <Button
-                className="button font-medium"
-                isDisabled={openingPortal}
-                isPending={openingPortal}
-                onPress={openCustomerPortal}
+                className="font-medium"
+                disabled={openingPortal}
+                onClick={openCustomerPortal}
                 size="sm"
                 variant="secondary"
               >
+                {openingPortal ? <Spinner className="size-3" /> : null}
                 Manage subscription
               </Button>
             )}
@@ -168,16 +167,16 @@ export function BillingPage({
       </section>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted">Billing interval</p>
+        <p className="text-sm text-muted-foreground">Billing interval</p>
         <div
-          className="marketing-control flex items-center gap-1 border border-border/50 bg-surface px-1.5 py-1"
+          className="flex items-center gap-1 rounded-xl border border-border/50 bg-card px-1.5 py-1"
           role="group"
         >
           <button
-            className={`marketing-control-item cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
+            className={`cursor-pointer rounded-lg px-2.5 py-1 text-sm font-medium transition-colors ${
               !isYearly
-                ? "bg-surface-secondary text-foreground"
-                : "text-muted hover:text-foreground"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => setBillingInterval("month")}
             type="button"
@@ -185,36 +184,34 @@ export function BillingPage({
             Monthly
           </button>
           <Switch
-            isSelected={isYearly}
-            onChange={() => setBillingInterval(isYearly ? "month" : "year")}
-          >
-            <Switch.Control>
-              <Switch.Thumb />
-            </Switch.Control>
-          </Switch>
+            checked={isYearly}
+            onCheckedChange={(checked) =>
+              setBillingInterval(checked ? "year" : "month")
+            }
+          />
           <button
-            className={`marketing-control-item cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
+            className={`cursor-pointer rounded-lg px-2.5 py-1 text-sm font-medium transition-colors ${
               isYearly
-                ? "bg-surface-secondary text-foreground"
-                : "text-muted hover:text-foreground"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => setBillingInterval("year")}
             type="button"
           >
             Yearly
-            <span className="text-xs text-accent"> · Save 20%</span>
+            <span className="text-xs text-primary"> · Save 20%</span>
           </button>
         </div>
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 lg:gap-5">
-        <article className="flex flex-col overflow-hidden rounded-2xl bg-surface-secondary">
+        <article className="flex flex-col overflow-hidden rounded-2xl bg-muted">
           <div className="flex flex-1 flex-col p-5 sm:p-6">
             <div className="flex flex-col gap-1">
               <h3 className="font-display text-xl font-semibold tracking-tight text-foreground">
                 {freePlan.name}
               </h3>
-              <p className="text-sm leading-relaxed text-muted">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {freePlan.description}
               </p>
             </div>
@@ -223,7 +220,7 @@ export function BillingPage({
               <span className="font-display text-4xl font-bold tracking-tight tabular-nums text-foreground">
                 $0
               </span>
-              <span className="text-sm text-muted">/month</span>
+              <span className="text-sm text-muted-foreground">/month</span>
             </div>
 
             <div className="my-5 h-px w-full bg-border/50" />
@@ -235,7 +232,7 @@ export function BillingPage({
                   key={feature}
                 >
                   <Icon
-                    className="mt-0.5 shrink-0 text-accent"
+                    className="mt-0.5 shrink-0 text-primary"
                     icon="ph:check"
                     width={16}
                   />
@@ -245,8 +242,8 @@ export function BillingPage({
             </ul>
 
             <Button
-              className="button mt-7 w-full max-w-sm self-center font-medium"
-              isDisabled
+              className="mt-7 w-full max-w-sm self-center font-medium"
+              disabled
               size="lg"
               variant="secondary"
             >
@@ -264,7 +261,7 @@ export function BillingPage({
 
           return (
             <article
-              className="flex flex-col overflow-hidden rounded-2xl bg-surface-secondary"
+              className="flex flex-col overflow-hidden rounded-2xl bg-muted"
               key={plan.key}
             >
               <div className="flex flex-1 flex-col p-5 sm:p-6">
@@ -273,12 +270,12 @@ export function BillingPage({
                     <h3 className="font-display text-xl font-semibold tracking-tight text-foreground">
                       {plan.name}
                     </h3>
-                    <p className="text-sm leading-relaxed text-muted">
+                    <p className="text-sm leading-relaxed text-muted-foreground">
                       {plan.description}
                     </p>
                   </div>
                   {preferred && (
-                    <span className="marketing-chip shrink-0 bg-accent px-2.5 py-1 text-[11px] font-semibold text-accent-foreground">
+                    <span className="shrink-0 rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
                       Best value
                     </span>
                   )}
@@ -288,7 +285,7 @@ export function BillingPage({
                   <span className="font-display text-4xl font-bold tracking-tight tabular-nums text-foreground">
                     ${plan.prices[billingInterval]}
                   </span>
-                  <span className="text-sm text-muted">
+                  <span className="text-sm text-muted-foreground">
                     {intervalLabels[billingInterval]}
                   </span>
                 </div>
@@ -302,7 +299,7 @@ export function BillingPage({
                       key={feature}
                     >
                       <Icon
-                        className="mt-0.5 shrink-0 text-accent"
+                        className="mt-0.5 shrink-0 text-primary"
                         icon="ph:check"
                         width={16}
                       />
@@ -312,25 +309,20 @@ export function BillingPage({
                 </ul>
 
                 <Button
-                  className="button mt-7 w-full max-w-sm self-center font-medium"
-                  isDisabled={
+                  className="mt-7 w-full max-w-sm self-center font-medium"
+                  disabled={
                     isCurrent || checkoutBlocked || checkingOut !== null
                   }
-                  isPending={isPending}
-                  onPress={() => startCheckout(plan.key)}
+                  onClick={() => startCheckout(plan.key)}
                   size="lg"
-                  variant="primary"
+                  variant="default"
                 >
-                  {({ isPending: pending }) => (
-                    <>
-                      {pending ? <Spinner color="current" size="sm" /> : null}
-                      {isCurrent
-                        ? "Current plan"
-                        : checkoutBlocked
-                          ? "Existing subscription"
-                          : "Choose this plan"}
-                    </>
-                  )}
+                  {isPending ? <Spinner className="size-4" /> : null}
+                  {isCurrent
+                    ? "Current plan"
+                    : checkoutBlocked
+                      ? "Existing subscription"
+                      : "Choose this plan"}
                 </Button>
               </div>
             </article>

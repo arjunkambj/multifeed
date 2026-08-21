@@ -2,16 +2,16 @@
 
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Button,
-  Description,
-  Input,
-  Label,
   Popover,
-  Spinner,
-  TextField,
-  toast,
-} from "@heroui/react";
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Spinner } from "@/components/ui/spinner";
 import { Icon } from "@iconify/react";
 import { loadTeamData, teamDataQueryKey, type TeamData } from "@/lib/team-data";
 import { countUsedTeamSeats } from "@/lib/team-seats";
@@ -67,12 +67,10 @@ export function InvitePopover({
           queryKey: teamDataQueryKey(teamId),
         });
         setEmail("");
-        toast.success("Invite sent.", { timeout: 3000 });
+        toast.success("Invite sent.");
       })
       .catch((err) => {
-        toast.danger(err instanceof Error ? err.message : String(err), {
-          timeout: 3000,
-        });
+        toast.error(err instanceof Error ? err.message : String(err));
       })
       .finally(() => {
         sendingRef.current = false;
@@ -82,59 +80,55 @@ export function InvitePopover({
 
   return (
     <Popover>
-      <Button>
+      <PopoverTrigger render={<Button />}>
         <Icon icon="hugeicons:user-add-02" width={16} />
         Invite member
-      </Button>
-      <Popover.Content className="w-90" placement="bottom end">
-        <Popover.Dialog className="p-4">
-          <Popover.Arrow />
-          <Popover.Heading className="text-base font-semibold text-foreground">
-            Invite teammate
-          </Popover.Heading>
-          <form className="mt-4 flex flex-col gap-4" onSubmit={handleInvite}>
-            <TextField
-              fullWidth
-              isRequired
+      </PopoverTrigger>
+      <PopoverContent className="w-90" align="end">
+        <div className="text-base font-semibold text-foreground">
+          Invite teammate
+        </div>
+        <form className="flex flex-col gap-4" onSubmit={handleInvite}>
+          <div className="flex w-full flex-col gap-1.5">
+            <Label htmlFor="invite-email">Email address</Label>
+            <Input
+              id="invite-email"
               name="email"
               type="email"
+              required
+              autoComplete="email"
+              placeholder="teammate@company.com"
               value={email}
-              onChange={setEmail}
-            >
-              <Label>Email address</Label>
-              <Input autoComplete="email" placeholder="teammate@company.com" />
-              <Description>Hexclave will email a team invitation.</Description>
-              {seatLimit !== undefined && (
-                <Description>
-                  {usedSeats} of {seatLimit} plan seats used
-                  {isAtLimit
-                    ? ". Upgrade your plan to invite more people."
-                    : "."}
-                </Description>
-              )}
-            </TextField>
+              onChange={(event) => setEmail(event.target.value)}
+            />
+            <p className="text-sm text-muted-foreground">
+              Hexclave will email a team invitation.
+            </p>
+            {seatLimit !== undefined && (
+              <p className="text-sm text-muted-foreground">
+                {usedSeats} of {seatLimit} plan seats used
+                {isAtLimit
+                  ? ". Upgrade your plan to invite more people."
+                  : "."}
+              </p>
+            )}
+          </div>
 
-            <div className="flex justify-end">
-              <Button
-                isDisabled={!email.trim() || isSending || isAtLimit}
-                isPending={isSending}
-                type="submit"
-              >
-                {({ isPending }) => (
-                  <>
-                    {isPending ? (
-                      <Spinner color="current" size="sm" />
-                    ) : (
-                      <Icon icon="hugeicons:mail-send-02" width={16} />
-                    )}
-                    Send invite
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </Popover.Dialog>
-      </Popover.Content>
+          <div className="flex justify-end">
+            <Button
+              disabled={!email.trim() || isSending || isAtLimit}
+              type="submit"
+            >
+              {isSending ? (
+                <Spinner className="size-4" />
+              ) : (
+                <Icon icon="hugeicons:mail-send-02" width={16} />
+              )}
+              Send invite
+            </Button>
+          </div>
+        </form>
+      </PopoverContent>
     </Popover>
   );
 }

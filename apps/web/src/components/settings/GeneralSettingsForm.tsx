@@ -1,15 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Button,
-  Description,
-  Input,
-  Label,
-  Spinner,
-  TextField,
-  toast,
-} from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { Icon } from "@iconify/react";
 import { useUser } from "@hexclave/next";
 import { PasswordModal } from "@/components/settings/PasswordModal";
@@ -54,11 +50,9 @@ export function GeneralSettingsForm() {
     }
 
     void Promise.all(updates)
-      .then(() => toast.success("Changes saved.", { timeout: 3000 }))
+      .then(() => toast.success("Changes saved."))
       .catch((err) => {
-        toast.danger(err instanceof Error ? err.message : String(err), {
-          timeout: 3000,
-        });
+        toast.error(err instanceof Error ? err.message : String(err));
       })
       .finally(() => setIsSaving(false));
   };
@@ -69,72 +63,58 @@ export function GeneralSettingsForm() {
       onSubmit={handleSubmit}
     >
       <div className="grid gap-4 md:grid-cols-2">
-        <TextField
-          fullWidth
-          isRequired
-          name="displayName"
-          value={displayName}
-          onChange={setDisplayName}
-        >
-          <Label>Name</Label>
+        <div className="flex w-full flex-col gap-1.5">
+          <Label htmlFor="displayName">Name</Label>
           <Input
-            className="w-full"
+            id="displayName"
+            name="displayName"
+            required
             placeholder="Your name"
-            variant="secondary"
+            value={displayName}
+            onChange={(event) => setDisplayName(event.target.value)}
           />
-        </TextField>
+        </div>
 
-        <TextField
-          fullWidth
-          isRequired
-          name="primaryEmail"
-          type="email"
-          value={email}
-          onChange={setEmail}
-        >
-          <Label>Email</Label>
+        <div className="flex w-full flex-col gap-1.5">
+          <Label htmlFor="primaryEmail">Email</Label>
           <Input
-            className="w-full"
+            id="primaryEmail"
+            name="primaryEmail"
+            type="email"
+            required
             placeholder="you@company.com"
-            variant="secondary"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
-          <Description>
+          <p className="text-sm text-muted-foreground">
             {user.primaryEmailVerified ? "Verified" : "Not verified"}
-          </Description>
-        </TextField>
+          </p>
+        </div>
       </div>
 
-      <TextField
-        fullWidth
-        isDisabled={!organization}
-        name="organizationName"
-        value={organizationName}
-        onChange={setOrganizationName}
-      >
-        <Label>Organization name</Label>
+      <div className="flex w-full flex-col gap-1.5">
+        <Label htmlFor="organizationName">Organization name</Label>
         <Input
-          className="w-full"
+          id="organizationName"
+          name="organizationName"
+          disabled={!organization}
           placeholder="Organization name"
-          variant="secondary"
+          value={organizationName}
+          onChange={(event) => setOrganizationName(event.target.value)}
         />
-      </TextField>
+      </div>
 
       <div className="flex items-center gap-3">
         <Button
-          isDisabled={!hasChanges || isSaving}
-          isPending={isSaving}
+          disabled={!hasChanges || isSaving}
           type="submit"
         >
-          {({ isPending }) => (
-            <>
-              {isPending ? (
-                <Spinner color="current" size="sm" />
-              ) : (
-                <Icon icon="solar:diskette-linear" width={16} />
-              )}
-              Save changes
-            </>
+          {isSaving ? (
+            <Spinner className="size-4" />
+          ) : (
+            <Icon icon="solar:diskette-linear" width={16} />
           )}
+          Save changes
         </Button>
         <PasswordModal />
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { Accordion, buttonVariants } from "@heroui/react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 
@@ -17,13 +18,13 @@ export function FAQ() {
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         data-gsap-heading
       >
-        <span className="text-sm font-semibold uppercase tracking-wide text-accent">
+        <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           FAQ
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Know before you schedule
         </h2>
-        <p className="text-base leading-relaxed text-muted sm:text-lg">
+        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
           The practical details about platforms, post formats, teamwork, and
           pricing.
         </p>
@@ -35,12 +36,12 @@ export function FAQ() {
           data-gsap-card
         >
           <h3 className="text-xl font-medium sm:text-2xl">Still unsure?</h3>
-          <p className="leading-relaxed text-muted">
+          <p className="leading-relaxed text-muted-foreground">
             Tell us how you publish today. We’ll help you choose the right
             setup.
           </p>
           <Link
-            className={`${buttonVariants()} button mt-4 w-fit`}
+            className={buttonVariants({ variant: "default" })}
             href="/sign-in"
           >
             <Icon icon="mdi:chat-outline" width={16} />
@@ -49,21 +50,14 @@ export function FAQ() {
         </div>
 
         <div className="flex w-full max-w-2xl justify-center" data-gsap-card>
-          <Accordion className="w-full">
+          <Accordion className="w-full" multiple>
             {faqItems.map((item, index) => (
-              <Accordion.Item key={item.title} id={`${index}`}>
-                <Accordion.Heading>
-                  <Accordion.Trigger className="text-base font-medium sm:text-lg">
-                    {item.title}
-                    <Accordion.Indicator>
-                      <Icon icon="mdi:chevron-down" width={16} />
-                    </Accordion.Indicator>
-                  </Accordion.Trigger>
-                </Accordion.Heading>
-                <Accordion.Panel>
-                  <Accordion.Body>{item.content}</Accordion.Body>
-                </Accordion.Panel>
-              </Accordion.Item>
+              <AccordionItem key={item.title} value={`${index}`}>
+                <AccordionTrigger className="text-base font-medium sm:text-lg">
+                  {item.title}
+                </AccordionTrigger>
+                <AccordionContent>{item.content}</AccordionContent>
+              </AccordionItem>
             ))}
           </Accordion>
         </div>

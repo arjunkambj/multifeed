@@ -2,7 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Chip, Input, Tabs, toast } from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@iconify/react";
 import { useMutation, usePreloadedQuery, type Preloaded } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -51,15 +56,24 @@ const PAGE_COPY: Record<
   },
 };
 
-const STATUS_TONE: Record<
+const STATUS_BADGE: Record<
   string,
-  "default" | "success" | "warning" | "danger"
+  { variant: "default" | "secondary" | "destructive" | "outline"; className?: string }
 > = {
-  draft: "default",
-  scheduled: "warning",
-  publishing: "warning",
-  published: "success",
-  failed: "danger",
+  draft: { variant: "secondary" },
+  scheduled: {
+    variant: "outline",
+    className: "border-amber-500/40 bg-amber-500/10 text-amber-600",
+  },
+  publishing: {
+    variant: "outline",
+    className: "border-amber-500/40 bg-amber-500/10 text-amber-600",
+  },
+  published: {
+    variant: "outline",
+    className: "border-emerald-600/40 bg-emerald-600/10 text-emerald-700 dark:text-emerald-400",
+  },
+  failed: { variant: "destructive" },
 };
 
 export function PostLibrary({
@@ -101,11 +115,10 @@ export function PostLibrary({
     if (!window.confirm("Delete this post permanently?")) return;
     setDeleting(postId);
     void removePost({ postId: postId as Id<"posts"> })
-      .then(() => toast.success("Post deleted.", { timeout: 3000 }))
+      .then(() => toast.success("Post deleted."))
       .catch((error) => {
-        toast.danger(
+        toast.error(
           error instanceof Error ? error.message : "Could not delete post",
-          { timeout: 3000 },
         );
       })
       .finally(() => setDeleting(null));
@@ -120,16 +133,16 @@ export function PostLibrary({
           <>
             <Button
               size="sm"
-              variant="tertiary"
-              onPress={() => router.push("/calendar")}
+              variant="outline"
+              onClick={() => router.push("/calendar")}
             >
               <Icon icon="hugeicons:calendar-03" width={16} />
               Calendar
             </Button>
             <Button
               size="sm"
-              variant="primary"
-              onPress={() => router.push("/posts/new")}
+              variant="default"
+              onClick={() => router.push("/posts/new")}
             >
               <Icon icon="hugeicons:add-01" width={16} />
               New post
@@ -140,8 +153,8 @@ export function PostLibrary({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs
-          selectedKey={filter}
-          onSelectionChange={(key) => {
+          value={filter}
+          onValueChange={(key) => {
             const next = key as PostLibraryFilter;
             startTransition(() => {
               router.replace(
@@ -151,23 +164,18 @@ export function PostLibrary({
             });
           }}
         >
-          <Tabs.ListContainer>
-            <Tabs.List aria-label="Filter posts by status">
-              {FILTERS.map((item) => (
-                <Tabs.Tab key={item.id} id={item.id}>
-                  {item.label}
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-              ))}
-            </Tabs.List>
-          </Tabs.ListContainer>
+          <TabsList aria-label="Filter posts by status">
+            {FILTERS.map((item) => (
+              <TabsTrigger key={item.id} value={item.id}>
+                {item.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         </Tabs>
         <div className="w-full sm:w-64">
           <Input
             aria-label="Search posts"
-            fullWidth
             placeholder="Search posts or accounts"
-            variant="secondary"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
@@ -176,7 +184,7 @@ export function PostLibrary({
 
       {visiblePosts.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-accent/10 text-accent">
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Icon icon="hugeicons:note-01" width={24} />
           </span>
           <div>
@@ -187,15 +195,15 @@ export function PostLibrary({
                   ? "No posts yet"
                   : `No ${copy.title.toLowerCase()} yet`}
             </p>
-            <p className="mt-1 max-w-sm text-sm text-muted">
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
               {search ? "Try another caption, account, or status." : copy.empty}
             </p>
           </div>
           {!search && (
             <Button
               size="sm"
-              variant="primary"
-              onPress={() => router.push("/posts/new")}
+              variant="default"
+              onClick={() => router.push("/posts/new")}
             >
               Create post
             </Button>
@@ -206,20 +214,21 @@ export function PostLibrary({
           {visiblePosts.map((post) => (
             <Card
               key={post._id}
-              className="border border-border bg-surface shadow-none transition hover:border-accent/30"
+              className="border border-border bg-card shadow-none transition hover:border-primary/30"
             >
-              <Card.Content className="flex flex-col gap-4 py-4 lg:flex-row lg:items-start">
+              <CardContent className="flex flex-col gap-4 py-4 lg:flex-row lg:items-start">
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <Chip
-                      size="sm"
-                      color={STATUS_TONE[post.status] ?? "default"}
-                      variant="soft"
+                    <Badge
+                      variant={
+                        STATUS_BADGE[post.status]?.variant ?? "secondary"
+                      }
+                      className={STATUS_BADGE[post.status]?.className}
                     >
                       {post.status}
-                    </Chip>
+                    </Badge>
                     {post.scheduledFor && (
-                      <span className="text-xs font-medium text-muted">
+                      <span className="text-xs font-medium text-muted-foreground">
                         {format(
                           new Date(post.scheduledFor),
                           "EEE, MMM d · h:mm a",
@@ -230,12 +239,12 @@ export function PostLibrary({
                   {post.title && (
                     <p className="text-sm font-semibold">{post.title}</p>
                   )}
-                  <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-muted">
+                  <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
                     {post.body || "No caption"}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {post.targets.length === 0 ? (
-                      <span className="text-xs text-muted">
+                      <span className="text-xs text-muted-foreground">
                         No accounts selected
                       </span>
                     ) : (
@@ -260,7 +269,7 @@ export function PostLibrary({
                             />
                           )}
                           {target.failureMessage && (
-                            <span className="text-danger">· {target.failureMessage}</span>
+                            <span className="text-red-600">· {target.failureMessage}</span>
                           )}
                         </span>
                       ))
@@ -278,7 +287,7 @@ export function PostLibrary({
                                   href={target.platformPermalink}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="text-xs font-medium text-accent hover:underline"
+                                  className="text-xs font-medium text-primary hover:underline"
                                 >
                                   Open on {platformLabel(target.platform)}
                                 </a>,
@@ -295,8 +304,8 @@ export function PostLibrary({
                   {post.scheduledFor && post.status !== "draft" && (
                     <Button
                       size="sm"
-                      variant="tertiary"
-                      onPress={() =>
+                      variant="outline"
+                      onClick={() =>
                         router.push(`/calendar?highlight=${post._id}`)
                       }
                     >
@@ -308,9 +317,9 @@ export function PostLibrary({
                     post.targets.some((target) => target.status === "failed")) && (
                     <Button
                       size="sm"
-                      variant="tertiary"
-                      isPending={retrying === post._id}
-                      onPress={async () => {
+                      variant="outline"
+                      disabled={retrying === post._id}
+                      onClick={async () => {
                         setRetrying(post._id);
                         try {
                           const result = await retryFailed({ postId: post._id });
@@ -320,7 +329,7 @@ export function PostLibrary({
                               : `Retrying ${result.retried} failed deliveries.`,
                           );
                         } catch (error) {
-                          toast.danger(
+                          toast.error(
                             error instanceof Error
                               ? error.message
                               : "Could not retry this post",
@@ -336,8 +345,8 @@ export function PostLibrary({
                   )}
                   <Button
                     size="sm"
-                    variant="tertiary"
-                    onPress={() =>
+                    variant="outline"
+                    onClick={() =>
                       router.push(
                         post.status === "draft"
                           ? `/posts/new?edit=${post._id}`
@@ -358,15 +367,15 @@ export function PostLibrary({
                   {post.status !== "publishing" && (
                     <Button
                       size="sm"
-                      variant="tertiary"
-                      isPending={deleting === post._id}
-                      onPress={() => void onDelete(post._id)}
+                      variant="outline"
+                      disabled={deleting === post._id}
+                      onClick={() => void onDelete(post._id)}
                     >
                       <Icon icon="hugeicons:delete-02" width={15} />
                     </Button>
                   )}
                 </div>
-              </Card.Content>
+              </CardContent>
             </Card>
           ))}
         </div>

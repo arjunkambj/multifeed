@@ -1,6 +1,7 @@
 "use client";
 
-import { buttonVariants, Switch } from "@heroui/react";
+import { buttonVariants } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -20,47 +21,46 @@ export function Pricing() {
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         data-gsap-heading
       >
-        <span className="text-sm font-semibold uppercase tracking-wide text-accent">
+        <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Pricing
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           A plan that fits the way you publish.
         </h2>
-        <p className="text-base leading-relaxed text-muted sm:text-lg">
+        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
           Start with the accounts and seats you need, then move up when your
           team or client list grows.
         </p>
         <div
-          className="marketing-control mt-2 flex items-center gap-1 border border-border/50 bg-surface px-1.5 py-1"
+          className="rounded-xl mt-2 flex items-center gap-1 border border-border/50 bg-card px-1.5 py-1"
           role="group"
         >
           <button
-            className={`marketing-control-item cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
+            className={`rounded-lg cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
               !isYearly
-                ? "bg-surface-secondary text-foreground"
-                : "text-muted hover:text-foreground"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => setIsYearly(false)}
             type="button"
           >
             Monthly
           </button>
-          <Switch isSelected={isYearly} onChange={setIsYearly}>
-            <Switch.Control>
-              <Switch.Thumb />
-            </Switch.Control>
-          </Switch>
+          <Switch
+            checked={isYearly}
+            onCheckedChange={(checked) => setIsYearly(checked)}
+          />
           <button
-            className={`marketing-control-item cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
+            className={`rounded-lg cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
               isYearly
-                ? "bg-surface-secondary text-foreground"
-                : "text-muted hover:text-foreground"
+                ? "bg-muted text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => setIsYearly(true)}
             type="button"
           >
             Yearly
-            <span className="text-xs text-accent"> · Save 20%</span>
+            <span className="text-xs text-primary"> · Save 20%</span>
           </button>
         </div>
       </div>
@@ -87,8 +87,8 @@ function PricingCard({
 
   return (
     <div
-      className={`marketing-surface group relative flex h-full flex-col overflow-hidden border bg-surface transition-colors ${
-        preferred ? "border-accent/40" : "border-border/50 hover:border-border"
+      className={`rounded-2xl group relative flex h-full flex-col overflow-hidden border bg-card transition-colors ${
+        preferred ? "border-primary/40" : "border-border/50 hover:border-border"
       }`}
     >
       <div className="flex flex-1 flex-col p-5 sm:p-6">
@@ -97,16 +97,16 @@ function PricingCard({
             <h3 className="font-display text-xl font-semibold tracking-tight text-foreground">
               {plan.name}
             </h3>
-            <p className="text-sm leading-relaxed text-muted">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {plan.description}
             </p>
           </div>
           {plan.badge && (
             <span
-              className={`marketing-chip shrink-0 px-2.5 py-1 text-[11px] font-semibold ${
+              className={`rounded-full shrink-0 px-2.5 py-1 text-[11px] font-semibold ${
                 preferred
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-surface-secondary text-muted"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
               }`}
             >
               {plan.badge}
@@ -118,10 +118,10 @@ function PricingCard({
           <span className="font-display text-4xl font-bold tracking-tight tabular-nums text-foreground">
             {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
           </span>
-          <span className="text-sm text-muted">
+          <span className="text-sm text-muted-foreground">
             {plan.period}
             {isYearly && (
-              <span className="text-accent"> · billed annually</span>
+              <span className="text-primary"> · billed annually</span>
             )}
           </span>
         </div>
@@ -135,7 +135,7 @@ function PricingCard({
               key={feature}
             >
               <Icon
-                className="mt-0.5 shrink-0 text-accent"
+                className="mt-0.5 shrink-0 text-primary"
                 icon="ph:check"
                 width={16}
               />
@@ -146,10 +146,9 @@ function PricingCard({
 
         <Link
           className={`${buttonVariants({
-            fullWidth: true,
             size: "lg",
-            variant: preferred ? "primary" : "tertiary",
-          })} button mt-7 font-medium`}
+            variant: preferred ? "default" : "ghost",
+          })} mt-7 w-full font-medium`}
           href="/sign-in"
         >
           {plan.cta}

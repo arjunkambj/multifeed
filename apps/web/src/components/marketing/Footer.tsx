@@ -1,4 +1,4 @@
-import { buttonVariants } from "@heroui/react";
+import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 
@@ -42,12 +42,12 @@ export function Footer() {
         <h3 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Ready to trade seven tabs for one calendar?
         </h3>
-        <p className="max-w-xl text-base text-muted sm:text-lg">
+        <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
           Create your post, tailor it for each platform, and schedule the whole
           week from one place.
         </p>
         <Link
-          className={`${buttonVariants({ size: "lg" })} button mt-2`}
+          className={`${buttonVariants({ size: "lg" })} mt-2`}
           href="/sign-in"
         >
           Plan your first post
@@ -60,7 +60,7 @@ export function Footer() {
           data-gsap-card
         >
           <Logo />
-          <p className="max-w-xs text-sm leading-relaxed text-muted">
+          <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
             Create, tailor, and schedule social posts across seven platforms
             from one visual calendar.
           </p>
@@ -68,7 +68,7 @@ export function Footer() {
             {socialLinks.map((social) => (
               <Link
                 aria-label={social.label}
-                className="text-muted transition-colors hover:text-accent"
+                className="text-muted-foreground transition-colors hover:text-primary"
                 href={social.href}
                 key={social.label}
               >
@@ -89,7 +89,7 @@ export function Footer() {
                 {section.links.map((link) => (
                   <li key={link.name}>
                     <Link
-                      className="text-sm text-muted transition-colors hover:text-accent"
+                      className="text-sm text-muted-foreground transition-colors hover:text-primary"
                       href={link.href}
                     >
                       {link.name}
@@ -106,14 +106,14 @@ export function Footer() {
         className="flex flex-col items-start justify-between gap-4 border border-border px-4 py-6 sm:flex-row sm:items-center sm:px-6"
         data-gsap-card
       >
-        <p className="text-xs text-muted">
+        <p className="text-xs text-muted-foreground">
           &copy; {new Date().getFullYear()} MultiFeed. All rights reserved.
         </p>
-        <div className="flex gap-4 text-xs text-muted">
-          <Link className="transition-colors hover:text-accent" href="/policies/privacy">
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          <Link className="transition-colors hover:text-primary" href="/policies/privacy">
             Privacy
           </Link>
-          <Link className="transition-colors hover:text-accent" href="/policies/terms">
+          <Link className="transition-colors hover:text-primary" href="/policies/terms">
             Terms
           </Link>
         </div>

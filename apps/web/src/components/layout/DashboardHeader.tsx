@@ -20,7 +20,7 @@ export function DashboardHeader({
       <button
         type="button"
         onClick={onToggle}
-        className="inline-flex size-9 items-center justify-center rounded-3xl text-muted transition-colors hover:bg-surface-secondary hover:text-foreground"
+        className="inline-flex size-9 items-center justify-center rounded-3xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         aria-label="Toggle sidebar"
       >
         <Icon icon="hugeicons:sidebar-left" width={18} />

@@ -1,6 +1,14 @@
 "use client";
 
-import { Avatar, Dropdown, Label, Switch } from "@heroui/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -32,38 +40,35 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <Dropdown>
-      <Dropdown.Trigger
+    <DropdownMenu>
+      <DropdownMenuTrigger
         aria-label="Open user profile"
-        className="group size-9 cursor-pointer rounded-full border border-border bg-surface p-0 items-center flex justify-center transition-colors hover:border-accent/40 hover:bg-surface-secondary"
+        className="group size-9 cursor-pointer rounded-full border border-border bg-card p-0 items-center flex justify-center transition-colors hover:border-primary/40 hover:bg-muted"
       >
         <Avatar className="size-7.5 rounded-full">
           {user.profileImageUrl && (
-            <Avatar.Image
+            <AvatarImage
               src={user.profileImageUrl}
               alt={user.displayName ?? ""}
             />
           )}
-          <Avatar.Fallback className="text-xs font-medium">
+          <AvatarFallback className="text-xs font-medium">
             {initials}
-          </Avatar.Fallback>
+          </AvatarFallback>
         </Avatar>
-      </Dropdown.Trigger>
-      <Dropdown.Popover
-        className="w-64 rounded-4xl py-2"
-        placement="bottom end"
-      >
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-64 rounded-4xl py-2" align="end">
         <div className="flex items-center gap-2 px-2  py-2 ">
           <Avatar className="size-10 rounded-full">
             {user.profileImageUrl && (
-              <Avatar.Image
+              <AvatarImage
                 src={user.profileImageUrl}
                 alt={user.displayName ?? ""}
               />
             )}
-            <Avatar.Fallback className="text-sm font-semibold">
+            <AvatarFallback className="text-sm font-semibold">
               {initials}
-            </Avatar.Fallback>
+            </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             {user.displayName && (
@@ -72,52 +77,49 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
               </div>
             )}
             {user.primaryEmail && (
-              <div className="truncate text-xs text-muted">
+              <div className="truncate text-xs text-muted-foreground">
                 {user.primaryEmail}
               </div>
             )}
           </div>
         </div>
-        <Dropdown.Menu
+        <div
           className="pt-1 flex flex-col gap-0"
-          onAction={async (key) => {
-            if (key === "settings") {
-              router.push(menuRoutes[key]);
-            }
-
-            if (key === "logout") {
-              await hexclaveClientApp.signOut();
-            }
-          }}
+          onClick={(event) => event.stopPropagation()}
         >
-          <Dropdown.Item
-            id="theme"
-            shouldCloseOnSelect={false}
-            textValue="Dark mode"
+          <DropdownMenuItem
+            className="select-none"
+            onSelect={(event) => event.preventDefault()}
           >
             <Icon icon="hugeicons:sun-03" width={20} />
             <Label>Dark mode</Label>
             <Switch
               aria-label="Toggle dark mode"
               className="ml-auto"
-              isSelected={isDark}
-              onChange={(selected) => setTheme(selected ? "dark" : "light")}
-            >
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch>
-          </Dropdown.Item>
-          <Dropdown.Item id="settings" textValue="Settings">
+              checked={isDark}
+              onCheckedChange={(checked) =>
+                setTheme(checked ? "dark" : "light")
+              }
+            />
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              router.push(menuRoutes.settings);
+            }}
+          >
             <Icon icon="hugeicons:settings-02" width={20} />
             <Label>Settings</Label>
-          </Dropdown.Item>
-          <Dropdown.Item id="logout" textValue="Logout">
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              void hexclaveClientApp.signOut();
+            }}
+          >
             <Icon icon="hugeicons:logout-03" width={20} />
             <Label>Logout</Label>
-          </Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown.Popover>
-    </Dropdown>
+          </DropdownMenuItem>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

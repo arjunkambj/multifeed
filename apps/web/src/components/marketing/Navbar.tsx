@@ -1,6 +1,6 @@
 "use client";
 
-import { buttonVariants } from "@heroui/react";
+import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -55,8 +55,8 @@ export function Navbar() {
 
   return (
     <header
-      className={`marketing-nav sticky top-2 z-50 mx-auto mt-2 w-[min(48rem,calc(100%-2rem))] border border-border/50 backdrop-blur-lg transition-colors duration-300 dark:shadow-lg dark:shadow-black/20 ${
-        isScrolled ? "bg-white/55 dark:bg-surface/80" : "bg-surface/95"
+      className={`rounded-2xl sticky top-2 z-50 mx-auto mt-2 w-[min(48rem,calc(100%-2rem))] border border-border/50 backdrop-blur-lg transition-colors duration-300 dark:shadow-lg dark:shadow-black/20 ${
+        isScrolled ? "bg-white/55 dark:bg-card/80" : "bg-card/95"
       }`}
       data-gsap-nav
     >
@@ -72,8 +72,8 @@ export function Navbar() {
               <li key={link.name}>
                 <Link
                   aria-current={isActive ? "page" : undefined}
-                  className={`block rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:text-accent ${
-                    isActive ? "text-accent" : "text-muted"
+                  className={`block rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:text-primary ${
+                    isActive ? "text-primary" : "text-muted-foreground"
                   }`}
                   href={link.href}
                 >
@@ -86,7 +86,7 @@ export function Navbar() {
 
         <div className="flex items-center justify-end gap-1.5 sm:gap-2">
           <Link
-            className={`${buttonVariants({ size: "sm" })} button hidden lg:inline-flex`}
+            className={`${buttonVariants({ size: "sm" })} hidden lg:inline-flex`}
             href="/sign-in"
           >
             Plan a post
@@ -94,7 +94,7 @@ export function Navbar() {
           <button
             aria-expanded={isMenuOpen}
             aria-label="Toggle navigation"
-            className="button inline-flex size-9 items-center justify-center border border-border/60 bg-surface text-foreground transition-colors hover:border-accent/40 hover:text-accent lg:hidden"
+            className=" inline-flex size-9 items-center justify-center border border-border/60 bg-card text-foreground transition-colors hover:border-primary/40 hover:text-primary lg:hidden"
             onClick={() => setIsMenuOpen((open) => !open)}
             type="button"
           >
@@ -112,7 +112,7 @@ export function Navbar() {
                 <Link
                   aria-current={isActive ? "page" : undefined}
                   className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive ? "text-accent" : "text-muted hover:text-accent"
+                    isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
                   }`}
                   href={link.href}
                   key={link.name}
@@ -124,7 +124,7 @@ export function Navbar() {
             })}
           </div>
           <Link
-            className={`${buttonVariants()} button mt-3 w-full justify-center`}
+            className={`${buttonVariants()} mt-3 w-full justify-center`}
             href="/sign-in"
             onClick={() => setIsMenuOpen(false)}
           >

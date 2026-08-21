@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import { PLATFORM_META } from "@/lib/platform-meta";
 import {
@@ -23,13 +23,12 @@ export function PostFormatPicker({
           return (
             <Button
               key={format.id}
-              fullWidth
-              variant="tertiary"
+              variant="ghost"
               aria-label={`${format.label}. ${format.description}`}
-              onPress={() => onChange(format.id)}
-              className="group h-auto min-h-48 w-full flex-col items-center justify-center gap-4 rounded-2xl border border-border/70 bg-transparent px-5 py-6 text-center hover:border-accent/40 hover:bg-accent/5"
+              onClick={() => onChange(format.id)}
+              className="group h-auto min-h-48 w-full flex-col items-center justify-center gap-4 rounded-2xl border border-border/70 bg-transparent px-5 py-6 text-center hover:border-primary/40 hover:bg-primary/5"
             >
-              <span className="flex size-12 items-center justify-center rounded-xl bg-surface-secondary text-muted transition-colors group-hover:bg-accent/10 group-hover:text-accent">
+              <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
                 <Icon icon={format.icon} width={24} />
               </span>
 
@@ -37,7 +36,7 @@ export function PostFormatPicker({
                 <span className="text-base font-semibold text-foreground">
                   {format.label}
                 </span>
-                <span className="text-sm font-normal text-muted">
+                <span className="text-sm font-normal text-muted-foreground">
                   {format.description}
                 </span>
               </span>
@@ -49,7 +48,7 @@ export function PostFormatPicker({
                     <span
                       key={platform}
                       title={meta?.label ?? platform}
-                      className="flex size-7 items-center justify-center rounded-lg bg-surface-secondary"
+                      className="flex size-7 items-center justify-center rounded-lg bg-muted"
                     >
                       <Icon
                         icon={meta?.icon ?? "hugeicons:link-01"}

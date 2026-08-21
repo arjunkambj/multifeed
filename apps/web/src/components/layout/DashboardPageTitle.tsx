@@ -14,7 +14,7 @@ export function DashboardPageTitle({ title, description, actions }: Props) {
           {title}
         </h1>
         {description && (
-          <p className="max-w-2xl text-sm leading-relaxed text-muted">
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
             {description}
           </p>
         )}

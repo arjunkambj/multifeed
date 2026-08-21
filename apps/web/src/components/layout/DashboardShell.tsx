@@ -22,7 +22,7 @@ export function DashboardShell({
       <Suspense fallback={<div className="w-16 shrink-0 bg-background" />}>
         <AppSidebar collapsed={collapsed} />
       </Suspense>
-      <div className="my-2 mr-2 flex min-w-0 flex-1 flex-col overflow-hidden rounded-4xl bg-surface">
+      <div className="my-2 mr-2 flex min-w-0 flex-1 flex-col overflow-hidden rounded-4xl bg-card">
         <DashboardHeader
           user={user}
           onToggle={() => setCollapsed((value) => !value)}

@@ -1,6 +1,16 @@
 "use client";
 
-import { Input, Label, ListBox, Select, Switch, TextArea } from "@heroui/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import {
   placementOptions,
   type PlatformSettings,
@@ -33,14 +43,10 @@ const Toggle = ({
   value: boolean;
   onChange: (value: boolean) => void;
 }) => (
-  <Switch size="sm" isSelected={value} onChange={onChange}>
-    <Switch.Content>
-      <Switch.Control>
-        <Switch.Thumb />
-      </Switch.Control>
-      {label}
-    </Switch.Content>
-  </Switch>
+  <label className="flex cursor-pointer items-center gap-2 text-sm">
+    <Switch size="sm" checked={value} onCheckedChange={onChange} />
+    {label}
+  </label>
 );
 
 export function PlatformSettingsFields({
@@ -58,69 +64,53 @@ export function PlatformSettingsFields({
 
   return (
     <div className="flex flex-col gap-3 border-t border-border/70 pt-3">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Platform settings
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {placements.length > 1 && (
           <Select
-            fullWidth
-            variant="secondary"
             value={value.placement ?? placements[0].id}
-            onChange={(placement) =>
+            onValueChange={(placement) =>
               onChange({ placement: placement as PostPlacement })
             }
           >
-            <Label>Placement</Label>
-            <Select.Trigger>
-              <Select.Value />
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover>
-              <ListBox>
+            <div className="flex w-full flex-col gap-1.5">
+              <Label>Placement</Label>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
                 {placements.map((placement) => (
-                  <ListBox.Item
-                    key={placement.id}
-                    id={placement.id}
-                    textValue={placement.label}
-                  >
+                  <SelectItem key={placement.id} value={placement.id}>
                     {placement.label}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
+                  </SelectItem>
                 ))}
-              </ListBox>
-            </Select.Popover>
+              </SelectContent>
+            </div>
           </Select>
         )}
 
         {showVisibility && (
           <Select
-            fullWidth
-            variant="secondary"
             value={value.visibility ?? "public"}
-            onChange={(visibility) =>
+            onValueChange={(visibility) =>
               onChange({ visibility: visibility as PostVisibility })
             }
           >
-            <Label>Visibility</Label>
-            <Select.Trigger>
-              <Select.Value />
-              <Select.Indicator />
-            </Select.Trigger>
-            <Select.Popover>
-              <ListBox>
+            <div className="flex w-full flex-col gap-1.5">
+              <Label>Visibility</Label>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
                 {VISIBILITY_OPTIONS.map((visibility) => (
-                  <ListBox.Item
-                    key={visibility.id}
-                    id={visibility.id}
-                    textValue={visibility.label}
-                  >
+                  <SelectItem key={visibility.id} value={visibility.id}>
                     {visibility.label}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
+                  </SelectItem>
                 ))}
-              </ListBox>
-            </Select.Popover>
+              </SelectContent>
+            </div>
           </Select>
         )}
 
@@ -129,8 +119,6 @@ export function PlatformSettingsFields({
             <Label htmlFor={`platform-title-${accountId}`}>Video title</Label>
             <Input
               id={`platform-title-${accountId}`}
-              fullWidth
-              variant="secondary"
               value={value.title ?? ""}
               onChange={(event) => onChange({ title: event.target.value })}
             />
@@ -140,10 +128,8 @@ export function PlatformSettingsFields({
         {showAltText && (
           <div className="flex flex-col gap-1.5 sm:col-span-2">
             <Label htmlFor={`alt-text-${accountId}`}>Alt text</Label>
-            <TextArea
+            <Textarea
               id={`alt-text-${accountId}`}
-              fullWidth
-              variant="secondary"
               rows={2}
               placeholder="Describe the image for accessibility"
               value={value.altText ?? ""}

@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Button, Spinner, toast } from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Icon } from "@iconify/react";
 import { useUploadFile } from "@convex-dev/r2/react";
 import { useMutation } from "convex/react";
@@ -102,7 +104,7 @@ function MediaPreviewCard({
 
   return (
     <div
-      className="group w-32 shrink-0 overflow-hidden rounded-xl border border-border bg-surface-secondary"
+      className="group w-32 shrink-0 overflow-hidden rounded-xl border border-border bg-muted"
       aria-busy={isBusy}
     >
       <div className="relative aspect-video">
@@ -123,7 +125,7 @@ function MediaPreviewCard({
             playsInline
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-muted">
+          <div className="flex size-full items-center justify-center text-muted-foreground">
             <Icon
               icon={
                 kind === "video" ? "hugeicons:video-01" : "hugeicons:image-02"
@@ -135,7 +137,7 @@ function MediaPreviewCard({
 
         {isBusy && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 text-white">
-            <Spinner color="current" size="md" />
+            <Spinner className="size-5" />
             <span className="text-xs font-medium tabular-nums">
               {uploadProgress === undefined ? busyLabel : `${uploadProgress}%`}
             </span>
@@ -147,12 +149,11 @@ function MediaPreviewCard({
 
         {onRemove && (
           <Button
-            isIconOnly
-            size="sm"
-            variant="danger"
+            size="icon-sm"
+            variant="destructive"
             aria-label={`Remove ${filename}`}
             className="absolute right-1.5 top-1.5"
-            onPress={onRemove}
+            onClick={onRemove}
           >
             <Icon icon="hugeicons:delete-02" width={14} />
           </Button>
@@ -212,10 +213,7 @@ export function PostMediaUploader({
     const room = maxFiles - media.length;
     const selectedFiles = files.slice(0, room);
     if (files.length > room) {
-      toast.danger(
-        `${kind === "image" ? "Image posts" : "This format"} supports ${maxFiles} file${maxFiles === 1 ? "" : "s"}.`,
-        { timeout: 3000 },
-      );
+      toast.error(`${kind === "image" ? "Image posts" : "This format"} supports ${maxFiles} file${maxFiles === 1 ? "" : "s"}.`);
     }
     if (selectedFiles.length === 0) return;
 
@@ -227,10 +225,7 @@ export function PostMediaUploader({
     const finishUpload = (caught: unknown) => {
       if (uploaded.length > 0) onChange([...media, ...uploaded]);
       setPendingMedia([]);
-      toast.danger(
-        caught instanceof Error ? caught.message : "Media upload failed",
-        { timeout: 6000 },
-      );
+      toast.error(caught instanceof Error ? caught.message : "Media upload failed");
       setUploading(false);
       onUploadingChange?.(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -323,10 +318,7 @@ export function PostMediaUploader({
         .then(() => {
           onChange([...media, ...uploaded]);
           setPendingMedia([]);
-          toast.success(
-            `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`,
-            { timeout: 3000 },
-          );
+          toast.success(`${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`);
         })
         .catch(finishUpload)
         .finally(() => {
@@ -343,13 +335,10 @@ export function PostMediaUploader({
     void deleteMedia({ mediaAssetId: asset._id })
       .then(() => {
         onChange(media.filter((item) => item._id !== asset._id));
-        toast.success("Media deleted from storage.", { timeout: 3000 });
+        toast.success("Media deleted from storage.");
       })
       .catch((caught) => {
-        toast.danger(
-          caught instanceof Error ? caught.message : "Could not delete media",
-          { timeout: 6000 },
-        );
+        toast.error(caught instanceof Error ? caught.message : "Could not delete media");
       })
       .finally(() => setDeletingMediaId(null));
   };
@@ -370,15 +359,15 @@ export function PostMediaUploader({
 
       {media.length + pendingMedia.length < maxFiles && (
         <Button
-          variant="tertiary"
-          isDisabled={uploading}
-          onPress={() => inputRef.current?.click()}
+          variant="ghost"
+          disabled={uploading}
+          onClick={() => inputRef.current?.click()}
           aria-label={
             media.length === 0 && pendingMedia.length === 0
               ? "Add media"
               : "Add another media file"
           }
-          className="h-24 w-36 shrink-0 flex-col gap-1.5 rounded-xl border border-dashed border-border bg-transparent px-3 py-3 hover:border-accent/50 hover:bg-surface-secondary"
+          className="h-24 w-36 shrink-0 flex-col gap-1.5 rounded-xl border border-dashed border-border bg-transparent px-3 py-3 hover:border-primary/50 hover:bg-muted"
         >
           <Icon icon="hugeicons:upload-04" width={20} />
           <span className="text-sm font-medium">
@@ -386,7 +375,7 @@ export function PostMediaUploader({
               ? "Add media"
               : "Add another"}
           </span>
-          <span className="text-[11px] font-normal text-muted">
+          <span className="text-[11px] font-normal text-muted-foreground">
             {kind === "image"
               ? "Up to 10 images"
               : kind === "video"

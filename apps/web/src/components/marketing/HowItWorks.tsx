@@ -29,13 +29,13 @@ export function HowItWorks() {
         className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
         data-gsap-heading
       >
-        <span className="text-sm font-semibold uppercase tracking-wide text-accent">
+        <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           How it works
         </span>
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Three steps from idea to scheduled
         </h2>
-        <p className="text-base leading-relaxed text-muted sm:text-lg">
+        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
           A simple workflow your whole team can understand at a glance.
         </p>
       </div>
@@ -65,16 +65,16 @@ function StepCard({
   step: string;
 }) {
   return (
-    <div className="marketing-surface flex h-full w-full flex-col gap-5 border border-border/50 bg-surface p-2">
-      <div className="marketing-media flex h-56 w-full items-end bg-background p-5 sm:h-64">
+    <div className="rounded-2xl flex h-full w-full flex-col gap-5 border border-border/50 bg-card p-2">
+      <div className="rounded-2xl flex h-56 w-full items-end bg-background p-5 sm:h-64">
         <div className="grid w-full grid-cols-4 gap-2">
           {[32, 58, 76, 44].map((height, index) => (
             <div
-              className="flex h-32 items-end rounded-full bg-surface-secondary sm:h-36"
+              className="flex h-32 items-end rounded-full bg-muted sm:h-36"
               key={`${height}-${index}`}
             >
               <div
-                className="w-full rounded-full bg-accent"
+                className="w-full rounded-full bg-primary"
                 data-gsap-bar
                 style={{ height: `${height}%` }}
               />
@@ -83,11 +83,11 @@ function StepCard({
         </div>
       </div>
       <div className="flex flex-col gap-2 px-3 pb-5">
-        <div className="marketing-chip mr-auto bg-background px-3 py-0.5 text-sm font-semibold">
+        <div className="rounded-full mr-auto bg-background px-3 py-0.5 text-sm font-semibold">
           Step {step}
         </div>
         <h3 className="text-xl font-medium">{title}</h3>
-        <p className="text-sm leading-relaxed text-muted">{description}</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
       </div>
     </div>
   );

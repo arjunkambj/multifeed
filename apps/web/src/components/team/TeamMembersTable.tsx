@@ -2,14 +2,15 @@
 
 import type { TeamTableRow } from "@/components/team/TeamMembersContent";
 
-import { Avatar, Table } from "@heroui/react";
-
-const memberColumns = [
-  { id: "member", label: "Member", isRowHeader: true },
-  { id: "email", label: "Email", isRowHeader: false },
-  { id: "lastActivity", label: "Last active", isRowHeader: false },
-  { id: "status", label: "Status", isRowHeader: false },
-] as const;
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const getInitials = (value: string | null) =>
   value
@@ -27,65 +28,68 @@ export function TeamMembersTable({
   rows: TeamTableRow[];
 }) {
   return (
-    <Table className="[&_.table__row:hover_.table__cell]:bg-surface [&_.table__row[data-hovered=true]_.table__cell]:bg-surface">
-      <Table.ScrollContainer>
-        <Table.Content aria-label="Team members" className="min-w-[880px]">
-          <Table.Header columns={memberColumns}>
-            {(column) => (
-              <Table.Column id={column.id} isRowHeader={column.isRowHeader}>
-                {column.label}
-              </Table.Column>
-            )}
-          </Table.Header>
-          <Table.Body
-            items={rows}
-            renderEmptyState={() => (
-              <div className="px-4 py-10 text-center text-sm text-muted">
-                {membersError?.message ?? "No team members yet."}
-              </div>
-            )}
-          >
-            {(row) => {
-              const initials = getInitials(row.name ?? row.email);
+    <Table className="min-w-[880px]">
+      <TableHeader>
+        <TableRow>
+          <TableHead>Member</TableHead>
+          <TableHead>Email</TableHead>
+          <TableHead>Last active</TableHead>
+          <TableHead>Status</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.length === 0 ? (
+          <TableRow>
+            <TableCell
+              className="px-4 py-10 text-center text-muted-foreground"
+              colSpan={4}
+            >
+              {membersError?.message ?? "No team members yet."}
+            </TableCell>
+          </TableRow>
+        ) : (
+          rows.map((row) => {
+            const initials = getInitials(row.name ?? row.email);
 
-              return (
-                <Table.Row id={row.id}>
-                  <Table.Cell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="size-9 rounded-full">
-                        {row.imageUrl && (
-                          <Avatar.Image
-                            alt={row.name ?? undefined}
-                            src={row.imageUrl}
-                          />
-                        )}
-                        <Avatar.Fallback className="text-xs font-semibold">
-                          {initials}
-                        </Avatar.Fallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-foreground">
-                          {row.name}
-                        </p>
-                        <p className="text-xs text-muted">{row.subtitle}</p>
-                      </div>
+            return (
+              <TableRow key={row.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-9 rounded-full">
+                      {row.imageUrl && (
+                        <AvatarImage
+                          alt={row.name ?? undefined}
+                          src={row.imageUrl}
+                        />
+                      )}
+                      <AvatarFallback className="text-xs font-semibold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {row.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {row.subtitle}
+                      </p>
                     </div>
-                  </Table.Cell>
-                  <Table.Cell className="text-sm text-muted">
-                    {row.email}
-                  </Table.Cell>
-                  <Table.Cell className="text-sm text-muted">
-                    {row.lastActivity}
-                  </Table.Cell>
-                  <Table.Cell className="text-sm font-medium text-foreground">
-                    {row.status}
-                  </Table.Cell>
-                </Table.Row>
-              );
-            }}
-          </Table.Body>
-        </Table.Content>
-      </Table.ScrollContainer>
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {row.email}
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {row.lastActivity}
+                </TableCell>
+                <TableCell className="text-sm font-medium text-foreground">
+                  {row.status}
+                </TableCell>
+              </TableRow>
+            );
+          })
+        )}
+      </TableBody>
     </Table>
   );
 }

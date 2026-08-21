@@ -1,6 +1,7 @@
 "use client";
 
-import { buttonVariants, Chip } from "@heroui/react";
+import { buttonVariants } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 
@@ -134,13 +135,13 @@ function CalendarMockup() {
       className="flex h-full min-h-[350px] w-full bg-background text-left text-foreground sm:min-h-[430px] md:min-h-[500px]"
       role="img"
     >
-      <aside className="hidden w-36 shrink-0 flex-col border-r border-border/70 bg-surface-secondary/50 p-3 md:flex lg:w-40 lg:p-4">
+      <aside className="hidden w-36 shrink-0 flex-col border-r border-border/70 bg-muted/50 p-3 md:flex lg:w-40 lg:p-4">
         <Logo className="mb-7 scale-75 origin-left" />
         <div className="space-y-1">
           {SIDEBAR_ITEMS.map((item) => (
             <div
               className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-[10px] font-medium ${
-                item.active ? "bg-accent/10 text-accent" : "text-muted"
+                item.active ? "bg-primary/10 text-primary" : "text-muted-foreground"
               }`}
               key={item.label}
             >
@@ -150,23 +151,23 @@ function CalendarMockup() {
           ))}
         </div>
         <div className="mt-auto space-y-1 border-t border-border/60 pt-3">
-          <div className="flex items-center gap-2 px-2.5 py-1.5 text-[10px] text-muted">
+          <div className="flex items-center gap-2 px-2.5 py-1.5 text-[10px] text-muted-foreground">
             <Icon icon="hugeicons:user-group" width={13} /> Team
           </div>
-          <div className="flex items-center gap-2 px-2.5 py-1.5 text-[10px] text-muted">
+          <div className="flex items-center gap-2 px-2.5 py-1.5 text-[10px] text-muted-foreground">
             <Icon icon="hugeicons:settings-02" width={13} /> Settings
           </div>
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col bg-surface">
+      <div className="flex min-w-0 flex-1 flex-col bg-card">
         <div className="flex h-10 shrink-0 items-center justify-between border-b border-border/60 px-3 sm:h-12 sm:px-5">
           <Icon
-            className="text-muted"
+            className="text-muted-foreground"
             icon="hugeicons:sidebar-left"
             width={15}
           />
-          <div className="flex size-6 items-center justify-center rounded-full bg-accent/15 text-[9px] font-bold text-accent sm:size-7">
+          <div className="flex size-6 items-center justify-center rounded-full bg-primary/15 text-[9px] font-bold text-primary sm:size-7">
             MF
           </div>
         </div>
@@ -177,11 +178,11 @@ function CalendarMockup() {
               <h2 className="text-sm font-bold tracking-tight sm:text-lg">
                 Calendar
               </h2>
-              <p className="mt-0.5 hidden text-[9px] text-muted sm:block sm:text-[10px]">
+              <p className="mt-0.5 hidden text-[9px] text-muted-foreground sm:block sm:text-[10px]">
                 Plan, review, and reschedule every post in one place.
               </p>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1.5 text-[9px] font-semibold text-accent-foreground sm:px-3 sm:py-2 sm:text-[10px]">
+            <div className="flex items-center gap-1.5 rounded-lg bg-primary px-2.5 py-1.5 text-[9px] font-semibold text-primary-foreground sm:px-3 sm:py-2 sm:text-[10px]">
               <Icon icon="hugeicons:add-01" width={12} />
               New post
             </div>
@@ -189,13 +190,13 @@ function CalendarMockup() {
 
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-1">
-              <div className="flex size-6 items-center justify-center rounded-md bg-surface-secondary text-muted sm:size-7">
+              <div className="flex size-6 items-center justify-center rounded-md bg-muted text-muted-foreground sm:size-7">
                 <Icon icon="hugeicons:arrow-left-01" width={11} />
               </div>
-              <div className="rounded-md bg-surface-secondary px-2 py-1.5 text-[9px] font-semibold sm:text-[10px]">
+              <div className="rounded-md bg-muted px-2 py-1.5 text-[9px] font-semibold sm:text-[10px]">
                 Today
               </div>
-              <div className="flex size-6 items-center justify-center rounded-md bg-surface-secondary text-muted sm:size-7">
+              <div className="flex size-6 items-center justify-center rounded-md bg-muted text-muted-foreground sm:size-7">
                 <Icon icon="hugeicons:arrow-right-01" width={11} />
               </div>
               <span className="ml-1 text-[10px] font-bold sm:ml-2 sm:text-xs">
@@ -203,12 +204,12 @@ function CalendarMockup() {
               </span>
             </div>
             <div className="hidden items-center gap-1 sm:flex">
-              <div className="flex items-center gap-2 rounded-md bg-surface-secondary px-2.5 py-1.5 text-[9px]">
+              <div className="flex items-center gap-2 rounded-md bg-muted px-2.5 py-1.5 text-[9px]">
                 All platforms
                 <Icon icon="hugeicons:arrow-down-01" width={10} />
               </div>
-              <div className="flex rounded-md bg-surface-secondary p-0.5 text-[9px] text-muted">
-                <span className="rounded-[5px] bg-surface px-2 py-1 font-semibold text-foreground shadow-sm">
+              <div className="flex rounded-md bg-muted p-0.5 text-[9px] text-muted-foreground">
+                <span className="rounded-[5px] bg-card px-2 py-1 font-semibold text-foreground shadow-sm">
                   Month
                 </span>
                 <span className="px-2 py-1">Week</span>
@@ -220,7 +221,7 @@ function CalendarMockup() {
           <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-[24px_repeat(6,minmax(0,1fr))] overflow-hidden rounded-lg border border-border/80 bg-background">
             {WEEKDAYS.map((weekday) => (
               <div
-                className="flex items-center justify-center border-b border-r border-border/70 bg-surface-secondary/70 text-[7px] font-semibold uppercase tracking-wide text-muted last:border-r-0 sm:text-[8px]"
+                className="flex items-center justify-center border-b border-r border-border/70 bg-muted/70 text-[7px] font-semibold uppercase tracking-wide text-muted-foreground last:border-r-0 sm:text-[8px]"
                 key={weekday}
               >
                 {weekday}
@@ -235,10 +236,10 @@ function CalendarMockup() {
                   <span
                     className={`flex size-3.5 items-center justify-center rounded-full text-[7px] sm:size-4 sm:text-[8px] ${
                       date.day === 29 && !date.muted
-                        ? "bg-accent font-semibold text-accent-foreground"
+                        ? "bg-primary font-semibold text-primary-foreground"
                         : date.muted
-                          ? "text-muted/40"
-                          : "text-muted"
+                          ? "text-muted-foreground/40"
+                          : "text-muted-foreground"
                     }`}
                   >
                     {date.day}
@@ -286,12 +287,12 @@ export function Hero() {
         data-gsap-hero-copy
       >
         <div>
-          <Chip className="marketing-chip border border-border/60 bg-surface px-3 py-1 text-accent">
+          <Badge variant="outline" className="h-auto border-border/60 bg-card px-3 py-1 text-primary">
             <span className="inline-flex items-center gap-1.5">
               <Icon icon="hugeicons:sparkles" width={13} />
               <span>Unified social scheduling · 7 platforms in 1 calendar</span>
             </span>
-          </Chip>
+          </Badge>
         </div>
 
         <h1 className="font-display max-w-4xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.05]">
@@ -300,13 +301,13 @@ export function Hero() {
             everywhere.
             <span
               aria-hidden
-              className="absolute inset-x-0 -bottom-1 h-[0.18em] rounded-full bg-accent sm:-bottom-1.5"
+              className="absolute inset-x-0 -bottom-1 h-[0.18em] rounded-full bg-primary sm:-bottom-1.5"
               data-gsap-underline
             />
           </span>
         </h1>
 
-        <p className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+        <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
           Draft your content once, fine-tune native captions and video formats
           for every channel, and schedule weeks of posts across Instagram,
           TikTok, LinkedIn, YouTube, X, Facebook, and Threads—without switching
@@ -315,24 +316,24 @@ export function Hero() {
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Link
-            className={`${buttonVariants({ size: "lg" })} button inline-flex items-center gap-2`}
+            className={`${buttonVariants({ size: "lg" })} inline-flex items-center gap-2`}
             href="/sign-in"
           >
             <span>Start publishing</span>
             <Icon icon="hugeicons:arrow-right-01" width={16} />
           </Link>
           <Link
-            className={`${buttonVariants({ size: "lg", variant: "tertiary" })} button`}
+            className={buttonVariants({ size: "lg", variant: "ghost" })}
             href="#features"
           >
             See how it works
           </Link>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-1 text-xs text-muted">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-1 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5 font-medium">
             <Icon
-              className="text-accent"
+              className="text-primary"
               icon="hugeicons:checkmark-circle-02"
               width={14}
             />
@@ -340,7 +341,7 @@ export function Hero() {
           </span>
           <span className="inline-flex items-center gap-1.5 font-medium">
             <Icon
-              className="text-accent"
+              className="text-primary"
               icon="hugeicons:checkmark-circle-02"
               width={14}
             />
@@ -348,7 +349,7 @@ export function Hero() {
           </span>
           <span className="inline-flex items-center gap-1.5 font-medium">
             <Icon
-              className="text-accent"
+              className="text-primary"
               icon="hugeicons:checkmark-circle-02"
               width={14}
             />
@@ -361,23 +362,23 @@ export function Hero() {
         className="relative z-10 mx-auto w-full max-w-5xl"
         data-gsap-hero-visual
       >
-        <div className="marketing-surface overflow-hidden border border-border/60 bg-surface shadow-xl shadow-foreground/5 dark:shadow-black/30">
+        <div className="rounded-2xl overflow-hidden border border-border/60 bg-card shadow-xl shadow-foreground/5 dark:shadow-black/30">
           {/* Window chrome */}
-          <div className="flex h-11 items-center gap-3 border-b border-border/50 bg-surface-secondary/50 px-4">
+          <div className="flex h-11 items-center gap-3 border-b border-border/50 bg-muted/50 px-4">
             <div className="flex items-center gap-1.5">
               <span className="size-2.5 rounded-full bg-[#FF5F57]" />
               <span className="size-2.5 rounded-full bg-[#FEBC2E]" />
               <span className="size-2.5 rounded-full bg-[#28C840]" />
             </div>
             <div className="mx-auto flex h-7 max-w-xs flex-1 items-center justify-center rounded-lg border border-border/40 bg-background px-3">
-              <span className="truncate text-[11px] font-medium text-muted">
+              <span className="truncate text-[11px] font-medium text-muted-foreground">
                 app.multifeed.io
               </span>
             </div>
             <div className="hidden w-14 sm:block" />
           </div>
 
-          <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-secondary/40">
+          <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted/40">
             <CalendarMockup />
           </div>
         </div>

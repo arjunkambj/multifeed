@@ -7,7 +7,7 @@ export default function Logo({
 }) {
   return (
     <div
-      className={`group flex cursor-pointer items-center gap-2 text-foreground transition-colors hover:text-accent${className ? ` ${className}` : ""}`}
+      className={`group flex cursor-pointer items-center gap-2 text-foreground transition-colors hover:text-primary${className ? ` ${className}` : ""}`}
     >
       <svg
         aria-label={markOnly ? "MultiFeed" : undefined}

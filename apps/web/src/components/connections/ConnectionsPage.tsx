@@ -1,7 +1,17 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
-import { Button, Modal, Spinner, toast } from "@heroui/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { Icon } from "@iconify/react";
 import { useMutation, usePreloadedQuery, type Preloaded } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -19,10 +29,10 @@ import { oauthErrorMessage } from "@/lib/oauth/env";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 
 const statusDot: Record<Doc<"connectedAccounts">["status"], string> = {
-  active: "bg-success",
-  expired: "bg-warning",
-  revoked: "bg-danger",
-  error: "bg-danger",
+  active: "bg-emerald-500",
+  expired: "bg-amber-500",
+  revoked: "bg-red-500",
+  error: "bg-red-500",
 };
 
 function ConnectionsPageInner({
@@ -61,17 +71,14 @@ function ConnectionsPageInner({
         const label = PLATFORM_META[connected]?.label ?? "Account";
         const skippedCount = Number.parseInt(skipped, 10);
         if (Number.isFinite(skippedCount) && skippedCount > 0) {
-          toast.warning(
-            `${label} connected. ${skippedCount} more account${
+          toast.warning(`${label} connected. ${skippedCount} more account${
               skippedCount === 1 ? " was" : "s were"
-            } skipped because your plan limit was reached. Upgrade to connect them.`,
-            { timeout: 6000 },
-          );
+            } skipped because your plan limit was reached. Upgrade to connect them.`);
         } else {
-          toast.success(`${label} connected successfully.`, { timeout: 3000 });
+          toast.success(`${label} connected successfully.`);
         }
       } else if (oauthError) {
-        toast.danger(oauthErrorMessage(oauthError), { timeout: 3000 });
+        toast.error(oauthErrorMessage(oauthError));
       }
     }
 
@@ -108,10 +115,7 @@ function ConnectionsPageInner({
       })
       .catch((err) => {
         setConnecting(null);
-        toast.danger(
-          err instanceof Error ? err.message : "Could not start OAuth",
-          { timeout: 3000 },
-        );
+        toast.error(err instanceof Error ? err.message : "Could not start OAuth");
       });
   };
 
@@ -120,13 +124,10 @@ function ConnectionsPageInner({
     void disconnect({ accountId })
       .then(() => {
         setAccountToDisconnect(null);
-        toast.success("Account disconnected.", { timeout: 3000 });
+        toast.success("Account disconnected.");
       })
       .catch((err) => {
-        toast.danger(
-          err instanceof Error ? err.message : "Could not disconnect account",
-          { timeout: 3000 },
-        );
+        toast.error(err instanceof Error ? err.message : "Could not disconnect account");
       })
       .finally(() => setDisconnecting(null));
   };
@@ -167,15 +168,14 @@ function ConnectionsPageInner({
                   </span>
                   <Button
                     size="sm"
-                    variant="primary"
+                    variant="default"
                     className="justify-start"
-                    isDisabled={connecting !== null && !isConnecting}
-                    isPending={isConnecting}
-                    onPress={() => void onConnect(platform)}
+                    disabled={connecting !== null && !isConnecting}
+                    onClick={() => void onConnect(platform)}
                   >
                     {isConnecting ? (
                       <>
-                        <Spinner color="current" size="sm" />
+                        <Spinner className="size-3" />
                         Redirecting…
                       </>
                     ) : hasAccounts ? (
@@ -188,7 +188,7 @@ function ConnectionsPageInner({
 
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                   {linked.length === 0 ? (
-                    <p className="text-xs text-muted">
+                    <p className="text-xs text-muted-foreground">
                       No {meta.label} accounts connected
                     </p>
                   ) : (
@@ -198,8 +198,8 @@ function ConnectionsPageInner({
                         <div
                           key={account._id}
                           className={[
-                            "flex max-w-full items-center gap-2 rounded-full bg-surface-secondary py-1 pl-1.5 pr-1",
-                            needsAttention ? "ring-1 ring-warning/50" : "",
+                            "flex max-w-full items-center gap-2 rounded-full bg-muted py-1 pl-1.5 pr-1",
+                            needsAttention ? "ring-1 ring-amber-500/50" : "",
                           ].join(" ")}
                         >
                           {account.avatarUrl ? (
@@ -209,7 +209,7 @@ function ConnectionsPageInner({
                               className="size-6 rounded-full object-cover"
                             />
                           ) : (
-                            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-semibold">
+                            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-card text-[10px] font-semibold">
                               {account.username.slice(0, 1).toUpperCase()}
                             </span>
                           )}
@@ -222,24 +222,22 @@ function ConnectionsPageInner({
                           </p>
                           {needsAttention && (
                             <Button
-                              size="sm"
-                              variant="tertiary"
-                              className="h-6 min-h-6 px-1.5 text-[11px] text-warning"
-                              isDisabled={connecting !== null && !isConnecting}
-                              isPending={isConnecting}
-                              onPress={() => void onConnect(platform)}
+                              size="xs"
+                              variant="ghost"
+                              className="h-6 min-h-6 px-1.5 text-[11px] text-amber-500"
+                              disabled={connecting !== null && !isConnecting}
+                              onClick={() => void onConnect(platform)}
                             >
                               Reconnect
                             </Button>
                           )}
                           <Button
-                            isIconOnly
-                            size="sm"
-                            variant="tertiary"
+                            size="icon-xs"
+                            variant="ghost"
                             aria-label={`Disconnect @${account.username}`}
-                            className="size-6 min-w-6 rounded-full text-muted hover:text-danger"
-                            isPending={disconnecting === account._id}
-                            onPress={() =>
+                            className="size-6 min-w-6 rounded-full text-muted-foreground hover:text-red-600"
+                            disabled={disconnecting === account._id}
+                            onClick={() =>
                               setAccountToDisconnect({
                                 id: account._id,
                                 username: account.username,
@@ -259,52 +257,44 @@ function ConnectionsPageInner({
         </section>
       </div>
 
-      <Modal
-        isOpen={accountToDisconnect !== null}
+      <Dialog
+        open={accountToDisconnect !== null}
         onOpenChange={(open) => {
           if (!open && disconnecting === null) setAccountToDisconnect(null);
         }}
       >
-        <Modal.Backdrop
-          variant="blur"
-          isDismissable={disconnecting === null}
-          isKeyboardDismissDisabled={disconnecting !== null}
-        >
-          <Modal.Container placement="center" size="sm">
-            <Modal.Dialog>
-              <Modal.Header>
-                <Modal.Heading>Disconnect account?</Modal.Heading>
-                <p className="text-sm leading-relaxed text-muted">
-                  Disconnect @{accountToDisconnect?.username}? You can reconnect
-                  it anytime.
-                </p>
-              </Modal.Header>
-              <Modal.Footer>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  isDisabled={disconnecting !== null}
-                  onPress={() => setAccountToDisconnect(null)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  isPending={disconnecting !== null}
-                  onPress={() => {
-                    if (accountToDisconnect) {
-                      void onDisconnect(accountToDisconnect.id);
-                    }
-                  }}
-                >
-                  Disconnect
-                </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Disconnect account?</DialogTitle>
+            <DialogDescription>
+              Disconnect @{accountToDisconnect?.username}? You can reconnect
+              it anytime.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={disconnecting !== null}
+              onClick={() => setAccountToDisconnect(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={disconnecting !== null}
+              onClick={() => {
+                if (accountToDisconnect) {
+                  void onDisconnect(accountToDisconnect.id);
+                }
+              }}
+            >
+              Disconnect
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

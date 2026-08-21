@@ -30,7 +30,7 @@ function NavItem({
       title={collapsed ? item.name : undefined}
       className={`flex items-center gap-3 rounded-[0.75rem] text-sm transition-colors ${
         collapsed ? collapsedRailSlot : "h-9 px-3"
-      } ${active ? "bg-accent/10 font-medium" : "hover:bg-surface-secondary"}`}
+      } ${active ? "bg-primary/10 font-medium" : "hover:bg-muted"}`}
     >
       <Icon
         icon={item.icon}
@@ -86,7 +86,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
             className={index === 0 ? "" : "pt-4"}
           >
             {section.name && !collapsed && (
-              <div className="px-3 pb-1.5 text-xs font-medium uppercase tracking-wider text-muted">
+              <div className="px-3 pb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {section.name}
               </div>
             )}

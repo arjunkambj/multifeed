@@ -1,8 +1,8 @@
-import { Skeleton } from "@heroui/react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function TeamTableSkeleton() {
   return (
-    <div className="rounded-2xl border border-border bg-surface">
+    <div className="rounded-2xl border border-border bg-card">
       <div className="grid grid-cols-[1.5fr_1fr_1fr_0.7fr] gap-4 border-b border-border px-4 py-3">
         <Skeleton className="h-4 w-24 rounded-xl" />
         <Skeleton className="h-4 w-20 rounded-xl" />

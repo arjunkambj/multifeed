@@ -1,4 +1,4 @@
-import { Skeleton } from "@heroui/react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarGridSkeleton } from "./CalendarGridSkeleton";
 import { ComposerFormSkeleton } from "./ComposerFormSkeleton";
 import { ConnectionsRowsSkeleton } from "./ConnectionsRowsSkeleton";

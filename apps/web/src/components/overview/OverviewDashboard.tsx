@@ -5,7 +5,9 @@ import {
   keepPreviousData,
   useQuery as usePointInTimeQuery,
 } from "@tanstack/react-query";
-import { Card, Separator, Skeleton } from "@heroui/react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Icon } from "@iconify/react";
 import { useConvex } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -37,19 +39,19 @@ function MetricCard({ title, value, icon, change }: MetricCardProps) {
   const trend = change == null ? null : Math.round(change * 10) / 10;
   const trendColor =
     trend == null || trend === 0
-      ? "text-muted"
+      ? "text-muted-foreground"
       : trend > 0
-        ? "text-success"
-        : "text-danger";
+        ? "text-emerald-600"
+        : "text-red-600";
 
   return (
-    <Card variant="secondary" className="shadow-none">
-      <Card.Content className="justify-between">
+    <Card className="rounded-2xl shadow-none ring-border">
+      <CardContent className="flex justify-between gap-2">
         <div className="flex items-start justify-between gap-3">
           <p className="truncate text-sm font-medium text-foreground">
             {title}
           </p>
-          <Icon icon={icon} width={18} className="shrink-0 text-muted" />
+          <Icon icon={icon} width={18} className="shrink-0 text-muted-foreground" />
         </div>
         <p className="text-3xl font-semibold tracking-tight tabular-nums text-foreground">
           {value}
@@ -57,7 +59,7 @@ function MetricCard({ title, value, icon, change }: MetricCardProps) {
         <div>
           <Separator className="mb-2" />
           {trend == null ? (
-            <p className="text-xs text-muted">Current workspace total</p>
+            <p className="text-xs text-muted-foreground">Current workspace total</p>
           ) : (
             <div className="flex items-center justify-between gap-2 text-xs">
               <span
@@ -74,11 +76,11 @@ function MetricCard({ title, value, icon, change }: MetricCardProps) {
                 {trend > 0 ? "+" : ""}
                 {trend}%
               </span>
-              <span className="text-muted">vs previous period</span>
+              <span className="text-muted-foreground">vs previous period</span>
             </div>
           )}
         </div>
-      </Card.Content>
+      </CardContent>
     </Card>
   );
 }
@@ -135,7 +137,7 @@ export function OverviewDashboard() {
       ) : (
         <>
           {metrics.truncated && (
-            <p className="mb-4 text-sm text-warning">
+            <p className="mb-4 text-sm text-amber-500">
               This range contains more data than the dashboard can summarize.
               Narrow the date range for complete metrics.
             </p>
