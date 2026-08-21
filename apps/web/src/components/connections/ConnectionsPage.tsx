@@ -44,7 +44,8 @@ function ConnectionsPageInner({
   const handledFlash = useRef("");
   const connected = searchParams.get("connected") ?? "";
   const oauthError = searchParams.get("error") ?? "";
-  const flashKey = `${connected}\0${oauthError}`;
+  const skipped = searchParams.get("skipped") ?? "";
+  const flashKey = `${connected}\0${oauthError}\0${skipped}`;
   const connectedAccountsCount = accounts.filter(
     (account) => account.status !== "revoked",
   ).length;
@@ -58,14 +59,24 @@ function ConnectionsPageInner({
       handledFlash.current = flashKey;
       if (connected) {
         const label = PLATFORM_META[connected]?.label ?? "Account";
-        toast.success(`${label} connected successfully.`, { timeout: 3000 });
+        const skippedCount = Number.parseInt(skipped, 10);
+        if (Number.isFinite(skippedCount) && skippedCount > 0) {
+          toast.warning(
+            `${label} connected. ${skippedCount} more account${
+              skippedCount === 1 ? " was" : "s were"
+            } skipped because your plan limit was reached. Upgrade to connect them.`,
+            { timeout: 6000 },
+          );
+        } else {
+          toast.success(`${label} connected successfully.`, { timeout: 3000 });
+        }
       } else if (oauthError) {
         toast.danger(oauthErrorMessage(oauthError), { timeout: 3000 });
       }
     }
 
     window.history.replaceState(null, "", "/connections");
-  }, [connected, flashKey, oauthError, router]);
+  }, [connected, flashKey, oauthError, router, skipped]);
 
   const byPlatform = new Map<string, NonNullable<typeof accounts>>();
   for (const platform of CONNECTABLE_PLATFORMS) {

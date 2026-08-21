@@ -32,104 +32,92 @@ const socialLinks = [
   { href: "#", icon: "ph:telegram-logo", label: "Telegram" },
 ] as const;
 
-function FooterCTA() {
+export function Footer() {
   return (
-    <div
-      className="marketing-surface relative mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-4 overflow-hidden border border-border bg-surface/80 px-6 py-16 text-center sm:px-10 sm:py-20"
-      data-gsap-section
-    >
-      <div className="contents" data-gsap-heading>
-        <h3 className="relative font-display text-3xl font-bold tracking-tight sm:text-4xl">
+    <footer className="mx-auto w-full max-w-7xl bg-background" data-gsap-section>
+      <div
+        className="flex flex-col items-center gap-4 border border-border bg-background px-6 py-16 text-center sm:px-10 sm:py-20"
+        data-gsap-heading
+      >
+        <h3 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Ready to trade seven tabs for one calendar?
         </h3>
-        <p className="relative max-w-xl text-base text-muted sm:text-lg">
+        <p className="max-w-xl text-base text-muted sm:text-lg">
           Create your post, tailor it for each platform, and schedule the whole
           week from one place.
         </p>
-        <div>
-          <Link
-            className={`${buttonVariants({ size: "lg" })} button mt-2`}
-            href="/sign-in"
-          >
-            Plan your first post
+        <Link
+          className={`${buttonVariants({ size: "lg" })} button mt-2`}
+          href="/sign-in"
+        >
+          Plan your first post
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 border-x border-border md:grid-cols-[1.1fr_1.7fr]">
+        <div
+          className="flex flex-col gap-3 px-4 py-10 sm:px-6 md:border-r md:border-border"
+          data-gsap-card
+        >
+          <Logo />
+          <p className="max-w-xs text-sm leading-relaxed text-muted">
+            Create, tailor, and schedule social posts across seven platforms
+            from one visual calendar.
+          </p>
+          <div className="mt-2 flex gap-3">
+            {socialLinks.map((social) => (
+              <Link
+                aria-label={social.label}
+                className="text-muted transition-colors hover:text-accent"
+                href={social.href}
+                key={social.label}
+              >
+                <Icon icon={social.icon} width={20} />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div
+          className="grid grid-cols-2 gap-10 px-4 py-10 sm:px-6 md:pl-10 lg:grid-cols-3"
+          data-gsap-card
+        >
+          {footerLinks.map((section) => (
+            <div className="flex flex-col gap-4" key={section.title}>
+              <h4 className="text-sm font-semibold">{section.title}</h4>
+              <ul className="flex flex-col gap-3">
+                {section.links.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      className="text-sm text-muted transition-colors hover:text-accent"
+                      href={link.href}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        className="flex flex-col items-start justify-between gap-4 border border-border px-4 py-6 sm:flex-row sm:items-center sm:px-6"
+        data-gsap-card
+      >
+        <p className="text-xs text-muted">
+          &copy; {new Date().getFullYear()} MultiFeed. All rights reserved.
+        </p>
+        <div className="flex gap-4 text-xs text-muted">
+          <Link className="transition-colors hover:text-accent" href="/policies/privacy">
+            Privacy
+          </Link>
+          <Link className="transition-colors hover:text-accent" href="/policies/terms">
+            Terms
           </Link>
         </div>
       </div>
-    </div>
-  );
-}
-
-export function Footer() {
-  return (
-    <div className="flex flex-col gap-12 px-4 pb-0 pt-12 sm:px-6 md:gap-16 md:pt-16">
-      <FooterCTA />
-      <footer className="w-full bg-background">
-        <div
-          className="mx-auto w-full max-w-7xl py-12 sm:py-16"
-          data-gsap-section
-        >
-          <div className="grid grid-cols-2 gap-10 md:grid-cols-4 md:gap-12">
-            {footerLinks.map((section) => (
-              <div
-                className="flex flex-col gap-4"
-                data-gsap-card
-                key={section.title}
-              >
-                <h4 className="text-sm font-semibold">{section.title}</h4>
-                <ul className="flex flex-col gap-3">
-                  {section.links.map((link) => (
-                    <li key={link.name}>
-                      <Link
-                        className="text-sm text-muted transition-colors hover:text-accent"
-                        href={link.href}
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-
-            <div className="flex flex-col gap-4" data-gsap-card>
-              <h4 className="text-sm font-semibold">Stay connected</h4>
-              <div className="flex gap-3">
-                {socialLinks.map((social) => (
-                  <Link
-                    aria-label={social.label}
-                    className="text-muted transition-colors hover:text-accent"
-                    href={social.href}
-                    key={social.label}
-                  >
-                    <Icon icon={social.icon} width={20} />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="mt-12 border-t border-border sm:mt-16"
-            data-gsap-card
-          />
-
-          <div
-            className="mt-8 flex flex-col items-start justify-between gap-6 sm:mt-10 sm:flex-row sm:items-end"
-            data-gsap-card
-          >
-            <div className="flex max-w-xs flex-col gap-3">
-              <Logo />
-              <p className="text-sm leading-relaxed text-muted">
-                Create, tailor, and schedule social posts across seven platforms
-                from one visual calendar.
-              </p>
-            </div>
-            <p className="text-xs text-muted">
-              &copy; {new Date().getFullYear()} MultiFeed. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </footer>
   );
 }

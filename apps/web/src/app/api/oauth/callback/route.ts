@@ -23,9 +23,14 @@ function errorRedirect(code: string) {
   return redirect(connectionsUrl({ error: code }));
 }
 
-function connectedRedirect(returnTo: unknown, platform: string) {
+function connectedRedirect(
+  returnTo: unknown,
+  platform: string,
+  skippedCount = 0,
+) {
   return redirect(
-    new URL(connectedReturnPath(returnTo, platform), appOrigin()).toString(),
+    new URL(connectedReturnPath(returnTo, platform, skippedCount), appOrigin())
+      .toString(),
   );
 }
 
@@ -141,7 +146,7 @@ export async function GET(request: NextRequest) {
         ),
       );
 
-      await saveConnectedAccounts({
+      const saved = await saveConnectedAccounts({
         token,
         platform: session.platform,
         connector,
@@ -153,7 +158,11 @@ export async function GET(request: NextRequest) {
         { state, serverSecret },
         { token },
       );
-      return connectedRedirect(session.returnTo, session.platform);
+      return connectedRedirect(
+        session.returnTo,
+        session.platform,
+        saved.skippedCount,
+      );
     }
 
     const profile = await connector.fetchProfile(tokens.accessToken);

@@ -47,7 +47,7 @@ async function postFirstComment(
   accessToken: string,
   account: Doc<"connectedAccounts">,
 ) {
-  if (platform === "youtube" || platform === "tiktok" || platform === "bluesky" || platform === "google_business") {
+  if (platform === "youtube" || platform === "tiktok") {
     throw new Error(`First comments are not supported on ${platform}`);
   }
   if (platform === "x") {

@@ -33,14 +33,22 @@ async function countConnectedAccounts(
   return accounts.reduce((count, rows) => count + rows.length, 0);
 }
 
+/** Current connected-account usage against the team's plan limit. */
+export async function accountLimitUsage(
+  ctx: QueryCtx | MutationCtx,
+  teamId: string,
+) {
+  const limit = await accountLimitForTeam(ctx, teamId, Date.now());
+  const count = await countConnectedAccounts(ctx, teamId, limit);
+  return { count, limit };
+}
+
 export async function assertCanConnect(
   ctx: QueryCtx | MutationCtx,
   teamId: string,
   additionalAccounts = 1,
 ) {
-  const limit = await accountLimitForTeam(ctx, teamId, Date.now());
-
-  const count = await countConnectedAccounts(ctx, teamId, limit);
+  const { count, limit } = await accountLimitUsage(ctx, teamId);
   if (count + additionalAccounts > limit) {
     fail(
       "PLAN_LIMIT_REACHED",

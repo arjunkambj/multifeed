@@ -5,13 +5,14 @@ import { HexclaveProvider, HexclaveTheme } from "@hexclave/next";
 import { hexclaveServerApp } from "@/hexclave/server";
 import { Bricolage_Grotesque, Inter, Figtree } from "next/font/google";
 import { clientEnv } from "@/env";
+import { cn } from "@/lib/utils";
 
 const figtreeHeading = Figtree({
   subsets: ["latin"],
   variable: "--font-heading",
 });
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -52,7 +53,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} font-sans ${inter.variable} ${figtreeHeading.variable}`}
+      className={cn(bricolage.variable, figtreeHeading.variable, "font-sans", inter.variable)}
       suppressHydrationWarning
     >
       <body className="font-sans">

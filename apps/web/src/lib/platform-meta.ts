@@ -7,9 +7,7 @@ export type PlatformKey =
   | "threads"
   | "linkedin"
   | "youtube"
-  | "tiktok"
-  | "bluesky"
-  | "google_business";
+  | "tiktok";
 
 export type { OAuthPlatform } from "@/lib/oauth/connectors/types";
 
@@ -72,16 +70,6 @@ export const PLATFORM_META: Record<string, PlatformMeta> = {
     brand: "#010101",
     description: "Videos and photos via Content Posting API",
     maxChars: 2200,
-  },
-  bluesky: {
-    label: "Bluesky",
-    icon: "fa6-brands:bluesky",
-    brand: "#1185FE",
-  },
-  google_business: {
-    label: "Google Business",
-    icon: "fa6-brands:google",
-    brand: "#4285F4",
   },
 };
 

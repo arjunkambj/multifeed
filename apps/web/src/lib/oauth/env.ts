@@ -75,7 +75,7 @@ export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   token_exchange_failed:
     "Could not exchange authorization code. Please try again.",
   account_limit:
-    "Your plan does not have room for every account returned by this connection.",
+    "Your plan limit was reached. Upgrade your plan to connect more accounts.",
 };
 
 export function oauthErrorMessage(code: string): string {
@@ -95,10 +95,14 @@ export function connectionsUrl(query?: Record<string, string>): string {
 export function connectedReturnPath(
   returnTo: unknown,
   platform: string,
+  skippedCount = 0,
 ): string {
   const safeReturn = sanitizeReturnTo(returnTo) ?? "/connections";
   const url = new URL(safeReturn, "http://local.invalid");
   url.searchParams.set("connected", platform);
+  if (skippedCount > 0) {
+    url.searchParams.set("skipped", String(skippedCount));
+  }
   return `${url.pathname}${url.search}${url.hash}`;
 }
 

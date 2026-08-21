@@ -29,8 +29,6 @@ export const platform = v.union(
   v.literal("linkedin"),
   v.literal("tiktok"),
   v.literal("youtube"),
-  v.literal("bluesky"),
-  v.literal("google_business"),
 );
 
 export const postStatus = v.union(

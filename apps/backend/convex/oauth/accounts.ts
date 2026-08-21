@@ -17,7 +17,7 @@ import {
   tokenType,
 } from "../schema";
 import { encryptSecret } from "./crypto";
-import { assertCanConnect } from "./limits";
+import { accountLimitUsage } from "./limits";
 import { requireOAuthServer } from "./server";
 
 const MAX_ACCOUNTS_PER_CONNECTION = 100;
@@ -218,7 +218,11 @@ export const saveMany = mutation({
     serverSecret: v.string(),
     accounts: v.array(accountInput),
   },
-  returns: v.object({ accountIds: v.array(v.id("connectedAccounts")) }),
+  returns: v.object({
+    accountIds: v.array(v.id("connectedAccounts")),
+    connectedCount: v.number(),
+    skippedCount: v.number(),
+  }),
   handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
@@ -256,17 +260,38 @@ export const saveMany = mutation({
       })),
     );
 
-    const additionalAccountCount = accountStates.reduce(
-      (count, { existing }) =>
-        count + (existing === null || existing.status === "revoked" ? 1 : 0),
-      0,
+    // Reconnects never count against the plan limit; net-new accounts are
+    // connected only up to the remaining capacity instead of failing the
+    // whole batch (a Meta login can return every account in a portfolio).
+    const isReconnect = (existing: Doc<"connectedAccounts"> | null) =>
+      existing !== null && existing.status !== "revoked";
+
+    const reconnects = accountStates.filter(({ existing }) =>
+      isReconnect(existing),
     );
-    if (additionalAccountCount > 0) {
-      await assertCanConnect(ctx, user.selectedTeamId, additionalAccountCount);
+    const netNew = accountStates.filter(
+      ({ existing }) => !isReconnect(existing),
+    );
+
+    const { count, limit } =
+      netNew.length > 0
+        ? await accountLimitUsage(ctx, user.selectedTeamId)
+        : { count: 0, limit: 0 };
+
+    const capacity = Math.max(0, limit - count);
+    const savableStates = [...reconnects, ...netNew.slice(0, capacity)];
+    const skippedCount = netNew.length - Math.min(netNew.length, capacity);
+
+    if (savableStates.length === 0) {
+      fail(
+        "PLAN_LIMIT_REACHED",
+        `Account limit reached (${count}/${limit}). Upgrade your plan to connect more accounts.`,
+        { resource: "connected_accounts", current: count, limit },
+      );
     }
 
     const encryptedAccounts = await Promise.all(
-      accountStates.map(async ({ account, existing }) => {
+      savableStates.map(async ({ account, existing }) => {
         const encryptedAccessToken = await encryptSecret(account.accessToken);
         const encryptedRefreshToken = account.refreshToken
           ? await encryptSecret(account.refreshToken)
@@ -295,7 +320,11 @@ export const saveMany = mutation({
       ),
     );
 
-    return { accountIds };
+    return {
+      accountIds,
+      connectedCount: savableStates.length,
+      skippedCount,
+    };
   },
 });
 

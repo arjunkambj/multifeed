@@ -65,7 +65,7 @@ export function Navbar() {
           <Logo />
         </div>
 
-        <ul className="hidden items-center justify-center gap-1 md:flex">
+        <ul className="hidden items-center justify-center gap-1 lg:flex">
           {navLinks.map((link) => {
             const isActive = activeSection === link.href.slice(1);
             return (
@@ -86,7 +86,7 @@ export function Navbar() {
 
         <div className="flex items-center justify-end gap-1.5 sm:gap-2">
           <Link
-            className={`${buttonVariants({ size: "sm" })} button`}
+            className={`${buttonVariants({ size: "sm" })} button hidden lg:inline-flex`}
             href="/sign-in"
           >
             Plan a post
@@ -94,7 +94,7 @@ export function Navbar() {
           <button
             aria-expanded={isMenuOpen}
             aria-label="Toggle navigation"
-            className="button inline-flex size-9 items-center justify-center border border-border/60 bg-surface text-foreground transition-colors hover:border-accent/40 hover:text-accent md:hidden"
+            className="button inline-flex size-9 items-center justify-center border border-border/60 bg-surface text-foreground transition-colors hover:border-accent/40 hover:text-accent lg:hidden"
             onClick={() => setIsMenuOpen((open) => !open)}
             type="button"
           >
@@ -104,7 +104,7 @@ export function Navbar() {
       </nav>
 
       {isMenuOpen && (
-        <div className="border-t border-border/50 px-3 pb-3 md:hidden">
+        <div className="border-t border-border/50 px-3 pb-3 lg:hidden">
           <div className="flex flex-col gap-1 pt-2">
             {navLinks.map((link) => {
               const isActive = activeSection === link.href.slice(1);
@@ -123,6 +123,13 @@ export function Navbar() {
               );
             })}
           </div>
+          <Link
+            className={`${buttonVariants()} button mt-3 w-full justify-center`}
+            href="/sign-in"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Plan a post
+          </Link>
         </div>
       )}
     </header>
