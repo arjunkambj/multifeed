@@ -5,117 +5,90 @@ import { usePathname } from "next/navigation";
 import { Icon } from "@iconify/react";
 
 import {
-  sidebarMainItems,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import {
   sidebarCategories,
   sidebarFooterItems,
+  sidebarMainItems,
 } from "@/constants/sidebar-menu";
 import type { MenuItem } from "@/constants/sidebar-menu";
 import Logo from "./Logo";
 
-const collapsedRailSlot =
-  "mx-auto flex size-10 items-center justify-center px-0";
-
-function NavItem({
-  item,
-  active,
-  collapsed,
-}: {
-  item: MenuItem;
-  active: boolean;
-  collapsed: boolean;
-}) {
-  return (
-    <Link
-      href={item.href}
-      title={collapsed ? item.name : undefined}
-      className={`flex items-center gap-3 rounded-[0.75rem] text-sm transition-colors ${
-        collapsed ? collapsedRailSlot : "h-9 px-3"
-      } ${active ? "bg-primary/10 font-medium" : "hover:bg-muted"}`}
-    >
-      <Icon
-        icon={item.icon}
-        width={18}
-        className={`shrink-0 ${active ? "[stroke-width:2]" : ""}`}
-      />
-      {!collapsed && <span>{item.name}</span>}
-    </Link>
-  );
-}
-
-export function AppSidebar({ collapsed }: { collapsed: boolean }) {
+export function AppSidebar() {
   const pathname = usePathname();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+
   const isActive = (item: MenuItem) =>
     pathname === item.href ||
     (item.href === "/posts" &&
       pathname.startsWith("/posts/") &&
       pathname !== "/posts/new");
-  const sections: { name?: string; items: MenuItem[] }[] = [
-    { items: sidebarMainItems },
-    ...sidebarCategories.map(({ name, items }) => ({ name, items })),
-  ];
 
   return (
-    <aside
-      className={`sticky top-0 flex h-dvh shrink-0 flex-col bg-background px-1 transition-[width] duration-200 ${
-        collapsed ? "w-16" : "w-62"
-      }`}
-    >
-      <div
-        className={`mt-2 flex h-14 items-center ${
-          collapsed ? "justify-center px-0" : "px-3"
-        }`}
-      >
-        <div
-          className={
-            collapsed ? "flex size-10 items-center justify-center overflow-hidden" : "overflow-hidden"
-          }
-        >
-          <Logo
-            className={collapsed ? "justify-center" : undefined}
-            markOnly={collapsed}
-          />
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <div className="flex h-12 items-center px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+          <Logo markOnly={collapsed} />
         </div>
-      </div>
+      </SidebarHeader>
 
-      <div
-        className={`flex-1 overflow-y-auto py-3 ${collapsed ? "px-0" : "px-2"}`}
-      >
-        {sections.map((section, index) => (
-          <section
-            key={section.name ?? "main"}
-            className={index === 0 ? "" : "pt-4"}
-          >
-            {section.name && !collapsed && (
-              <div className="px-3 pb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {section.name}
-              </div>
-            )}
-            <nav className="space-y-1">
-              {section.items.map((item) => (
-                <NavItem
-                  key={item.name}
-                  item={item}
-                  active={isActive(item)}
-                  collapsed={collapsed}
-                />
-              ))}
-            </nav>
-          </section>
+      <SidebarContent>
+        {(
+          [
+            { items: sidebarMainItems },
+            ...sidebarCategories.map(({ name, items }) => ({ name, items })),
+          ] as { name?: string; items: MenuItem[] }[]
+        ).map(({ name, items }) => (
+          <SidebarGroup key={name ?? "main"}>
+            {name && <SidebarGroupLabel>{name}</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton
+                      isActive={isActive(item)}
+                      render={<Link href={item.href} />}
+                      tooltip={item.name}
+                    >
+                      <Icon icon={item.icon} width={18} />
+                      <span>{item.name}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         ))}
-      </div>
+      </SidebarContent>
 
-      <div className="border-t border-border p-2">
-        <nav className="space-y-1">
+      <SidebarFooter>
+        <SidebarMenu>
           {sidebarFooterItems.map((item) => (
-            <NavItem
-              key={item.name}
-              item={item}
-              active={isActive(item)}
-              collapsed={collapsed}
-            />
+            <SidebarMenuItem key={item.name}>
+              <SidebarMenuButton
+                isActive={isActive(item)}
+                render={<Link href={item.href} />}
+                tooltip={item.name}
+              >
+                <Icon icon={item.icon} width={18} />
+                <span>{item.name}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           ))}
-        </nav>
-      </div>
-    </aside>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 }

@@ -1,21 +1,26 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { Icon } from "@iconify/react";
+import { useMutation } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache/hooks";
+import { format } from "date-fns";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { PostsListSkeleton } from "@/components/layout/PostsListSkeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Icon } from "@iconify/react";
-import { useMutation, usePreloadedQuery, type Preloaded } from "convex/react";
-import { api } from "@convex/_generated/api";
-import type { Id } from "@convex/_generated/dataModel";
-import { format } from "date-fns";
-import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { platformBrand, platformLabel } from "@/lib/platform-meta";
-import type { PostLibraryFilter } from "@/lib/post-filters";
+import {
+  isPostLibraryFilter,
+  type PostLibraryFilter,
+} from "@/lib/post-filters";
 
 const FILTERS: Array<{ id: PostLibraryFilter; label: string }> = [
   { id: "all", label: "All" },
@@ -58,7 +63,10 @@ const PAGE_COPY: Record<
 
 const STATUS_BADGE: Record<
   string,
-  { variant: "default" | "secondary" | "destructive" | "outline"; className?: string }
+  {
+    variant: "default" | "secondary" | "destructive" | "outline";
+    className?: string;
+  }
 > = {
   draft: { variant: "secondary" },
   scheduled: {
@@ -71,22 +79,23 @@ const STATUS_BADGE: Record<
   },
   published: {
     variant: "outline",
-    className: "border-emerald-600/40 bg-emerald-600/10 text-emerald-700 dark:text-emerald-400",
+    className:
+      "border-emerald-600/40 bg-emerald-600/10 text-emerald-700 dark:text-emerald-400",
   },
   failed: { variant: "destructive" },
 };
 
-export function PostLibrary({
-  filter,
-  preloaded,
-}: {
-  filter: PostLibraryFilter;
-  preloaded: Preloaded<typeof api.posts.list>;
-}) {
+export function PostLibrary() {
+  const searchParams = useSearchParams();
+  const rawStatus = searchParams.get("status");
+  const filter = isPostLibraryFilter(rawStatus) ? rawStatus : "all";
   const router = useRouter();
   const removePost = useMutation(api.posts.remove);
   const retryFailed = useMutation(api.posts.retryFailed);
-  const posts = usePreloadedQuery(preloaded);
+  const posts = useQuery(
+    api.posts.list,
+    filter === "all" ? { limit: 100 } : { status: filter, limit: 100 },
+  );
   const [, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -94,6 +103,7 @@ export function PostLibrary({
   const copy = PAGE_COPY[filter];
 
   const visiblePosts = (() => {
+    if (!posts) return [];
     const query = search.trim().toLowerCase();
     if (!query) return posts;
     return posts.filter((post) =>
@@ -182,7 +192,9 @@ export function PostLibrary({
         </div>
       </div>
 
-      {visiblePosts.length === 0 ? (
+      {posts === undefined ? (
+        <PostsListSkeleton />
+      ) : visiblePosts.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Icon icon="hugeicons:note-01" width={24} />
@@ -261,7 +273,7 @@ export function PostLibrary({
                           />
                           {platformLabel(target.platform)}
                           {target.username ? ` · @${target.username}` : ""}
-                          {target.bodyOverride && (
+                          {target.hasCustomCaption && (
                             <Icon
                               icon="hugeicons:edit-02"
                               width={11}
@@ -269,7 +281,9 @@ export function PostLibrary({
                             />
                           )}
                           {target.failureMessage && (
-                            <span className="text-red-600">· {target.failureMessage}</span>
+                            <span className="text-red-600">
+                              · {target.failureMessage}
+                            </span>
                           )}
                         </span>
                       ))
@@ -314,7 +328,9 @@ export function PostLibrary({
                     </Button>
                   )}
                   {(post.status === "failed" ||
-                    post.targets.some((target) => target.status === "failed")) && (
+                    post.targets.some(
+                      (target) => target.status === "failed",
+                    )) && (
                     <Button
                       size="sm"
                       variant="outline"
@@ -322,7 +338,9 @@ export function PostLibrary({
                       onClick={async () => {
                         setRetrying(post._id);
                         try {
-                          const result = await retryFailed({ postId: post._id });
+                          const result = await retryFailed({
+                            postId: post._id,
+                          });
                           toast.success(
                             result.retried === 1
                               ? "Retrying 1 failed delivery."

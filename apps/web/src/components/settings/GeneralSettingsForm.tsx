@@ -1,14 +1,14 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { PasswordModal } from "@/components/settings/PasswordModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { Icon } from "@iconify/react";
-import { useUser } from "@hexclave/next";
-import { PasswordModal } from "@/components/settings/PasswordModal";
+import { hexclaveClientApp } from "@/hexclave/client";
 
 const cleanOptional = (value: string) => {
   const trimmed = value.trim();
@@ -17,7 +17,7 @@ const cleanOptional = (value: string) => {
 };
 
 export function GeneralSettingsForm() {
-  const user = useUser({ or: "redirect" });
+  const user = hexclaveClientApp.useUser({ or: "redirect" });
   const organization = user.selectedTeam;
   const [displayName, setDisplayName] = useState(user.displayName ?? "");
   const [email, setEmail] = useState(user.primaryEmail ?? "");
@@ -105,10 +105,7 @@ export function GeneralSettingsForm() {
       </div>
 
       <div className="flex items-center gap-3">
-        <Button
-          disabled={!hasChanges || isSaving}
-          type="submit"
-        >
+        <Button disabled={!hasChanges || isSaving} type="submit">
           {isSaving ? (
             <Spinner className="size-4" />
           ) : (

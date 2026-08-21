@@ -1,4 +1,5 @@
 import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,12 +8,8 @@ import { whyUsPoints } from "@/constants/landing-page";
 
 export function WhyUS() {
   return (
-    <section
-      className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
-    >
-      <div
-        className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-      >
+    <section className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24">
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Why MultiFeed
         </span>
@@ -53,11 +50,9 @@ function WhyUSCard({
   reversed: boolean;
 }) {
   return (
-    <div
-      className="rounded-2xl flex w-full flex-col justify-between gap-6 overflow-hidden border border-border/50 bg-card p-5 sm:p-6 md:flex-row md:gap-10 md:p-10"
-    >
+    <Card className="w-full flex-col justify-between gap-6 p-5 sm:p-6 md:flex-row md:gap-10 md:p-10">
       <div
-        className={`rounded-2xl relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden bg-muted md:w-80 lg:w-96 ${
+        className={`relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted md:w-80 lg:w-96 ${
           reversed ? "md:order-2" : ""
         }`}
       >
@@ -69,14 +64,16 @@ function WhyUSCard({
           src={point.image}
         />
       </div>
-      <div className="flex flex-1 flex-col justify-center gap-3 md:max-w-lg">
+      <CardContent className="flex flex-1 flex-col justify-center gap-3 md:max-w-lg">
         <span className="text-sm font-medium uppercase tracking-wide text-primary">
           {point.subheading}
         </span>
         <h3 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
           {point.title}
         </h3>
-        <p className="leading-relaxed text-muted-foreground">{point.description}</p>
+        <p className="leading-relaxed text-muted-foreground">
+          {point.description}
+        </p>
         <Link
           className={`${buttonVariants({ size: "lg" })} mt-2 w-fit`}
           href="/sign-in"
@@ -84,7 +81,7 @@ function WhyUSCard({
           {point.cta}
           <Icon icon="mdi:arrow-right" width={16} />
         </Link>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

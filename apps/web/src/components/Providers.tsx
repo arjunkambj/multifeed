@@ -5,10 +5,11 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { Toaster } from "sonner";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "sonner";
+import { TimezoneCookie } from "@/components/layout/TimezoneCookie";
 import { clientEnv } from "@/env";
 import { hexclaveClientApp } from "@/hexclave/client";
 
@@ -42,6 +43,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <ConvexProvider client={convex}>
         <ConvexQueryCacheProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+            <TimezoneCookie />
             <Toaster />
             {children}
           </ThemeProvider>

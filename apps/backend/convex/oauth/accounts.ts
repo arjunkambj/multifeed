@@ -46,10 +46,7 @@ async function serializeTeamAccountWrites(ctx: MutationCtx, teamId: string) {
 
 export const publicAccountValidator = v.object({
   _id: v.id("connectedAccounts"),
-  _creationTime: v.number(),
-  teamId: v.string(),
   platform: platformValidator,
-  providerAccountId: v.string(),
   username: v.string(),
   displayName: v.optional(v.string()),
   avatarUrl: v.optional(v.string()),
@@ -59,17 +56,8 @@ export const publicAccountValidator = v.object({
     v.literal("revoked"),
     v.literal("error"),
   ),
-  tokenType: v.optional(tokenType),
   capabilities: v.array(capability),
   scopes: v.array(v.string()),
-  tokenExpiresAt: v.optional(v.number()),
-  refreshTokenExpiresAt: v.optional(v.number()),
-  lastSyncedAt: v.optional(v.number()),
-  metadata: v.optional(v.any()),
-  errorMessage: v.optional(v.string()),
-  connectedByUserId: v.string(),
-  createdAt: v.number(),
-  updatedAt: v.number(),
 });
 
 const accountInput = v.object({
@@ -89,18 +77,20 @@ const accountInput = v.object({
 });
 
 type AccountInput = Infer<typeof accountInput>;
+type PublicAccount = Infer<typeof publicAccountValidator>;
 
-type PublicAccount = Omit<
-  Doc<"connectedAccounts">,
-  "encryptedAccessToken" | "encryptedRefreshToken"
->;
-
-/** Drop token fields before returning accounts to the client. */
-function stripSecrets(doc: Doc<"connectedAccounts">): PublicAccount {
-  const safe = { ...doc };
-  delete safe.encryptedAccessToken;
-  delete safe.encryptedRefreshToken;
-  return safe;
+/** UI fields only — tokens and provider metadata stay on the document. */
+function toPublicAccount(doc: Doc<"connectedAccounts">): PublicAccount {
+  return {
+    _id: doc._id,
+    platform: doc.platform,
+    username: doc.username,
+    displayName: doc.displayName,
+    avatarUrl: doc.avatarUrl,
+    status: doc.status,
+    capabilities: doc.capabilities,
+    scopes: doc.scopes,
+  };
 }
 
 export async function listAccountsForTeam(
@@ -120,7 +110,7 @@ export async function listAccountsForTeam(
         .withIndex("by_team_provider", (q) => q.eq("teamId", teamId))
         .take(MAX_ACCOUNTS_PER_TEAM);
 
-  return rows.map(stripSecrets);
+  return rows.map(toPublicAccount);
 }
 
 async function upsertAccount(

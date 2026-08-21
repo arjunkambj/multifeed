@@ -1,18 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { useUser } from "@hexclave/next";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { useRouter } from "next/navigation";
+import { hexclaveClientApp } from "@/hexclave/client";
 
 export function CreateOrganizationForm() {
   const router = useRouter();
-  const user = useUser({ or: "redirect" });
+  const user = hexclaveClientApp.useUser({ or: "redirect" });
   const [organizationName, setOrganizationName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 

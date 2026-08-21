@@ -19,8 +19,14 @@ export type CalendarDateRange = {
   end: CalendarDate;
 };
 
-export function getPresetRange(preset: DateRangePreset): CalendarDateRange {
-  const currentDate = today(getLocalTimeZone());
+const DAY_MS = 86_400_000;
+const CALENDAR_PRELOAD_PAD_MS = 70 * DAY_MS;
+
+export function getPresetRange(
+  preset: DateRangePreset,
+  timeZone: string = getLocalTimeZone(),
+): CalendarDateRange {
+  const currentDate = today(timeZone);
 
   switch (preset) {
     case "today":
@@ -42,13 +48,19 @@ export function calendarDateToInputValue(date: CalendarDate) {
   return `${date.year}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
 }
 
-export function calendarDateRangeToMilliseconds(range: CalendarDateRange) {
-  const start = new Date(range.start.year, range.start.month - 1, range.start.day);
-  const end = new Date(
-    range.end.year,
-    range.end.month - 1,
-    range.end.day + 1,
-  );
+/** Wide, timezone-agnostic window so calendar preload covers month/week views. */
+export function defaultCalendarRangeMs(now = Date.now()) {
+  return {
+    startMs: now - CALENDAR_PRELOAD_PAD_MS,
+    endMs: now + CALENDAR_PRELOAD_PAD_MS,
+  };
+}
 
+export function calendarDateRangeToMilliseconds(
+  range: CalendarDateRange,
+  timeZone: string = getLocalTimeZone(),
+) {
+  const start = range.start.toDate(timeZone);
+  const end = range.end.add({ days: 1 }).toDate(timeZone);
   return { startMs: start.getTime(), endMs: end.getTime() - 1 };
 }

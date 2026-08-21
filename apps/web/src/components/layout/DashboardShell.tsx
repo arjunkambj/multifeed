@@ -1,36 +1,22 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export function DashboardShell({
-  children,
-  user,
-}: {
-  children: React.ReactNode;
-  user: {
-    displayName: string | null;
-    primaryEmail: string | null;
-    profileImageUrl: string | null;
-  };
-}) {
-  const [collapsed, setCollapsed] = useState(false);
-
+export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh bg-background">
-      <Suspense fallback={<div className="w-16 shrink-0 bg-background" />}>
-        <AppSidebar collapsed={collapsed} />
+    <SidebarProvider>
+      <Suspense fallback={null}>
+        <AppSidebar />
       </Suspense>
-      <div className="my-2 mr-2 flex min-w-0 flex-1 flex-col overflow-hidden rounded-4xl bg-card">
-        <DashboardHeader
-          user={user}
-          onToggle={() => setCollapsed((value) => !value)}
-        />
+      <SidebarInset className="overflow-hidden rounded-4xl bg-card">
+        <DashboardHeader />
         <main className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
           {children}
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

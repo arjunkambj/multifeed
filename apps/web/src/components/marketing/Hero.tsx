@@ -286,7 +286,7 @@ export function Hero() {
         className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-5 text-center lg:mt-4"
       >
         <div>
-          <Badge variant="outline" className="h-auto border-border/60 bg-card px-3 py-1 text-primary">
+          <Badge className="h-auto px-3 py-1 text-primary" variant="outline">
             <span className="inline-flex items-center gap-1.5">
               <Icon icon="hugeicons:sparkles" width={13} />
               <span>Unified social scheduling · 7 platforms in 1 calendar</span>

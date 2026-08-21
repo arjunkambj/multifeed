@@ -1,7 +1,16 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
+import type { Doc, Id } from "@convex/_generated/dataModel";
+import { Icon } from "@iconify/react";
+import { useMutation } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache/hooks";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
+import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { RemoteAvatar } from "@/components/RemoteAvatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,21 +21,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { Icon } from "@iconify/react";
-import { useMutation, usePreloadedQuery, type Preloaded } from "convex/react";
-import { api } from "@convex/_generated/api";
-import type { Doc, Id } from "@convex/_generated/dataModel";
-import { useRouter, useSearchParams } from "next/navigation";
-import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
-import { RemoteAvatar } from "@/components/RemoteAvatar";
-import {
-  CONNECTABLE_PLATFORMS,
-  PLATFORM_META,
-  type OAuthPlatform,
-} from "@/lib/platform-meta";
 import { oauthErrorMessage } from "@/lib/oauth/env";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
+import {
+  CONNECTABLE_PLATFORMS,
+  type OAuthPlatform,
+  PLATFORM_META,
+} from "@/lib/platform-meta";
+import { currentTimeBucket } from "@/lib/time-bucket";
 
 const statusDot: Record<Doc<"connectedAccounts">["status"], string> = {
   active: "bg-emerald-500",
@@ -35,12 +37,11 @@ const statusDot: Record<Doc<"connectedAccounts">["status"], string> = {
   error: "bg-red-500",
 };
 
-function ConnectionsPageInner({
-  preloaded,
-}: {
-  preloaded: Preloaded<typeof api.oauth.accounts.getConnectionsPageData>;
-}) {
-  const { accounts, entitlements } = usePreloadedQuery(preloaded);
+function ConnectionsPageInner() {
+  const [nowMs] = useState(() => currentTimeBucket());
+  const pageData = useQuery(api.oauth.accounts.getConnectionsPageData, {
+    nowMs,
+  });
   const disconnect = useMutation(api.oauth.accounts.disconnect);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -56,11 +57,11 @@ function ConnectionsPageInner({
   const oauthError = searchParams.get("error") ?? "";
   const skipped = searchParams.get("skipped") ?? "";
   const flashKey = `${connected}\0${oauthError}\0${skipped}`;
-  const connectedAccountsCount = accounts.filter(
+  const accounts = pageData?.accounts;
+  const entitlements = pageData?.entitlements;
+  const connectedAccountsCount = (accounts ?? []).filter(
     (account) => account.status !== "revoked",
   ).length;
-  const accountLimit = entitlements.connectedAccountLimit;
-  const connectionUsage = `${connectedAccountsCount} of ${accountLimit} connections used`;
 
   useEffect(() => {
     if (flashKey === "\0") return;
@@ -71,9 +72,11 @@ function ConnectionsPageInner({
         const label = PLATFORM_META[connected]?.label ?? "Account";
         const skippedCount = Number.parseInt(skipped, 10);
         if (Number.isFinite(skippedCount) && skippedCount > 0) {
-          toast.warning(`${label} connected. ${skippedCount} more account${
+          toast.warning(
+            `${label} connected. ${skippedCount} more account${
               skippedCount === 1 ? " was" : "s were"
-            } skipped because your plan limit was reached. Upgrade to connect them.`);
+            } skipped because your plan limit was reached. Upgrade to connect them.`,
+          );
         } else {
           toast.success(`${label} connected successfully.`);
         }
@@ -85,7 +88,14 @@ function ConnectionsPageInner({
     window.history.replaceState(null, "", "/connections");
   }, [connected, flashKey, oauthError, router, skipped]);
 
-  const byPlatform = new Map<string, NonNullable<typeof accounts>>();
+  if (!accounts || !entitlements) {
+    return <DashboardLoadingSkeleton variant="connections" />;
+  }
+
+  const accountLimit = entitlements.connectedAccountLimit;
+  const connectionUsage = `${connectedAccountsCount} of ${accountLimit} connections used`;
+
+  const byPlatform = new Map<string, typeof accounts>();
   for (const platform of CONNECTABLE_PLATFORMS) {
     byPlatform.set(platform, []);
   }
@@ -115,7 +125,9 @@ function ConnectionsPageInner({
       })
       .catch((err) => {
         setConnecting(null);
-        toast.error(err instanceof Error ? err.message : "Could not start OAuth");
+        toast.error(
+          err instanceof Error ? err.message : "Could not start OAuth",
+        );
       });
   };
 
@@ -127,7 +139,9 @@ function ConnectionsPageInner({
         toast.success("Account disconnected.");
       })
       .catch((err) => {
-        toast.error(err instanceof Error ? err.message : "Could not disconnect account");
+        toast.error(
+          err instanceof Error ? err.message : "Could not disconnect account",
+        );
       })
       .finally(() => setDisconnecting(null));
   };
@@ -267,8 +281,8 @@ function ConnectionsPageInner({
           <DialogHeader>
             <DialogTitle>Disconnect account?</DialogTitle>
             <DialogDescription>
-              Disconnect @{accountToDisconnect?.username}? You can reconnect
-              it anytime.
+              Disconnect @{accountToDisconnect?.username}? You can reconnect it
+              anytime.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -299,12 +313,10 @@ function ConnectionsPageInner({
   );
 }
 
-export function ConnectionsPage(props: {
-  preloaded: Preloaded<typeof api.oauth.accounts.getConnectionsPageData>;
-}) {
+export function ConnectionsPage() {
   return (
     <Suspense fallback={<DashboardLoadingSkeleton variant="connections" />}>
-      <ConnectionsPageInner {...props} />
+      <ConnectionsPageInner />
     </Suspense>
   );
 }

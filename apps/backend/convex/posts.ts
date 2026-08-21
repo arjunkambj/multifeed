@@ -23,18 +23,20 @@ const targetInput = v.object({
   platformSettings: v.optional(platformSettings),
 });
 
+const targetStatusValidator = v.union(
+  v.literal("draft"),
+  v.literal("scheduled"),
+  v.literal("publishing"),
+  v.literal("published"),
+  v.literal("failed"),
+  v.literal("skipped"),
+);
+
 const targetOutputValidator = v.object({
   targetId: v.id("postTargets"),
   connectedAccountId: v.id("connectedAccounts"),
   platform: platformValidator,
-  status: v.union(
-    v.literal("draft"),
-    v.literal("scheduled"),
-    v.literal("publishing"),
-    v.literal("published"),
-    v.literal("failed"),
-    v.literal("skipped"),
-  ),
+  status: targetStatusValidator,
   bodyOverride: v.optional(v.string()),
   firstComment: v.optional(v.string()),
   referenceUrl: v.optional(v.string()),
@@ -46,6 +48,30 @@ const targetOutputValidator = v.object({
   username: v.optional(v.string()),
   displayName: v.optional(v.string()),
   avatarUrl: v.optional(v.string()),
+});
+
+const listTargetValidator = v.object({
+  targetId: v.id("postTargets"),
+  platform: platformValidator,
+  status: targetStatusValidator,
+  username: v.optional(v.string()),
+  displayName: v.optional(v.string()),
+  hasCustomCaption: v.boolean(),
+  failureMessage: v.optional(v.string()),
+  platformPermalink: v.optional(v.string()),
+});
+
+const listPostValidator = v.object({
+  _id: v.id("posts"),
+  title: v.optional(v.string()),
+  body: v.string(),
+  kind: postKind,
+  status: postStatus,
+  scheduledFor: v.optional(v.number()),
+  calendarColor: v.optional(v.string()),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+  targets: v.array(listTargetValidator),
 });
 
 const enrichedPostValidator = v.object({
@@ -338,11 +364,10 @@ function targetStatusFromPost(
   return status;
 }
 
-async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
-  const [targetsByPost, mediaIdsByPost] = await Promise.all([
-    Promise.all(posts.map((post) => loadTargets(ctx, post._id))),
-    Promise.all(posts.map((post) => loadMediaAssetIds(ctx, post._id))),
-  ]);
+async function loadAccountMap(
+  ctx: QueryCtx,
+  targetsByPost: Doc<"postTargets">[][],
+) {
   const accountIds = [
     ...new Set(
       targetsByPost.flatMap((targets) =>
@@ -350,14 +375,56 @@ async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
       ),
     ),
   ];
-  const mediaIds = [...new Set(mediaIdsByPost.flat())];
-  const [accounts, mediaAssets] = await Promise.all([
-    Promise.all(accountIds.map((id) => ctx.db.get("connectedAccounts", id))),
-    Promise.all(mediaIds.map((id) => ctx.db.get("mediaAssets", id))),
-  ]);
-  const accountsById = new Map(
+  const accounts = await Promise.all(
+    accountIds.map((id) => ctx.db.get("connectedAccounts", id)),
+  );
+  return new Map(
     accounts.flatMap((account) => (account ? [[account._id, account]] : [])),
   );
+}
+
+async function enrichListPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
+  const targetsByPost = await Promise.all(
+    posts.map((post) => loadTargets(ctx, post._id)),
+  );
+  const accountsById = await loadAccountMap(ctx, targetsByPost);
+
+  return posts.map((post, index) => ({
+    _id: post._id,
+    title: post.title,
+    body: post.body,
+    kind: post.kind,
+    status: post.status,
+    scheduledFor: post.scheduledFor,
+    calendarColor: post.calendarColor,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+    targets: (targetsByPost[index] ?? []).map((target) => {
+      const account = accountsById.get(target.connectedAccountId);
+      return {
+        targetId: target._id,
+        platform: target.platform,
+        status: target.status,
+        username: account?.username,
+        displayName: account?.displayName,
+        hasCustomCaption: Boolean(target.bodyOverride),
+        failureMessage: target.failureMessage,
+        platformPermalink: target.platformPermalink,
+      };
+    }),
+  }));
+}
+
+async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
+  const [targetsByPost, mediaIdsByPost] = await Promise.all([
+    Promise.all(posts.map((post) => loadTargets(ctx, post._id))),
+    Promise.all(posts.map((post) => loadMediaAssetIds(ctx, post._id))),
+  ]);
+  const mediaIds = [...new Set(mediaIdsByPost.flat())];
+  const [accountsById, mediaAssets] = await Promise.all([
+    loadAccountMap(ctx, targetsByPost),
+    Promise.all(mediaIds.map((id) => ctx.db.get("mediaAssets", id))),
+  ]);
   const mediaById = new Map(
     mediaAssets.flatMap((asset) => (asset ? [[asset._id, asset]] : [])),
   );
@@ -793,7 +860,7 @@ export const list = query({
     status: v.optional(postStatus),
     limit: v.optional(v.number()),
   },
-  returns: v.array(enrichedPostValidator),
+  returns: v.array(listPostValidator),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const limit = Math.max(1, Math.min(args.limit ?? 50, 100));
@@ -817,7 +884,7 @@ export const list = query({
         .take(limit);
     }
 
-    return await enrichPosts(ctx, posts);
+    return await enrichListPosts(ctx, posts);
   },
 });
 
@@ -872,7 +939,7 @@ export const listInRange = query({
     endMs: v.number(),
   },
   returns: v.object({
-    posts: v.array(enrichedPostValidator),
+    posts: v.array(listPostValidator),
     truncated: v.boolean(),
   }),
   handler: async (ctx, args) => {
@@ -907,7 +974,7 @@ export const listInRange = query({
       .sort((a, b) => (a.scheduledFor ?? 0) - (b.scheduledFor ?? 0))
       .slice(0, 500);
 
-    return { posts: await enrichPosts(ctx, posts), truncated };
+    return { posts: await enrichListPosts(ctx, posts), truncated };
   },
 });
 
@@ -1070,7 +1137,7 @@ export const overviewMetrics = query({
 
 export const listScheduled = query({
   args: { limit: v.optional(v.number()) },
-  returns: v.array(enrichedPostValidator),
+  returns: v.array(listPostValidator),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const limit = Math.max(1, Math.min(args.limit ?? 40, 100));
@@ -1082,6 +1149,6 @@ export const listScheduled = query({
       .order("desc")
       .take(limit);
 
-    return await enrichPosts(ctx, posts);
+    return await enrichListPosts(ctx, posts);
   },
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -90,15 +90,17 @@ export function Navbar() {
           >
             Plan a post
           </Link>
-          <button
+          <Button
             aria-expanded={isMenuOpen}
             aria-label="Toggle navigation"
-            className=" inline-flex size-9 items-center justify-center border border-border/60 bg-card text-foreground transition-colors hover:border-primary/40 hover:text-primary lg:hidden"
+            className="lg:hidden"
             onClick={() => setIsMenuOpen((open) => !open)}
+            size="icon-lg"
             type="button"
+            variant="outline"
           >
             <Icon icon={isMenuOpen ? "ph:x" : "ph:list"} width={18} />
-          </button>
+          </Button>
         </div>
       </nav>
 

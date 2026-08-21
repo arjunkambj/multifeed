@@ -1,3 +1,4 @@
+import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 
 import { featureItems } from "@/constants/landing-page";
@@ -11,9 +12,7 @@ export function Features() {
       className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
       id="features"
     >
-      <div
-        className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-      >
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Features
         </span>
@@ -49,23 +48,22 @@ export function Features() {
 
 function FeatureCard({ item }: { item: (typeof featureItems)[number] }) {
   return (
-    <div className="rounded-2xl flex h-full flex-col overflow-hidden border border-border/50 bg-card">
-      <div
-        className="relative h-52 w-full scale-[1.06] md:h-56"
-      >
-        <Image
-          alt={item.heading}
-          className="object-cover"
-          fill
-          loading="lazy"
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          src={item.image}
-        />
-      </div>
-      <div className="flex flex-col gap-2 p-5 sm:p-6">
+    <Card className="h-full gap-2 py-0">
+      <Image
+        alt={item.heading}
+        className="h-52 w-full object-cover md:h-56"
+        height={224}
+        loading="lazy"
+        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        src={item.image}
+        width={672}
+      />
+      <CardContent className="flex flex-col gap-2 pb-5">
         <h3 className="text-lg font-semibold sm:text-xl">{item.heading}</h3>
-        <p className="text-sm leading-relaxed text-muted-foreground">{item.description}</p>
-      </div>
-    </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {item.description}
+        </p>
+      </CardContent>
+    </Card>
   );
 }

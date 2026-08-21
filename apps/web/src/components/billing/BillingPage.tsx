@@ -1,15 +1,17 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
+import { Icon } from "@iconify/react";
+import type { BillingInterval, PlanKey } from "@multifeed/plans";
+import { PLANS } from "@multifeed/plans";
+import { useQuery } from "convex-helpers/react/cache/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import { Icon } from "@iconify/react";
-import { usePreloadedQuery, type Preloaded } from "convex/react";
-import { api } from "@convex/_generated/api";
-import { PLANS } from "@multifeed/plans";
-import type { BillingInterval, PlanKey } from "@multifeed/plans";
+import { currentTimeBucket } from "@/lib/time-bucket";
 
 const intervalLabels = {
   month: "/month",
@@ -55,16 +57,13 @@ function formatDate(value?: number) {
   return dateFormatter.format(new Date(value));
 }
 
-export function BillingPage({
-  preloaded,
-}: {
-  preloaded: Preloaded<typeof api.billing.getSubscription>;
-}) {
+export function BillingPage() {
+  const [nowMs] = useState(() => currentTimeBucket());
   const [billingInterval, setBillingInterval] =
     useState<BillingInterval>("month");
   const [checkingOut, setCheckingOut] = useState<PlanKey | null>(null);
   const [openingPortal, setOpeningPortal] = useState(false);
-  const subscription = usePreloadedQuery(preloaded);
+  const subscription = useQuery(api.billing.getSubscription, { nowMs });
   const isYearly = billingInterval === "year";
   const activePlan = subscription?.hasPlanAccess
     ? PLANS.find((plan) => plan.key === subscription.planKey)
@@ -118,6 +117,15 @@ export function BillingPage({
         toast.error(err instanceof Error ? err.message : String(err));
       });
   };
+
+  if (subscription === undefined) {
+    return (
+      <div className="max-w-xl space-y-5 pt-4">
+        <Skeleton className="h-24 w-full rounded-2xl" />
+        <Skeleton className="h-40 w-full rounded-2xl" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full flex-col gap-6">

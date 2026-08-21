@@ -1,3 +1,5 @@
+import { Card, CardContent } from "@/components/ui/card";
+
 const steps = [
   {
     description:
@@ -21,12 +23,8 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section
-      className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
-    >
-      <div
-        className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-      >
+    <section className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24">
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           How it works
         </span>
@@ -63,8 +61,8 @@ function StepCard({
   step: string;
 }) {
   return (
-    <div className="rounded-2xl flex h-full w-full flex-col gap-5 border border-border/50 bg-card p-2">
-      <div className="rounded-2xl flex h-56 w-full items-end bg-background p-5 sm:h-64">
+    <Card className="h-full w-full gap-0 p-2">
+      <div className="flex h-56 w-full items-end rounded-2xl bg-background p-5 sm:h-64">
         <div className="grid w-full grid-cols-4 gap-2">
           {[32, 58, 76, 44].map((height, index) => (
             <div
@@ -79,13 +77,15 @@ function StepCard({
           ))}
         </div>
       </div>
-      <div className="flex flex-col gap-2 px-3 pb-5">
-        <div className="rounded-full mr-auto bg-background px-3 py-0.5 text-sm font-semibold">
+      <CardContent className="flex flex-col gap-2 px-3 pb-5">
+        <div className="mr-auto rounded-full bg-background px-3 py-0.5 text-sm font-semibold">
           Step {step}
         </div>
         <h3 className="text-xl font-medium">{title}</h3>
-        <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
-      </div>
-    </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {description}
+        </p>
+      </CardContent>
+    </Card>
   );
 }

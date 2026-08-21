@@ -1,22 +1,28 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import Providers from "@/components/Providers";
 import { HexclaveProvider, HexclaveTheme } from "@hexclave/next";
-import { hexclaveServerApp } from "@/hexclave/server";
-import { Bricolage_Grotesque, Inter, Figtree } from "next/font/google";
+import { Bricolage_Grotesque, Figtree, Inter } from "next/font/google";
+import Providers from "@/components/Providers";
 import { clientEnv } from "@/env";
+import { hexclaveServerApp } from "@/hexclave/server";
 import { cn } from "@/lib/utils";
 
 const figtreeHeading = Figtree({
   subsets: ["latin"],
   variable: "--font-heading",
+  display: "swap",
 });
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -53,7 +59,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(bricolage.variable, figtreeHeading.variable, "font-sans", inter.variable)}
+      className={cn(
+        bricolage.variable,
+        figtreeHeading.variable,
+        "font-sans",
+        inter.variable,
+      )}
       suppressHydrationWarning
     >
       <body className="font-sans">

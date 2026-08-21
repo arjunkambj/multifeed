@@ -1,22 +1,14 @@
+import type { Metadata } from "next";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { requireDashboardSession } from "@/hexclave/dashboard-session";
 
-export default async function DashboardLayout({
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
+
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = await requireDashboardSession();
-
-  return (
-    <DashboardShell
-      user={{
-        displayName: user.displayName,
-        primaryEmail: user.primaryEmail,
-        profileImageUrl: user.profileImageUrl,
-      }}
-    >
-      {children}
-    </DashboardShell>
-  );
+  return <DashboardShell>{children}</DashboardShell>;
 }

@@ -1,31 +1,16 @@
-import type { Id } from "@convex/_generated/dataModel";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { CreatePostComposer } from "@/components/posts/CreatePostComposer";
 
-type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+export const metadata: Metadata = {
+  title: "New post",
+};
 
-const first = (value: string | string[] | undefined) =>
-  Array.isArray(value) ? value[0] : value;
-
-export default async function NewPostPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
-  const params = await searchParams;
-  const at = first(params.at);
-  const from = first(params.from);
-  const edit = first(params.edit);
-  const initialScheduledFor = at ? Number(at) : undefined;
-
+export default function NewPostPage() {
   return (
-    <CreatePostComposer
-      initialScheduledFor={
-        initialScheduledFor && !Number.isNaN(initialScheduledFor)
-          ? initialScheduledFor
-          : undefined
-      }
-      duplicateFromId={from ? (from as Id<"posts">) : undefined}
-      editPostId={edit ? (edit as Id<"posts">) : undefined}
-    />
+    <Suspense fallback={<DashboardLoadingSkeleton variant="composer" />}>
+      <CreatePostComposer />
+    </Suspense>
   );
 }

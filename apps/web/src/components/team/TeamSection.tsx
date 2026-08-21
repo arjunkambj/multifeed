@@ -1,35 +1,58 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { InvitePopover } from "@/components/team/InvitePopover";
 import { TeamMembersContent } from "@/components/team/TeamMembersContent";
-import type { TeamData } from "@/lib/team-data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { hexclaveClientApp } from "@/hexclave/client";
 
-export function TeamSection({
-  canInviteMembers,
-  canReadMembers,
-  initialData,
-  team,
-}: {
-  canInviteMembers: boolean;
-  canReadMembers: boolean;
-  initialData?: TeamData;
-  team: { id: string; displayName: string };
-}) {
+export function TeamSection() {
+  const user = hexclaveClientApp.useUser({ or: "redirect" });
+  const team = user.selectedTeam;
+  const router = useRouter();
+  const [canReadMembers, setCanReadMembers] = useState<boolean | null>(null);
+  const [canInviteMembers, setCanInviteMembers] = useState(false);
+
+  useEffect(() => {
+    if (!team) {
+      router.replace("/created-org");
+    }
+  }, [router, team]);
+
+  useEffect(() => {
+    if (!team) return;
+    void Promise.all([
+      user.hasPermission(team, "$read_members"),
+      user.hasPermission(team, "$invite_members"),
+    ]).then(([read, invite]) => {
+      setCanReadMembers(read);
+      setCanInviteMembers(invite);
+    });
+  }, [team, user]);
+
+  if (!team || canReadMembers === null) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-8 w-48 rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full flex-1 flex-col gap-6">
       <DashboardPageTitle
         title="Manage team"
         description={`Manage who can work inside ${team.displayName}.`}
         actions={
-          canInviteMembers ? (
-            <InvitePopover initialData={initialData} teamId={team.id} />
-          ) : undefined
+          canInviteMembers ? <InvitePopover teamId={team.id} /> : undefined
         }
       />
 
       {canReadMembers ? (
-        <TeamMembersContent initialData={initialData} teamId={team.id} />
+        <TeamMembersContent teamId={team.id} />
       ) : (
         <div className="rounded-4xl border border-border bg-background/40 p-5 text-sm text-muted-foreground">
           You do not have permission to read team members.

@@ -1,7 +1,19 @@
 "use client";
 
-import { buttonVariants } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -16,9 +28,7 @@ export function Pricing() {
       className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-20 sm:px-6 md:gap-16 md:py-24"
       id="pricing"
     >
-      <div
-        className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center"
-      >
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         <span className="text-sm font-semibold uppercase tracking-wide text-primary">
           Pricing
         </span>
@@ -30,44 +40,45 @@ export function Pricing() {
           team or client list grows.
         </p>
         <div
-          className="rounded-xl mt-2 flex items-center gap-1 border border-border/50 bg-card px-1.5 py-1"
+          className="mt-2 flex items-center gap-1 rounded-xl border border-border/50 bg-card px-1.5 py-1"
           role="group"
         >
-          <button
-            className={`rounded-lg cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
-              !isYearly
-                ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+          <Button
+            className={cn(
+              "cursor-pointer rounded-lg px-2.5",
+              isYearly && "text-muted-foreground hover:text-foreground",
+            )}
             onClick={() => setIsYearly(false)}
+            size="sm"
             type="button"
+            variant={!isYearly ? "secondary" : "ghost"}
           >
             Monthly
-          </button>
+          </Button>
           <Switch
+            aria-label="Toggle yearly billing"
             checked={isYearly}
             onCheckedChange={(checked) => setIsYearly(checked)}
           />
-          <button
-            className={`rounded-lg cursor-pointer px-2.5 py-1 text-sm font-medium transition-colors ${
-              isYearly
-                ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+          <Button
+            className={cn(
+              "cursor-pointer rounded-lg px-2.5",
+              !isYearly && "text-muted-foreground hover:text-foreground",
+            )}
             onClick={() => setIsYearly(true)}
+            size="sm"
             type="button"
+            variant={isYearly ? "secondary" : "ghost"}
           >
             Yearly
             <span className="text-xs text-primary"> · Save 20%</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-3 md:gap-5">
         {pricingPlans.map((plan) => (
-          <div className="h-full" key={plan.name}>
-            <PricingCard isYearly={isYearly} plan={plan} />
-          </div>
+          <PricingCard isYearly={isYearly} key={plan.name} plan={plan} />
         ))}
       </div>
     </section>
@@ -84,36 +95,28 @@ function PricingCard({
   const preferred = plan.preferred;
 
   return (
-    <div
-      className={`rounded-2xl group relative flex h-full flex-col overflow-hidden border bg-card transition-colors ${
-        preferred ? "border-primary/40" : "border-border/50 hover:border-border"
-      }`}
+    <Card
+      className={cn(
+        "h-full transition-colors hover:ring-foreground/10",
+        preferred && "ring-primary/40",
+      )}
     >
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <h3 className="font-display text-xl font-semibold tracking-tight text-foreground">
-              {plan.name}
-            </h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {plan.description}
-            </p>
-          </div>
-          {plan.badge && (
-            <span
-              className={`rounded-full shrink-0 px-2.5 py-1 text-[11px] font-semibold ${
-                preferred
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
+      <CardHeader>
+        <CardTitle className="font-display text-xl font-semibold tracking-tight">
+          {plan.name}
+        </CardTitle>
+        <CardDescription>{plan.description}</CardDescription>
+        {plan.badge && (
+          <CardAction>
+            <Badge variant={preferred ? "default" : "secondary"}>
               {plan.badge}
-            </span>
-          )}
-        </div>
-
-        <div className="mt-6 flex items-baseline gap-1.5">
-          <span className="font-display text-4xl font-bold tracking-tight tabular-nums text-foreground">
+            </Badge>
+          </CardAction>
+        )}
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col">
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-display text-4xl font-bold tabular-nums tracking-tight">
             {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
           </span>
           <span className="text-sm text-muted-foreground">
@@ -123,9 +126,7 @@ function PricingCard({
             )}
           </span>
         </div>
-
-        <div className="my-5 h-px w-full bg-border/50" />
-
+        <Separator className="my-5" />
         <ul className="flex flex-1 flex-col gap-2.5">
           {plan.features.map((feature) => (
             <li
@@ -141,17 +142,18 @@ function PricingCard({
             </li>
           ))}
         </ul>
-
+      </CardContent>
+      <CardFooter>
         <Link
-          className={`${buttonVariants({
+          className={buttonVariants({
             size: "lg",
             variant: preferred ? "default" : "ghost",
-          })} mt-7 w-full font-medium`}
+          })}
           href="/sign-in"
         >
           {plan.cta}
         </Link>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

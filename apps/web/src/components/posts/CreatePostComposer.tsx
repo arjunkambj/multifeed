@@ -1,7 +1,17 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { Icon } from "@iconify/react";
+import { useMutation } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache/hooks";
+import { format } from "date-fns";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
+import { ComposerFormSkeleton } from "@/components/layout/ComposerFormSkeleton";
+import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { RemoteAvatar } from "@/components/RemoteAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,31 +19,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Icon } from "@iconify/react";
-import { useMutation } from "convex/react";
-import { useQuery } from "convex-helpers/react/cache/hooks";
-import { api } from "@convex/_generated/api";
-import type { Id } from "@convex/_generated/dataModel";
-import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { ComposerFormSkeleton } from "@/components/layout/ComposerFormSkeleton";
-import { RemoteAvatar } from "@/components/RemoteAvatar";
+import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import {
   PLATFORM_META,
   platformBrand,
   platformLabel,
 } from "@/lib/platform-meta";
-import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
-import { PlatformSettingsFields } from "./PlatformSettingsFields";
 import { PlatformPostPreview } from "./PlatformPostPreview";
+import { PlatformSettingsFields } from "./PlatformSettingsFields";
 import { PostFormatPicker } from "./PostFormatPicker";
 import { PostMediaUploader } from "./PostMediaUploader";
 import {
   accountSupportsPostKind,
+  type ComposerMedia,
   defaultPlatformSettings,
   formatLabel,
-  type ComposerMedia,
   type PlatformSettings,
   type PostKind,
 } from "./post-composer-config";
@@ -59,14 +59,10 @@ function fromLocalInputValue(value: string) {
 
 const currentTimestamp = () => Date.now();
 
-type Props = {
+type ComposerFormProps = {
   initialScheduledFor?: number;
-  /** Prefill from an existing post (calendar Duplicate). */
   duplicateFromId?: Id<"posts">;
   editPostId?: Id<"posts">;
-};
-
-type ComposerFormProps = Props & {
   initialPostKind: PostKind;
   onChooseDifferentFormat?: () => void;
 };
@@ -119,7 +115,11 @@ type ComposerAction =
   | { type: "uploadingMediaChanged"; value: boolean }
   | { type: "selectedChanged"; value: Set<string> }
   | { type: "accountToggled"; accountId: string }
-  | { type: "targetOptionsChanged"; accountId: string; patch: Partial<TargetOptions> }
+  | {
+      type: "targetOptionsChanged";
+      accountId: string;
+      patch: Partial<TargetOptions>;
+    }
   | { type: "captionSearchChanged"; value: string }
   | { type: "toolChanged"; value: ComposerTool }
   | { type: "scheduleModeChanged"; value: "now" | "schedule" }
@@ -227,8 +227,15 @@ function composerReducer(
   }
 }
 
-export function CreatePostComposer(props: Props) {
-  const isExistingPostFlow = Boolean(props.editPostId || props.duplicateFromId);
+export function CreatePostComposer() {
+  const searchParams = useSearchParams();
+  const editPostId =
+    (searchParams.get("edit") as Id<"posts"> | null) ?? undefined;
+  const duplicateFromId =
+    (searchParams.get("from") as Id<"posts"> | null) ?? undefined;
+  const at = searchParams.get("at");
+  const initialScheduledFor = at ? Number(at) : undefined;
+  const isExistingPostFlow = Boolean(editPostId || duplicateFromId);
   const [selectedKind, setSelectedKind] = useState<PostKind | null>(null);
 
   if (!isExistingPostFlow && selectedKind === null) {
@@ -245,7 +252,13 @@ export function CreatePostComposer(props: Props) {
 
   return (
     <PostComposerForm
-      {...props}
+      initialScheduledFor={
+        initialScheduledFor && !Number.isNaN(initialScheduledFor)
+          ? initialScheduledFor
+          : undefined
+      }
+      duplicateFromId={duplicateFromId}
+      editPostId={editPostId}
       initialPostKind={selectedKind ?? "text"}
       onChooseDifferentFormat={
         isExistingPostFlow ? undefined : () => setSelectedKind(null)
@@ -339,15 +352,15 @@ function usePostComposerForm({
     prefilledFrom.current = sourcePostId;
 
     const nextMedia = sourcePost.mediaAssets.map((asset) => ({
-        _id: asset._id,
-        filename: asset.filename,
-        mimeType: asset.mimeType,
-        kind: asset.kind,
-        sizeBytes: asset.sizeBytes,
-        publicUrl: asset.publicUrl,
-        width: asset.width,
-        height: asset.height,
-        durationMs: asset.durationMs,
+      _id: asset._id,
+      filename: asset.filename,
+      mimeType: asset.mimeType,
+      kind: asset.kind,
+      sizeBytes: asset.sizeBytes,
+      publicUrl: asset.publicUrl,
+      width: asset.width,
+      height: asset.height,
+      durationMs: asset.durationMs,
     }));
     const activeAccountsSet = new Set(
       (accounts ?? []).reduce<Id<"connectedAccounts">[]>((acc, a) => {
@@ -364,18 +377,18 @@ function usePostComposerForm({
       }, []),
     );
     const nextTargetOptions = Object.fromEntries(
-        (sourcePost.targets ?? []).map((target) => [
-          target.connectedAccountId,
-          {
-            bodyOverride: target.bodyOverride ?? "",
-            firstComment: target.firstComment ?? "",
-            referenceUrl: target.referenceUrl ?? "",
-            platformSettings: {
-              ...defaultPlatformSettings(target.platform, sourcePost.kind),
-              ...target.platformSettings,
-            },
+      (sourcePost.targets ?? []).map((target) => [
+        target.connectedAccountId,
+        {
+          bodyOverride: target.bodyOverride ?? "",
+          firstComment: target.firstComment ?? "",
+          referenceUrl: target.referenceUrl ?? "",
+          platformSettings: {
+            ...defaultPlatformSettings(target.platform, sourcePost.kind),
+            ...target.platformSettings,
           },
-        ]),
+        },
+      ]),
     );
     const nextSchedule =
       sourcePost.scheduledFor && sourcePost.scheduledFor > Date.now()
@@ -456,7 +469,8 @@ function usePostComposerForm({
 
   const overLimitAccounts = selectedAccounts.filter((account) => {
     const limit = PLATFORM_META[account.platform]?.maxChars;
-    const effectiveBody = targetOptions[account._id]?.bodyOverride.trim() || body;
+    const effectiveBody =
+      targetOptions[account._id]?.bodyOverride.trim() || body;
     return limit != null && effectiveBody.length > limit;
   });
 
@@ -589,11 +603,7 @@ function usePostComposerForm({
         description={formatLabel(postKind)}
         actions={
           onChooseDifferentFormat ? (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={chooseDifferentFormat}
-            >
+            <Button size="sm" variant="outline" onClick={chooseDifferentFormat}>
               <Icon icon="hugeicons:arrow-left-01" width={15} />
               Change type
             </Button>
@@ -637,7 +647,9 @@ function usePostComposerForm({
                     className="font-medium text-primary hover:underline"
                     onClick={() => router.push("/connections")}
                   >
-                    {(accounts ?? []).length > 0 ? "Reconnect accounts" : "Connect accounts"}
+                    {(accounts ?? []).length > 0
+                      ? "Reconnect accounts"
+                      : "Connect accounts"}
                   </button>
                 </p>
               ) : compatibleAccounts.length === 0 ? (
@@ -748,10 +760,13 @@ function usePostComposerForm({
                     <Label htmlFor="post-title">Title</Label>
                     <Input
                       id="post-title"
-                                            placeholder="Optional calendar label"
+                      placeholder="Optional calendar label"
                       value={title}
                       onChange={(e) =>
-                        dispatch({ type: "titleChanged", value: e.target.value })
+                        dispatch({
+                          type: "titleChanged",
+                          value: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -763,7 +778,9 @@ function usePostComposerForm({
                       <span
                         className={[
                           "text-xs tabular-nums",
-                          overLimit ? "font-medium text-red-600" : "text-muted-foreground",
+                          overLimit
+                            ? "font-medium text-red-600"
+                            : "text-muted-foreground",
                         ].join(" ")}
                       >
                         {body.length}
@@ -772,7 +789,7 @@ function usePostComposerForm({
                     </div>
                     <Textarea
                       id="post-body"
-                                            placeholder="What do you want to share?"
+                      placeholder="What do you want to share?"
                       value={body}
                       onChange={(e) =>
                         dispatch({ type: "bodyChanged", value: e.target.value })
@@ -902,7 +919,7 @@ function usePostComposerForm({
                               </Label>
                               <Textarea
                                 id={`caption-${account._id}`}
-                                                                placeholder="Leave blank to use the main caption"
+                                placeholder="Leave blank to use the main caption"
                                 value={options.bodyOverride}
                                 onChange={(event) =>
                                   updateTargetOptions(account._id, {
@@ -911,16 +928,22 @@ function usePostComposerForm({
                                 }
                               />
                             </div>
-                            {(["x", "facebook", "instagram", "linkedin", "threads"] as const).includes(
-                              account.platform as "x",
-                            ) && (
+                            {(
+                              [
+                                "x",
+                                "facebook",
+                                "instagram",
+                                "linkedin",
+                                "threads",
+                              ] as const
+                            ).includes(account.platform as "x") && (
                               <div className="flex flex-col gap-1.5">
                                 <Label htmlFor={`comment-${account._id}`}>
                                   First comment
                                 </Label>
                                 <Input
                                   id={`comment-${account._id}`}
-                                                                    placeholder="Optional follow-up"
+                                  placeholder="Optional follow-up"
                                   value={options.firstComment}
                                   onChange={(event) =>
                                     updateTargetOptions(account._id, {
@@ -938,7 +961,7 @@ function usePostComposerForm({
                                 <Input
                                   id={`reference-${account._id}`}
                                   type="url"
-                                                                    placeholder="https://x.com/.../status/..."
+                                  placeholder="https://x.com/.../status/..."
                                   value={options.referenceUrl}
                                   onChange={(event) =>
                                     updateTargetOptions(account._id, {
@@ -974,7 +997,7 @@ function usePostComposerForm({
                 <div className="flex flex-col gap-3">
                   <Input
                     aria-label="Search past captions"
-                                        placeholder="Search past captions"
+                    placeholder="Search past captions"
                     value={captionSearch}
                     onChange={(event) =>
                       dispatch({
@@ -1018,7 +1041,7 @@ function usePostComposerForm({
                   <Label htmlFor="post-notes">Internal notes</Label>
                   <Textarea
                     id="post-notes"
-                                        placeholder="Team reminders — not posted publicly"
+                    placeholder="Team reminders — not posted publicly"
                     value={notes}
                     onChange={(e) =>
                       dispatch({ type: "notesChanged", value: e.target.value })

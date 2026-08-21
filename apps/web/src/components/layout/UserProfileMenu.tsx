@@ -1,28 +1,19 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Switch } from "@/components/ui/switch";
-import { Icon } from "@iconify/react";
-import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { hexclaveClientApp } from "@/hexclave/client";
-
-const menuRoutes = {
-  settings: "/settings",
-} as const;
-
-type ProfileUser = {
-  displayName: string | null;
-  primaryEmail: string | null;
-  profileImageUrl: string | null;
-};
 
 const getInitials = (value: string | null) =>
   value
@@ -32,7 +23,8 @@ const getInitials = (value: string | null) =>
     .map((part) => part[0]?.toUpperCase())
     .join("");
 
-export function UserProfileMenu({ user }: { user: ProfileUser }) {
+export function UserProfileMenu() {
+  const user = hexclaveClientApp.useUser({ or: "redirect" });
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
   const initials =
@@ -43,13 +35,15 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Open user profile"
-        className="group size-9 cursor-pointer rounded-full border border-border bg-card p-0 items-center flex justify-center transition-colors hover:border-primary/40 hover:bg-muted"
+        render={
+          <Button className="rounded-full" size="icon-lg" variant="outline" />
+        }
       >
-        <Avatar className="size-7.5 rounded-full">
+        <Avatar className="size-7">
           {user.profileImageUrl && (
             <AvatarImage
-              src={user.profileImageUrl}
               alt={user.displayName ?? ""}
+              src={user.profileImageUrl}
             />
           )}
           <AvatarFallback className="text-xs font-medium">
@@ -57,13 +51,13 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 rounded-4xl py-2" align="end">
-        <div className="flex items-center gap-2 px-2  py-2 ">
-          <Avatar className="size-10 rounded-full">
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="flex items-center gap-2 px-2 py-1.5">
+          <Avatar className="size-9">
             {user.profileImageUrl && (
               <AvatarImage
-                src={user.profileImageUrl}
                 alt={user.displayName ?? ""}
+                src={user.profileImageUrl}
               />
             )}
             <AvatarFallback className="text-sm font-semibold">
@@ -72,7 +66,7 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
           </Avatar>
           <div className="min-w-0">
             {user.displayName && (
-              <div className="truncate text-sm font-semibold text-foreground">
+              <div className="truncate text-sm font-semibold">
                 {user.displayName}
               </div>
             )}
@@ -83,42 +77,48 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
             )}
           </div>
         </div>
-        <div
-          className="pt-1 flex flex-col gap-0"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <DropdownMenuItem
-            className="select-none"
-            onSelect={(event) => event.preventDefault()}
+        <DropdownMenuSeparator />
+        <div className="flex items-center gap-2 px-2 py-1">
+          <span className="flex items-center gap-2 text-sm">
+            <Icon icon="hugeicons:sun-03" width={16} />
+            Theme
+          </span>
+          <Tabs
+            className="ml-auto"
+            onValueChange={(value) => setTheme(value as "light" | "dark")}
+            value={isDark ? "dark" : "light"}
           >
-            <Icon icon="hugeicons:sun-03" width={20} />
-            <Label>Dark mode</Label>
-            <Switch
-              aria-label="Toggle dark mode"
-              className="ml-auto"
-              checked={isDark}
-              onCheckedChange={(checked) =>
-                setTheme(checked ? "dark" : "light")
-              }
-            />
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => {
-              router.push(menuRoutes.settings);
-            }}
-          >
-            <Icon icon="hugeicons:settings-02" width={20} />
-            <Label>Settings</Label>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => {
-              void hexclaveClientApp.signOut();
-            }}
-          >
-            <Icon icon="hugeicons:logout-03" width={20} />
-            <Label>Logout</Label>
-          </DropdownMenuItem>
+            <TabsList className="h-7 justify-between">
+              <TabsTrigger
+                aria-label="Light mode"
+                className="flex-none px-1.5"
+                title="Light mode"
+                value="light"
+              >
+                <Icon icon="hugeicons:sun-03" width={14} />
+              </TabsTrigger>
+              <TabsTrigger
+                aria-label="Dark mode"
+                className="flex-none px-1.5"
+                title="Dark mode"
+                value="dark"
+              >
+                <Icon icon="hugeicons:moon-02" width={14} />
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
+        <DropdownMenuItem onSelect={() => router.push("/settings")}>
+          <Icon icon="hugeicons:settings-02" width={16} />
+          Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          variant="destructive"
+          onSelect={() => void hexclaveClientApp.signOut()}
+        >
+          <Icon icon="hugeicons:logout-03" width={16} />
+          Logout
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

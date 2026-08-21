@@ -1,21 +1,30 @@
 "use client";
 
-import { useRef, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import listPlugin from "@fullcalendar/list";
-import interactionPlugin from "@fullcalendar/interaction";
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import type {
+  DateSelectArg,
   DatesSetArg,
   EventClickArg,
   EventDropArg,
-  DateSelectArg,
   EventInput,
 } from "@fullcalendar/core";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import { Icon } from "@iconify/react";
+import { useMutation } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache/hooks";
+import { format } from "date-fns";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { CalendarGridSkeleton } from "@/components/layout/CalendarGridSkeleton";
+import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -32,15 +41,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Icon } from "@iconify/react";
-import { useMutation } from "convex/react";
-import { useQuery } from "convex-helpers/react/cache/hooks";
-import { api } from "@convex/_generated/api";
-import type { Id } from "@convex/_generated/dataModel";
-import { useRouter, useSearchParams } from "next/navigation";
-import { format } from "date-fns";
-import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { CalendarGridSkeleton } from "@/components/layout/CalendarGridSkeleton";
+import { defaultCalendarRangeMs } from "@/lib/date-ranges";
 import {
   PLATFORM_META,
   platformBrand,
@@ -76,18 +77,16 @@ export function PostCalendar() {
 
   const [view, setView] = useState<CalendarView>("dayGridMonth");
   const [platformFilter, setPlatformFilter] = useState("all");
-  const [range, setRange] = useState<{ start: number; end: number } | null>(
-    null,
-  );
+  const [range, setRange] = useState(defaultCalendarRangeMs);
   const [selectedPostId, setSelectedPostId] = useState<Id<"posts"> | null>(
     (highlight as Id<"posts">) || null,
   );
   const [title, setTitle] = useState("");
 
-  const postsResult = useQuery(
-    api.posts.listInRange,
-    range ? { startMs: range.start, endMs: range.end } : "skip",
-  );
+  const postsResult = useQuery(api.posts.listInRange, {
+    startMs: range.startMs,
+    endMs: range.endMs,
+  });
   const posts = postsResult?.posts;
   const selectedPost = useQuery(
     api.posts.get,
@@ -140,12 +139,16 @@ export function PostCalendar() {
   })();
 
   const onDatesSet = (arg: DatesSetArg) => {
-    setRange({
-      start: arg.start.getTime(),
-      end: arg.end.getTime(),
-    });
+    const startMs = arg.start.getTime();
+    const endMs = arg.end.getTime();
     setTitle(arg.view.title);
     setView(arg.view.type as CalendarView);
+    setRange((current) => {
+      if (current.startMs === startMs && current.endMs === endMs) {
+        return current;
+      }
+      return { startMs, endMs };
+    });
   };
 
   const changeView = (next: CalendarView) => {
@@ -181,7 +184,9 @@ export function PostCalendar() {
       toast.success("Post rescheduled.");
     } catch (error) {
       info.revert();
-      toast.error(error instanceof Error ? error.message : "Could not reschedule post");
+      toast.error(
+        error instanceof Error ? error.message : "Could not reschedule post",
+      );
     }
   };
 
@@ -192,7 +197,9 @@ export function PostCalendar() {
       setSelectedPostId(null);
       toast.success("Post deleted.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete post");
+      toast.error(
+        error instanceof Error ? error.message : "Could not delete post",
+      );
     }
   };
 
@@ -202,10 +209,7 @@ export function PostCalendar() {
         title="Calendar"
         description="Month, week, day, and list — drag to reschedule."
         actions={
-          <Button
-            size="sm"
-            onClick={() => router.push("/posts/new")}
-          >
+          <Button size="sm" onClick={() => router.push("/posts/new")}>
             <Icon icon="hugeicons:add-01" width={16} />
             New post
           </Button>
@@ -238,9 +242,14 @@ export function PostCalendar() {
             <div className="flex flex-wrap items-center gap-2">
               <Select
                 value={platformFilter}
-                onValueChange={(value) => setPlatformFilter(String(value ?? "all"))}
+                onValueChange={(value) =>
+                  setPlatformFilter(String(value ?? "all"))
+                }
               >
-                <SelectTrigger aria-label="Filter calendar by platform" className="w-40">
+                <SelectTrigger
+                  aria-label="Filter calendar by platform"
+                  className="w-40"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -269,7 +278,7 @@ export function PostCalendar() {
           </div>
 
           <div className="multifeed-calendar relative min-h-[640px]">
-            {posts === undefined && range && (
+            {posts === undefined && (
               <div className="absolute inset-0 z-10 bg-card">
                 <CalendarGridSkeleton />
               </div>
@@ -423,9 +432,7 @@ function PostDetailsCard({
                         {platformLabel(t.platform)}
                       </p>
                     </div>
-                    <Badge variant="secondary">
-
-                      </Badge>
+                    <Badge variant="secondary"></Badge>
                   </div>
                 ))
               )}

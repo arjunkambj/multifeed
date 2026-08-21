@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,11 +16,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { Icon } from "@iconify/react";
-import { useUser } from "@hexclave/next";
+import { hexclaveClientApp } from "@/hexclave/client";
 
 export function PasswordModal() {
-  const user = useUser({ or: "redirect" });
+  const user = hexclaveClientApp.useUser({ or: "redirect" });
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

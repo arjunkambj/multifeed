@@ -1,32 +1,14 @@
 "use client";
 
-import { Icon } from "@iconify/react";
-
 import { UserProfileMenu } from "@/components/layout/UserProfileMenu";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export function DashboardHeader({
-  onToggle,
-  user,
-}: {
-  onToggle: () => void;
-  user: {
-    displayName: string | null;
-    primaryEmail: string | null;
-    profileImageUrl: string | null;
-  };
-}) {
+export function DashboardHeader() {
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 sm:px-6">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="inline-flex size-9 items-center justify-center rounded-3xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        aria-label="Toggle sidebar"
-      >
-        <Icon icon="hugeicons:sidebar-left" width={18} />
-      </button>
+      <SidebarTrigger />
       <div className="ml-auto flex items-center justify-end">
-        <UserProfileMenu user={user} />
+        <UserProfileMenu />
       </div>
     </header>
   );

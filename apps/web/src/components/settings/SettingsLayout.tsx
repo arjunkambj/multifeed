@@ -1,27 +1,18 @@
 "use client";
 
-import { useTransition } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@iconify/react";
-import { useRouter } from "next/navigation";
-import type { Preloaded } from "convex/react";
-import { api } from "@convex/_generated/api";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
 import { BillingPage } from "@/components/billing/BillingPage";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { GeneralSettingsForm } from "@/components/settings/GeneralSettingsForm";
-import {
-  isSettingsTab,
-  settingsTabs,
-  type SettingsTab,
-} from "@/lib/settings-tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { isSettingsTab, settingsTabs } from "@/lib/settings-tabs";
 
-export function SettingsLayout({
-  preloadedSubscription,
-  selectedTab,
-}: {
-  preloadedSubscription?: Preloaded<typeof api.billing.getSubscription>;
-  selectedTab: SettingsTab;
-}) {
+export function SettingsLayout() {
+  const searchParams = useSearchParams();
+  const rawTab = searchParams.get("tab");
+  const selectedTab = isSettingsTab(rawTab) ? rawTab : "general";
   const router = useRouter();
   const [, startTransition] = useTransition();
 
@@ -60,9 +51,7 @@ export function SettingsLayout({
         </TabsContent>
 
         <TabsContent className="w-full pt-4" value="billing">
-          {selectedTab === "billing" && preloadedSubscription ? (
-            <BillingPage preloaded={preloadedSubscription} />
-          ) : null}
+          {selectedTab === "billing" ? <BillingPage /> : null}
         </TabsContent>
 
         <TabsContent className="w-full pt-4" value="support">
