@@ -13,7 +13,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </Suspense>
       <SidebarInset className="overflow-hidden">
         <DashboardHeader />
-        <main className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
+        <main className="flex flex-1 flex-col gap-6 px-4 py-3 sm:px-6 sm:py-3">
           {children}
         </main>
       </SidebarInset>

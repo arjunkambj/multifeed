@@ -1,18 +1,25 @@
+import { cn } from "@/lib/utils";
+
 export default function Logo({
   className,
   markOnly = false,
+  markClassName,
 }: {
   className?: string;
   markOnly?: boolean;
+  markClassName?: string;
 }) {
   return (
     <div
-      className={`group flex cursor-pointer items-center gap-2 text-foreground transition-colors hover:text-primary${className ? ` ${className}` : ""}`}
+      className={cn(
+        "group flex cursor-pointer items-center gap-2 text-foreground transition-colors hover:text-primary",
+        className,
+      )}
     >
       <svg
         aria-label={markOnly ? "MultiFeed" : undefined}
         aria-hidden={!markOnly}
-        className="size-8 -translate-y-px shrink-0"
+        className={cn("size-8 shrink-0", markClassName)}
         fill="none"
         role={markOnly ? "img" : undefined}
         viewBox="0 0 64 64"
