@@ -107,9 +107,7 @@ export function InvitePopover({
             {seatLimit !== undefined && (
               <p className="text-sm text-muted-foreground">
                 {usedSeats} of {seatLimit} plan seats used
-                {isAtLimit
-                  ? ". Upgrade your plan to invite more people."
-                  : "."}
+                {isAtLimit ? ". Upgrade your plan to invite more people." : "."}
               </p>
             )}
           </div>

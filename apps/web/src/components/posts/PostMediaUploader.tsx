@@ -51,7 +51,8 @@ function readPreviewUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error ?? new Error("Could not preview file"));
+    reader.onerror = () =>
+      reject(reader.error ?? new Error("Could not preview file"));
     reader.readAsDataURL(file);
   });
 }
@@ -213,7 +214,9 @@ export function PostMediaUploader({
     const room = maxFiles - media.length;
     const selectedFiles = files.slice(0, room);
     if (files.length > room) {
-      toast.error(`${kind === "image" ? "Image posts" : "This format"} supports ${maxFiles} file${maxFiles === 1 ? "" : "s"}.`);
+      toast.error(
+        `${kind === "image" ? "Image posts" : "This format"} supports ${maxFiles} file${maxFiles === 1 ? "" : "s"}.`,
+      );
     }
     if (selectedFiles.length === 0) return;
 
@@ -225,7 +228,9 @@ export function PostMediaUploader({
     const finishUpload = (caught: unknown) => {
       if (uploaded.length > 0) onChange([...media, ...uploaded]);
       setPendingMedia([]);
-      toast.error(caught instanceof Error ? caught.message : "Media upload failed");
+      toast.error(
+        caught instanceof Error ? caught.message : "Media upload failed",
+      );
       setUploading(false);
       onUploadingChange?.(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -318,7 +323,9 @@ export function PostMediaUploader({
         .then(() => {
           onChange([...media, ...uploaded]);
           setPendingMedia([]);
-          toast.success(`${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`);
+          toast.success(
+            `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`,
+          );
         })
         .catch(finishUpload)
         .finally(() => {
@@ -338,7 +345,9 @@ export function PostMediaUploader({
         toast.success("Media deleted from storage.");
       })
       .catch((caught) => {
-        toast.error(caught instanceof Error ? caught.message : "Could not delete media");
+        toast.error(
+          caught instanceof Error ? caught.message : "Could not delete media",
+        );
       })
       .finally(() => setDeletingMediaId(null));
   };

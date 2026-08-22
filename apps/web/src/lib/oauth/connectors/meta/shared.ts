@@ -212,10 +212,11 @@ export async function metaListPages(
   try {
     const businessIds: string[] = [];
     const seenBiz = new Set<string>();
-    let bizUrl: string | undefined = `${GRAPH}/me/businesses?${new URLSearchParams({
-      access_token: userAccessToken,
-      limit: "100",
-    })}`;
+    let bizUrl: string | undefined =
+      `${GRAPH}/me/businesses?${new URLSearchParams({
+        access_token: userAccessToken,
+        limit: "100",
+      })}`;
     while (bizUrl) {
       const bizRes = await oauthFetch(bizUrl);
       const bizData = (await bizRes.json()) as {
@@ -226,7 +227,9 @@ export async function metaListPages(
       for (const business of bizData.data ?? []) {
         if (business.id) businessIds.push(business.id);
       }
-      const after = bizData.paging?.next ? bizData.paging.cursors?.after : undefined;
+      const after = bizData.paging?.next
+        ? bizData.paging.cursors?.after
+        : undefined;
       if (!after || seenBiz.has(after)) break;
       seenBiz.add(after);
       const next = new URL(bizUrl);

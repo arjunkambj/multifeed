@@ -27,11 +27,10 @@ export default function TermsPage() {
       <section>
         <h2>1. The service</h2>
         <p>
-          MultiFeed, available at <a href={SITE_URL}>{SITE_URL}</a>, helps
-          users and teams create, manage, schedule, publish, and review social
-          media content across supported third-party platforms. Features may
-          vary by plan, platform, region, account type, and third-party
-          approval.
+          MultiFeed, available at <a href={SITE_URL}>{SITE_URL}</a>, helps users
+          and teams create, manage, schedule, publish, and review social media
+          content across supported third-party platforms. Features may vary by
+          plan, platform, region, account type, and third-party approval.
         </p>
       </section>
 
@@ -116,8 +115,8 @@ export default function TermsPage() {
         <h2>6. Teams</h2>
         <p>
           Workspace owners and administrators control membership and access. If
-          you use MultiFeed for an organization, you represent that you can
-          bind that organization to these terms. Your organization may access,
+          you use MultiFeed for an organization, you represent that you can bind
+          that organization to these terms. Your organization may access,
           manage, export, or delete content and connected-account information in
           its workspace.
         </p>
@@ -127,12 +126,12 @@ export default function TermsPage() {
         <h2>7. Plans, billing, and cancellation</h2>
         <p>
           Paid plans renew for the billing interval selected at checkout unless
-          canceled. Prices, taxes, plan limits, and billing dates
-          are shown before purchase. You authorize our payment provider to
-          charge the applicable amount. You may cancel before renewal to prevent
-          the next recurring charge; access may continue through the paid
-          period. Except where law requires otherwise or the checkout terms say
-          otherwise, charges already paid are non-refundable.
+          canceled. Prices, taxes, plan limits, and billing dates are shown
+          before purchase. You authorize our payment provider to charge the
+          applicable amount. You may cancel before renewal to prevent the next
+          recurring charge; access may continue through the paid period. Except
+          where law requires otherwise or the checkout terms say otherwise,
+          charges already paid are non-refundable.
         </p>
         <p>
           We may change future prices or plan features with reasonable advance
@@ -207,9 +206,9 @@ export default function TermsPage() {
           incidental, special, exemplary, consequential, or punitive damages, or
           for lost profits, revenue, data, goodwill, or business interruption.
           Our total liability for claims relating to the service will not exceed
-          the amount you paid to MultiFeed during the 12 months before the
-          event giving rise to the claim. These limits do not apply where
-          prohibited by law.
+          the amount you paid to MultiFeed during the 12 months before the event
+          giving rise to the claim. These limits do not apply where prohibited
+          by law.
         </p>
       </section>
 
@@ -218,8 +217,8 @@ export default function TermsPage() {
         <p>
           We may update these terms. We will post the revised version, change
           the effective date, and provide additional notice where required. By
-          continuing to use MultiFeed after revised terms take effect, you
-          agree to them. If you do not agree, you must stop using the service.
+          continuing to use MultiFeed after revised terms take effect, you agree
+          to them. If you do not agree, you must stop using the service.
         </p>
       </section>
 

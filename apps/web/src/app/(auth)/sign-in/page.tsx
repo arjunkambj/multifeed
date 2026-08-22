@@ -178,7 +178,11 @@ export default function SignInPage() {
           >
             <InputOTPGroup className="gap-2">
               {[0, 1, 2, 3, 4, 5].map((index) => (
-                <InputOTPSlot key={index} index={index} className="rounded-xl" />
+                <InputOTPSlot
+                  key={index}
+                  index={index}
+                  className="rounded-xl"
+                />
               ))}
             </InputOTPGroup>
           </InputOTP>
@@ -231,7 +235,11 @@ export default function SignInPage() {
         className="w-full font-normal"
         onClick={handleGoogleSignIn}
       >
-        {isGoogleLoading ? <Spinner className="size-4" /> : <Icon icon="logos:google-icon" width={18} />}
+        {isGoogleLoading ? (
+          <Spinner className="size-4" />
+        ) : (
+          <Icon icon="logos:google-icon" width={18} />
+        )}
         Continue with Google
       </Button>
 

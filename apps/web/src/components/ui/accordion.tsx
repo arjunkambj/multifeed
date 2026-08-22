@@ -1,8 +1,7 @@
-import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion"
+import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion";
+import { Icon } from "@iconify/react";
 
-import { cn } from "@/lib/utils"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons"
+import { cn } from "@/lib/utils";
 
 function Accordion({ className, ...props }: AccordionPrimitive.Root.Props) {
   return (
@@ -10,11 +9,11 @@ function Accordion({ className, ...props }: AccordionPrimitive.Root.Props) {
       data-slot="accordion"
       className={cn(
         "flex w-full flex-col overflow-hidden rounded-2xl border",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function AccordionItem({ className, ...props }: AccordionPrimitive.Item.Props) {
@@ -24,30 +23,55 @@ function AccordionItem({ className, ...props }: AccordionPrimitive.Item.Props) {
       className={cn("not-last:border-b data-open:bg-muted/50", className)}
       {...props}
     />
-  )
+  );
 }
 
 function AccordionTrigger({
   className,
   children,
+  indicator = "plus",
   ...props
-}: AccordionPrimitive.Trigger.Props) {
+}: AccordionPrimitive.Trigger.Props & { indicator?: "chevron" | "plus" }) {
+  const [closedIcon, openIcon] =
+    indicator === "plus"
+      ? ["lucide:plus", "lucide:minus"]
+      : ["lucide:chevron-down", "lucide:chevron-up"];
+
+  const closedIconClasses =
+    indicator === "plus"
+      ? "pointer-events-none absolute inset-0 size-4 text-muted-foreground transition-all duration-200 rotate-0 group-hover/accordion-trigger:rotate-45 group-aria-expanded/accordion-trigger:rotate-90 group-aria-expanded/accordion-trigger:opacity-0 group-aria-expanded/accordion-trigger:scale-75"
+      : "pointer-events-none absolute inset-0 size-4 text-muted-foreground transition-all duration-200 rotate-0 group-hover/accordion-trigger:rotate-12 group-aria-expanded/accordion-trigger:rotate-180 group-aria-expanded/accordion-trigger:opacity-0 group-aria-expanded/accordion-trigger:scale-75";
+
   return (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "group/accordion-trigger relative flex flex-1 items-start justify-between gap-6 border border-transparent p-4 text-left text-sm font-medium transition-all outline-none hover:underline aria-disabled:pointer-events-none aria-disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground",
-          className
+          "group/accordion-trigger relative flex flex-1 items-start justify-between gap-6 border-0 p-4 text-left text-sm font-medium transition-all outline-none hover:no-underline aria-disabled:pointer-events-none aria-disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground",
+          className,
         )}
         {...props}
       >
         {children}
-        <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} data-slot="accordion-trigger-icon" className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden" />
-        <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} data-slot="accordion-trigger-icon" className="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline" />
+        <span className="relative ml-auto size-4 shrink-0">
+          <Icon
+            icon={closedIcon}
+            width={16}
+            height={16}
+            data-slot="accordion-trigger-icon"
+            className={closedIconClasses}
+          />
+          <Icon
+            icon={openIcon}
+            width={16}
+            height={16}
+            data-slot="accordion-trigger-icon"
+            className="pointer-events-none absolute inset-0 size-4 text-muted-foreground opacity-0 scale-75 transition-all duration-200 group-aria-expanded/accordion-trigger:opacity-100 group-aria-expanded/accordion-trigger:scale-100 group-aria-expanded/accordion-trigger:rotate-0"
+          />
+        </span>
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
-  )
+  );
 }
 
 function AccordionContent({
@@ -64,13 +88,13 @@ function AccordionContent({
       <div
         className={cn(
           "h-(--accordion-panel-height) pt-0 pb-4 data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4",
-          className
+          className,
         )}
       >
         {children}
       </div>
     </AccordionPrimitive.Panel>
-  )
+  );
 }
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };

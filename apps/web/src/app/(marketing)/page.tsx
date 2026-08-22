@@ -2,14 +2,12 @@ import type { Metadata } from "next";
 
 import { Hero } from "@/components/marketing/Hero";
 import { Navbar } from "@/components/marketing/Navbar";
-import { HowItWorks } from "@/components/marketing/HowItWorks";
+import { Features } from "@/components/marketing/Feature";
+import { Testimonials } from "@/components/marketing/Testimonials";
+import { Pricing } from "@/components/marketing/Pricing";
 import { Footer } from "@/components/marketing/Footer";
 import { FAQ } from "@/components/marketing/FAQ";
-import { Features } from "@/components/marketing/Feature";
-import { Pricing } from "@/components/marketing/Pricing";
-import { MarketingMarquee } from "@/components/marketing/MarketingMarquee";
-import { WhyUS } from "@/components/marketing/WhyUS";
-import { UseCases } from "@/components/marketing/UseCases";
+import { ReadyCTA } from "@/components/marketing/ReadyCTA";
 
 export const metadata: Metadata = {
   title: "MultiFeed | Plan and schedule social posts in one place",
@@ -36,13 +34,11 @@ export default function Home() {
     <main className="marketing-landing flex w-full flex-col bg-background">
       <Navbar />
       <Hero />
-      <MarketingMarquee />
       <Features />
-      <WhyUS />
-      <HowItWorks />
-      <UseCases />
+      <Testimonials />
       <Pricing />
       <FAQ />
+      <ReadyCTA />
       <Footer />
     </main>
   );

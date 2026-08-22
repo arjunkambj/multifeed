@@ -115,7 +115,7 @@ html.lenis {
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display);
   --font-sans: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -155,27 +155,34 @@ html.lenis {
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Two shape sizes for the marketing page: rounded-panel for full-width
+       surfaces (feature blocks, CTA), rounded-card for grid cards. */
+  --radius-panel: 1.5rem;
+  --radius-card: 1.25rem;
 }
 
 :root {
-  --background: oklch(0.985 0 0 / 95%);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(0.965 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* Brand green from Post Bridge (daisyUI emerald primary,
+     oklch(0.7666 0.1354 153.45)). Hue 153.45 is kept exactly; lightness is
+     taken down to 0.54 so white button text clears WCAG AA (4.76:1). */
+  --background: oklch(0.989 0.002 286.32); /* between white and zinc-50 */
+  --foreground: oklch(0.176 0.0055 285.85); /* zinc-900 → 950, softened black */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.176 0.0055 285.85);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.439 0 0);
+  --popover-foreground: oklch(0.176 0.0055 285.85);
+  --primary: oklch(0.54 0.13 153.45);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.967 0.001 286.375); /* zinc-100 */
+  --secondary-foreground: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.406 0.015 285.79); /* zinc-600 → 700 */
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.54 0.13 153.45);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -184,33 +191,33 @@ html.lenis {
   --radius: 0.5rem;
   --sidebar: var(--background);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.54 0.13 153.45);
+  --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: var(--card);
   --sidebar-accent-foreground: var(--card-foreground);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: oklch(0.54 0.13 153.45);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --background: oklch(0.141 0.005 285.823); /* zinc-950 */
+  --foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
+  --card: oklch(0.21 0.006 285.885); /* zinc-900 */
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --primary: oklch(0.54 0.13 153.45);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.274 0.006 286.033); /* zinc-800 */
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067); /* zinc-400 */
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.54 0.13 153.45);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -218,12 +225,12 @@ html.lenis {
   --chart-5: oklch(0.269 0 0);
   --sidebar: var(--background);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.54 0.13 153.45);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: var(--card);
   --sidebar-accent-foreground: var(--card-foreground);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.54 0.13 153.45);
 }
 
 .dark [data-dashboard] {

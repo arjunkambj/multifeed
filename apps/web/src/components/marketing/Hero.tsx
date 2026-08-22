@@ -1,378 +1,140 @@
 "use client";
 
-import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Icon } from "@iconify/react";
+import { motion, useReducedMotion, type Variants } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 
-import Logo from "@/components/layout/Logo";
+import { buttonVariants } from "@/components/ui/button";
 
-type MockPost = {
-  time: string;
-  title: string;
-  platform: "instagram" | "linkedin" | "tiktok" | "youtube";
+import { PLATFORM_ICON, platforms } from "./rhythm";
+import Section from "./Section";
+
+const EASE = "easeOut" as const;
+
+const stack: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
 };
-
-type MockDay = {
-  id: string;
-  day: number;
-  muted?: boolean;
-  posts?: MockPost[];
-};
-
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const MOCK_DAYS: MockDay[] = ([
-  { day: 28, muted: true },
-  { day: 29, muted: true },
-  { day: 30, muted: true },
-  { day: 1 },
-  { day: 2 },
-  {
-    day: 3,
-    posts: [
-      {
-        time: "10:00",
-        title: "Summer launch",
-        platform: "instagram",
-      },
-    ],
-  },
-  { day: 4 },
-  { day: 5 },
-  {
-    day: 6,
-    posts: [{ time: "09:30", title: "Founder note", platform: "linkedin" }],
-  },
-  { day: 7 },
-  { day: 8 },
-  {
-    day: 9,
-    posts: [{ time: "18:00", title: "Behind the scenes", platform: "tiktok" }],
-  },
-  { day: 10 },
-  { day: 11 },
-  { day: 12 },
-  { day: 13 },
-  {
-    day: 14,
-    posts: [
-      { time: "12:00", title: "Product walkthrough", platform: "youtube" },
-    ],
-  },
-  { day: 15 },
-  { day: 16 },
-  { day: 17 },
-  { day: 18 },
-  { day: 19 },
-  {
-    day: 20,
-    posts: [
-      { time: "11:00", title: "Customer story", platform: "instagram" },
-      { time: "14:30", title: "Weekly insight", platform: "linkedin" },
-    ],
-  },
-  { day: 21 },
-  { day: 22 },
-  { day: 23 },
-  { day: 24 },
-  { day: 25 },
-  { day: 26 },
-  { day: 27 },
-  { day: 28 },
-  { day: 29 },
-  {
-    day: 30,
-    posts: [{ time: "16:00", title: "July recap", platform: "instagram" }],
-  },
-  { day: 31 },
-  { day: 1, muted: true },
-  { day: 2, muted: true },
-  { day: 3, muted: true },
-  { day: 4, muted: true },
-  { day: 5, muted: true },
-  { day: 6, muted: true },
-  { day: 7, muted: true },
-  { day: 8, muted: true },
-] as Omit<MockDay, "id">[]).map((d, i) => ({ ...d, id: `mock-day-${i + 1}-${d.day}` }));
-
-const PLATFORM_STYLES: Record<
-  MockPost["platform"],
-  { icon: string; className: string }
-> = {
-  instagram: {
-    icon: "hugeicons:instagram",
-    className:
-      "bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-950/60 dark:text-fuchsia-300",
-  },
-  linkedin: {
-    icon: "hugeicons:linkedin-01",
-    className:
-      "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300",
-  },
-  tiktok: {
-    icon: "hugeicons:tiktok",
-    className: "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100",
-  },
-  youtube: {
-    icon: "hugeicons:youtube",
-    className: "bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300",
-  },
-};
-
-const SIDEBAR_ITEMS = [
-  { icon: "hugeicons:dashboard-square-01", label: "Overview" },
-  { icon: "hugeicons:add-square", label: "New post" },
-  { icon: "hugeicons:calendar-03", label: "Calendar", active: true },
-  { icon: "hugeicons:layers-01", label: "All posts" },
-  { icon: "hugeicons:connect", label: "Connections" },
-];
-
-function CalendarMockup() {
-  return (
-    <div
-      aria-label="MultiFeed visual content calendar preview"
-      className="flex h-full min-h-[350px] w-full bg-background text-left text-foreground sm:min-h-[430px] md:min-h-[500px]"
-      role="img"
-    >
-      <aside className="hidden w-36 shrink-0 flex-col border-r border-border/70 bg-muted/50 p-3 md:flex lg:w-40 lg:p-4">
-        <Logo className="mb-7 scale-75 origin-left" />
-        <div className="space-y-1">
-          {SIDEBAR_ITEMS.map((item) => (
-            <div
-              className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-[10px] font-medium ${
-                item.active ? "bg-primary/10 text-primary" : "text-muted-foreground"
-              }`}
-              key={item.label}
-            >
-              <Icon icon={item.icon} width={13} />
-              {item.label}
-            </div>
-          ))}
-        </div>
-        <div className="mt-auto space-y-1 border-t border-border/60 pt-3">
-          <div className="flex items-center gap-2 px-2.5 py-1.5 text-[10px] text-muted-foreground">
-            <Icon icon="hugeicons:user-group" width={13} /> Team
-          </div>
-          <div className="flex items-center gap-2 px-2.5 py-1.5 text-[10px] text-muted-foreground">
-            <Icon icon="hugeicons:settings-02" width={13} /> Settings
-          </div>
-        </div>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col bg-card">
-        <div className="flex h-10 shrink-0 items-center justify-between border-b border-border/60 px-3 sm:h-12 sm:px-5">
-          <Icon
-            className="text-muted-foreground"
-            icon="hugeicons:sidebar-left"
-            width={15}
-          />
-          <div className="flex size-6 items-center justify-center rounded-full bg-primary/15 text-[9px] font-bold text-primary sm:size-7">
-            MF
-          </div>
-        </div>
-
-        <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-5 lg:p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-bold tracking-tight sm:text-lg">
-                Calendar
-              </h2>
-              <p className="mt-0.5 hidden text-[9px] text-muted-foreground sm:block sm:text-[10px]">
-                Plan, review, and reschedule every post in one place.
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-primary px-2.5 py-1.5 text-[9px] font-semibold text-primary-foreground sm:px-3 sm:py-2 sm:text-[10px]">
-              <Icon icon="hugeicons:add-01" width={12} />
-              New post
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-1">
-              <div className="flex size-6 items-center justify-center rounded-md bg-muted text-muted-foreground sm:size-7">
-                <Icon icon="hugeicons:arrow-left-01" width={11} />
-              </div>
-              <div className="rounded-md bg-muted px-2 py-1.5 text-[9px] font-semibold sm:text-[10px]">
-                Today
-              </div>
-              <div className="flex size-6 items-center justify-center rounded-md bg-muted text-muted-foreground sm:size-7">
-                <Icon icon="hugeicons:arrow-right-01" width={11} />
-              </div>
-              <span className="ml-1 text-[10px] font-bold sm:ml-2 sm:text-xs">
-                July 2026
-              </span>
-            </div>
-            <div className="hidden items-center gap-1 sm:flex">
-              <div className="flex items-center gap-2 rounded-md bg-muted px-2.5 py-1.5 text-[9px]">
-                All platforms
-                <Icon icon="hugeicons:arrow-down-01" width={10} />
-              </div>
-              <div className="flex rounded-md bg-muted p-0.5 text-[9px] text-muted-foreground">
-                <span className="rounded-[5px] bg-card px-2 py-1 font-semibold text-foreground shadow-sm">
-                  Month
-                </span>
-                <span className="px-2 py-1">Week</span>
-                <span className="hidden px-2 py-1 lg:block">List</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-[24px_repeat(6,minmax(0,1fr))] overflow-hidden rounded-lg border border-border/80 bg-background">
-            {WEEKDAYS.map((weekday) => (
-              <div
-                className="flex items-center justify-center border-b border-r border-border/70 bg-muted/70 text-[7px] font-semibold uppercase tracking-wide text-muted-foreground last:border-r-0 sm:text-[8px]"
-                key={weekday}
-              >
-                {weekday}
-              </div>
-            ))}
-            {MOCK_DAYS.map((date) => (
-              <div
-                className="min-w-0 overflow-hidden border-b border-r border-border/70 p-1.5 [&:nth-last-child(-n+7)]:border-b-0 [&:nth-child(7n)]:border-r-0 sm:p-2"
-                key={date.id}
-              >
-                <div className="mb-1 flex justify-end">
-                  <span
-                    className={`flex size-3.5 items-center justify-center rounded-full text-[7px] sm:size-4 sm:text-[8px] ${
-                      date.day === 29 && !date.muted
-                        ? "bg-primary font-semibold text-primary-foreground"
-                        : date.muted
-                          ? "text-muted-foreground/40"
-                          : "text-muted-foreground"
-                    }`}
-                  >
-                    {date.day}
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  {date.posts?.map((post) => {
-                    const platform = PLATFORM_STYLES[post.platform];
-
-                    return (
-                      <div
-                        className={`flex min-w-0 items-center gap-1 rounded px-1 py-0.5 text-[6px] font-semibold sm:text-[7px] lg:text-[8px] ${platform.className}`}
-                        key={`${post.time}-${post.title}`}
-                      >
-                        <Icon
-                          className="shrink-0"
-                          icon={platform.icon}
-                          width={9}
-                        />
-                        <span className="hidden shrink-0 lg:inline">
-                          {post.time}
-                        </span>
-                        <span className="truncate">{post.title}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function Hero() {
+  const reduceMotion = useReducedMotion();
+
+  const rise: Variants = {
+    hidden: { opacity: 0, y: reduceMotion ? 0 : 16 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+  };
+
   return (
-    <section
-      className="relative mx-auto flex min-h-[58dvh] w-full max-w-7xl flex-col gap-12 px-4 pb-16 pt-20 sm:px-6 sm:pt-24 md:gap-14 md:pb-20 lg:pt-36"
+    <Section
       id="hero"
+      className="overflow-hidden"
+      containerClassName="relative"
     >
-      <div
-        className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-5 text-center lg:mt-4"
+      <motion.div
+        initial="hidden"
+        animate="show"
+        variants={stack}
+        className="relative mx-auto w-full min-w-0 max-w-5xl text-center"
       >
-        <div>
-          <Badge className="h-auto px-3 py-1 text-primary" variant="outline">
-            <span className="inline-flex items-center gap-1.5">
-              <Icon icon="hugeicons:sparkles" width={13} />
-              <span>Unified social scheduling · 7 platforms in 1 calendar</span>
+        {/* Platform icons — flat, no card/border */}
+        <motion.div
+          variants={rise}
+          className="flex flex-wrap items-center justify-center gap-3.5 md:gap-4"
+        >
+          {platforms.map((p) => (
+            <span
+              key={p.label}
+              aria-label={p.label}
+              title={p.label}
+              className="inline-flex cursor-pointer items-center justify-center opacity-90 transition-all duration-200 hover:scale-110 hover:opacity-100"
+            >
+              <Icon
+                icon={p.icon}
+                className={PLATFORM_ICON}
+                style={{ color: p.color }}
+              />
             </span>
-          </Badge>
-        </div>
+          ))}
+        </motion.div>
 
-        <h1 className="font-display max-w-4xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.05]">
-          Post to all your social accounts from one dashboard.
-        </h1>
+        <motion.h1
+          variants={rise}
+          className="font-heading mx-auto mt-6 w-full min-w-0 max-w-4xl text-[2.375rem] leading-[1.04] font-semibold tracking-[-0.035em] text-pretty text-foreground sm:text-[3rem] sm:text-balance md:mt-7 md:max-w-none md:text-[3.5rem] md:leading-[1.02] lg:text-6xl xl:text-[4.375rem]"
+        >
+          Post to all your social
+          <span className="block sm:whitespace-nowrap">
+            <span className="font-normal text-muted-foreground">
+              accounts from one calendar
+            </span>
+          </span>
+        </motion.h1>
 
-        <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Draft your content once, fine-tune native captions and video formats
-          for every channel, and schedule weeks of posts across Instagram,
-          TikTok, LinkedIn, YouTube, X, Facebook, and Threads—without switching
-          tabs.
-        </p>
+        <motion.p
+          variants={rise}
+          className="mx-auto mt-5 max-w-xl text-[1.0625rem] leading-8 text-pretty text-muted-foreground md:mt-6 md:text-[1.125rem]"
+        >
+          Draft your content once, fine-tune native captions and formats for
+          every channel, and schedule weeks of posts across seven platforms —
+          without switching tabs.
+        </motion.p>
 
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+        <motion.div
+          variants={rise}
+          className="mt-9 flex justify-center md:mt-10"
+        >
           <Link
-            className={`${buttonVariants({ size: "lg" })} inline-flex items-center gap-2`}
             href="/sign-in"
+            className={`${buttonVariants({ size: "lg" })} w-full rounded-full px-8 has-[svg]:gap-2 sm:w-auto [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5`}
           >
-            <span>Start publishing</span>
-            <Icon icon="hugeicons:arrow-right-01" width={16} />
+            Start publishing
+            <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
           </Link>
-          <Link
-            className={buttonVariants({ size: "lg", variant: "ghost" })}
-            href="#features"
-          >
-            See how it works
-          </Link>
-        </div>
+        </motion.div>
 
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-1 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5 font-medium">
-            <Icon
-              className="text-primary"
-              icon="hugeicons:checkmark-circle-02"
-              width={14}
-            />
+        {/* Trust line — the hero's closing beat */}
+        <motion.div
+          variants={rise}
+          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2"
+        >
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+            <Icon className="text-primary" icon="lucide:check" width={14} />
             Cancel anytime
           </span>
-          <span className="inline-flex items-center gap-1.5 font-medium">
-            <Icon
-              className="text-primary"
-              icon="hugeicons:checkmark-circle-02"
-              width={14}
-            />
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+            <Icon className="text-primary" icon="lucide:check" width={14} />
             Simple monthly or yearly billing
           </span>
-          <span className="inline-flex items-center gap-1.5 font-medium">
-            <Icon
-              className="text-primary"
-              icon="hugeicons:checkmark-circle-02"
-              width={14}
-            />
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+            <Icon className="text-primary" icon="lucide:check" width={14} />
             Connect all 7 channels
           </span>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div
-        className="relative z-10 mx-auto w-full max-w-5xl"
+      {/* Product screenshot on a panel canvas */}
+      <motion.div
+        initial={{ opacity: 0, y: reduceMotion ? 0 : 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.35, ease: EASE }}
+        className="relative mx-auto mt-16 w-full md:mt-20 lg:mt-24"
       >
-        <div className="rounded-2xl overflow-hidden border border-border/60 bg-card shadow-xl shadow-foreground/5 dark:shadow-black/30">
-          {/* Window chrome */}
-          <div className="flex h-11 items-center gap-3 border-b border-border/50 bg-muted/50 px-4">
-            <div className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-full bg-[#FF5F57]" />
-              <span className="size-2.5 rounded-full bg-[#FEBC2E]" />
-              <span className="size-2.5 rounded-full bg-[#28C840]" />
-            </div>
-            <div className="mx-auto flex h-7 max-w-xs flex-1 items-center justify-center rounded-lg border border-border/40 bg-background px-3">
-              <span className="truncate text-[11px] font-medium text-muted-foreground">
-                app.multifeed.io
-              </span>
-            </div>
-            <div className="hidden w-14 sm:block" />
-          </div>
-
-          <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted/40">
-            <CalendarMockup />
+        <div className="relative overflow-hidden rounded-panel bg-secondary px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-12 lg:px-16 lg:py-16 xl:px-20 xl:pt-20 xl:pb-10">
+          <div className="relative min-w-0 overflow-hidden rounded-card border border-border/50 bg-card shadow-[0_24px_64px_-20px_rgba(24,24,27,0.35)] md:rounded-panel lg:rounded-[1.75rem]">
+            <Image
+              src="/hero-main.png"
+              alt="MultiFeed visual content calendar"
+              width={1672}
+              height={941}
+              priority
+              sizes="(max-width: 1280px) 100vw, 1200px"
+              className="h-auto w-full"
+            />
           </div>
         </div>
-      </div>
-    </section>
+      </motion.div>
+    </Section>
   );
 }

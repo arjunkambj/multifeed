@@ -31,8 +31,8 @@ export default function DataDeletionPage() {
             Open <Link href="/connections">Connections</Link>.
           </li>
           <li>
-            Find the connected profile and select the disconnect  beside
-            its username.
+            Find the connected profile and select the disconnect beside its
+            username.
           </li>
           <li>Confirm that you want to disconnect it.</li>
         </ol>

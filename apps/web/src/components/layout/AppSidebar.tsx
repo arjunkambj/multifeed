@@ -108,7 +108,10 @@ export function AppSidebar() {
           <CommandList>
             <CommandEmpty>No results.</CommandEmpty>
             {searchGroups.map((group) => (
-              <CommandGroup heading={group.heading} key={group.heading ?? "main"}>
+              <CommandGroup
+                heading={group.heading}
+                key={group.heading ?? "main"}
+              >
                 {group.items.map((item) => (
                   <CommandItem
                     key={item.href}

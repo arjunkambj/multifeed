@@ -3,10 +3,7 @@ import { fetchQuery } from "convex/nextjs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
-import {
-  getDodoApiKey,
-  getDodoEnvironment,
-} from "@/lib/billing-config";
+import { getDodoApiKey, getDodoEnvironment } from "@/lib/billing-config";
 import {
   getHexclaveConvexServerToken,
   hexclaveServerApp,
@@ -77,10 +74,7 @@ export async function POST(request: NextRequest) {
       return errorResponse("Dodo did not return a portal link", 502);
     }
 
-    return NextResponse.json(
-      { url: portalSession.link },
-      responseOptions,
-    );
+    return NextResponse.json({ url: portalSession.link }, responseOptions);
   } catch (error) {
     console.error(
       "[billing/portal]",

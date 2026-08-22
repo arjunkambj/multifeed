@@ -2,7 +2,13 @@ import { optionalEnv, requireEnv } from "../env";
 import { oauthFetch } from "./http";
 import type { SocialConnector } from "./types";
 
-const SCOPES = ["tweet.read", "tweet.write", "media.write", "users.read", "offline.access"];
+const SCOPES = [
+  "tweet.read",
+  "tweet.write",
+  "media.write",
+  "users.read",
+  "offline.access",
+];
 
 function credentials() {
   return {

@@ -36,9 +36,7 @@ export const loadTeamData = async ({ signal }: { signal: AbortSignal }) => {
   const payload = (await response.json()) as TeamData | { error?: string };
 
   if ("error" in payload && payload.error) {
-    throw new Error(
-      payload.error,
-    );
+    throw new Error(payload.error);
   }
 
   if (

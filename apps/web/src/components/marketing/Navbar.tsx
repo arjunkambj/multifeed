@@ -116,7 +116,9 @@ export function Navbar() {
                 <Link
                   aria-current={isActive ? "page" : undefined}
                   className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-primary"
                   }`}
                   href={link.href}
                   key={link.name}

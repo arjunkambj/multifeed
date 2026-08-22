@@ -1,118 +1,147 @@
-import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
-import Link from "next/link";
 
 import Logo from "@/components/layout/Logo";
+import Reveal from "@/components/motion/Reveal";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+
 import { policyLinks } from "@/components/marketing/policies/policy-links";
+import { BODY, HEADER_GAP } from "./rhythm";
 
-const footerLinks = [
+type FooterLink = { label: string; href: string };
+
+const socials = [
+  { label: "Twitter/X", href: "#", icon: "simple-icons:x" },
+  { label: "Instagram", href: "#", icon: "simple-icons:instagram" },
+  { label: "TikTok", href: "#", icon: "simple-icons:tiktok" },
+  { label: "YouTube", href: "#", icon: "simple-icons:youtube" },
+];
+
+const legal: FooterLink[] = policyLinks.map((link) => ({
+  label: link.name,
+  href: link.href,
+}));
+
+const sections: { title: string; links: FooterLink[] }[] = [
   {
-    links: [
-      { href: "#features", name: "Features" },
-      { href: "#pricing", name: "Pricing" },
-    ],
     title: "Product",
-  },
-  {
     links: [
-      { href: "#faq", name: "FAQ" },
-      { href: "/sign-in", name: "Sign in" },
+      { label: "Features", href: "#features" },
+      { label: "Pricing", href: "#pricing" },
+      { label: "Testimonials", href: "#reviews" },
+      { label: "FAQ", href: "#faq" },
+      { label: "Sign in", href: "/sign-in" },
     ],
-    title: "Resources",
   },
   {
-    links: policyLinks,
-    title: "Legal",
+    title: "Platforms",
+    links: [
+      { label: "Instagram scheduler", href: "#" },
+      { label: "TikTok scheduler", href: "#" },
+      { label: "YouTube scheduler", href: "#" },
+      { label: "LinkedIn scheduler", href: "#" },
+      { label: "X / Twitter scheduler", href: "#" },
+      { label: "Facebook scheduler", href: "#" },
+      { label: "Threads scheduler", href: "#" },
+    ],
   },
-] as const;
-
-const socialLinks = [
-  { href: "#", icon: "ph:x-logo", label: "X" },
-  { href: "#", icon: "ph:instagram-logo", label: "Instagram" },
-  { href: "#", icon: "ph:telegram-logo", label: "Telegram" },
-] as const;
+  {
+    title: "Company",
+    links: [
+      { label: "Support", href: "mailto:support@themultifeed.com" },
+      { label: "Privacy policy", href: "/policies/privacy" },
+      { label: "Terms of service", href: "/policies/terms" },
+    ],
+  },
+];
 
 export function Footer() {
   return (
-    <footer className="mx-auto w-full max-w-7xl bg-background">
-      <div
-        className="flex flex-col items-center gap-4 border border-border bg-background px-6 py-16 text-center sm:px-10 sm:py-20"
-      >
-        <h3 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Ready to trade seven tabs for one calendar?
-        </h3>
-        <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
-          Create your post, tailor it for each platform, and schedule the whole
-          week from one place.
-        </p>
-        <Link
-          className={`${buttonVariants({ size: "lg" })} mt-2`}
-          href="/sign-in"
-        >
-          Plan your first post
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 border-x border-border md:grid-cols-[1.1fr_1.7fr]">
-        <div
-          className="flex flex-col gap-3 px-4 py-10 sm:px-6 md:border-r md:border-border"
-        >
-          <Logo />
-          <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-            Create, tailor, and schedule social posts across seven platforms
-            from one visual calendar.
-          </p>
-          <div className="mt-2 flex gap-3">
-            {socialLinks.map((social) => (
-              <Link
-                aria-label={social.label}
-                className="text-muted-foreground transition-colors hover:text-primary"
-                href={social.href}
-                key={social.label}
-              >
-                <Icon icon={social.icon} width={20} />
-              </Link>
-            ))}
+    <footer className="min-w-0 scroll-mt-20 border-t bg-background">
+      {/* Same gutters as Section, and the section padding scale one step down —
+          the footer closes the page, it doesn't open a new one. */}
+      <div className="mx-auto w-full max-w-7xl px-5 pt-16 pb-12 sm:px-6 lg:px-8 lg:pt-24">
+        {/* Row 1 — about + social */}
+        <Reveal className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div className="max-w-md">
+            <Logo />
+            <p className={`mt-4 text-muted-foreground ${BODY}`}>
+              Create, tailor, and schedule social posts across seven platforms
+              from one visual calendar.
+            </p>
           </div>
-        </div>
 
-        <div
-          className="grid grid-cols-2 gap-10 px-4 py-10 sm:px-6 md:pl-10 lg:grid-cols-3"
+          <div className="md:text-right">
+            <h3 className="font-sans text-[0.8125rem] leading-5 font-semibold text-foreground">
+              Follow along
+            </h3>
+            <ul className="-mx-1 mt-4 flex flex-wrap items-center gap-2 md:justify-end">
+              {socials.map((social) => (
+                <li key={social.label}>
+                  <a
+                    href={social.href}
+                    aria-label={social.label}
+                    title={social.label}
+                    className="flex items-center justify-center rounded-full p-2 text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    <Icon icon={social.icon} width={18} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+
+        {/* Row 2 — link grid */}
+        <nav
+          aria-label="Footer"
+          className={cn(
+            HEADER_GAP,
+            "grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 lg:grid-cols-[repeat(3,max-content)] lg:justify-between lg:gap-x-12",
+          )}
         >
-          {footerLinks.map((section) => (
-            <div className="flex flex-col gap-4" key={section.title}>
-              <h4 className="text-sm font-semibold">{section.title}</h4>
-              <ul className="flex flex-col gap-3">
+          {sections.map((section, idx) => (
+            <Reveal key={section.title} delay={idx * 0.06}>
+              <h3 className="font-sans text-[0.8125rem] leading-5 font-semibold text-foreground">
+                {section.title}
+              </h3>
+              <ul className="mt-4 space-y-2">
                 {section.links.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                  <li key={link.label} className="break-inside-avoid">
+                    <a
                       href={link.href}
+                      className="inline-block rounded-sm text-[0.8125rem] leading-5 text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                     >
-                      {link.name}
-                    </Link>
+                      {link.label}
+                    </a>
                   </li>
                 ))}
               </ul>
-            </div>
+            </Reveal>
           ))}
-        </div>
-      </div>
+        </nav>
 
-      <div
-        className="flex flex-col items-start justify-between gap-4 border border-border px-4 py-6 sm:flex-row sm:items-center sm:px-6"
-      >
-        <p className="text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} MultiFeed. All rights reserved.
-        </p>
-        <div className="flex gap-4 text-xs text-muted-foreground">
-          <Link className="transition-colors hover:text-primary" href="/policies/privacy">
-            Privacy
-          </Link>
-          <Link className="transition-colors hover:text-primary" href="/policies/terms">
-            Terms
-          </Link>
-        </div>
+        <Reveal>
+          <Separator className="mt-12 mb-6 opacity-50" />
+        </Reveal>
+
+        {/* Row 3 — legal + copyright */}
+        <Reveal className="flex flex-col gap-4 text-xs leading-5 text-muted-foreground md:flex-row-reverse md:items-center md:justify-between">
+          <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            {legal.map((link) => (
+              <li key={link.label}>
+                <a
+                  href={link.href}
+                  className="inline-block rounded-sm transition-colors duration-200 hover:text-foreground"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <p>© {new Date().getFullYear()} MultiFeed. All rights reserved.</p>
+        </Reveal>
       </div>
     </footer>
   );

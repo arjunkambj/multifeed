@@ -108,14 +108,21 @@ export function OverviewDateRangePicker({ value, preset, onChange }: Props) {
     >
       <PopoverTrigger
         render={
-          <Button size="sm" variant="outline" className="min-w-36 justify-between" />
+          <Button
+            size="sm"
+            variant="outline"
+            className="min-w-36 justify-between"
+          />
         }
       >
         <Icon icon="hugeicons:calendar-03" width={16} />
         <span className="text-sm font-medium">{label}</span>
         <Icon icon="hugeicons:arrow-down-01" width={14} />
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-auto max-w-[calc(100vw-2rem)] p-0">
+      <PopoverContent
+        align="end"
+        className="w-auto max-w-[calc(100vw-2rem)] p-0"
+      >
         <div className="flex max-sm:flex-col">
           <aside className="w-36 shrink-0 border-r border-border bg-muted/50 p-3 max-sm:w-full max-sm:border-r-0 max-sm:border-b">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -146,7 +153,9 @@ export function OverviewDateRangePicker({ value, preset, onChange }: Props) {
                 max={maxInputDate}
                 className="h-9 text-sm"
                 value={calendarDateToInputValue(draft.start)}
-                onChange={(event) => typeDate("start", event.currentTarget.value)}
+                onChange={(event) =>
+                  typeDate("start", event.currentTarget.value)
+                }
               />
               <Input
                 aria-label="End date"

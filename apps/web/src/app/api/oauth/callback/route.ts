@@ -30,8 +30,10 @@ function connectedRedirect(
   skippedCount = 0,
 ) {
   return redirect(
-    new URL(connectedReturnPath(returnTo, platform, skippedCount), appOrigin())
-      .toString(),
+    new URL(
+      connectedReturnPath(returnTo, platform, skippedCount),
+      appOrigin(),
+    ).toString(),
   );
 }
 
