@@ -83,35 +83,36 @@ export function Hero() {
 
         <motion.div
           variants={rise}
-          className="mt-9 flex justify-center md:mt-10"
+          className="mt-9 flex flex-col items-center gap-5 md:mt-10 md:gap-6"
         >
           <Link
             href="/sign-in"
-            className={`${buttonVariants({ size: "lg" })} w-full rounded-full px-8 has-[svg]:gap-2 sm:w-auto [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5`}
+            className={`${buttonVariants({ size: "lg" })} w-full px-8 has-[svg]:gap-2 sm:w-auto [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5`}
           >
-            Start publishing
+            Try it for free
             <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
-          </Link>
-        </motion.div>
+            </Link>
 
-        {/* Trust line — the hero's closing beat */}
-        <motion.div
-          variants={rise}
-          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2"
-        >
-          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-            <Icon className="text-primary" icon="lucide:check" width={14} />
-            Cancel anytime
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-            <Icon className="text-primary" icon="lucide:check" width={14} />
-            Simple monthly or yearly billing
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-            <Icon className="text-primary" icon="lucide:check" width={14} />
-            Connect all 7 channels
-          </span>
-        </motion.div>
+            {/* Social proof — customer avatars + usage count */}
+            <div className="flex items-center justify-center">
+              <div className="flex -space-x-2.5">
+                {["PS", "ML", "AR", "TB", "JN"].map((initials) => (
+                  <span
+                    className="inline-flex size-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[0.625rem] font-medium text-muted-foreground"
+                    key={initials}
+                  >
+                    {initials}
+                  </span>
+                ))}
+              </div>
+              <p className="ml-3 text-sm text-muted-foreground">
+                Used by{" "}
+                <span className="font-semibold text-foreground">1,773</span>{" "}
+                customers
+              </p>
+            </div>
+          </motion.div>
+
       </motion.div>
 
       {/* Product screenshot on a panel canvas */}
@@ -121,17 +122,20 @@ export function Hero() {
         transition={{ duration: 0.7, delay: 0.35, ease: EASE }}
         className="relative mx-auto mt-16 w-full md:mt-20 lg:mt-24"
       >
-        <div className="relative overflow-hidden rounded-panel bg-secondary px-4 py-8 sm:px-8 sm:py-10 md:px-12 md:py-12 lg:px-16 lg:py-16 xl:px-20 xl:pt-20 xl:pb-10">
-          <div className="relative min-w-0 overflow-hidden rounded-card border border-border/50 bg-card shadow-[0_24px_64px_-20px_rgba(24,24,27,0.35)] md:rounded-panel lg:rounded-[1.75rem]">
-            <Image
-              src="/hero-main.png"
-              alt="MultiFeed visual content calendar"
-              width={1672}
-              height={941}
-              priority
-              sizes="(max-width: 1280px) 100vw, 1200px"
-              className="h-auto w-full"
-            />
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-panel">
+          <Image
+            src="/hero-main.png"
+            alt="MultiFeed visual content calendar"
+            width={1672}
+            height={941}
+            priority
+            sizes="(max-width: 1280px) 100vw, 1200px"
+            className="h-full w-full object-cover object-bottom"
+          />
+
+          {/* Mockup placeholder — a single box floating over the artwork */}
+          <div className="absolute inset-5 sm:inset-10 lg:inset-16 xl:inset-28">
+            <div className="h-full w-full rounded-card border border-border/50 bg-card shadow-[0_24px_64px_-20px_rgba(24,24,27,0.35)]" />
           </div>
         </div>
       </motion.div>

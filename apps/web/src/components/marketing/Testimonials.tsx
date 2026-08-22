@@ -56,6 +56,27 @@ const testimonials: Testimonial[] = [
     highlight: "scheduled my first post the same hour",
     initials: "DO",
   },
+  {
+    name: "Sofia Marino",
+    handle: "@sofiamarino",
+    text: "The native caption overrides are genius. Our LinkedIn voice and our TikTok energy both stay authentic from one draft.",
+    highlight: "both stay authentic from one draft",
+    initials: "SM",
+  },
+  {
+    name: "Ryan Whitfield",
+    handle: "@ryanwhit",
+    text: "Client approvals used to live in email threads. Now everyone reviews the same calendar and nothing ships twice.",
+    highlight: "nothing ships twice",
+    initials: "RW",
+  },
+  {
+    name: "Amara Diallo",
+    handle: "@amaracreates",
+    text: "I batch-create on Sundays and MultiFeed handles the rest of the week. Best hour of my workflow, every week.",
+    highlight: "best hour of my workflow",
+    initials: "AD",
+  },
 ] as const;
 
 function Mark({ children }: { children: React.ReactNode }) {
@@ -85,7 +106,7 @@ function Quote({ text, highlight }: { text: string; highlight?: string }) {
 
 function Card({ t }: { t: Testimonial }) {
   return (
-    <div className="flex break-inside-avoid flex-col overflow-hidden rounded-card border-0 bg-secondary">
+    <div className="flex break-inside-avoid flex-col overflow-hidden rounded-card border-0 bg-zinc-100 dark:bg-zinc-800">
       <div className={cn("flex flex-1 flex-col", CARD_PADDING)}>
         <span
           aria-hidden
@@ -132,47 +153,58 @@ export function Testimonials() {
 
       {/* Mobile / tablet: masonry columns for tight packing; desktop: three
           columns with the middle offset lower — space only, no color change */}
+      {/* Edge gradient like the platform marquee in WhyMultiFeed, rotated
+          vertical so the last row of cards dissolves into the next section */}
       <div
         className={cn(
           HEADER_GAP,
-          GRID_GAP,
-          "columns-1 space-y-3 md:columns-2 md:space-y-4 lg:hidden",
+          "[mask-image:linear-gradient(to_bottom,black_78%,transparent)]",
         )}
       >
-        {testimonials.map((t, idx) => (
-          <Reveal
-            key={t.name}
-            delay={(idx % 3) * 0.06}
-            className="break-inside-avoid"
-          >
-            <Card t={t} />
-          </Reveal>
-        ))}
-      </div>
+        <div
+          className={cn(
+            GRID_GAP,
+            "columns-1 space-y-3 md:columns-2 md:space-y-4 lg:hidden",
+          )}
+        >
+          {testimonials.map((t, idx) => (
+            <Reveal
+              key={t.name}
+              delay={(idx % 3) * 0.06}
+              className="break-inside-avoid"
+            >
+              <Card t={t} />
+            </Reveal>
+          ))}
+        </div>
 
-      <div
-        className={cn(
-          HEADER_GAP,
-          GRID_GAP,
-          "hidden lg:grid lg:grid-cols-3 lg:items-start",
-        )}
-      >
-        {[
-          testimonials.slice(0, 2),
-          testimonials.slice(2, 4),
-          testimonials.slice(4),
-        ].map((col, colIdx) => (
-          <div
-            key={colIdx}
-            className={cn("flex flex-col", GRID_GAP, colIdx === 1 && "lg:mt-8")}
-          >
-            {col.map((t, idx) => (
-              <Reveal key={t.name} delay={(idx % 3) * 0.06}>
-                <Card t={t} />
-              </Reveal>
-            ))}
-          </div>
-        ))}
+        <div
+          className={cn(
+            GRID_GAP,
+            "hidden lg:grid lg:grid-cols-3 lg:items-start",
+          )}
+        >
+          {[
+            testimonials.slice(0, 3),
+            testimonials.slice(3, 6),
+            testimonials.slice(6),
+          ].map((col, colIdx) => (
+            <div
+              key={colIdx}
+              className={cn(
+                "flex flex-col",
+                GRID_GAP,
+                colIdx === 1 && "lg:mt-8",
+              )}
+            >
+              {col.map((t, idx) => (
+                <Reveal key={t.name} delay={(idx % 3) * 0.06}>
+                  <Card t={t} />
+                </Reveal>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </Section>
   );

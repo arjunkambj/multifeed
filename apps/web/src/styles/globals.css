@@ -14,7 +14,7 @@
 }
 
 .marketing-marquee-track {
-  animation: marquee 30s linear infinite;
+  animation: marquee 40s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -35,7 +35,6 @@ html.lenis {
   overflow: hidden;
 }
 
-/* FullCalendar — MultiFeed theme */
 /* FullCalendar — MultiFeed theme */
 .multifeed-calendar {
   --fc-border-color: var(--border);
@@ -177,25 +176,25 @@ html.lenis {
   --secondary-foreground: oklch(0.21 0.006 285.885); /* zinc-900 */
   --muted: oklch(0.967 0.001 286.375);
   --muted-foreground: oklch(0.406 0.015 285.79); /* zinc-600 → 700 */
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: oklch(0.967 0.001 286.375); /* zinc-100 */
+  --accent-foreground: oklch(0.21 0.006 285.885); /* zinc-900 */
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --border: oklch(0.92 0.004 286.32); /* zinc-200 */
+  --input: oklch(0.92 0.004 286.32); /* zinc-200 */
   --ring: oklch(0.54 0.13 153.45);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --chart-1: oklch(0.871 0.006 286.286); /* zinc-300 */
+  --chart-2: oklch(0.552 0.016 285.938); /* zinc-500 */
+  --chart-3: oklch(0.442 0.017 285.786); /* zinc-600 */
+  --chart-4: oklch(0.37 0.013 285.805); /* zinc-700 */
+  --chart-5: oklch(0.274 0.006 286.033); /* zinc-800 */
   --radius: 0.5rem;
   --sidebar: var(--background);
-  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-foreground: oklch(0.141 0.005 285.823); /* zinc-950 */
   --sidebar-primary: oklch(0.54 0.13 153.45);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: var(--card);
   --sidebar-accent-foreground: var(--card-foreground);
-  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-border: oklch(0.92 0.004 286.32); /* zinc-200 */
   --sidebar-ring: oklch(0.54 0.13 153.45);
 }
 
@@ -203,30 +202,30 @@ html.lenis {
   --background: oklch(0.141 0.005 285.823); /* zinc-950 */
   --foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
   --card: oklch(0.21 0.006 285.885); /* zinc-900 */
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --card-foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
+  --popover: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --popover-foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
   --primary: oklch(0.54 0.13 153.45);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.274 0.006 286.033); /* zinc-800 */
-  --secondary-foreground: oklch(0.985 0 0);
+  --secondary-foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
   --muted: oklch(0.274 0.006 286.033);
   --muted-foreground: oklch(0.705 0.015 286.067); /* zinc-400 */
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --accent: oklch(0.274 0.006 286.033); /* zinc-800 */
+  --accent-foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.54 0.13 153.45);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --chart-1: oklch(0.871 0.006 286.286); /* zinc-300 */
+  --chart-2: oklch(0.552 0.016 285.938); /* zinc-500 */
+  --chart-3: oklch(0.442 0.017 285.786); /* zinc-600 */
+  --chart-4: oklch(0.37 0.013 285.805); /* zinc-700 */
+  --chart-5: oklch(0.274 0.006 286.033); /* zinc-800 */
   --sidebar: var(--background);
-  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
   --sidebar-primary: oklch(0.54 0.13 153.45);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
   --sidebar-accent: var(--card);
   --sidebar-accent-foreground: var(--card-foreground);
   --sidebar-border: oklch(1 0 0 / 10%);
@@ -234,8 +233,8 @@ html.lenis {
 }
 
 .dark [data-dashboard] {
-  --background: oklch(0.145 0 0);
-  --card: oklch(0.205 0 0);
+  --background: oklch(0.141 0.005 285.823); /* zinc-950 */
+  --card: oklch(0.21 0.006 285.885); /* zinc-900 */
   --sidebar: var(--background);
 }
 

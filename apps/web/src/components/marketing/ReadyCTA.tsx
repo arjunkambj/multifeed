@@ -15,7 +15,7 @@ export function ReadyCTA() {
       {/* No SectionHeader above this one — the Section's own padding is the
           only top spacing it needs. */}
       <Reveal>
-        <div className="grid items-center overflow-hidden rounded-panel bg-secondary md:grid-cols-2">
+        <div className="grid items-center overflow-hidden rounded-panel bg-zinc-100 md:grid-cols-2 dark:bg-zinc-800">
           <div className={cn("flex flex-col", PANEL_PADDING)}>
             <h2 className="font-heading text-[1.875rem] leading-[1.08] font-medium tracking-[-0.032em] text-balance sm:text-[2.25rem] md:text-[2.5rem] md:leading-[1.06] lg:text-[2.75rem]">
               Give your mornings
@@ -31,7 +31,7 @@ export function ReadyCTA() {
               href="/sign-in"
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "mt-8 w-fit rounded-full px-8 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5",
+                "mt-8 w-fit px-8 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5",
               )}
             >
               Start publishing

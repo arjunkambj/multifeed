@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Hero } from "@/components/marketing/Hero";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Features } from "@/components/marketing/Feature";
+import { WhyMultiFeed } from "@/components/marketing/WhyMultiFeed";
 import { Testimonials } from "@/components/marketing/Testimonials";
 import { Pricing } from "@/components/marketing/Pricing";
 import { Footer } from "@/components/marketing/Footer";
@@ -34,6 +35,7 @@ export default function Home() {
     <main className="marketing-landing flex w-full flex-col bg-background">
       <Navbar />
       <Hero />
+      <WhyMultiFeed />
       <Features />
       <Testimonials />
       <Pricing />

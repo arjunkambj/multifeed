@@ -91,7 +91,7 @@ export function Navbar() {
             className={`${buttonVariants()} hidden lg:inline-flex`}
             href="/sign-in"
           >
-            Plan a post
+            Get started
           </Link>
           <Button
             aria-expanded={isMenuOpen}
@@ -134,7 +134,7 @@ export function Navbar() {
             href="/sign-in"
             onClick={() => setIsMenuOpen(false)}
           >
-            Plan a post
+            Get started
           </Link>
         </div>
       )}

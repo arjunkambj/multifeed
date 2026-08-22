@@ -134,7 +134,7 @@ function PriceCard({
   return (
     <div
       className={cn(
-        "flex h-full flex-col rounded-card border bg-secondary transition-colors duration-200 hover:border-primary/20 hover:shadow-sm",
+        "flex h-full flex-col rounded-card border bg-zinc-100 hover:border-primary/20 dark:bg-zinc-800",
         preferred ? "border-primary/40" : "border-transparent",
         "px-6 py-7 md:px-7 md:py-8",
       )}
@@ -196,17 +196,12 @@ function PriceCard({
           href="/sign-in"
           className={cn(
             buttonVariants({ size: "lg" }),
-            "w-full rounded-full [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5 active:[&_svg]:translate-x-0",
-            preferred
-              ? "bg-primary text-primary-foreground hover:bg-primary/90"
-              : "border bg-card text-foreground shadow-none hover:bg-card/80",
+            "w-full [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5 active:[&_svg]:translate-x-0",
+            "bg-primary text-primary-foreground hover:bg-primary/90",
           )}
         >
           {plan.cta}
         </Link>
-        <p className="mt-2.5 text-center text-[0.6875rem] leading-4 text-muted-foreground">
-          Cancel anytime
-        </p>
       </div>
     </div>
   );

@@ -26,31 +26,29 @@ export const faqItems = [
       "Yes. Use the month, week, day, or list view to review what is coming up. Drag a post to reschedule it without rebuilding the post.",
     title: "Can I review and change my schedule?",
   },
-  {
-    content:
-      "Creator is for solo work and does not include team seats. Growth includes five team seats, and Agency includes fifteen.",
-    title: "Can my team use MultiFeed?",
-  },
 ] as const;
 
 export const featureItems = [
   {
+    ctaPrimary: "Tailor your first post",
     description:
       "Draft one post, then tailor the caption and settings for every channel without starting over.",
+    eyebrow: "Platform-specific posts",
     heading: "One draft, seven channels",
-    image: "/hero-main.png",
   },
   {
+    ctaPrimary: "Open the calendar",
     description:
       "See your month, week, day, or list at a glance. Drag any post to change its publish time.",
+    eyebrow: "Visual calendar",
     heading: "Visual content calendar",
-    image: "/hero-main.png",
   },
   {
+    ctaPrimary: "Connect your accounts",
     description:
       "Schedule text, images, videos, Reels, Shorts, and Stories wherever each platform supports them.",
+    eyebrow: "Multi-platform scheduling",
     heading: "Multi-platform scheduling",
-    image: "/hero-main.png",
   },
 ] as const;
 
