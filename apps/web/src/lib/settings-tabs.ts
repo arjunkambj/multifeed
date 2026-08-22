@@ -1,6 +1,6 @@
 export const settingsTabs = [
-  { id: "general", label: "General", icon: "solar:user-linear" },
-  { id: "billing", label: "Billing", icon: "solar:card-linear" },
+  { id: "account", label: "Account", icon: "solar:user-linear" },
+  { id: "subscription", label: "Subscription", icon: "solar:card-linear" },
   { id: "support", label: "Support", icon: "solar:chat-round-call-linear" },
 ] as const;
 

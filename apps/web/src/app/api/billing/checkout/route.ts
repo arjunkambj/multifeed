@@ -114,8 +114,8 @@ export async function POST(request: NextRequest) {
         planKey: payload.planKey,
         interval: payload.interval,
       },
-      return_url: `${origin}/settings?tab=billing&checkout=complete`,
-      cancel_url: `${origin}/settings?tab=billing&checkout=cancelled`,
+      return_url: `${origin}/billing?checkout=complete`,
+      cancel_url: `${origin}/billing?checkout=cancelled`,
     });
   } catch (error) {
     console.error(

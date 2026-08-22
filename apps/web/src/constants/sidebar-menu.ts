@@ -22,20 +22,14 @@ export const sidebarMainItems: MenuItem[] = [
 
 export const sidebarCategories: MenuCategory[] = [
   {
-    name: "Create",
-    icon: "hugeicons:edit-02",
+    name: "Social",
+    icon: "hugeicons:calendar-03",
     items: [
       {
         name: "New Post",
         href: "/posts/new",
         icon: "hugeicons:file-add",
       },
-    ],
-  },
-  {
-    name: "Posts",
-    icon: "hugeicons:calendar-03",
-    items: [
       {
         name: "Calendar",
         href: "/calendar",
@@ -49,7 +43,7 @@ export const sidebarCategories: MenuCategory[] = [
     ],
   },
   {
-    name: "Manage",
+    name: "Manager",
     icon: "hugeicons:dashboard-square-setting",
     items: [
       {
@@ -57,15 +51,20 @@ export const sidebarCategories: MenuCategory[] = [
         href: "/connections",
         icon: "hugeicons:connect",
       },
+      {
+        name: "Team",
+        href: "/teams",
+        icon: "hugeicons:user-group-03",
+      },
     ],
   },
 ];
 
 export const sidebarFooterItems: MenuItem[] = [
   {
-    name: "Team",
-    href: "/teams",
-    icon: "hugeicons:user-group-03",
+    name: "Billing",
+    href: "/billing",
+    icon: "solar:card-linear",
   },
   {
     name: "Settings",

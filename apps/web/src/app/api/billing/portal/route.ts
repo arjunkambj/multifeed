@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     const portalSession = await client.customers.customerPortal.create(
       subscription.dodoCustomerId,
       {
-        return_url: `${origin}/settings?tab=billing`,
+        return_url: `${origin}/billing`,
       },
     );
 

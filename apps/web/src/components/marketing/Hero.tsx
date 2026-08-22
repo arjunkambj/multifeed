@@ -295,14 +295,7 @@ export function Hero() {
         </div>
 
         <h1 className="font-display max-w-4xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.05]">
-          Plan once. Show up{" "}
-          <span className="relative inline-block whitespace-nowrap">
-            everywhere.
-            <span
-              aria-hidden
-              className="absolute inset-x-0 -bottom-1 h-[0.18em] rounded-full bg-primary sm:-bottom-1.5"
-            />
-          </span>
+          Post to all your social accounts from one dashboard.
         </h1>
 
         <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
