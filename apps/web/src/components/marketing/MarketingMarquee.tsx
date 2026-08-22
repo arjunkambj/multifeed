@@ -6,6 +6,7 @@ export function MarketingMarquee() {
   return (
     <section
       className="w-full overflow-hidden pb-16 md:pb-20"
+      id="integrations"
     >
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
         <p className="mb-8 text-center text-sm font-medium uppercase tracking-wide text-muted-foreground">

@@ -9,6 +9,7 @@ import Logo from "@/components/layout/Logo";
 
 const navLinks = [
   { href: "#features", name: "Features" },
+  { href: "#integrations", name: "Integrations" },
   { href: "#pricing", name: "Pricing" },
   { href: "#faq", name: "FAQ" },
 ] as const;
@@ -55,13 +56,15 @@ export function Navbar() {
 
   return (
     <header
-      className={`rounded-2xl sticky top-2 z-50 mx-auto mt-2 w-[min(48rem,calc(100%-2rem))] border border-border/50 backdrop-blur-lg transition-colors duration-300 dark:shadow-lg dark:shadow-black/20 ${
-        isScrolled ? "bg-white/55 dark:bg-card/80" : "bg-card/95"
+      className={`rounded-2xl sticky z-50 mx-auto backdrop-blur-lg transition-all duration-300 ${
+        isScrolled
+          ? "top-2 mt-2 w-[min(42rem,calc(100%-2rem))] translate-y-1 bg-card/95 dark:bg-card/80"
+          : "top-3 mt-3 w-[min(80rem,calc(100%-2rem))] bg-background/95"
       }`}
     >
-      <nav className="grid h-14 w-full grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 sm:px-5">
+      <nav className="flex h-14 w-full items-center justify-between gap-6 px-5 sm:px-6">
         <div className="justify-self-start">
-          <Logo />
+          <Logo markOnly />
         </div>
 
         <ul className="hidden items-center justify-center gap-1 lg:flex">
@@ -85,7 +88,7 @@ export function Navbar() {
 
         <div className="flex items-center justify-end gap-1.5 sm:gap-2">
           <Link
-            className={`${buttonVariants({ size: "sm" })} hidden lg:inline-flex`}
+            className={`${buttonVariants()} hidden lg:inline-flex`}
             href="/sign-in"
           >
             Plan a post
