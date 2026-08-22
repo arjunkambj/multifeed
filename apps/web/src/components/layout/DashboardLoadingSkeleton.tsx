@@ -67,8 +67,7 @@ export function DashboardLoadingSkeleton({
       content = (
         <>
           <Skeleton className="h-10 w-96 max-w-full rounded-lg" />
-          <div className="max-w-xl space-y-5 pt-4">
-            <Skeleton className="h-10 w-full rounded-lg" />
+          <div className="flex max-w-xl flex-col gap-5 pt-4">
             <Skeleton className="h-10 w-full rounded-lg" />
             <Skeleton className="h-10 w-32 rounded-lg" />
           </div>

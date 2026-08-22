@@ -108,13 +108,13 @@ export function UserProfileMenu() {
             </TabsList>
           </Tabs>
         </div>
-        <DropdownMenuItem onSelect={() => router.push("/settings")}>
+        <DropdownMenuItem onClick={() => router.push("/settings")}>
           <Icon icon="hugeicons:settings-02" width={16} />
           Settings
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"
-          onSelect={() => void hexclaveClientApp.signOut()}
+          onClick={() => void hexclaveClientApp.signOut()}
         >
           <Icon icon="hugeicons:logout-03" width={16} />
           Logout

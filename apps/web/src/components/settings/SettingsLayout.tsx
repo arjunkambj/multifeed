@@ -20,7 +20,7 @@ export function SettingsLayout() {
     <div className="flex w-full flex-1 flex-col items-start gap-6">
       <DashboardPageTitle
         title="Settings"
-        description="Manage your profile, organization, billing, and support preferences."
+        description="Manage your organization, billing, and support preferences."
       />
 
       <Tabs
