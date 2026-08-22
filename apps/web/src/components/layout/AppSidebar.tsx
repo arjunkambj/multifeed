@@ -37,7 +37,7 @@ export function AppSidebar() {
       pathname !== "/posts/new");
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0!">
+    <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader>
         <div className="flex h-12 items-center px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
           <Logo markOnly={collapsed} />

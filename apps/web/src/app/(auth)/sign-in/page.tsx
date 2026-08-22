@@ -12,6 +12,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SignInPage() {
   const app = useHexclaveApp();
@@ -160,7 +161,7 @@ export default function SignInPage() {
             className="w-full font-normal"
           >
             {isEmailLoading ? <Spinner className="size-4" /> : null}
-            {isEmailLoading ? "Sending..." : "Continue with Email"}
+            Continue with Email
           </Button>
         </form>
       ) : (
@@ -182,10 +183,7 @@ export default function SignInPage() {
             </InputOTPGroup>
           </InputOTP>
           {isVerifying ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Spinner className="size-4" />
-              Verifying...
-            </div>
+            <Skeleton className="h-5 w-32" aria-label="Verifying..." />
           ) : null}
           <div className="flex flex-col items-center gap-2 text-sm">
             <p className="text-xs text-muted-foreground">
@@ -227,18 +225,14 @@ export default function SignInPage() {
       </div>
 
       <Button
-        variant="outline"
+        variant="secondary"
         disabled={isGoogleLoading}
         size="lg"
         className="w-full font-normal"
         onClick={handleGoogleSignIn}
       >
-        {isGoogleLoading ? (
-          <Spinner className="size-4" />
-        ) : (
-          <Icon icon="logos:google-icon" width={18} />
-        )}
-        {isGoogleLoading ? "Redirecting..." : "Continue with Google"}
+        {isGoogleLoading ? <Spinner className="size-4" /> : <Icon icon="logos:google-icon" width={18} />}
+        Continue with Google
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
