@@ -31,7 +31,7 @@ export function Pricing() {
       <SectionHeader
         eyebrow="Pricing"
         title="Unlimited posts on every plan."
-        titleMuted="Pick by how many accounts you run."
+        titleMuted="You pay for accounts, not posts."
       />
 
       <div
@@ -91,7 +91,6 @@ export function Pricing() {
         </div>
       </div>
 
-      {/* Same strip as the hero — one list, one icon set, one size. */}
       <Reveal
         className={cn(
           HEADER_GAP,
@@ -134,7 +133,7 @@ function PriceCard({
   return (
     <div
       className={cn(
-        "flex h-full flex-col rounded-card border bg-zinc-100 hover:border-primary/20 dark:bg-zinc-800",
+        "flex h-full flex-col rounded-card border bg-card hover:border-primary/20",
         preferred ? "border-primary/40" : "border-transparent",
         "px-6 py-7 md:px-7 md:py-8",
       )}

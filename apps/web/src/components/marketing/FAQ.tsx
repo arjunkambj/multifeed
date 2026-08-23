@@ -29,9 +29,9 @@ export function FAQ() {
           <SectionHeader
             align="left"
             eyebrow="FAQ"
-            title="You have questions."
-            titleMuted="Straight answers."
-            description="Still curious?"
+            title="Questions."
+            titleMuted="The ones we get a lot."
+            description="If yours isn't here, email us."
           />
           <Link
             href={`mailto:${SUPPORT_EMAIL}`}
@@ -40,7 +40,7 @@ export function FAQ() {
               "mt-8 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5",
             )}
           >
-            Chat with us
+            Email us
             <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
           </Link>
         </div>
@@ -53,10 +53,8 @@ export function FAQ() {
               <AccordionItem
                 key={item.title}
                 value={item.title}
-                className="rounded-card border-0 bg-zinc-100 shadow-none ring-0 outline-none transition-colors not-last:border-0 dark:bg-zinc-800"
+                className="rounded-card border-0 bg-card shadow-none ring-0 outline-none transition-colors not-last:border-0"
               >
-                {/* Trigger padding is the page's card padding; the panel adds its
-                    own px-4, so px-2 here lands the answer on the same left edge. */}
                 <AccordionTrigger
                   indicator="plus"
                   className="cursor-pointer items-start p-6 text-left text-[0.9375rem] leading-6 font-medium text-foreground hover:no-underline [&_svg]:mt-[1px]"

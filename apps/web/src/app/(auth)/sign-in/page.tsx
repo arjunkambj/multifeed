@@ -125,7 +125,7 @@ export default function SignInPage() {
         </h1>
         <p className="mt-2 text-sm font-light text-muted-foreground">
           {step === "email"
-            ? "Sign in to run social on autopilot"
+            ? "Sign in to plan and schedule your posts"
             : `We sent a code to ${email}`}
         </p>
       </div>

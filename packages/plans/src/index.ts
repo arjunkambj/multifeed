@@ -46,8 +46,7 @@ const PLAN_BY_KEY: Record<PlanKey, Plan> = {
   creator: definePlan({
     key: "creator",
     name: "Creator",
-    description:
-      "For creators and founders building a consistent social presence.",
+    description: "For one person posting across a few accounts.",
     prices: {
       month: 29,
       year: 23,
@@ -59,16 +58,16 @@ const PLAN_BY_KEY: Record<PlanKey, Plan> = {
     },
     coreFeatures: [
       "Unlimited scheduled posts",
-      "Multi-account posting",
+      "Post to multiple accounts",
       "Image, video, and carousel posts",
-      "Platform caption overrides",
-      "Basic analytics refresh",
+      "Different captions per platform",
+      "Basic analytics",
     ],
   }),
   growth: definePlan({
     key: "growth",
     name: "Growth",
-    description: "For teams coordinating multiple brands and calendars.",
+    description: "For a small team sharing a calendar.",
     prices: {
       month: 59,
       year: 47,
@@ -83,13 +82,13 @@ const PLAN_BY_KEY: Record<PlanKey, Plan> = {
       "Calendar and status views",
       "Shared inbox",
       "Advanced analytics history",
-      "Priority metric refresh",
+      "Faster analytics",
     ],
   }),
   agency: definePlan({
     key: "agency",
     name: "Agency",
-    description: "For agencies managing high-volume client publishing.",
+    description: "For people running a lot of client accounts.",
     prices: {
       month: 119,
       year: 95,
@@ -102,7 +101,7 @@ const PLAN_BY_KEY: Record<PlanKey, Plan> = {
     coreFeatures: [
       "Everything in Growth",
       "Bulk video scheduling",
-      "Approval-ready team workflows",
+      "Team approvals",
       "API add-on available",
       "Priority support",
     ],

@@ -1,11 +1,12 @@
 "use client";
 
+import Logo from "@/components/layout/Logo";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
+import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-import Logo from "@/components/layout/Logo";
 
 const navLinks = [
   { href: "#features", name: "Features" },
@@ -14,33 +15,51 @@ const navLinks = [
   { href: "#faq", name: "FAQ" },
 ] as const;
 
+const sectionIds = ["hero", ...navLinks.map(({ href }) => href.slice(1))];
+
 export function Navbar() {
   const [activeSection, setActiveSection] = useState("hero");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const next = latest > 8;
+    setIsScrolled((prev) => (prev === next ? prev : next));
+  });
 
   useEffect(() => {
-    const sectionIds = ["hero", ...navLinks.map(({ href }) => href.slice(1))];
-    const onScroll = () => {
-      setIsScrolled(window.scrollY > 8);
+    const ratios = new Map<string, number>();
 
-      const currentSection =
-        [...sectionIds].reverse().find((id) => {
-          const section = document.getElementById(id);
-          return section ? section.getBoundingClientRect().top <= 120 : false;
-        }) ?? "hero";
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          ratios.set(entry.target.id, entry.intersectionRatio);
+        }
 
-      setActiveSection(currentSection);
-    };
+        let next = "hero";
+        let best = 0;
+        for (const id of sectionIds) {
+          const ratio = ratios.get(id) ?? 0;
+          if (ratio > best) {
+            best = ratio;
+            next = id;
+          }
+        }
+        setActiveSection((prev) => (prev === next ? prev : next));
+      },
+      {
+        rootMargin: "-18% 0px -62% 0px",
+        threshold: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      },
+    );
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    for (const id of sectionIds) {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    }
 
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -56,7 +75,7 @@ export function Navbar() {
 
   return (
     <header
-      className={`rounded-2xl sticky z-50 mx-auto backdrop-blur-lg transition-all duration-300 ${
+      className={`rounded-2xl sticky z-50 mx-auto backdrop-blur-lg transition-[width,background-color,transform] duration-300 ${
         isScrolled
           ? "top-2 mt-2 w-[min(42rem,calc(100%-2rem))] translate-y-1 bg-card/95 dark:bg-card/80"
           : "top-3 mt-3 w-[min(80rem,calc(100%-2rem))] bg-background/95"
@@ -88,7 +107,7 @@ export function Navbar() {
 
         <div className="flex items-center justify-end gap-1.5 sm:gap-2">
           <Link
-            className={`${buttonVariants()} hidden lg:inline-flex`}
+            className={cn(buttonVariants(), "hidden lg:inline-flex")}
             href="/sign-in"
           >
             Get started

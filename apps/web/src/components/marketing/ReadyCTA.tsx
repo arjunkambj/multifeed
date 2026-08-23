@@ -12,19 +12,17 @@ import Section from "./Section";
 export function ReadyCTA() {
   return (
     <Section>
-      {/* No SectionHeader above this one — the Section's own padding is the
-          only top spacing it needs. */}
       <Reveal>
-        <div className="grid items-center overflow-hidden rounded-panel bg-zinc-100 md:grid-cols-2 dark:bg-zinc-800">
+        <div className="grid items-center overflow-hidden rounded-panel bg-card md:grid-cols-2">
           <div className={cn("flex flex-col", PANEL_PADDING)}>
             <h2 className="font-heading text-[1.875rem] leading-[1.08] font-medium tracking-[-0.032em] text-balance sm:text-[2.25rem] md:text-[2.5rem] md:leading-[1.06] lg:text-[2.75rem]">
-              Your week of posts,
+              Plan the week.
               <span className="block font-normal text-muted-foreground">
-                done before lunch.
+                Then stop thinking about it.
               </span>
             </h2>
             <p className={`mt-5 max-w-sm text-muted-foreground ${BODY}`}>
-              Connect your accounts and drag the week onto the calendar.
+              Connect your accounts, write the posts, drop them on the calendar.
             </p>
             <Link
               href="/sign-in"
@@ -38,7 +36,6 @@ export function ReadyCTA() {
             </Link>
           </div>
 
-          {/* Image panel — artwork fills right side flush */}
           <div
             className={cn(
               "relative h-full overflow-hidden bg-muted",
@@ -53,7 +50,6 @@ export function ReadyCTA() {
               className="object-cover object-center"
             />
 
-            {/* Floating mock post card */}
             <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 scale-[0.90] rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm leading-5 font-medium">New post</p>

@@ -1,7 +1,7 @@
 import Reveal from "@/components/motion/Reveal";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { BODY, CARD_PADDING, GRID_GAP, HEADER_GAP } from "./rhythm";
+import { BODY, GRID_GAP, HEADER_GAP } from "./rhythm";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
@@ -17,64 +17,64 @@ const testimonials: Testimonial[] = [
   {
     name: "Priya Sharma",
     handle: "@priyabuilds",
-    text: "MultiFeed replaced five scheduling tools for us. I plan a full week of posts in one sitting and never think about it again.",
-    highlight: "a full week of posts in one sitting",
+    text: "I used to bounce between five apps to schedule a week. Now I sit down once, plan it, and close the laptop.",
+    highlight: "sit down once, plan it, and close the laptop",
     initials: "PS",
   },
   {
     name: "Marcus Lee",
     handle: "@marcuslee",
-    text: "The calendar view is the killer feature. Spotting the empty days before they happen doubled our posting consistency.",
-    highlight: "doubled our posting consistency",
+    text: "The calendar made us notice the empty days. We post more because we can see the holes.",
+    highlight: "we can see the holes",
     initials: "ML",
   },
   {
     name: "Ana Rodrigues",
     handle: "@anarod",
-    text: "Platform-specific captions used to mean copy-paste chaos. Now each channel gets the right message automatically.",
-    highlight: "the right message automatically",
+    text: "I used to paste the same caption everywhere, then go back and fix it. LinkedIn and TikTok get different text from the start now.",
+    highlight: "different text from the start",
     initials: "AR",
   },
   {
     name: "Tom Becker",
     handle: "@tbecker",
-    text: "We manage 12 client calendars with a team of three. MultiFeed is the first tool that didn't buckle under that.",
-    highlight: "12 client calendars with a team of three",
+    text: "We run 12 client calendars with three people. This is the first tool that didn't get messy at that size.",
+    highlight: "12 client calendars with three people",
     initials: "TB",
   },
   {
     name: "Jess Nguyen",
     handle: "@jesswrites",
-    text: "Drag to reschedule sounds small until you live in it. Moving a whole campaign is now a ten-second job.",
-    highlight: "a ten-second job",
+    text: "Dragging a post to a new day sounds small. Moving a whole campaign takes about ten seconds.",
+    highlight: "about ten seconds",
     initials: "JN",
   },
   {
     name: "David Okafor",
     handle: "@dokafor",
-    text: "Setup took minutes. Connected all six channels, scheduled my first post the same hour, and it just shipped.",
-    highlight: "scheduled my first post the same hour",
+    text: "I connected six accounts, scheduled a post, and it went out that same hour.",
+    highlight: "it went out that same hour",
     initials: "DO",
   },
   {
     name: "Sofia Marino",
     handle: "@sofiamarino",
-    text: "The native caption overrides are genius. Our LinkedIn voice and our TikTok energy both stay authentic from one draft.",
-    highlight: "both stay authentic from one draft",
+    text: "Our LinkedIn posts are longer. TikTok is messier. Both come from the same draft.",
+    highlight: "Both come from the same draft",
     initials: "SM",
   },
   {
     name: "Ryan Whitfield",
     handle: "@ryanwhit",
-    text: "Client approvals used to live in email threads. Now everyone reviews the same calendar and nothing ships twice.",
-    highlight: "nothing ships twice",
+    text: "Approvals used to live in email. Now everyone looks at the same calendar, so we don't post twice.",
+    highlight: "we don't post twice",
     initials: "RW",
   },
   {
     name: "Amara Diallo",
     handle: "@amaracreates",
-    text: "I batch-create on Sundays and MultiFeed handles the rest of the week. Best hour of my workflow, every week.",
-    highlight: "best hour of my workflow",
+    text: "Sundays I batch the week. MultiFeed posts it. That's the job.",
+    highlight: "That's the job",
     initials: "AD",
   },
 ] as const;
@@ -106,21 +106,21 @@ function Quote({ text, highlight }: { text: string; highlight?: string }) {
 
 function Card({ t }: { t: Testimonial }) {
   return (
-    <div className="flex break-inside-avoid flex-col overflow-hidden rounded-card border-0 bg-zinc-100 dark:bg-zinc-800">
-      <div className={cn("flex flex-1 flex-col", CARD_PADDING)}>
+    <div className="flex break-inside-avoid flex-col overflow-hidden rounded-card border-0 bg-card">
+      <div className="flex flex-1 flex-col px-5 py-4">
         <span
           aria-hidden
-          className="select-none font-heading text-[42px] font-bold leading-none tracking-[-0.04em] text-primary"
+          className="select-none font-heading text-[32px] font-bold leading-none tracking-[-0.04em] text-primary"
         >
           &ldquo;
         </span>
 
-        <p className={`mt-3 text-foreground ${BODY}`}>
+        <p className={`mt-1.5 text-foreground ${BODY}`}>
           <Quote text={t.text} highlight={t.highlight} />
         </p>
 
-        <div className="mt-auto pt-4">
-          <div className="mt-4 border-t border-foreground/[0.08]" />
+        <div className="mt-auto pt-3">
+          <div className="border-t border-foreground/[0.08]" />
           <div className="flex items-center gap-3 pt-3">
             <Avatar className="size-10">
               <AvatarFallback className="bg-card text-xs font-semibold text-foreground">
@@ -147,15 +147,10 @@ export function Testimonials() {
     <Section id="reviews" className="relative">
       <SectionHeader
         eyebrow="Testimonials"
-        title="What people do with it."
-        titleMuted="In their own words."
+        title="What people say."
       />
 
-      {/* Mobile / tablet: masonry columns for tight packing; desktop: three
-          columns with the middle offset lower — space only, no color change */}
-      {/* Edge gradient like the platform marquee in WhyMultiFeed, rotated
-          vertical so the last row of cards dissolves into the next section */}
-      <div
+      <Reveal
         className={cn(
           HEADER_GAP,
           "[mask-image:linear-gradient(to_bottom,black_78%,transparent)]",
@@ -164,48 +159,16 @@ export function Testimonials() {
         <div
           className={cn(
             GRID_GAP,
-            "columns-1 space-y-3 md:columns-2 md:space-y-4 lg:hidden",
+            "columns-1 space-y-3 md:columns-2 md:space-y-4 lg:columns-3",
           )}
         >
-          {testimonials.map((t, idx) => (
-            <Reveal
-              key={t.name}
-              delay={(idx % 3) * 0.06}
-              className="break-inside-avoid"
-            >
+          {testimonials.map((t) => (
+            <div className="break-inside-avoid" key={t.name}>
               <Card t={t} />
-            </Reveal>
-          ))}
-        </div>
-
-        <div
-          className={cn(
-            GRID_GAP,
-            "hidden lg:grid lg:grid-cols-3 lg:items-start",
-          )}
-        >
-          {[
-            testimonials.slice(0, 3),
-            testimonials.slice(3, 6),
-            testimonials.slice(6),
-          ].map((col, colIdx) => (
-            <div
-              key={colIdx}
-              className={cn(
-                "flex flex-col",
-                GRID_GAP,
-                colIdx === 1 && "lg:mt-8",
-              )}
-            >
-              {col.map((t, idx) => (
-                <Reveal key={t.name} delay={(idx % 3) * 0.06}>
-                  <Card t={t} />
-                </Reveal>
-              ))}
             </div>
           ))}
         </div>
-      </div>
+      </Reveal>
     </Section>
   );
 }

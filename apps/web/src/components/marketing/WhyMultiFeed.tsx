@@ -135,24 +135,24 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
 
 const steps = [
   {
-    title: "Link your accounts",
-    description: "One sign-in per platform, on their screen, not ours.",
+    title: "Connect your accounts",
+    description:
+      "Sign in on Instagram, TikTok, and the rest. On their site, not ours.",
     kind: "accounts",
     mediaFirst: true,
     position: "object-[center_30%]",
   },
   {
-    title: "Write one draft, tune per channel",
+    title: "Write the post",
     description:
-      "Start with one caption, then override the text or settings per channel.",
+      "Start with one caption. Change the text for any platform that needs it.",
     kind: "composer",
     mediaFirst: false,
     position: "object-[center_60%]",
   },
   {
-    title: "Drag it onto the calendar",
-    description:
-      "Pick a slot. MultiFeed publishes every version on time and retries failures.",
+    title: "Drop it on the calendar",
+    description: "Pick a time. We post it, and try again if it fails.",
     kind: "schedule",
     mediaFirst: true,
     position: "object-center",
@@ -168,21 +168,21 @@ export function WhyMultiFeed() {
     <Section id="why-multifeed">
       <SectionHeader
         eyebrow="How it works"
-        title="Three steps"
-        titleMuted="and your week is scheduled."
+        title="Three steps."
+        titleMuted="Then you're done for the week."
       />
 
-      {/* Marquee of supported-platform pills — rises in on scroll like the
-          hero, then keeps its continuous loop. Reveal is already a client
-          component, so this stays SSR-safe. */}
-      <Reveal className="relative mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+      <Reveal
+        y={0}
+        className="relative mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]"
+      >
         <ul className="marketing-marquee-track flex w-max items-center">
           {[...platforms, ...platforms].map((platform, index) => (
             <li
               // Duplicated for a seamless loop; the index keeps keys unique.
               key={`${platform.label}-${index}`}
               aria-hidden={index >= platforms.length}
-              className="mr-3 inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-zinc-100 px-4.5 py-2.5 text-[0.9375rem] font-medium text-foreground md:px-5 dark:bg-zinc-800 dark:text-zinc-100"
+              className="mr-3 inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-card px-4.5 py-2.5 text-[0.9375rem] font-medium text-foreground md:px-5 dark:text-zinc-100"
             >
               <Icon
                 icon={platform.icon}
@@ -204,7 +204,7 @@ export function WhyMultiFeed() {
       >
         {steps.map((step, index) => (
           <Reveal key={step.title} delay={index * 0.12} className="flex">
-            <article className="flex h-full w-full flex-col overflow-hidden rounded-panel bg-zinc-100 dark:bg-zinc-800">
+            <article className="flex h-full w-full flex-col overflow-hidden rounded-panel bg-card">
               {step.mediaFirst ? (
                 <div className="relative min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
                   <Image

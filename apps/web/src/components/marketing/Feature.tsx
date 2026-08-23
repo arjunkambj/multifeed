@@ -40,7 +40,7 @@ function OverridesMock() {
     { platform: platforms[0], text: "One sharp line. That's all X needs." },
     {
       platform: platforms[4],
-      text: "Same clip — caption plus a pinned comment.",
+      text: "Same clip. Caption plus a pinned comment.",
     },
   ];
   return (
@@ -108,7 +108,7 @@ function CalendarMock() {
               {day.posts.length > 0 ? (
                 day.posts.map((post) => (
                   <div
-                    className="rounded-lg bg-zinc-100 px-2 py-1.5 dark:bg-zinc-800"
+                    className="rounded-lg bg-background px-2 py-1.5"
                     key={post.time}
                   >
                     <p className="text-sm leading-5 text-muted-foreground">
@@ -139,8 +139,8 @@ function FormatsMock() {
   return (
     <div className={MOCK_CARD}>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm leading-5 font-medium">What publishes natively</p>
-        <span className={SOFT_CHIP}>Auto-detected</span>
+        <p className="text-sm leading-5 font-medium">What each app gets</p>
+        <span className={SOFT_CHIP}>By platform</span>
       </div>
       <ul className="mt-4 divide-y">
         {formats.map((format) => (
@@ -168,7 +168,6 @@ function FormatsMock() {
   );
 }
 
-/** Each Feature card gets the mock that matches its copy. */
 function FeatureMock({
   mock,
 }: {
@@ -198,7 +197,7 @@ function StickyFeatureCard({
   const scale = useTransform(
     scrollYProgress,
     [0, 1],
-    reduceMotion ? [1, 1] : [1, 0.94],
+    reduceMotion ? [1, 1] : [1, 0.96],
     { ease: easeOut },
   );
   const overlay = useTransform(
@@ -220,7 +219,7 @@ function StickyFeatureCard({
       <motion.div
         style={{ scale, transformOrigin: "top center" }}
         className={cn(
-          "relative grid items-center overflow-hidden rounded-panel bg-zinc-100 md:grid-cols-2 dark:bg-zinc-800",
+          "relative grid transform-gpu items-center overflow-hidden rounded-panel bg-card will-change-transform md:grid-cols-2",
           index < total - 1 && "mb-6 md:mb-10 lg:mb-14",
         )}
       >
@@ -284,8 +283,8 @@ export function Features() {
     <Section id="features">
       <SectionHeader
         eyebrow="Features"
-        title="One composer."
-        titleMuted="Every platform's rules, handled."
+        title="One draft."
+        titleMuted="Change the caption per platform."
       />
 
       <div className={`${HEADER_GAP} relative`}>

@@ -32,10 +32,10 @@ export default function SectionHeader({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: reduceMotion ? 0 : 18 }}
+      initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.55, ease: EASE }}
+      viewport={{ once: true, amount: 0.2, margin: "0px 0px -32px 0px" }}
+      transition={{ duration: 0.45, ease: EASE }}
       className={cn(
         "w-full min-w-0 max-w-2xl",
         centered ? "mx-auto text-center" : "text-left",

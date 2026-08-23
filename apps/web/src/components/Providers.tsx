@@ -8,7 +8,7 @@ import {
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { ThemeProvider } from "next-themes";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TimezoneCookie } from "@/components/layout/TimezoneCookie";
 import { clientEnv } from "@/env";
 import { hexclaveClientApp } from "@/hexclave/client";

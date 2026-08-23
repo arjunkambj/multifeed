@@ -10,28 +10,28 @@ import { Testimonials } from "@/components/marketing/Testimonials";
 import { WhyMultiFeed } from "@/components/marketing/WhyMultiFeed";
 
 export const metadata: Metadata = {
-  title: "MultiFeed | Plan and schedule social posts in one place",
+  title: "Post to all your social accounts from one place",
   description:
-    "Draft once, customize captions and formats natively for every channel, and schedule across Instagram, TikTok, LinkedIn, YouTube, X, and Facebook from one visual calendar.",
+    "Write a post, change the caption per platform, and schedule it for Instagram, TikTok, LinkedIn, YouTube, X, and Facebook.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "MultiFeed | Plan once. Show up everywhere.",
+    title: "MultiFeed | Post to all your social accounts from one place",
     description:
-      "Draft once, customize captions and formats natively for every channel, and schedule across six platforms from one visual calendar.",
+      "Write a post, change the caption per platform, and schedule it for Instagram, TikTok, LinkedIn, YouTube, X, and Facebook.",
     siteName: "MultiFeed",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MultiFeed | Plan once. Show up everywhere.",
+    title: "MultiFeed | Post to all your social accounts from one place",
     description:
-      "Draft once, customize captions and formats natively for every channel, and schedule across six platforms from one visual calendar.",
+      "Write a post, change the caption per platform, and schedule it for Instagram, TikTok, LinkedIn, YouTube, X, and Facebook.",
   },
 };
 
 export default function Home() {
   return (
-    <main className="marketing-landing flex w-full flex-col bg-background">
+    <main className="flex w-full flex-col bg-background">
       <Navbar />
       <Hero />
       <WhyMultiFeed />

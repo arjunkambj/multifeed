@@ -16,15 +16,15 @@ const EASE = "easeOut" as const;
 
 const stack: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.02 } },
 };
 
 export function Hero() {
   const reduceMotion = useReducedMotion();
 
   const rise: Variants = {
-    hidden: { opacity: 0, y: reduceMotion ? 0 : 16 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+    hidden: { opacity: 0, y: reduceMotion ? 0 : 12 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
   };
 
   return (
@@ -39,7 +39,6 @@ export function Hero() {
         variants={stack}
         className="relative mx-auto w-full min-w-0 max-w-5xl text-center"
       >
-        {/* Platform icons — flat, no card/border */}
         <motion.div
           variants={rise}
           className="flex flex-wrap items-center justify-center gap-3.5 md:gap-4"
@@ -67,7 +66,7 @@ export function Hero() {
           Post to all your social
           <span className="block sm:whitespace-nowrap">
             <span className="font-normal text-muted-foreground">
-              accounts from one Dashboard
+              accounts from one place
             </span>
           </span>
         </motion.h1>
@@ -76,8 +75,8 @@ export function Hero() {
           variants={rise}
           className="mx-auto mt-5 max-w-xl text-[1.0625rem] leading-8 text-pretty text-muted-foreground md:mt-6 md:text-[1.125rem]"
         >
-          Draft once, tweak per platform, and schedule a week of posts across
-          six channels.
+          Write the post once. Change the caption if a platform needs it. Drop
+          it on the calendar.
         </motion.p>
 
         <motion.div
@@ -92,7 +91,6 @@ export function Hero() {
             <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
           </Link>
 
-          {/* Social proof — customer avatars + usage count */}
           <div className="flex items-center justify-center">
             <div className="flex -space-x-2.5">
               {["PS", "ML", "AR", "TB", "JN"].map((initials) => (
@@ -105,36 +103,29 @@ export function Hero() {
               ))}
             </div>
             <p className="ml-3 text-sm text-muted-foreground">
-              Used by{" "}
               <span className="font-semibold text-foreground">1,773</span>{" "}
-              customers
+              people use it
             </p>
           </div>
         </motion.div>
       </motion.div>
 
-      {/* Product screenshot on a panel canvas */}
       <motion.div
-        initial={{ opacity: 0, y: reduceMotion ? 0 : 28 }}
+        initial={{ opacity: 0, y: reduceMotion ? 0 : 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.35, ease: EASE }}
+        transition={{ duration: 0.55, delay: 0.18, ease: EASE }}
         className="relative mx-auto mt-16 w-full md:mt-20 lg:mt-24"
       >
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-panel">
           <Image
             src="/hero-main.png"
-            alt="MultiFeed visual content calendar"
+            alt="MultiFeed calendar"
             width={1672}
             height={941}
             priority
             sizes="(max-width: 1280px) 100vw, 1200px"
             className="h-full w-full object-cover object-bottom"
           />
-
-          {/* Mockup placeholder — a single box floating over the artwork */}
-          <div className="absolute inset-5 sm:inset-10 lg:inset-16 xl:inset-28">
-            <div className="h-full w-full rounded-card border border-border/50 bg-card shadow-[0_24px_64px_-20px_rgba(24,24,27,0.35)]" />
-          </div>
         </div>
       </motion.div>
     </Section>

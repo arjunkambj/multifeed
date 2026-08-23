@@ -29,25 +29,25 @@ export const metadata: Metadata = {
   metadataBase: new URL(clientEnv.NEXT_PUBLIC_APP_URL),
   applicationName: "MultiFeed",
   title: {
-    default: "MultiFeed | Run social on autopilot with AI agents",
+    default: "Post to all your social accounts from one place",
     template: "%s | MultiFeed",
   },
   description:
-    "Plan, generate, and schedule posts automatically to 30+ social networks — then review everything in a visual calendar.",
+    "Write a post, change the caption per platform, and schedule it for Instagram, TikTok, LinkedIn, YouTube, X, and Facebook.",
   icons: {
     icon: "/icon.svg",
   },
   openGraph: {
-    title: "MultiFeed | Run social on autopilot with AI agents",
+    title: "MultiFeed | Post to all your social accounts from one place",
     description:
-      "Plan, generate, and schedule posts to 30+ networks with AI agents — then review and edit on a visual calendar.",
+      "Write a post, change the caption per platform, and schedule it for Instagram, TikTok, LinkedIn, YouTube, X, and Facebook.",
     siteName: "MultiFeed",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MultiFeed | Run social on autopilot with AI agents",
+    title: "MultiFeed | Post to all your social accounts from one place",
     description:
-      "Plan, generate, and schedule posts to 30+ networks with AI agents — then review and edit on a visual calendar.",
+      "Write a post, change the caption per platform, and schedule it for Instagram, TikTok, LinkedIn, YouTube, X, and Facebook.",
   },
 };
 
