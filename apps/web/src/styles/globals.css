@@ -6,16 +6,16 @@
 @custom-variant dark (&:is(.dark *));
 
 @keyframes marquee {
-  0% {
-    transform: translateX(0);
+  from {
+    transform: translate3d(0, 0, 0);
   }
-  100% {
-    transform: translateX(-50%);
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 .marketing-marquee-track {
-  animation: marquee 40s linear infinite;
+  animation: marquee 60s linear infinite;
   will-change: transform;
 }
 
@@ -88,6 +88,8 @@
   font-size: 0.7rem !important;
   font-weight: 600 !important;
   border: none !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
   cursor: pointer;
 }
 
@@ -103,6 +105,61 @@
   border: none;
   border-radius: min(var(--radius-4xl), 24px);
   overflow: hidden;
+}
+
+.marketing-calendar {
+  display: flex;
+  flex-direction: column;
+}
+
+.marketing-calendar .fc {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.marketing-calendar .fc-view-harness,
+.marketing-calendar .fc-daygrid,
+.marketing-calendar .fc-scrollgrid,
+.marketing-calendar .fc-scroller,
+.marketing-calendar .fc-scroller-liquid-absolute,
+.marketing-calendar .fc-daygrid-body,
+.marketing-calendar .fc-col-header,
+.marketing-calendar .fc-scrollgrid-sync-table {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.marketing-calendar .fc-scrollgrid,
+.marketing-calendar .fc-col-header,
+.marketing-calendar .fc-scrollgrid-sync-table {
+  table-layout: fixed;
+}
+
+.marketing-calendar .fc-scrollgrid-section-liquid,
+.marketing-calendar .fc-scrollgrid-section-body,
+.marketing-calendar .fc-scrollgrid-section-body > td {
+  height: 100%;
+}
+
+.marketing-calendar .fc-scroller {
+  overflow: hidden !important;
+}
+
+.marketing-calendar .fc-scrollgrid-sync-table tbody tr {
+  height: calc(100% / 6);
+}
+
+.marketing-calendar .fc-col-header-cell,
+.marketing-calendar .fc-daygrid-day {
+  width: calc(100% / 7);
+}
+
+.marketing-calendar .fc-daygrid-day-frame {
+  height: 100%;
+  min-height: 0;
 }
 
 @theme inline {

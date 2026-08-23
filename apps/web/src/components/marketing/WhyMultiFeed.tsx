@@ -134,6 +134,36 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
   );
 }
 
+/** Repeats the platform list so one set is always wider than the viewport.
+ *  Two of these sit side by side; the CSS loop shifts exactly one set. */
+const MARQUEE_COPIES = 4;
+
+function PlatformMarqueeSet({ hidden = false }: { hidden?: boolean }) {
+  return (
+    <ul
+      aria-hidden={hidden || undefined}
+      className="flex shrink-0 items-center gap-3 pr-3"
+    >
+      {Array.from({ length: MARQUEE_COPIES }, (_, copy) =>
+        platforms.map((platform) => (
+          <li
+            key={`${copy}-${platform.label}`}
+            aria-hidden={hidden || copy > 0 || undefined}
+            className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-2xl bg-card px-4.5 py-2 text-[0.9375rem] font-medium text-foreground md:px-5 dark:text-zinc-100"
+          >
+            <Icon
+              icon={platform.icon}
+              className="size-4 shrink-0"
+              style={{ color: platform.color }}
+            />
+            <span className="whitespace-nowrap">{platform.label}</span>
+          </li>
+        )),
+      )}
+    </ul>
+  );
+}
+
 const steps = [
   {
     title: "Connect your accounts",
@@ -177,23 +207,10 @@ export function WhyMultiFeed() {
         y={0}
         className="relative mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]"
       >
-        <ul className="marketing-marquee-track flex w-max items-center">
-          {[...platforms, ...platforms].map((platform, index) => (
-            <li
-              // Duplicated for a seamless loop; the index keeps keys unique.
-              key={`${platform.label}-${index}`}
-              aria-hidden={index >= platforms.length}
-              className="mr-3 inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-card px-4.5 py-2.5 text-[0.9375rem] font-medium text-foreground md:px-5 dark:text-zinc-100"
-            >
-              <Icon
-                icon={platform.icon}
-                className="size-4 shrink-0"
-                style={{ color: platform.color }}
-              />
-              <span className="whitespace-nowrap">{platform.label}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="marketing-marquee-track flex w-max">
+          <PlatformMarqueeSet />
+          <PlatformMarqueeSet hidden />
+        </div>
       </Reveal>
 
       <div

@@ -277,7 +277,7 @@ export function PostCalendar() {
             </div>
           </div>
 
-          <div className="multifeed-calendar relative min-h-[640px] overflow-hidden rounded-[min(var(--radius-4xl),24px)]">
+          <div className="multifeed-calendar relative min-h-[640px] overflow-hidden rounded-[min(var(--radius-4xl),24px)] border border-border">
             {posts === undefined && (
               <div className="absolute inset-0 z-10 bg-card">
                 <CalendarGridSkeleton />

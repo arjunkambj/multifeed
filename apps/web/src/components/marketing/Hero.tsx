@@ -9,6 +9,7 @@ import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
 
+import { DashboardMock } from "./DashboardMock";
 import { PLATFORM_ICON, platforms } from "./rhythm";
 import Section from "./Section";
 
@@ -103,8 +104,8 @@ export function Hero() {
               ))}
             </div>
             <p className="ml-3 text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">1,773</span>{" "}
-              people use it
+              <span className="font-semibold text-foreground">100+</span> people
+              use it
             </p>
           </div>
         </motion.div>
@@ -116,16 +117,22 @@ export function Hero() {
         transition={{ duration: 0.55, delay: 0.18, ease: EASE }}
         className="relative mx-auto mt-16 w-full md:mt-20 lg:mt-24"
       >
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-panel">
+        <div
+          aria-label="MultiFeed calendar"
+          className="relative w-full overflow-hidden rounded-panel"
+          role="img"
+        >
           <Image
             src="/hero-main.png"
-            alt="MultiFeed calendar"
-            width={1672}
-            height={941}
+            alt=""
+            fill
             priority
             sizes="(max-width: 1280px) 100vw, 1200px"
-            className="h-full w-full object-cover object-bottom"
+            className="object-cover object-center"
           />
+          <div className="relative p-[6%]">
+            <DashboardMock />
+          </div>
         </div>
       </motion.div>
     </Section>

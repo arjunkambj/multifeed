@@ -45,6 +45,11 @@ export const SOFT_CHIP =
 export const MOCK_CARD =
   "absolute inset-x-5 top-1/2 -translate-y-1/2 rounded-card border bg-background p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5";
 
+/** Full product window over a photo. Same chrome as MOCK_CARD, sized for the
+    hero dashboard rather than a floating snippet. */
+export const MOCK_FRAME =
+  "overflow-hidden rounded-card border bg-background shadow-2xl shadow-black/10";
+
 /** Supported platforms, in one order, with one icon set. Hero, Features and
     Pricing each render this list so the strips never drift apart. */
 export const platforms = [
