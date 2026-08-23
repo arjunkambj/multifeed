@@ -30,7 +30,7 @@ export function FAQ() {
             align="left"
             eyebrow="FAQ"
             title="You have questions."
-            titleMuted="We have answers."
+            titleMuted="Straight answers."
             description="Still curious?"
           />
           <Link

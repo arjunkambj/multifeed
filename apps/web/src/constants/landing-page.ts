@@ -3,52 +3,55 @@ import { PLANS, type PlanKey } from "@multifeed/plans";
 export const faqItems = [
   {
     content:
-      "Connect an account, create a post, and choose when it should go live. You can add the rest of your channels whenever you’re ready.",
-    title: "How quickly can I get started?",
+      "Sign in with one platform, write a post, and pick a time. Adding the other six channels takes a couple of minutes each.",
+    title: "How do I get started?",
   },
   {
     content:
-      "Instagram, TikTok, YouTube, LinkedIn, X, Facebook, and Threads. Available post formats vary by platform.",
+      "Instagram, TikTok, YouTube, LinkedIn, X, and Facebook Pages. Each platform decides which post formats it accepts.",
     title: "Which platforms are supported?",
   },
   {
     content:
-      "Yes. Start with one main caption, then add platform-specific copy and settings wherever the message or format needs to change.",
-    title: "Can I tailor a post for each platform?",
+      "Yes. Every post starts with one caption. Each connected account can get its own text, first comment, alt text, and visibility settings.",
+    title: "Can I write different captions per platform?",
   },
   {
     content:
-      "MultiFeed supports text, images, videos, carousels, Reels, Shorts, and Stories where each connected platform allows them.",
+      "Text, images, videos, and carousels, plus Reels, Shorts, and Stories on the platforms that support them. The composer only shows formats the target account accepts.",
     title: "What kinds of posts can I schedule?",
   },
   {
     content:
-      "Yes. Use the month, week, day, or list view to review what is coming up. Drag a post to reschedule it without rebuilding the post.",
-    title: "Can I review and change my schedule?",
+      "Yes. Month, week, day, and list views show everything coming up. Drag a post to a new slot and it reschedules everywhere, in your timezone.",
+    title: "Can I reschedule after I've planned the week?",
   },
 ] as const;
 
 export const featureItems = [
   {
-    ctaPrimary: "Tailor your first post",
+    ctaPrimary: "Try the composer",
+    mock: "overrides",
     description:
-      "Draft one post, then tailor the caption and settings for every channel without starting over.",
-    eyebrow: "Platform-specific posts",
-    heading: "One draft, seven channels",
+      "Write the post once. Then give LinkedIn its longer version, X its shorter one, and TikTok a first comment, each in the same composer.",
+    eyebrow: "Per-platform overrides",
+    heading: "One draft, six channels",
   },
   {
-    ctaPrimary: "Open the calendar",
+    ctaPrimary: "See the calendar",
+    mock: "calendar",
     description:
-      "See your month, week, day, or list at a glance. Drag any post to change its publish time.",
-    eyebrow: "Visual calendar",
-    heading: "Visual content calendar",
+      "Month, week, day, and list views. Drag a post to a new slot and it reschedules everywhere, in your timezone.",
+    eyebrow: "Drag-and-drop calendar",
+    heading: "A calendar you can actually move things around on",
   },
   {
     ctaPrimary: "Connect your accounts",
+    mock: "formats",
     description:
-      "Schedule text, images, videos, Reels, Shorts, and Stories wherever each platform supports them.",
-    eyebrow: "Multi-platform scheduling",
-    heading: "Multi-platform scheduling",
+      "Reels, Shorts, Stories, carousels, plain text. The composer reads each platform's rules and only offers what will actually publish.",
+    eyebrow: "Native formats",
+    heading: "Every format each platform supports",
   },
 ] as const;
 

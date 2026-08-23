@@ -39,7 +39,7 @@ export const BODY = "text-[0.9375rem] leading-7 text-pretty";
 
 /** Solid status chip used on floating product cards. */
 export const SOFT_CHIP =
-  "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[0.6875rem] leading-4 font-medium text-primary dark:bg-primary/15";
+  "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[0.6875rem] leading-4 font-medium text-primary dark:bg-primary/15";
 
 /** Supported platforms, in one order, with one icon set. Hero, Features and
     Pricing each render this list so the strips never drift apart. */
@@ -50,7 +50,6 @@ export const platforms = [
   { label: "Facebook", icon: "simple-icons:facebook", color: "#1877F2" },
   { label: "TikTok", icon: "simple-icons:tiktok", color: "#000000" },
   { label: "YouTube", icon: "simple-icons:youtube", color: "#FF0000" },
-  { label: "Threads", icon: "simple-icons:threads", color: "#000000" },
 ] as const;
 
 /** Icon size for the flat platform strips in Hero and Pricing. */

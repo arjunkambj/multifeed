@@ -52,7 +52,7 @@ const testimonials: Testimonial[] = [
   {
     name: "David Okafor",
     handle: "@dokafor",
-    text: "Setup took minutes. Connected all seven channels, scheduled my first post the same hour, and it just shipped.",
+    text: "Setup took minutes. Connected all six channels, scheduled my first post the same hour, and it just shipped.",
     highlight: "scheduled my first post the same hour",
     initials: "DO",
   },
@@ -147,8 +147,8 @@ export function Testimonials() {
     <Section id="reviews" className="relative">
       <SectionHeader
         eyebrow="Testimonials"
-        title="Loved by busy teams."
-        titleMuted="Here's what they say."
+        title="What people do with it."
+        titleMuted="In their own words."
       />
 
       {/* Mobile / tablet: masonry columns for tight packing; desktop: three

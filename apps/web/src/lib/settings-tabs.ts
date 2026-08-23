@@ -1,7 +1,6 @@
 export const settingsTabs = [
-  { id: "account", label: "Account", icon: "solar:user-linear" },
-  { id: "subscription", label: "Subscription", icon: "solar:card-linear" },
-  { id: "support", label: "Support", icon: "solar:chat-round-call-linear" },
+  { id: "account", label: "Account", icon: "hugeicons:user-02" },
+  { id: "support", label: "Support", icon: "hugeicons:headphones" },
 ] as const;
 
 export type SettingsTab = (typeof settingsTabs)[number]["id"];

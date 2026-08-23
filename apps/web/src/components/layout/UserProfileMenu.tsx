@@ -36,10 +36,10 @@ export function UserProfileMenu() {
       <DropdownMenuTrigger
         aria-label="Open user profile"
         render={
-          <Button className="rounded-full" size="icon-lg" variant="outline" />
+          <Button className="rounded-full" size="icon-lg" variant="ghost" />
         }
       >
-        <Avatar className="size-7">
+        <Avatar className="size-8">
           {user.profileImageUrl && (
             <AvatarImage
               alt={user.displayName ?? ""}

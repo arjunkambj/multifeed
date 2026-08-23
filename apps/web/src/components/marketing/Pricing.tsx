@@ -30,8 +30,8 @@ export function Pricing() {
     <Section id="pricing">
       <SectionHeader
         eyebrow="Pricing"
-        title="Get more reach,"
-        titleMuted="with less effort."
+        title="Unlimited posts on every plan."
+        titleMuted="Pick by how many accounts you run."
       />
 
       <div

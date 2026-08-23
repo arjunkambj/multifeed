@@ -9,7 +9,7 @@ import Logo from "@/components/layout/Logo";
 
 const navLinks = [
   { href: "#features", name: "Features" },
-  { href: "#integrations", name: "Integrations" },
+  { href: "#why-multifeed", name: "How it works" },
   { href: "#pricing", name: "Pricing" },
   { href: "#faq", name: "FAQ" },
 ] as const;

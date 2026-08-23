@@ -3,8 +3,9 @@
 import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 
-/** Gentle deceleration — long tail, no snap. Tasteful over flashy. */
-const EASE = [0.22, 1, 0.36, 1] as const;
+/** Same easing and timing as the hero section, so the whole page shares
+    one motion vocabulary. */
+const EASE = "easeOut" as const;
 
 type RevealProps = {
   children: ReactNode;
@@ -16,31 +17,27 @@ type RevealProps = {
 };
 
 /**
- * Scroll-triggered entrance used by every section, so the whole page enters
- * with one motion vocabulary: short travel, soft blur-out, one easing curve.
- * Honours prefers-reduced-motion by fading only — no travel, no blur.
+ * Scroll-triggered entrance used by every section: short travel, no blur,
+ * one easing curve. Honours prefers-reduced-motion by fading only.
  */
 export default function Reveal({
   children,
   className,
   delay = 0,
-  y = 14,
+  y = 16,
 }: RevealProps) {
   const reduceMotion = useReducedMotion();
 
   return (
     <motion.div
       className={className}
-      initial={
-        reduceMotion ? { opacity: 0 } : { opacity: 0, y, filter: "blur(6px)" }
-      }
-      whileInView={
-        reduceMotion
-          ? { opacity: 1 }
-          : { opacity: 1, y: 0, filter: "blur(0px)" }
-      }
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.8, delay, ease: EASE }}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y }}
+      whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      /* Negative bottom margin pulls the trigger zone up, so an element must
+         travel well past the bottom edge before its entrance starts — the
+         animation plays where the user can actually watch it. */
+      viewport={{ once: true, amount: 0.3, margin: "0px 0px -96px 0px" }}
+      transition={{ duration: 0.6, delay, ease: EASE }}
     >
       {children}
     </motion.div>

@@ -67,7 +67,7 @@ export function Footer() {
           <Reveal className="max-w-sm">
             <Logo />
             <p className={`mt-4 text-muted-foreground ${BODY}`}>
-              Create, tailor, and schedule social posts across seven platforms
+              Create, tailor, and schedule social posts across six platforms
               from one visual calendar.
             </p>
             <ul className="mt-6 flex items-center gap-4">

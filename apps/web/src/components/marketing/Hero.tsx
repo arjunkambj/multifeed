@@ -67,7 +67,7 @@ export function Hero() {
           Post to all your social
           <span className="block sm:whitespace-nowrap">
             <span className="font-normal text-muted-foreground">
-              accounts from one calendar
+              accounts from one Dashboard
             </span>
           </span>
         </motion.h1>
@@ -76,9 +76,8 @@ export function Hero() {
           variants={rise}
           className="mx-auto mt-5 max-w-xl text-[1.0625rem] leading-8 text-pretty text-muted-foreground md:mt-6 md:text-[1.125rem]"
         >
-          Draft your content once, fine-tune native captions and formats for
-          every channel, and schedule weeks of posts across seven platforms —
-          without switching tabs.
+          Draft once, tweak per platform, and schedule a week of posts across
+          six channels.
         </motion.p>
 
         <motion.div
@@ -91,28 +90,27 @@ export function Hero() {
           >
             Try it for free
             <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
-            </Link>
+          </Link>
 
-            {/* Social proof — customer avatars + usage count */}
-            <div className="flex items-center justify-center">
-              <div className="flex -space-x-2.5">
-                {["PS", "ML", "AR", "TB", "JN"].map((initials) => (
-                  <span
-                    className="inline-flex size-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[0.625rem] font-medium text-muted-foreground"
-                    key={initials}
-                  >
-                    {initials}
-                  </span>
-                ))}
-              </div>
-              <p className="ml-3 text-sm text-muted-foreground">
-                Used by{" "}
-                <span className="font-semibold text-foreground">1,773</span>{" "}
-                customers
-              </p>
+          {/* Social proof — customer avatars + usage count */}
+          <div className="flex items-center justify-center">
+            <div className="flex -space-x-2.5">
+              {["PS", "ML", "AR", "TB", "JN"].map((initials) => (
+                <span
+                  className="inline-flex size-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[0.625rem] font-medium text-muted-foreground"
+                  key={initials}
+                >
+                  {initials}
+                </span>
+              ))}
             </div>
-          </motion.div>
-
+            <p className="ml-3 text-sm text-muted-foreground">
+              Used by{" "}
+              <span className="font-semibold text-foreground">1,773</span>{" "}
+              customers
+            </p>
+          </div>
+        </motion.div>
       </motion.div>
 
       {/* Product screenshot on a panel canvas */}

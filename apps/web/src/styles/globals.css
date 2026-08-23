@@ -68,13 +68,13 @@ html.lenis {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--muted);
+  color: var(--muted-foreground);
   background: var(--muted);
 }
 
 .multifeed-calendar .fc-daygrid-day-number,
 .multifeed-calendar .fc-timegrid-slot-label {
-  color: var(--muted);
+  color: var(--muted-foreground);
   font-size: 0.75rem;
   padding: 0.35rem 0.5rem;
 }

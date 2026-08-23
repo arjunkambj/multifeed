@@ -18,14 +18,13 @@ export function ReadyCTA() {
         <div className="grid items-center overflow-hidden rounded-panel bg-zinc-100 md:grid-cols-2 dark:bg-zinc-800">
           <div className={cn("flex flex-col", PANEL_PADDING)}>
             <h2 className="font-heading text-[1.875rem] leading-[1.08] font-medium tracking-[-0.032em] text-balance sm:text-[2.25rem] md:text-[2.5rem] md:leading-[1.06] lg:text-[2.75rem]">
-              Give your mornings
+              Your week of posts,
               <span className="block font-normal text-muted-foreground">
-                back to yourself.
+                done before lunch.
               </span>
             </h2>
             <p className={`mt-5 max-w-sm text-muted-foreground ${BODY}`}>
-              Plan once, tailor for each platform, and schedule the whole week
-              from one visual calendar.
+              Connect your accounts and drag the week onto the calendar.
             </p>
             <Link
               href="/sign-in"
@@ -34,7 +33,7 @@ export function ReadyCTA() {
                 "mt-8 w-fit px-8 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5",
               )}
             >
-              Start publishing
+              Start free
               <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
             </Link>
           </div>

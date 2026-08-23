@@ -120,7 +120,8 @@ export function BillingPage() {
 
   if (subscription === undefined) {
     return (
-      <div className="max-w-xl space-y-5 pt-4">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pt-8">
+        <Skeleton className="h-10 w-40" />
         <Skeleton className="h-24 w-full rounded-2xl" />
         <Skeleton className="h-40 w-full rounded-2xl" />
       </div>
@@ -128,49 +129,52 @@ export function BillingPage() {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <section className="flex flex-col gap-3 rounded-2xl bg-muted p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pt-8">
+      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+        Billing
+      </h1>
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-muted p-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-card">
             <Icon
-              icon="solar:card-linear"
-              width={20}
-              className="shrink-0 text-muted-foreground"
+              icon="hugeicons:credit-card"
+              width={18}
+              className="text-muted-foreground"
             />
-            <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-semibold text-foreground">
-                {activePlan ? activePlan.name : "No active plan"}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {subscription
-                  ? `${statusLabel(subscription.status)} · ${subscription.interval === "year" ? "Yearly" : "Monthly"}`
-                  : "Choose a plan to activate billing."}
-              </span>
-            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {subscription && (
-              <span className="rounded-full bg-card px-3 py-1.5 text-sm font-medium text-foreground">
-                {subscription.hasPlanAccess &&
-                subscription.status !== "cancelled" &&
-                formatDate(subscription.currentPeriodEnd)
-                  ? `Renews ${formatDate(subscription.currentPeriodEnd)}`
-                  : statusLabel(subscription.status)}
-              </span>
-            )}
-            {subscription?.dodoCustomerId && (
-              <Button
-                className="font-medium"
-                disabled={openingPortal}
-                onClick={openCustomerPortal}
-                size="sm"
-                variant="secondary"
-              >
-                {openingPortal ? <Spinner className="size-3" /> : null}
-                Manage subscription
-              </Button>
-            )}
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="truncate text-sm font-semibold text-foreground">
+              {activePlan ? activePlan.name : "No active plan"}
+            </span>
+            <span className="truncate text-sm text-muted-foreground">
+              {subscription
+                ? `${statusLabel(subscription.status)} · ${subscription.interval === "year" ? "Yearly" : "Monthly"}`
+                : "Choose a plan to activate billing."}
+            </span>
           </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {subscription && (
+            <span className="rounded-full bg-card px-3 py-1.5 text-sm font-medium text-foreground">
+              {subscription.hasPlanAccess &&
+              subscription.status !== "cancelled" &&
+              formatDate(subscription.currentPeriodEnd)
+                ? `Renews ${formatDate(subscription.currentPeriodEnd)}`
+                : statusLabel(subscription.status)}
+            </span>
+          )}
+          {subscription?.dodoCustomerId && (
+            <Button
+              className="font-medium"
+              disabled={openingPortal}
+              onClick={openCustomerPortal}
+              size="sm"
+              variant="secondary"
+            >
+              {openingPortal ? <Spinner className="size-3" /> : null}
+              Manage subscription
+            </Button>
+          )}
         </div>
       </section>
 

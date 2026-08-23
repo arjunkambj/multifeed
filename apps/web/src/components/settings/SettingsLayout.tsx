@@ -3,11 +3,9 @@
 import { Icon } from "@iconify/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
-import { BillingPage } from "@/components/billing/BillingPage";
 import { AccountSettingsPanel } from "@/components/settings/AccountSettingsPanel";
 import { SupportSettingsPanel } from "@/components/settings/SupportSettingsPanel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { isSettingsTab, settingsTabs } from "@/lib/settings-tabs";
 import { hexclaveClientApp } from "@/hexclave/client";
 import { cn } from "@/lib/utils";
@@ -41,7 +39,7 @@ export function SettingsLayout() {
   };
 
   return (
-    <div className="flex w-full flex-1 flex-col gap-6 lg:flex-row lg:gap-10">
+    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 pt-8 lg:flex-row lg:gap-10">
       <aside className="flex w-full shrink-0 flex-col gap-6 lg:w-64">
         <section className="flex flex-col gap-3">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -68,14 +66,6 @@ export function SettingsLayout() {
               </div>
             </div>
           </div>
-          <Button
-            className="justify-start"
-            variant="outline"
-            onClick={() => void hexclaveClientApp.signOut()}
-          >
-            <Icon icon="hugeicons:logout-03" width={16} />
-            Sign out
-          </Button>
         </section>
 
         <nav aria-label="Settings sections" className="flex flex-col gap-2">
@@ -111,7 +101,6 @@ export function SettingsLayout() {
           {settingsTabs.find((tab) => tab.id === selectedTab)?.label}
         </h1>
         {selectedTab === "account" ? <AccountSettingsPanel /> : null}
-        {selectedTab === "subscription" ? <BillingPage /> : null}
         {selectedTab === "support" ? <SupportSettingsPanel /> : null}
       </div>
     </div>

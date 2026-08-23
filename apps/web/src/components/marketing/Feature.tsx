@@ -2,6 +2,7 @@
 
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Icon } from "@iconify/react";
 import { easeOut } from "motion";
 import {
   motion,
@@ -12,10 +13,8 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-
-import { featureItems } from "@/constants/landing-page";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
+import { featureItems } from "@/constants/landing-page";
 import { cn } from "@/lib/utils";
 import {
   BODY,
@@ -23,10 +22,162 @@ import {
   OVERLINE,
   PANEL_MEDIA,
   PANEL_PADDING,
+  platforms,
   SOFT_CHIP,
 } from "./rhythm";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
+
+const MOCK_CARD =
+  "absolute inset-x-5 top-1/2 -translate-y-1/2 scale-[0.90] rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5";
+
+function OverridesMock() {
+  const overrides = [
+    {
+      platform: platforms[2],
+      text: "The long-form take, with a link in the first comment.",
+    },
+    { platform: platforms[0], text: "One sharp line. That's all X needs." },
+    {
+      platform: platforms[4],
+      text: "Same clip — caption plus a pinned comment.",
+    },
+  ];
+  return (
+    <div className={MOCK_CARD}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm leading-5 font-medium">One draft</p>
+        <span className={SOFT_CHIP}>3 versions</span>
+      </div>
+      <ul className="mt-4 divide-y">
+        {overrides.map((override) => (
+          <li
+            className="flex items-start gap-3 py-2.5 first:pt-0 last:pb-0"
+            key={override.platform.label}
+          >
+            <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background">
+              <Icon
+                icon={override.platform.icon}
+                className="size-3.5"
+                style={{ color: override.platform.color }}
+              />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm leading-5 font-medium">
+                {override.platform.label}
+              </p>
+              <p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">
+                {override.text}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function CalendarMock() {
+  const days = [
+    {
+      day: "Mon",
+      posts: [
+        { time: "9:00", label: "Launch" },
+        { time: "18:00", label: "Clip" },
+      ],
+    },
+    { day: "Tue", posts: [{ time: "12:30", label: "Note" }] },
+    { day: "Wed", posts: [] },
+  ];
+  return (
+    <div className={MOCK_CARD}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm leading-5 font-medium">Week of Mar 10</p>
+        <span className={SOFT_CHIP}>Drag to reschedule</span>
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        {days.map((day) => (
+          <div
+            className="rounded-xl border border-border/60 bg-background p-2"
+            key={day.day}
+          >
+            <p className="text-sm leading-5 font-semibold uppercase tracking-wide text-muted-foreground">
+              {day.day}
+            </p>
+            <div className="mt-2 space-y-1.5">
+              {day.posts.length > 0 ? (
+                day.posts.map((post) => (
+                  <div
+                    className="rounded-lg bg-zinc-100 px-2 py-1.5 dark:bg-zinc-800"
+                    key={post.time}
+                  >
+                    <p className="text-sm leading-5 text-muted-foreground">
+                      {post.time}
+                    </p>
+                    <p className="truncate text-base leading-6 font-medium">
+                      {post.label}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="h-[34px] rounded-lg border border-dashed border-border" />
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FormatsMock() {
+  const formats = [
+    { platform: platforms[1], format: "Reels + carousel" },
+    { platform: platforms[5], format: "Shorts" },
+    { platform: platforms[3], format: "Text + link" },
+  ];
+  return (
+    <div className={MOCK_CARD}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm leading-5 font-medium">What publishes natively</p>
+        <span className={SOFT_CHIP}>Auto-detected</span>
+      </div>
+      <ul className="mt-4 divide-y">
+        {formats.map((format) => (
+          <li
+            className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0"
+            key={format.format}
+          >
+            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background">
+              <Icon
+                icon={format.platform.icon}
+                className="size-4"
+                style={{ color: format.platform.color }}
+              />
+            </span>
+            <p className="min-w-0 flex-1 truncate text-sm leading-5 font-medium">
+              {format.platform.label}
+            </p>
+            <span className="shrink-0 rounded-full border border-border/60 px-2.5 py-1 text-sm leading-5 font-medium text-muted-foreground">
+              {format.format}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Each Feature card gets the mock that matches its copy. */
+function FeatureMock({
+  mock,
+}: {
+  mock: (typeof featureItems)[number]["mock"];
+}) {
+  if (mock === "overrides") return <OverridesMock />;
+  if (mock === "calendar") return <CalendarMock />;
+  return <FormatsMock />;
+}
 
 function StickyFeatureCard({
   item,
@@ -91,7 +242,8 @@ function StickyFeatureCard({
             <Link
               href="/sign-in"
               className={cn(
-                buttonVariants(),
+                buttonVariants({ size: "lg" }),
+                "h-11 px-6 text-base",
                 "[&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5",
               )}
             >
@@ -102,7 +254,10 @@ function StickyFeatureCard({
         </div>
 
         <div
-          className={cn("relative h-full overflow-hidden bg-muted", PANEL_MEDIA)}
+          className={cn(
+            "relative h-full overflow-hidden bg-muted",
+            PANEL_MEDIA,
+          )}
         >
           <Image
             src="/hero-main.png"
@@ -111,59 +266,7 @@ function StickyFeatureCard({
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover object-center"
           />
-          {/* Floating mock "Scheduled" card, like the Post Bridge reference */}
-          <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 scale-[0.90] rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm leading-5 font-medium">Scheduled</p>
-              <span className={SOFT_CHIP}>Today</span>
-            </div>
-
-            <ul className="mt-4 divide-y">
-              {[
-                {
-                  time: "9:00 AM",
-                  caption: "Launch post is ready to go",
-                  people: ["PS", "ML"],
-                },
-                {
-                  time: "12:30 PM",
-                  caption: "Founder note in the replies",
-                  people: ["AR", "TB"],
-                },
-                {
-                  time: "6:00 PM",
-                  caption: "15s product clip from studio",
-                  people: ["JN", "DO"],
-                },
-              ].map((post) => (
-                <li
-                  className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
-                  key={post.time}
-                >
-                  <div className="min-w-0">
-                    <p className="text-xs leading-4 text-muted-foreground">
-                      {post.time}
-                    </p>
-                    <p className="mt-1 truncate text-sm leading-5 font-medium">
-                      {post.caption}
-                    </p>
-                  </div>
-                  <div className="flex -space-x-2">
-                    {post.people.map((initials) => (
-                      <Avatar
-                        className="size-7 border-2 border-background sm:size-8"
-                        key={initials}
-                      >
-                        <AvatarFallback className="text-[0.625rem] font-medium">
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FeatureMock mock={item.mock} />
         </div>
 
         <motion.div
@@ -180,9 +283,9 @@ export function Features() {
   return (
     <Section id="features">
       <SectionHeader
-        eyebrow="Why MultiFeed"
-        title="Posting shouldn't take an hour."
-        titleMuted="With us it takes 30 seconds."
+        eyebrow="Features"
+        title="One composer."
+        titleMuted="Every platform's rules, handled."
       />
 
       <div className={`${HEADER_GAP} relative`}>

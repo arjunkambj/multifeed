@@ -1,31 +1,159 @@
-import Image from "next/image";
 import { Icon } from "@iconify/react";
-
+import Image from "next/image";
 import Reveal from "@/components/motion/Reveal";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { BODY, GRID_GAP, HEADER_GAP, PANEL_HEADING, platforms } from "./rhythm";
+import {
+  BODY,
+  GRID_GAP,
+  HEADER_GAP,
+  OVERLINE,
+  PANEL_HEADING,
+  platforms,
+  SOFT_CHIP,
+} from "./rhythm";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
+/** Floating product mocks, one per step — same treatment as the Feature cards'
+    "Scheduled" panel, so every media box on the page speaks one language. */
+function StepMock({ step }: { step: (typeof steps)[number] }) {
+  if (step.kind === "accounts") {
+    const accounts = [
+      { platform: platforms[1], handle: "@studio.honey" },
+      { platform: platforms[2], handle: "Honey Sharma" },
+      { platform: platforms[4], handle: "@honeybuilds" },
+    ];
+    return (
+      <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm leading-5 font-medium">Accounts</p>
+          <span className={SOFT_CHIP}>3 connected</span>
+        </div>
+        <ul className="mt-4 divide-y">
+          {accounts.map((account) => (
+            <li
+              className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0"
+              key={account.handle}
+            >
+              <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background">
+                <Icon
+                  icon={account.platform.icon}
+                  className="size-4"
+                  style={{ color: account.platform.color }}
+                />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm leading-5 font-medium">
+                  {account.handle}
+                </p>
+                <p className="text-xs leading-4 text-muted-foreground">
+                  {account.platform.label}
+                </p>
+              </div>
+              <span className={SOFT_CHIP}>Live</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  if (step.kind === "composer") {
+    return (
+      <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm leading-5 font-medium">Composer</p>
+          <span className={SOFT_CHIP}>Draft</span>
+        </div>
+        <div className="mt-4 space-y-3">
+          <div className="h-2 w-full rounded-full bg-muted" />
+          <div className="h-2 w-11/12 rounded-full bg-muted" />
+          <div className="h-2 w-7/12 rounded-full bg-muted" />
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {["LinkedIn · longer", "X · shorter", "TikTok · comment"].map(
+            (override) => (
+              <span
+                className="inline-flex items-center rounded-full border border-border/60 px-2.5 py-1 text-[0.75rem] leading-4 font-medium text-muted-foreground"
+                key={override}
+              >
+                {override}
+              </span>
+            ),
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm leading-5 font-medium">Scheduled</p>
+        <span className={SOFT_CHIP}>Today</span>
+      </div>
+      <ul className="mt-4 divide-y">
+        {[
+          {
+            time: "9:00 AM",
+            caption: "Launch post is ready",
+            people: ["PS", "ML"],
+          },
+          { time: "6:00 PM", caption: "15s clip from studio", people: ["JN"] },
+        ].map((post) => (
+          <li
+            className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
+            key={post.time}
+          >
+            <div className="min-w-0">
+              <p className="text-xs leading-4 text-muted-foreground">
+                {post.time}
+              </p>
+              <p className="mt-1 truncate text-sm leading-5 font-medium">
+                {post.caption}
+              </p>
+            </div>
+            <div className="flex -space-x-2">
+              {post.people.map((initials) => (
+                <Avatar
+                  className="size-7 border-2 border-background sm:size-8"
+                  key={initials}
+                >
+                  <AvatarFallback className="text-[0.625rem] font-medium">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 const steps = [
   {
-    title: "Connect your channels",
-    description:
-      "One OAuth click links Instagram, TikTok, YouTube, LinkedIn, X, Facebook, and Threads. No passwords shared with us.",
+    title: "Link your accounts",
+    description: "One sign-in per platform, on their screen, not ours.",
+    kind: "accounts",
     mediaFirst: true,
     position: "object-[center_30%]",
   },
   {
-    title: "Draft once, tailor everywhere",
+    title: "Write one draft, tune per channel",
     description:
-      "Start from one caption, then tune the copy and format per platform without rebuilding the post.",
+      "Start with one caption, then override the text or settings per channel.",
+    kind: "composer",
     mediaFirst: false,
     position: "object-[center_60%]",
   },
   {
-    title: "Ship on schedule",
+    title: "Drag it onto the calendar",
     description:
-      "Drag posts onto the calendar and MultiFeed publishes at the right time on every channel, even while you sleep.",
+      "Pick a slot. MultiFeed publishes every version on time and retries failures.",
+    kind: "schedule",
     mediaFirst: true,
     position: "object-center",
   },
@@ -39,13 +167,15 @@ export function WhyMultiFeed() {
   return (
     <Section id="why-multifeed">
       <SectionHeader
-        eyebrow="Why MultiFeed"
-        title="From blank page to published"
-        titleMuted="in three steps."
+        eyebrow="How it works"
+        title="Three steps"
+        titleMuted="and your week is scheduled."
       />
 
-      {/* Marquee of supported-platform pills */}
-      <div className="relative mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+      {/* Marquee of supported-platform pills — rises in on scroll like the
+          hero, then keeps its continuous loop. Reveal is already a client
+          component, so this stays SSR-safe. */}
+      <Reveal className="relative mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
         <ul className="marketing-marquee-track flex w-max items-center">
           {[...platforms, ...platforms].map((platform, index) => (
             <li
@@ -63,61 +193,59 @@ export function WhyMultiFeed() {
             </li>
           ))}
         </ul>
-      </div>
+      </Reveal>
 
-      <Reveal
+      <div
         className={cn(
           HEADER_GAP,
           "grid md:grid-cols-3 items-stretch",
           GRID_GAP,
         )}
       >
-        {steps.map((step) => (
-          <article
-            key={step.title}
-            className="flex flex-col overflow-hidden rounded-panel bg-zinc-100 dark:bg-zinc-800"
-          >
-            {step.mediaFirst ? (
-              <div className="relative min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
-                <Image
-                  src="/hero-main.png"
-                  alt=""
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className={cn("h-full w-full object-cover", step.position)}
-                />
-              </div>
-            ) : null}
+        {steps.map((step, index) => (
+          <Reveal key={step.title} delay={index * 0.12} className="flex">
+            <article className="flex h-full w-full flex-col overflow-hidden rounded-panel bg-zinc-100 dark:bg-zinc-800">
+              {step.mediaFirst ? (
+                <div className="relative min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
+                  <Image
+                    src="/hero-main.png"
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className={cn("h-full w-full object-cover", step.position)}
+                  />
+                  <StepMock step={step} />
+                </div>
+              ) : null}
 
-            <div className="flex flex-1 flex-col p-6">
-              <h3
-                className={cn(
-                  PANEL_HEADING,
-                  "text-balance",
-                  step.mediaFirst ? "mt-4" : "mt-0",
-                )}
-              >
-                {step.title}
-              </h3>
-              <p className={cn(BODY, "mt-3 text-muted-foreground")}>
-                {step.description}
-              </p>
-            </div>
-
-            {step.mediaFirst ? null : (
-              <div className="relative mt-auto min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
-                <Image
-                  src="/hero-main.png"
-                  alt=""
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className={cn("h-full w-full object-cover", step.position)}
-                />
+              <div className="flex flex-1 flex-col p-6">
+                <p className={`text-muted-foreground ${OVERLINE}`}>
+                  Step {index + 1}
+                </p>
+                <h3 className={cn(PANEL_HEADING, "text-balance", "mt-3")}>
+                  {step.title}
+                </h3>
+                <p className={cn(BODY, "mt-3 text-muted-foreground")}>
+                  {step.description}
+                </p>
               </div>
-            )}
-          </article>
+
+              {step.mediaFirst ? null : (
+                <div className="relative mt-auto min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
+                  <Image
+                    src="/hero-main.png"
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className={cn("h-full w-full object-cover", step.position)}
+                  />
+                  <StepMock step={step} />
+                </div>
+              )}
+            </article>
+          </Reveal>
         ))}
-      </Reveal>
+      </div>
     </Section>
   );
 }
