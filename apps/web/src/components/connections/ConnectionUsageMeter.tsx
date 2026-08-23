@@ -21,7 +21,7 @@ export function ConnectionUsageMeter({
     remaining === 1 ? "1 account remaining" : `${remaining} accounts remaining`;
 
   return (
-    <div className="w-full min-w-0 rounded-2xl bg-muted px-4 py-3 sm:w-72">
+    <div className="w-full min-w-0 shrink-0 rounded-2xl bg-muted px-4 py-3 lg:w-72">
       <Progress
         value={Math.min(used, Math.max(limit, 1))}
         max={Math.max(limit, 1)}
@@ -63,7 +63,12 @@ export function ConnectionUsageMeter({
           {atLimit ? "Plan limit reached" : remainingLabel}
         </p>
         {atLimit ? (
-          <Button size="xs" variant="ghost" render={<Link href="/billing" />}>
+          <Button
+            nativeButton={false}
+            render={<Link href="/billing" />}
+            size="xs"
+            variant="ghost"
+          >
             Upgrade
           </Button>
         ) : null}

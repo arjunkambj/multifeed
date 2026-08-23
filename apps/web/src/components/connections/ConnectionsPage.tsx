@@ -153,134 +153,136 @@ function ConnectionsPageInner() {
         <DashboardPageTitle
           title="Connections"
           description="Connect social accounts from one workspace."
-          actions={
-            <ConnectionUsageMeter
-              used={connectedAccountsCount}
-              limit={accountLimit}
-            />
-          }
         />
 
-        <section className="divide-y divide-border/70">
-          {CONNECTABLE_PLATFORMS.map((platform) => {
-            const meta = PLATFORM_META[platform] ?? {
-              label: platform,
-              icon: "hugeicons:link-01",
-              brand: "#666666",
-            };
-            const linked = byPlatform.get(platform) ?? [];
-            const isConnecting = connecting === platform;
-            const hasAccounts = linked.length > 0;
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+          <ConnectionUsageMeter
+            used={connectedAccountsCount}
+            limit={accountLimit}
+          />
+          <section className="min-w-0 flex-1 divide-y divide-border/70 lg:order-first">
+            {CONNECTABLE_PLATFORMS.map((platform) => {
+              const meta = PLATFORM_META[platform] ?? {
+                label: platform,
+                icon: "hugeicons:link-01",
+                brand: "#666666",
+              };
+              const linked = byPlatform.get(platform) ?? [];
+              const isConnecting = connecting === platform;
+              const hasAccounts = linked.length > 0;
 
-            return (
-              <div
-                key={platform}
-                className="grid gap-3 py-3.5 first:pt-0 last:pb-0 md:grid-cols-[220px_minmax(0,1fr)] md:items-center"
-              >
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <span
-                    className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white"
-                    style={{
-                      backgroundColor: meta.brand,
-                      color: meta.foreground ?? "#FFFFFF",
-                    }}
-                  >
-                    <Icon icon={meta.icon} width={16} />
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="default"
-                    className="justify-start"
-                    disabled={atLimit || (connecting !== null && !isConnecting)}
-                    title={
-                      atLimit
-                        ? "Plan limit reached. Upgrade to connect more accounts."
-                        : undefined
-                    }
-                    onClick={() => void onConnect(platform)}
-                  >
-                    {isConnecting ? (
-                      <>
-                        <Spinner className="size-3" />
-                        Redirecting…
-                      </>
-                    ) : hasAccounts ? (
-                      `Add ${meta.label}`
+              return (
+                <div
+                  key={platform}
+                  className="grid gap-3 py-3.5 first:pt-0 last:pb-0 md:grid-cols-[220px_minmax(0,1fr)] md:items-center"
+                >
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span
+                      className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white"
+                      style={{
+                        backgroundColor: meta.brand,
+                        color: meta.foreground ?? "#FFFFFF",
+                      }}
+                    >
+                      <Icon icon={meta.icon} width={16} />
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="justify-start"
+                      disabled={
+                        atLimit || (connecting !== null && !isConnecting)
+                      }
+                      title={
+                        atLimit
+                          ? "Plan limit reached. Upgrade to connect more accounts."
+                          : undefined
+                      }
+                      onClick={() => void onConnect(platform)}
+                    >
+                      {isConnecting ? (
+                        <>
+                          <Spinner className="size-3" />
+                          Redirecting…
+                        </>
+                      ) : hasAccounts ? (
+                        `Add ${meta.label}`
+                      ) : (
+                        `Connect ${meta.label}`
+                      )}
+                    </Button>
+                  </div>
+
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    {linked.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        No {meta.label} accounts connected
+                      </p>
                     ) : (
-                      `Connect ${meta.label}`
-                    )}
-                  </Button>
-                </div>
-
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  {linked.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      No {meta.label} accounts connected
-                    </p>
-                  ) : (
-                    linked.map((account) => {
-                      const needsAttention = accountNeedsReconnect(account);
-                      return (
-                        <div
-                          key={account._id}
-                          className={[
-                            "flex max-w-full items-center gap-2 rounded-full bg-muted py-1 pl-1.5 pr-1",
-                            needsAttention ? "ring-1 ring-amber-500/50" : "",
-                          ].join(" ")}
-                        >
-                          {account.avatarUrl ? (
-                            <RemoteAvatar
-                              src={account.avatarUrl}
-                              size={24}
-                              className="size-6 rounded-full object-cover"
-                            />
-                          ) : (
-                            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-card text-[10px] font-semibold">
-                              {account.username.slice(0, 1).toUpperCase()}
-                            </span>
-                          )}
-                          <span
-                            className={`size-1.5 shrink-0 rounded-full ${statusDot[account.status] ?? "bg-muted"}`}
-                            title={account.status}
-                          />
-                          <p className="max-w-40 truncate text-xs font-medium">
-                            @{account.username}
-                          </p>
-                          {needsAttention && (
-                            <Button
-                              size="xs"
-                              variant="ghost"
-                              className="h-6 min-h-6 px-1.5 text-[11px] text-amber-500"
-                              disabled={connecting !== null && !isConnecting}
-                              onClick={() => void onConnect(platform)}
-                            >
-                              Reconnect
-                            </Button>
-                          )}
-                          <Button
-                            size="icon-xs"
-                            variant="ghost"
-                            aria-label={`Disconnect @${account.username}`}
-                            className="size-6 min-w-6 rounded-full text-muted-foreground hover:text-red-600"
-                            disabled={disconnecting === account._id}
-                            onClick={() =>
-                              setAccountToDisconnect({
-                                id: account._id,
-                                username: account.username,
-                              })
-                            }
+                      linked.map((account) => {
+                        const needsAttention = accountNeedsReconnect(account);
+                        return (
+                          <div
+                            key={account._id}
+                            className={[
+                              "flex max-w-full items-center gap-2 rounded-full bg-muted py-1 pl-1.5 pr-1",
+                              needsAttention ? "ring-1 ring-amber-500/50" : "",
+                            ].join(" ")}
                           >
-                            <Icon icon="hugeicons:delete-02" width={13} />
-                          </Button>
-                        </div>
-                      );
-                    })
-                  )}
+                            {account.avatarUrl ? (
+                              <RemoteAvatar
+                                src={account.avatarUrl}
+                                size={24}
+                                className="size-6 rounded-full object-cover"
+                              />
+                            ) : (
+                              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-card text-[10px] font-semibold">
+                                {account.username.slice(0, 1).toUpperCase()}
+                              </span>
+                            )}
+                            <span
+                              className={`size-1.5 shrink-0 rounded-full ${statusDot[account.status] ?? "bg-muted"}`}
+                              title={account.status}
+                            />
+                            <p className="max-w-40 truncate text-xs font-medium">
+                              @{account.username}
+                            </p>
+                            {needsAttention && (
+                              <Button
+                                size="xs"
+                                variant="ghost"
+                                className="h-6 min-h-6 px-1.5 text-[11px] text-amber-500"
+                                disabled={connecting !== null && !isConnecting}
+                                onClick={() => void onConnect(platform)}
+                              >
+                                Reconnect
+                              </Button>
+                            )}
+                            <Button
+                              size="icon-xs"
+                              variant="ghost"
+                              aria-label={`Disconnect @${account.username}`}
+                              className="size-6 min-w-6 rounded-full text-muted-foreground hover:text-red-600"
+                              disabled={disconnecting === account._id}
+                              onClick={() =>
+                                setAccountToDisconnect({
+                                  id: account._id,
+                                  username: account.username,
+                                })
+                              }
+                            >
+                              <Icon icon="hugeicons:delete-02" width={13} />
+                            </Button>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </section>
+              );
+            })}
+          </section>
+        </div>
       </div>
 
       <Dialog

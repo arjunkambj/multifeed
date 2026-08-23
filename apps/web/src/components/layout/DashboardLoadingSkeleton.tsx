@@ -69,8 +69,15 @@ export function DashboardLoadingSkeleton({
       );
       break;
     case "connections":
-      actionClassName = "h-[4.75rem] w-72";
-      content = <ConnectionsRowsSkeleton />;
+      actions = 0;
+      content = (
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+          <Skeleton className="h-[4.75rem] w-full rounded-2xl lg:w-72" />
+          <div className="min-w-0 flex-1 lg:order-first">
+            <ConnectionsRowsSkeleton />
+          </div>
+        </div>
+      );
       break;
     case "calendar":
       content = (
