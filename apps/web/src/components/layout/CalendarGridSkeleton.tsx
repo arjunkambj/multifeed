@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function CalendarGridSkeleton() {
   return (
-    <div className="grid min-h-[640px] grid-cols-7 overflow-hidden rounded-xl border border-border">
+    <div className="grid min-h-[640px] grid-cols-7 overflow-hidden rounded-[min(var(--radius-4xl),24px)] bg-muted">
       {Array.from({ length: 35 }, (_, index) => (
         <div
           className="min-h-24 border-b border-r border-border/70 p-2"

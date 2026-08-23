@@ -5,8 +5,23 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Kbd, KbdGroup, useMetaKeyLabel } from "@/components/ui/kbd";
 import {
   Sidebar,
   SidebarContent,
@@ -19,22 +34,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import type { MenuItem } from "@/constants/sidebar-menu";
 import {
   sidebarCategories,
   sidebarFooterItems,
   sidebarMainItems,
 } from "@/constants/sidebar-menu";
-import type { MenuItem } from "@/constants/sidebar-menu";
 import Logo from "./Logo";
 
 const searchGroups = [
@@ -46,10 +56,27 @@ const searchGroups = [
   { heading: "Workspace", items: sidebarFooterItems },
 ];
 
+const SEARCH_SHORTCUT = "k";
+
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
+  const metaKey = useMetaKeyLabel();
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key.toLowerCase() === SEARCH_SHORTCUT
+      ) {
+        event.preventDefault();
+        setSearchOpen((open) => !open);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const isActive = (item: MenuItem) =>
     pathname === item.href ||
@@ -78,23 +105,59 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="flex h-14 flex-row items-center gap-1 border-b border-border px-2 py-0 group-data-[collapsible=icon]:justify-center">
+      <SidebarHeader className="gap-2 p-2 group-data-[collapsible=icon]:items-center">
         <Link
           aria-label="MultiFeed"
-          className="flex h-8 items-center px-2 group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          className="flex items-center px-1 py-1 group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
           href="/overview"
         >
-          <Logo markOnly markClassName="size-4" />
+          <Logo markOnly markClassName="size-7" />
         </Link>
-        <Button
-          aria-label="Search"
-          className="ml-auto group-data-[collapsible=icon]:hidden"
-          size="icon-sm"
-          variant="ghost"
+        <InputGroup
+          className="h-8 w-full min-w-0 cursor-pointer rounded-lg group-data-[collapsible=icon]:hidden"
           onClick={() => setSearchOpen(true)}
         >
-          <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
-        </Button>
+          <InputGroupAddon>
+            <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
+          </InputGroupAddon>
+          <InputGroupInput
+            readOnly
+            aria-label="Search"
+            placeholder="Search"
+            onFocus={(event) => {
+              event.currentTarget.blur();
+              setSearchOpen(true);
+            }}
+          />
+          <InputGroupAddon align="inline-end" className="shrink-0">
+            <KbdGroup>
+              <Kbd>{metaKey}</Kbd>
+              <Kbd>{SEARCH_SHORTCUT.toUpperCase()}</Kbd>
+            </KbdGroup>
+          </InputGroupAddon>
+        </InputGroup>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                aria-label="Search"
+                className="hidden size-9 group-data-[collapsible=icon]:flex"
+                size="icon-sm"
+                variant="ghost"
+                onClick={() => setSearchOpen(true)}
+              />
+            }
+          >
+            <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            Search
+            <KbdGroup>
+              <Kbd>{metaKey}</Kbd>
+              <Kbd>{SEARCH_SHORTCUT.toUpperCase()}</Kbd>
+            </KbdGroup>
+          </TooltipContent>
+        </Tooltip>
       </SidebarHeader>
 
       <CommandDialog

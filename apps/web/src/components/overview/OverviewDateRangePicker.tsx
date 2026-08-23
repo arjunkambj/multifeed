@@ -1,22 +1,21 @@
 "use client";
 
+import { Icon } from "@iconify/react";
+import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import { useState } from "react";
+import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import type { DateRange } from "react-day-picker";
-import { Icon } from "@iconify/react";
-import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import {
-  DATE_RANGE_PRESETS,
   type CalendarDateRange,
+  DATE_RANGE_PRESETS,
   type DateRangePreset,
-  calendarDateToInputValue,
   getPresetRange,
 } from "@/lib/date-ranges";
 
@@ -48,11 +47,48 @@ function formatDate(date: CalendarDate) {
   return dateFormatter.format(calendarDateToDate(date));
 }
 
+function startOfMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function addMonths(date: Date, count: number) {
+  return new Date(date.getFullYear(), date.getMonth() + count, 1);
+}
+
+function monthFromRangeEnd(range: CalendarDateRange) {
+  return startOfMonth(new Date(range.end.year, range.end.month - 2, 1));
+}
+
+function formatMonthRange(start: Date) {
+  const end = addMonths(start, 1);
+  const startMonth = start.toLocaleString("en", { month: "long" });
+  const endMonth = end.toLocaleString("en", { month: "long" });
+  if (start.getFullYear() === end.getFullYear()) {
+    return `${startMonth} – ${endMonth} ${start.getFullYear()}`;
+  }
+  return `${startMonth} ${start.getFullYear()} – ${endMonth} ${end.getFullYear()}`;
+}
+
+function rangeSelection(range: CalendarDateRange): DateRange {
+  return {
+    from: calendarDateToDate(range.start),
+    to: calendarDateToDate(range.end),
+  };
+}
+
 export function OverviewDateRangePicker({ value, preset, onChange }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState(value);
+  const [picked, setPicked] = useState<DateRange | undefined>(() =>
+    rangeSelection(value),
+  );
+  const [visibleMonth, setVisibleMonth] = useState(() =>
+    monthFromRangeEnd(value),
+  );
   const maxDate = today(getLocalTimeZone());
-  const maxInputDate = calendarDateToInputValue(maxDate);
+  const maxJsDate = calendarDateToDate(maxDate);
+  const maxMonth = startOfMonth(maxJsDate);
+  const canGoNext = addMonths(visibleMonth, 2).getTime() <= maxMonth.getTime();
 
   const label = preset
     ? DATE_RANGE_PRESETS[preset].label
@@ -60,57 +96,78 @@ export function OverviewDateRangePicker({ value, preset, onChange }: Props) {
       ? formatDate(value.start)
       : `${formatDate(value.start)} – ${formatDate(value.end)}`;
 
+  const commitRange = (
+    nextRange: CalendarDateRange,
+    nextPreset: DateRangePreset | null,
+    close = false,
+  ) => {
+    setDraft(nextRange);
+    setPicked(rangeSelection(nextRange));
+    setVisibleMonth(monthFromRangeEnd(nextRange));
+    onChange(nextRange, nextPreset);
+    if (close) setIsOpen(false);
+  };
+
   const selectPreset = (nextPreset: DateRangePreset) => {
-    const range = getPresetRange(nextPreset);
-    setDraft(range);
-    onChange(range, nextPreset);
-    setIsOpen(false);
+    commitRange(getPresetRange(nextPreset), nextPreset, true);
   };
 
   const selectRange = (range: DateRange | undefined) => {
+    setPicked(range);
     if (!range?.from) return;
-    const start = dateToCalendarDate(range.from);
-    const end = range.to ? dateToCalendarDate(range.to) : start;
-    const nextRange = { start, end };
-    setDraft(nextRange);
-    if (range.to) {
-      onChange(nextRange, null);
-      setIsOpen(false);
+    if (!range.to) {
+      const start = dateToCalendarDate(range.from);
+      setDraft({ start, end: start });
+      return;
     }
+    commitRange(
+      {
+        start: dateToCalendarDate(range.from),
+        end: dateToCalendarDate(range.to),
+      },
+      null,
+    );
   };
 
-  const typeDate = (field: "start" | "end", input: string) => {
-    if (input.length !== 10) return;
-    try {
-      const parts = input.split("-").map(Number);
-      if (parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) return;
-      const [year, month, day] = parts as [number, number, number];
-      const parsed = new CalendarDate(year, month, day);
-      const candidate = { ...draft, [field]: parsed };
-      const nextRange =
-        candidate.start.compare(candidate.end) <= 0
-          ? candidate
-          : { start: candidate.end, end: candidate.start };
-      setDraft(nextRange);
-      onChange(nextRange, null);
-    } catch {
-      // Keep the last valid range while the user edits the field.
-    }
+  const applyDate = (field: "start" | "end", date: Date) => {
+    const parsed = dateToCalendarDate(date);
+    const candidate = { ...draft, [field]: parsed };
+    const nextRange =
+      candidate.start.compare(candidate.end) <= 0
+        ? candidate
+        : { start: candidate.end, end: candidate.start };
+    commitRange(nextRange, null);
   };
 
   return (
     <Popover
       open={isOpen}
-      onOpenChange={(open) => {
+      onOpenChange={(open, details) => {
+        if (!open && details.reason === "outside-press") {
+          const target = details.event.target;
+          const element =
+            target instanceof Element
+              ? target
+              : target instanceof Node
+                ? target.parentElement
+                : null;
+          if (element?.closest("[data-slot='date-picker-content']")) {
+            details.cancel();
+            return;
+          }
+        }
         setIsOpen(open);
-        if (open) setDraft(value);
+        if (open) {
+          setDraft(value);
+          setPicked(rangeSelection(value));
+          setVisibleMonth(monthFromRangeEnd(value));
+        }
       }}
     >
       <PopoverTrigger
         render={
           <Button
-            size="sm"
-            variant="outline"
+            variant="secondary"
             className="min-w-36 justify-between"
           />
         }
@@ -145,39 +202,75 @@ export function OverviewDateRangePicker({ value, preset, onChange }: Props) {
             </div>
           </aside>
 
-          <div className="w-[26.5rem] max-w-full shrink-0 overflow-x-auto bg-background p-3">
-            <div className="mb-3 grid grid-cols-2 gap-2">
-              <Input
+          <div className="w-[26.5rem] max-w-full min-w-0 shrink-0 bg-background p-3">
+            <div className="mb-3 grid min-w-0 grid-cols-2 gap-2">
+              <DatePicker
                 aria-label="Start date"
-                type="date"
-                max={maxInputDate}
-                className="h-9 text-sm"
-                value={calendarDateToInputValue(draft.start)}
-                onChange={(event) =>
-                  typeDate("start", event.currentTarget.value)
-                }
+                value={calendarDateToDate(draft.start)}
+                maxDate={maxJsDate}
+                onChange={(date) => applyDate("start", date)}
               />
-              <Input
+              <DatePicker
                 aria-label="End date"
-                type="date"
-                max={maxInputDate}
-                className="h-9 text-sm"
-                value={calendarDateToInputValue(draft.end)}
-                onChange={(event) => typeDate("end", event.currentTarget.value)}
+                value={calendarDateToDate(draft.end)}
+                maxDate={maxJsDate}
+                onChange={(date) => applyDate("end", date)}
               />
+            </div>
+
+            <div className="mb-1 flex items-center justify-between">
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                aria-label="Previous months"
+                onClick={() =>
+                  setVisibleMonth((current) => addMonths(current, -1))
+                }
+              >
+                <Icon icon="hugeicons:arrow-left-01" />
+              </Button>
+              <p className="text-sm font-medium">
+                {formatMonthRange(visibleMonth)}
+              </p>
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                aria-label="Next months"
+                disabled={!canGoNext}
+                onClick={() =>
+                  setVisibleMonth((current) => addMonths(current, 1))
+                }
+              >
+                <Icon icon="hugeicons:arrow-right-01" />
+              </Button>
             </div>
 
             <Calendar
               aria-label="Overview date range"
               mode="range"
+              resetOnSelect
               numberOfMonths={2}
               weekStartsOn={1}
-              disabled={[{ after: calendarDateToDate(maxDate) }]}
-              selected={{
-                from: calendarDateToDate(draft.start),
-                to: calendarDateToDate(draft.end),
-              }}
+              hideNavigation
+              month={visibleMonth}
+              onMonthChange={setVisibleMonth}
+              disabled={[{ after: maxJsDate }]}
+              selected={picked}
               onSelect={selectRange}
+              className="w-full p-0 [--cell-size:--spacing(7)]"
+              classNames={{
+                root: "w-full",
+                months: "relative flex flex-row gap-2",
+                month: "flex w-full min-w-0 flex-col gap-2",
+                month_caption: "hidden",
+                nav: "hidden",
+              }}
+              formatters={{
+                formatWeekdayName: (day) =>
+                  day.toLocaleDateString("en", { weekday: "short" }),
+              }}
             />
           </div>
         </div>

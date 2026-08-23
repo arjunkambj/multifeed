@@ -36,7 +36,7 @@
   --fc-now-indicator-color: var(--primary);
   --fc-event-border-color: transparent;
   --fc-button-bg-color: var(--muted);
-  --fc-button-border-color: var(--border);
+  --fc-button-border-color: transparent;
   --fc-button-text-color: var(--foreground);
   --fc-button-hover-bg-color: var(--secondary);
   --fc-button-active-bg-color: var(--primary);
@@ -100,7 +100,8 @@
 }
 
 .multifeed-calendar .fc-scrollgrid {
-  border-radius: var(--radius-xl);
+  border: none;
+  border-radius: min(var(--radius-4xl), 24px);
   overflow: hidden;
 }
 
@@ -171,7 +172,7 @@
   --accent-foreground: oklch(0.21 0.006 285.885); /* zinc-900 */
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.92 0.004 286.32); /* zinc-200 */
-  --input: oklch(0.92 0.004 286.32); /* zinc-200 */
+  --input: oklch(0.967 0.001 286.375); /* zinc-100 */
   --ring: oklch(0.54 0.13 153.45);
   --chart-1: oklch(0.871 0.006 286.286); /* zinc-300 */
   --chart-2: oklch(0.552 0.016 285.938); /* zinc-500 */
@@ -206,7 +207,7 @@
   --accent-foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --input: oklch(0.21 0.006 285.885); /* zinc-900 */
   --ring: oklch(0.54 0.13 153.45);
   --chart-1: oklch(0.871 0.006 286.286); /* zinc-300 */
   --chart-2: oklch(0.552 0.016 285.938); /* zinc-500 */

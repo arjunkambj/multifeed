@@ -94,7 +94,12 @@ export function DashboardLoadingSkeleton({
   return (
     <div className="flex flex-col gap-6" aria-busy="true" role="status">
       <span className="sr-only">Loading page</span>
-      <PageHeaderSkeleton actions={variant === "inbox" ? 0 : 1} />
+      <PageHeaderSkeleton
+        actionClassName={
+          variant === "connections" ? "h-[4.75rem] w-72 rounded-2xl" : undefined
+        }
+        actions={variant === "inbox" ? 0 : 1}
+      />
       {content}
     </div>
   );

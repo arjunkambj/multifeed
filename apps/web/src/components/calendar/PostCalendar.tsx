@@ -277,7 +277,7 @@ export function PostCalendar() {
             </div>
           </div>
 
-          <div className="multifeed-calendar relative min-h-[640px]">
+          <div className="multifeed-calendar relative min-h-[640px] overflow-hidden rounded-[min(var(--radius-4xl),24px)]">
             {posts === undefined && (
               <div className="absolute inset-0 z-10 bg-card">
                 <CalendarGridSkeleton />
@@ -353,7 +353,7 @@ function PostDetailsCard({
   router: ReturnType<typeof useRouter>;
 }) {
   return (
-    <Card className="border border-border bg-card shadow-none xl:sticky xl:top-4 xl:self-start">
+    <Card className="bg-card shadow-none xl:sticky xl:top-4 xl:self-start">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Post details</CardTitle>
         <CardDescription>Review or jump into editing</CardDescription>
@@ -409,7 +409,7 @@ function PostDetailsCard({
                 selectedPost.targets.map((t) => (
                   <div
                     key={t.targetId}
-                    className="flex items-center gap-2 rounded-xl border border-border/60 px-2.5 py-2"
+                    className="flex items-center gap-2 rounded-xl bg-muted px-2.5 py-2"
                   >
                     <span
                       className="flex size-7 items-center justify-center rounded-full text-white"

@@ -13,6 +13,7 @@ import { ComposerFormSkeleton } from "@/components/layout/ComposerFormSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -603,7 +604,7 @@ function usePostComposerForm({
         description={formatLabel(postKind)}
         actions={
           onChooseDifferentFormat ? (
-            <Button size="sm" variant="outline" onClick={chooseDifferentFormat}>
+            <Button size="sm" variant="secondary" onClick={chooseDifferentFormat}>
               <Icon icon="hugeicons:arrow-left-01" width={15} />
               Change type
             </Button>
@@ -613,8 +614,7 @@ function usePostComposerForm({
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex flex-col gap-6">
-          {/* Publish to */}
-          <section className="border-b border-border/70 pb-5">
+          <section>
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold">
                 Publish to
@@ -626,10 +626,10 @@ function usePostComposerForm({
               </h2>
               {compatibleAccounts.length > 0 && (
                 <div className="flex gap-1">
-                  <Button size="sm" variant="outline" onClick={selectAll}>
+                  <Button size="sm" variant="secondary" onClick={selectAll}>
                     Select all
                   </Button>
-                  <Button size="sm" variant="outline" onClick={clearAll}>
+                  <Button size="sm" variant="secondary" onClick={clearAll}>
                     Clear
                   </Button>
                 </div>
@@ -638,31 +638,46 @@ function usePostComposerForm({
 
             <div className="mt-3">
               {activeAccounts.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  {(accounts ?? []).length > 0
-                    ? "Connected accounts need a reconnect before they can publish."
-                    : "No accounts connected."}{" "}
-                  <button
-                    type="button"
-                    className="font-medium text-primary hover:underline"
+                <div className="flex flex-col items-start gap-3 rounded-[min(var(--radius-4xl),24px)] bg-muted px-4 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    {(accounts ?? []).length > 0
+                      ? "Connected accounts need a reconnect before they can publish."
+                      : "Connect a social account to publish this post."}
+                  </p>
+                  <Button
+                    size="sm"
                     onClick={() => router.push("/connections")}
                   >
                     {(accounts ?? []).length > 0
                       ? "Reconnect accounts"
                       : "Connect accounts"}
-                  </button>
-                </p>
+                  </Button>
+                </div>
               ) : compatibleAccounts.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No accounts support this format.{" "}
-                  <button
-                    type="button"
-                    className="font-medium text-primary hover:underline"
-                    onClick={() => router.push("/connections")}
-                  >
-                    Manage connections
-                  </button>
-                </p>
+                <div className="flex flex-col items-start gap-3 rounded-[min(var(--radius-4xl),24px)] bg-muted px-4 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    None of your connected accounts support this format. Connect
+                    a matching network or pick a different type.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => router.push("/connections")}
+                    >
+                      Manage connections
+                    </Button>
+                    {onChooseDifferentFormat ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="bg-background"
+                        onClick={chooseDifferentFormat}
+                      >
+                        Change type
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {compatibleAccounts.map((account) => {
@@ -675,13 +690,13 @@ function usePostComposerForm({
                       <Button
                         key={account._id}
                         size="sm"
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => toggleAccount(account._id)}
                         aria-label={`${label} on ${platformName} (@${account.username})`}
                         className={
                           isOn
-                            ? "h-10 gap-2 rounded-full bg-primary/10 py-0 pl-1 pr-3 ring-1 ring-primary/40"
-                            : "h-10 gap-2 rounded-full bg-muted py-0 pl-1 pr-3 hover:bg-secondary"
+                            ? "h-10 gap-2 rounded-full bg-primary/10 py-0 pl-1 pr-3"
+                            : "h-10 gap-2 rounded-full bg-background py-0 pl-1 pr-3"
                         }
                       >
                         <span className="relative size-8 shrink-0">
@@ -729,8 +744,7 @@ function usePostComposerForm({
             </div>
           </section>
 
-          {/* Content */}
-          <section className="border-b border-border/70 pb-5">
+          <section>
             <div className="flex flex-col gap-4">
               <div
                 className={
@@ -809,10 +823,10 @@ function usePostComposerForm({
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 border-t border-border/70 pt-4">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
-                  variant={activeTool === "account" ? "default" : "outline"}
+                  variant={activeTool === "account" ? "default" : "secondary"}
                   onClick={() =>
                     dispatch({
                       type: "toolChanged",
@@ -825,7 +839,7 @@ function usePostComposerForm({
                 </Button>
                 <Button
                   size="sm"
-                  variant={activeTool === "history" ? "default" : "outline"}
+                  variant={activeTool === "history" ? "default" : "secondary"}
                   onClick={() =>
                     dispatch({
                       type: "toolChanged",
@@ -838,7 +852,7 @@ function usePostComposerForm({
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant={showNotes ? "default" : "secondary"}
                   onClick={() => dispatch({ type: "notesVisibilityToggled" })}
                 >
                   <Icon
@@ -1026,7 +1040,7 @@ function usePostComposerForm({
                             dispatch({ type: "bodyChanged", value: caption });
                             dispatch({ type: "toolChanged", value: null });
                           }}
-                          className="h-auto w-full justify-start rounded-xl border border-border bg-card px-3 py-2 text-left text-sm leading-relaxed hover:border-primary/40"
+                          className="h-auto w-full justify-start rounded-xl bg-muted px-3 py-2 text-left text-sm leading-relaxed"
                         >
                           <span className="line-clamp-2">{caption}</span>
                         </Button>
@@ -1055,9 +1069,9 @@ function usePostComposerForm({
           <section>
             <h2 className="mb-3 text-base font-semibold">Preview</h2>
             {selectedAccountIds.size === 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <div className="rounded-[min(var(--radius-4xl),24px)] bg-muted px-4 py-8 text-center text-sm text-muted-foreground">
                 Select accounts above to preview.
-              </p>
+              </div>
             ) : (
               <div className="flex items-start gap-4 overflow-x-auto pb-2">
                 {[...selectedAccountIds].map((id) => {
@@ -1089,7 +1103,7 @@ function usePostComposerForm({
 
         {/* Sidebar */}
         <div className="flex flex-col gap-4 lg:sticky lg:top-4 lg:self-start">
-          <section className="border-t border-border/70 pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+          <section className="rounded-[min(var(--radius-4xl),24px)] bg-muted p-5">
             <h2 className="mb-3 text-base font-semibold">Publish</h2>
             <div className="flex flex-col gap-3">
               <Tabs
@@ -1104,7 +1118,7 @@ function usePostComposerForm({
               >
                 <TabsList
                   aria-label="Publishing time"
-                  className="grid w-full grid-cols-2"
+                  className="grid w-full grid-cols-2 bg-background"
                 >
                   <TabsTrigger value="now">Post now</TabsTrigger>
                   <TabsTrigger value="schedule">Schedule</TabsTrigger>
@@ -1116,17 +1130,22 @@ function usePostComposerForm({
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_112px] lg:grid-cols-1">
                     <div className="flex w-full flex-col gap-1.5">
                       <Label htmlFor="schedule-date">Date</Label>
-                      <Input
+                      <DatePicker
                         id="schedule-date"
-                        type="date"
-                        className="w-full"
-                        value={scheduleParts?.date ?? ""}
-                        onChange={(event) =>
-                          updateSchedule(
-                            event.currentTarget.value || null,
-                            scheduleParts?.time ?? "12:00",
-                          )
+                        aria-label="Date"
+                        className="bg-background h-8"
+                        value={
+                          scheduleParts?.date
+                            ? new Date(`${scheduleParts.date}T00:00:00`)
+                            : undefined
                         }
+                        onChange={(date) => {
+                          const pad = (n: number) => String(n).padStart(2, "0");
+                          updateSchedule(
+                            `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
+                            scheduleParts?.time ?? "12:00",
+                          );
+                        }}
                       />
                     </div>
 
@@ -1135,7 +1154,7 @@ function usePostComposerForm({
                       <Input
                         id="schedule-time"
                         type="time"
-                        className="w-full"
+                        className="w-full bg-background"
                         value={scheduleParts?.time ?? ""}
                         onChange={(event) =>
                           updateSchedule(
@@ -1166,8 +1185,8 @@ function usePostComposerForm({
                       <Button
                         key={chip.label}
                         size="sm"
-                        variant="outline"
-                        className="rounded-full bg-muted"
+                        variant="secondary"
+                        className="rounded-full bg-background"
                         onClick={() => {
                           if (chip.kind === "tomorrow") {
                             const date = new Date();
@@ -1196,7 +1215,7 @@ function usePostComposerForm({
                 </>
               )}
 
-              <div className="mt-1 flex flex-col gap-2 border-t border-border/70 pt-3">
+              <div className="mt-1 flex flex-col gap-2">
                 <Button
                   className="w-full"
                   variant="default"
@@ -1224,8 +1243,8 @@ function usePostComposerForm({
                   {scheduleMode === "schedule" ? "Schedule post" : "Post now"}
                 </Button>
                 <Button
-                  className="w-full"
-                  variant="outline"
+                  className="w-full bg-background"
+                  variant="secondary"
                   disabled={!!saving || uploadingMedia || !hasRequiredContent}
                   onClick={() => void submit("draft")}
                 >

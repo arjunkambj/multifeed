@@ -41,9 +41,9 @@ function MetricCard({ title, value, icon, change }: MetricCardProps) {
         : "text-red-600";
 
   return (
-    <Card className="bg-card">
+    <Card className="bg-card py-3.5 [--card-spacing:--spacing(4)]">
       <CardContent className="flex flex-col gap-2">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <p className="truncate text-sm font-medium text-foreground">
             {title}
           </p>
@@ -53,11 +53,11 @@ function MetricCard({ title, value, icon, change }: MetricCardProps) {
             className="shrink-0 text-muted-foreground"
           />
         </div>
-        <p className="text-3xl font-semibold tracking-tight tabular-nums text-foreground">
+        <p className="text-3xl font-semibold leading-none tracking-tight tabular-nums text-foreground">
           {value}
         </p>
-        <div>
-          <Separator className="mb-2" />
+        <div className="flex flex-col gap-1.5">
+          <Separator />
           {trend == null ? (
             <p className="text-xs text-muted-foreground">
               Current workspace total
@@ -67,14 +67,16 @@ function MetricCard({ title, value, icon, change }: MetricCardProps) {
               <span
                 className={`flex items-center gap-1 font-medium ${trendColor}`}
               >
-                <Icon
-                  icon={
-                    trend < 0
-                      ? "hugeicons:arrow-down-02"
-                      : "hugeicons:arrow-up-02"
-                  }
-                  width={13}
-                />
+                {trend !== 0 ? (
+                  <Icon
+                    icon={
+                      trend < 0
+                        ? "hugeicons:arrow-down-02"
+                        : "hugeicons:arrow-up-02"
+                    }
+                    width={13}
+                  />
+                ) : null}
                 {trend > 0 ? "+" : ""}
                 {trend}%
               </span>
@@ -91,7 +93,7 @@ function MetricsSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       {Array.from({ length: 5 }, (_, index) => (
-        <Skeleton key={index} className="h-28 rounded-2xl" />
+        <Skeleton key={index} className="h-24 rounded-2xl" />
       ))}
     </div>
   );

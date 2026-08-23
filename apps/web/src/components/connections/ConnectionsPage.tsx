@@ -8,6 +8,7 @@ import { useQuery } from "convex-helpers/react/cache/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { ConnectionUsageMeter } from "@/components/connections/ConnectionUsageMeter";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
@@ -93,7 +94,7 @@ function ConnectionsPageInner() {
   }
 
   const accountLimit = entitlements.connectedAccountLimit;
-  const connectionUsage = `${connectedAccountsCount} of ${accountLimit} connections used`;
+  const atLimit = connectedAccountsCount >= accountLimit;
 
   const byPlatform = new Map<string, typeof accounts>();
   for (const platform of CONNECTABLE_PLATFORMS) {
@@ -151,7 +152,13 @@ function ConnectionsPageInner() {
       <div className="flex flex-col gap-6">
         <DashboardPageTitle
           title="Connections"
-          description={`Connect and manage social accounts from one workspace. ${connectionUsage}.`}
+          description="Connect social accounts from one workspace."
+          actions={
+            <ConnectionUsageMeter
+              used={connectedAccountsCount}
+              limit={accountLimit}
+            />
+          }
         />
 
         <section className="divide-y divide-border/70">
@@ -184,7 +191,12 @@ function ConnectionsPageInner() {
                     size="sm"
                     variant="default"
                     className="justify-start"
-                    disabled={connecting !== null && !isConnecting}
+                    disabled={atLimit || (connecting !== null && !isConnecting)}
+                    title={
+                      atLimit
+                        ? "Plan limit reached. Upgrade to connect more accounts."
+                        : undefined
+                    }
                     onClick={() => void onConnect(platform)}
                   >
                     {isConnecting ? (

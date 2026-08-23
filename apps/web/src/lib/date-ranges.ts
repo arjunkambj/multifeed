@@ -1,6 +1,9 @@
 import {
   type CalendarDate,
+  endOfMonth,
   getLocalTimeZone,
+  startOfMonth,
+  startOfWeek,
   today,
 } from "@internationalized/date";
 
@@ -9,7 +12,9 @@ export const DATE_RANGE_PRESETS = {
   yesterday: { label: "Yesterday" },
   last_7_days: { label: "Last 7 days" },
   last_30_days: { label: "Last 30 days" },
-  this_month: { label: "This month" },
+  week_to_date: { label: "Week to date" },
+  month_to_date: { label: "Month to date" },
+  last_month: { label: "Last month" },
 } as const;
 
 export type DateRangePreset = keyof typeof DATE_RANGE_PRESETS;
@@ -39,8 +44,20 @@ export function getPresetRange(
       return { start: currentDate.subtract({ days: 6 }), end: currentDate };
     case "last_30_days":
       return { start: currentDate.subtract({ days: 29 }), end: currentDate };
-    case "this_month":
-      return { start: currentDate.set({ day: 1 }), end: currentDate };
+    case "week_to_date":
+      return {
+        start: startOfWeek(currentDate, "en-US", "mon"),
+        end: currentDate,
+      };
+    case "month_to_date":
+      return { start: startOfMonth(currentDate), end: currentDate };
+    case "last_month": {
+      const previousMonth = currentDate.subtract({ months: 1 });
+      return {
+        start: startOfMonth(previousMonth),
+        end: endOfMonth(previousMonth),
+      };
+    }
   }
 }
 

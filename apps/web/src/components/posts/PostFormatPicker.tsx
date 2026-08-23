@@ -1,8 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
-import { PLATFORM_META } from "@/lib/platform-meta";
+import { PLATFORM_META, platformLabel } from "@/lib/platform-meta";
 import {
   POST_FORMATS,
   POST_KIND_PLATFORMS,
@@ -16,51 +15,52 @@ export function PostFormatPicker({
 }) {
   return (
     <section className="w-full" aria-label="Choose post format">
-      <div className="grid w-full gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {POST_FORMATS.map((format) => {
           const platforms = POST_KIND_PLATFORMS[format.id];
+          const platformNames = platforms.map(platformLabel).join(", ");
 
           return (
-            <Button
+            <button
               key={format.id}
-              variant="ghost"
-              aria-label={`${format.label}. ${format.description}`}
+              type="button"
+              aria-label={`${format.label}. ${format.description}. Supported on ${platformNames}`}
               onClick={() => onChange(format.id)}
-              className="group h-auto min-h-48 w-full flex-col items-center justify-center gap-4 rounded-2xl border border-border/70 bg-transparent px-5 py-6 text-center hover:border-primary/40 hover:bg-primary/5"
+              className="group flex h-full min-h-52 w-full flex-col items-center rounded-2xl bg-muted px-5 py-5 text-center outline-none transition-colors hover:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_4%)] focus-visible:ring-3 focus-visible:ring-ring/30"
             >
-              <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
-                <Icon icon={format.icon} width={24} />
+              <span className="flex size-11 items-center justify-center rounded-xl bg-background text-muted-foreground transition-colors group-hover:text-primary">
+                <Icon icon={format.icon} width={22} />
               </span>
 
-              <span className="flex w-full flex-col items-center gap-1">
-                <span className="text-base font-semibold text-foreground">
+              <span className="mt-4 flex w-full flex-col items-center gap-1">
+                <span className="text-sm font-semibold text-foreground">
                   {format.label}
                 </span>
-                <span className="text-sm font-normal text-muted-foreground">
+                <span className="text-sm font-normal leading-snug text-muted-foreground">
                   {format.description}
                 </span>
               </span>
 
-              <span className="flex flex-wrap items-center justify-center gap-1.5">
+              <span className="mt-auto flex flex-wrap items-center justify-center gap-1.5 pt-5">
                 {platforms.map((platform) => {
                   const meta = PLATFORM_META[platform];
                   return (
                     <span
                       key={platform}
                       title={meta?.label ?? platform}
-                      className="flex size-7 items-center justify-center rounded-lg bg-muted"
+                      className="flex size-7 items-center justify-center rounded-full bg-background"
                     >
                       <Icon
                         icon={meta?.icon ?? "hugeicons:link-01"}
-                        width={14}
+                        width={13}
                         style={{ color: meta?.brand }}
-                        aria-label={meta?.label ?? platform}
+                        aria-hidden
                       />
                     </span>
                   );
                 })}
               </span>
-            </Button>
+            </button>
           );
         })}
       </div>

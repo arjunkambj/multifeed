@@ -7,6 +7,7 @@ import { PLANS } from "@multifeed/plans";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
+import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -120,8 +121,8 @@ export function BillingPage() {
 
   if (subscription === undefined) {
     return (
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pt-8">
-        <Skeleton className="h-10 w-40" />
+      <div className="flex w-full min-w-0 flex-1 flex-col gap-6">
+        <Skeleton className="h-8 w-40" />
         <Skeleton className="h-24 w-full rounded-2xl" />
         <Skeleton className="h-40 w-full rounded-2xl" />
       </div>
@@ -129,10 +130,11 @@ export function BillingPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pt-8">
-      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-        Billing
-      </h1>
+    <div className="flex w-full min-w-0 flex-1 flex-col gap-6">
+      <DashboardPageTitle
+        title="Billing"
+        description="Manage your plan, billing interval, and subscription."
+      />
       <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-muted p-5">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-card">
@@ -180,14 +182,11 @@ export function BillingPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">Billing interval</p>
-        <div
-          className="flex items-center gap-1 rounded-xl border border-border/50 bg-card px-1.5 py-1"
-          role="group"
-        >
+        <div className="flex items-center gap-2" role="group">
           <button
-            className={`cursor-pointer rounded-lg px-2.5 py-1 text-sm font-medium transition-colors ${
+            className={`cursor-pointer px-1 py-1 text-sm font-medium transition-colors ${
               !isYearly
-                ? "bg-muted text-foreground"
+                ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => setBillingInterval("month")}
@@ -202,9 +201,9 @@ export function BillingPage() {
             }
           />
           <button
-            className={`cursor-pointer rounded-lg px-2.5 py-1 text-sm font-medium transition-colors ${
+            className={`cursor-pointer px-1 py-1 text-sm font-medium transition-colors ${
               isYearly
-                ? "bg-muted text-foreground"
+                ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => setBillingInterval("year")}
@@ -216,8 +215,8 @@ export function BillingPage() {
         </div>
       </div>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 lg:gap-5">
-        <article className="flex flex-col overflow-hidden rounded-2xl bg-muted">
+      <section className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <article className="flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl bg-muted">
           <div className="flex flex-1 flex-col p-5 sm:p-6">
             <div className="flex flex-col gap-1">
               <h3 className="font-display text-xl font-semibold tracking-tight text-foreground">
@@ -254,7 +253,7 @@ export function BillingPage() {
             </ul>
 
             <Button
-              className="mt-7 w-full max-w-sm self-center font-medium"
+              className="mt-7 w-full font-medium"
               disabled
               size="lg"
               variant="secondary"
@@ -273,7 +272,7 @@ export function BillingPage() {
 
           return (
             <article
-              className="flex flex-col overflow-hidden rounded-2xl bg-muted"
+              className="flex h-full min-w-0 w-full flex-col overflow-hidden rounded-2xl bg-muted"
               key={plan.key}
             >
               <div className="flex flex-1 flex-col p-5 sm:p-6">
@@ -321,7 +320,7 @@ export function BillingPage() {
                 </ul>
 
                 <Button
-                  className="mt-7 w-full max-w-sm self-center font-medium"
+                  className="mt-7 w-full font-medium"
                   disabled={
                     isCurrent || checkoutBlocked || checkingOut !== null
                   }
