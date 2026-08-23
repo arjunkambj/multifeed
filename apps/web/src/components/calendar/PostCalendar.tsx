@@ -360,7 +360,7 @@ function PostDetailsCard({
       </CardHeader>
       <CardContent>
         {selectedPost === undefined && (
-          <div className="space-y-4 py-2">
+          <div className="flex flex-col gap-4 py-2">
             <Skeleton className="h-5 w-24 rounded-full" />
             <Skeleton className="h-4 w-3/5 rounded-lg" />
             <Skeleton className="h-4 w-full rounded-lg" />

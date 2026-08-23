@@ -6,7 +6,13 @@ import Reveal from "@/components/motion/Reveal";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { BODY, PANEL_MEDIA, PANEL_PADDING, SOFT_CHIP } from "./rhythm";
+import {
+  BODY,
+  MOCK_CARD,
+  PANEL_MEDIA,
+  PANEL_PADDING,
+  SOFT_CHIP,
+} from "./rhythm";
 import Section from "./Section";
 
 export function ReadyCTA() {
@@ -50,7 +56,7 @@ export function ReadyCTA() {
               className="object-cover object-center"
             />
 
-            <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 scale-[0.90] rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5">
+            <div className={cn(MOCK_CARD, "scale-[0.90]")}>
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm leading-5 font-medium">New post</p>
                 <span className={SOFT_CHIP}>Today, 9:00 AM</span>

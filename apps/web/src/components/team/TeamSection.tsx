@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { InvitePopover } from "@/components/team/InvitePopover";
 import { TeamMembersContent } from "@/components/team/TeamMembersContent";
-import { Skeleton } from "@/components/ui/skeleton";
 import { hexclaveClientApp } from "@/hexclave/client";
 
 export function TeamSection() {
@@ -33,12 +33,7 @@ export function TeamSection() {
   }, [team, user]);
 
   if (!team || canReadMembers === null) {
-    return (
-      <div className="flex flex-col gap-6">
-        <Skeleton className="h-8 w-48 rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
-      </div>
-    );
+    return <DashboardLoadingSkeleton variant="teams" />;
   }
 
   return (

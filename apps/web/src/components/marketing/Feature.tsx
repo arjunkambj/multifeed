@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import {
   BODY,
   HEADER_GAP,
+  MOCK_CARD,
   OVERLINE,
   PANEL_MEDIA,
   PANEL_PADDING,
@@ -27,9 +28,6 @@ import {
 } from "./rhythm";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
-
-const MOCK_CARD =
-  "absolute inset-x-5 top-1/2 -translate-y-1/2 scale-[0.90] rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5";
 
 function OverridesMock() {
   const overrides = [
@@ -44,7 +42,7 @@ function OverridesMock() {
     },
   ];
   return (
-    <div className={MOCK_CARD}>
+    <div className={cn(MOCK_CARD, "scale-[0.90]")}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm leading-5 font-medium">One draft</p>
         <span className={SOFT_CHIP}>3 versions</span>
@@ -90,7 +88,7 @@ function CalendarMock() {
     { day: "Wed", posts: [] },
   ];
   return (
-    <div className={MOCK_CARD}>
+    <div className={cn(MOCK_CARD, "scale-[0.90]")}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm leading-5 font-medium">Week of Mar 10</p>
         <span className={SOFT_CHIP}>Drag to reschedule</span>
@@ -98,7 +96,7 @@ function CalendarMock() {
       <div className="mt-4 grid grid-cols-3 gap-2">
         {days.map((day) => (
           <div
-            className="rounded-xl border border-border/60 bg-background p-2"
+            className="rounded-xl border border-border/60 bg-muted/50 p-2"
             key={day.day}
           >
             <p className="text-sm leading-5 font-semibold uppercase tracking-wide text-muted-foreground">
@@ -108,7 +106,7 @@ function CalendarMock() {
               {day.posts.length > 0 ? (
                 day.posts.map((post) => (
                   <div
-                    className="rounded-lg bg-background px-2 py-1.5"
+                    className="rounded-lg bg-muted px-2 py-1.5"
                     key={post.time}
                   >
                     <p className="text-sm leading-5 text-muted-foreground">
@@ -137,7 +135,7 @@ function FormatsMock() {
     { platform: platforms[3], format: "Text + link" },
   ];
   return (
-    <div className={MOCK_CARD}>
+    <div className={cn(MOCK_CARD, "scale-[0.90]")}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm leading-5 font-medium">What each app gets</p>
         <span className={SOFT_CHIP}>By platform</span>

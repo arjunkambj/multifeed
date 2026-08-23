@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ComposerFormSkeleton } from "@/components/layout/ComposerFormSkeleton";
+import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
 import { Button } from "@/components/ui/button";
@@ -583,12 +583,7 @@ function usePostComposerForm({
   };
 
   if (accounts === undefined || (sourcePostId && sourcePost === undefined)) {
-    return (
-      <div className="flex flex-col gap-6" aria-busy="true" role="status">
-        <span className="sr-only">Loading composer</span>
-        <ComposerFormSkeleton />
-      </div>
-    );
+    return <DashboardLoadingSkeleton variant="composer" />;
   }
 
   return (
@@ -604,7 +599,11 @@ function usePostComposerForm({
         description={formatLabel(postKind)}
         actions={
           onChooseDifferentFormat ? (
-            <Button size="sm" variant="secondary" onClick={chooseDifferentFormat}>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={chooseDifferentFormat}
+            >
               <Icon icon="hugeicons:arrow-left-01" width={15} />
               Change type
             </Button>
@@ -644,10 +643,7 @@ function usePostComposerForm({
                       ? "Connected accounts need a reconnect before they can publish."
                       : "Connect a social account to publish this post."}
                   </p>
-                  <Button
-                    size="sm"
-                    onClick={() => router.push("/connections")}
-                  >
+                  <Button size="sm" onClick={() => router.push("/connections")}>
                     {(accounts ?? []).length > 0
                       ? "Reconnect accounts"
                       : "Connect accounts"}
@@ -1021,7 +1017,7 @@ function usePostComposerForm({
                     }
                   />
                   {recentCaptions === undefined ? (
-                    <div className="space-y-2 py-2">
+                    <div className="flex flex-col gap-2 py-2">
                       <Skeleton className="h-8 w-full rounded-lg" />
                       <Skeleton className="h-8 w-4/5 rounded-lg" />
                       <Skeleton className="h-8 w-3/5 rounded-lg" />

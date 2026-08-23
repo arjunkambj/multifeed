@@ -41,6 +41,10 @@ export const BODY = "text-[0.9375rem] leading-7 text-pretty";
 export const SOFT_CHIP =
   "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[0.6875rem] leading-4 font-medium text-primary dark:bg-primary/15";
 
+/** Floating product mock over a photo. Page background, not card. */
+export const MOCK_CARD =
+  "absolute inset-x-5 top-1/2 -translate-y-1/2 rounded-card border bg-background p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5";
+
 /** Supported platforms, in one order, with one icon set. Hero, Features and
     Pricing each render this list so the strips never drift apart. */
 export const platforms = [

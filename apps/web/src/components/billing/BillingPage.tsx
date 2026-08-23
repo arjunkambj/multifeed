@@ -7,9 +7,9 @@ import { PLANS } from "@multifeed/plans";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
+import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { currentTimeBucket } from "@/lib/time-bucket";
@@ -120,13 +120,7 @@ export function BillingPage() {
   };
 
   if (subscription === undefined) {
-    return (
-      <div className="flex w-full min-w-0 flex-1 flex-col gap-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-24 w-full rounded-2xl" />
-        <Skeleton className="h-40 w-full rounded-2xl" />
-      </div>
-    );
+    return <DashboardLoadingSkeleton variant="billing" />;
   }
 
   return (

@@ -7,6 +7,7 @@ import {
   BODY,
   GRID_GAP,
   HEADER_GAP,
+  MOCK_CARD,
   OVERLINE,
   PANEL_HEADING,
   platforms,
@@ -20,12 +21,12 @@ import SectionHeader from "./SectionHeader";
 function StepMock({ step }: { step: (typeof steps)[number] }) {
   if (step.kind === "accounts") {
     const accounts = [
-      { platform: platforms[1], handle: "@studio.honey" },
-      { platform: platforms[2], handle: "Honey Sharma" },
-      { platform: platforms[4], handle: "@honeybuilds" },
+      { platform: platforms[1], handle: "@maya.studio" },
+      { platform: platforms[2], handle: "Maya Chen" },
+      { platform: platforms[4], handle: "@maya.makes" },
     ];
     return (
-      <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5">
+      <div className={MOCK_CARD}>
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm leading-5 font-medium">Accounts</p>
           <span className={SOFT_CHIP}>3 connected</span>
@@ -61,7 +62,7 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
 
   if (step.kind === "composer") {
     return (
-      <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5">
+      <div className={MOCK_CARD}>
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm leading-5 font-medium">Composer</p>
           <span className={SOFT_CHIP}>Draft</span>
@@ -88,7 +89,7 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
   }
 
   return (
-    <div className="absolute inset-x-5 top-1/2 -translate-y-1/2 rounded-card border bg-card p-4 shadow-2xl shadow-black/10 sm:inset-x-8 sm:p-5">
+    <div className={MOCK_CARD}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm leading-5 font-medium">Scheduled</p>
         <span className={SOFT_CHIP}>Today</span>
