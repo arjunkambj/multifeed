@@ -26,7 +26,7 @@ export default function Section({
       <div
         className={cn(
           "mx-auto w-full min-w-0 max-w-7xl px-5 sm:px-6 lg:px-8",
-          "py-16 md:py-20 lg:py-24 xl:py-28 2xl:py-32",
+          "py-16 md:py-20 lg:py-24 xl:py-28",
           containerClassName,
         )}
       >

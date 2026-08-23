@@ -1,7 +1,8 @@
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Reveal from "@/components/motion/Reveal";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { landingPeople } from "@/constants/landing-page";
 import { cn } from "@/lib/utils";
 import {
   BODY,
@@ -99,9 +100,13 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
           {
             time: "9:00 AM",
             caption: "Launch post is ready",
-            people: ["PS", "ML"],
+            people: [landingPeople.priya, landingPeople.marcus],
           },
-          { time: "6:00 PM", caption: "15s clip from studio", people: ["JN"] },
+          {
+            time: "6:00 PM",
+            caption: "15s clip from studio",
+            people: [landingPeople.jess],
+          },
         ].map((post) => (
           <li
             className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
@@ -116,13 +121,14 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
               </p>
             </div>
             <div className="flex -space-x-2">
-              {post.people.map((initials) => (
+              {post.people.map((person) => (
                 <Avatar
                   className="size-7 border-2 border-background sm:size-8"
-                  key={initials}
+                  key={person.initials}
                 >
+                  <AvatarImage alt="" src={person.src} />
                   <AvatarFallback className="text-[0.625rem] font-medium">
-                    {initials}
+                    {person.initials}
                   </AvatarFallback>
                 </Avatar>
               ))}

@@ -56,7 +56,7 @@ const socials = [
 export function Footer() {
   return (
     <footer className="min-w-0 scroll-mt-20 border-t bg-background">
-      <div className="mx-auto w-full max-w-7xl px-5 pt-12 pb-12 sm:px-6 lg:px-8 lg:pt-16">
+      <div className="mx-auto w-full max-w-7xl px-5 pt-12 pb-12 sm:px-6 lg:px-8">
         <Reveal>
           <div
             className={cn(

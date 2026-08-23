@@ -128,13 +128,10 @@ function PriceCard({
   plan: (typeof pricingPlans)[number];
   isYearly: boolean;
 }) {
-  const preferred = plan.preferred;
-
   return (
     <div
       className={cn(
-        "flex h-full flex-col rounded-card border bg-card hover:border-primary/20",
-        preferred ? "border-primary/40" : "border-transparent",
+        "flex h-full flex-col rounded-card border border-transparent bg-card px-6 py-7 md:px-7 md:py-8",
         "px-6 py-7 md:px-7 md:py-8",
       )}
     >
@@ -146,7 +143,7 @@ function PriceCard({
           <span
             className={cn(
               "shrink-0 rounded-full px-2.5 py-1 text-[0.6875rem] leading-4 font-medium",
-              preferred
+              plan.preferred
                 ? "bg-primary text-primary-foreground"
                 : "bg-background text-muted-foreground",
             )}

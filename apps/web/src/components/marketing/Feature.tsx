@@ -80,11 +80,14 @@ function CalendarMock() {
     {
       day: "Mon",
       posts: [
-        { time: "9:00", label: "Launch" },
-        { time: "18:00", label: "Clip" },
+        { time: "9:00", label: "Launch", platform: platforms[1] },
+        { time: "18:00", label: "Clip", platform: platforms[4] },
       ],
     },
-    { day: "Tue", posts: [{ time: "12:30", label: "Note" }] },
+    {
+      day: "Tue",
+      posts: [{ time: "12:30", label: "Note", platform: platforms[0] }],
+    },
     { day: "Wed", posts: [] },
   ];
   return (
@@ -93,32 +96,36 @@ function CalendarMock() {
         <p className="text-sm leading-5 font-medium">Week of Mar 10</p>
         <span className={SOFT_CHIP}>Drag to reschedule</span>
       </div>
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-3 gap-3">
         {days.map((day) => (
-          <div
-            className="rounded-xl border border-border/60 bg-muted/50 p-2"
-            key={day.day}
-          >
-            <p className="text-sm leading-5 font-semibold uppercase tracking-wide text-muted-foreground">
-              {day.day}
-            </p>
-            <div className="mt-2 space-y-1.5">
+          <div className="min-w-0" key={day.day}>
+            <p className={`${OVERLINE} text-muted-foreground`}>{day.day}</p>
+            <div className="mt-2 flex flex-col gap-1.5">
               {day.posts.length > 0 ? (
                 day.posts.map((post) => (
                   <div
-                    className="rounded-lg bg-muted px-2 py-1.5"
+                    className="rounded-xl border border-border/60 bg-background px-2.5 py-2"
                     key={post.time}
                   >
-                    <p className="text-sm leading-5 text-muted-foreground">
+                    <p className="flex items-center gap-1.5 text-xs leading-4 whitespace-nowrap text-muted-foreground">
+                      <Icon
+                        icon={post.platform.icon}
+                        className="size-3 shrink-0"
+                        style={{ color: post.platform.color }}
+                      />
                       {post.time}
                     </p>
-                    <p className="truncate text-base leading-6 font-medium">
+                    <p className="mt-1 truncate text-sm leading-5 font-medium">
                       {post.label}
                     </p>
                   </div>
                 ))
               ) : (
-                <div className="h-[34px] rounded-lg border border-dashed border-border" />
+                <div className="flex min-h-[3.25rem] items-center justify-center rounded-xl border border-dashed border-border/60 px-2.5 py-2">
+                  <p className="text-xs leading-4 text-muted-foreground">
+                    Drop
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -218,7 +225,7 @@ function StickyFeatureCard({
         style={{ scale, transformOrigin: "top center" }}
         className={cn(
           "relative grid transform-gpu items-center overflow-hidden rounded-panel bg-card will-change-transform md:grid-cols-2",
-          index < total - 1 && "mb-6 md:mb-10 lg:mb-14",
+          index < total - 1 && "mb-6 md:mb-8 lg:mb-10",
         )}
       >
         <div

@@ -26,6 +26,32 @@
   }
 }
 
+@keyframes marketing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.marketing-hero-rise {
+  animation: marketing-rise 0.45s ease-out both;
+}
+
+.marketing-hero-mock {
+  animation: marketing-rise 0.55s ease-out 0.18s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-hero-rise,
+  .marketing-hero-mock {
+    animation: none;
+  }
+}
+
 /* FullCalendar — MultiFeed theme */
 .multifeed-calendar {
   --fc-border-color: var(--border);

@@ -13,7 +13,7 @@ import { Icon } from "@iconify/react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import Logo from "@/components/layout/Logo";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/input-group";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { landingPeople } from "@/constants/landing-page";
 import {
   type MenuItem,
   sidebarCategories,
@@ -170,7 +171,9 @@ export function DashboardMock() {
     if (!frame) return;
 
     const update = () => {
-      setScale(frame.clientWidth / STAGE_WIDTH);
+      const width = frame.clientWidth;
+      if (width === 0) return;
+      setScale(width / STAGE_WIDTH);
     };
 
     update();
@@ -181,7 +184,11 @@ export function DashboardMock() {
 
   useLayoutEffect(() => {
     if (scale == null) return;
-    calendarRef.current?.getApi().updateSize();
+    try {
+      calendarRef.current?.getApi().updateSize();
+    } catch {
+      /* FullCalendar isn't mounted yet */
+    }
   }, [scale]);
 
   return (
@@ -253,8 +260,9 @@ export function DashboardMock() {
                 </Button>
                 <div className="ml-auto">
                   <Avatar className="size-8">
+                    <AvatarImage alt="" src={landingPeople.maya.src} />
                     <AvatarFallback className="text-xs font-medium">
-                      MC
+                      {landingPeople.maya.initials}
                     </AvatarFallback>
                   </Avatar>
                 </div>

@@ -7,7 +7,7 @@
  */
 
 /** Gap between a `SectionHeader` and the body it introduces. */
-export const HEADER_GAP = "mt-12 md:mt-16";
+export const HEADER_GAP = "mt-10 md:mt-12";
 
 /** Gap between cards or tiles in any grid on the page. */
 export const GRID_GAP = "gap-3 md:gap-4";
@@ -21,7 +21,7 @@ export const PANEL_PADDING =
 
 /** Media column of a full-width panel — steps with `PANEL_PADDING`. */
 export const PANEL_MEDIA =
-  "min-h-[280px] sm:min-h-[340px] md:min-h-[420px] lg:min-h-[480px]";
+  "min-h-[280px] sm:min-h-[320px] md:min-h-[380px] lg:min-h-[440px]";
 
 /** Heading inside a panel — one step below `SectionHeader`'s h2. */
 export const PANEL_HEADING =

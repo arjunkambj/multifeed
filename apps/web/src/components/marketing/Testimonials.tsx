@@ -1,81 +1,56 @@
 import Reveal from "@/components/motion/Reveal";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { landingPeople } from "@/constants/landing-page";
 import { cn } from "@/lib/utils";
 import { BODY, GRID_GAP, HEADER_GAP } from "./rhythm";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
-type Testimonial = {
-  name: string;
-  handle: string;
-  text: string;
-  highlight: string;
-  initials: string;
-};
-
-const testimonials: Testimonial[] = [
+const testimonials = [
   {
-    name: "Priya Sharma",
-    handle: "@priyabuilds",
+    person: landingPeople.priya,
     text: "I used to bounce between five apps to schedule a week. Now I sit down once, plan it, and close the laptop.",
     highlight: "sit down once, plan it, and close the laptop",
-    initials: "PS",
   },
   {
-    name: "Marcus Lee",
-    handle: "@marcuslee",
+    person: landingPeople.marcus,
     text: "The calendar made us notice the empty days. We post more because we can see the holes.",
     highlight: "we can see the holes",
-    initials: "ML",
   },
   {
-    name: "Ana Rodrigues",
-    handle: "@anarod",
+    person: landingPeople.ana,
     text: "I used to paste the same caption everywhere, then go back and fix it. LinkedIn and TikTok get different text from the start now.",
     highlight: "different text from the start",
-    initials: "AR",
   },
   {
-    name: "Tom Becker",
-    handle: "@tbecker",
+    person: landingPeople.tom,
     text: "We run 12 client calendars with three people. This is the first tool that didn't get messy at that size.",
     highlight: "12 client calendars with three people",
-    initials: "TB",
   },
   {
-    name: "Jess Nguyen",
-    handle: "@jesswrites",
+    person: landingPeople.jess,
     text: "Dragging a post to a new day sounds small. Moving a whole campaign takes about ten seconds.",
     highlight: "about ten seconds",
-    initials: "JN",
   },
   {
-    name: "David Okafor",
-    handle: "@dokafor",
+    person: landingPeople.david,
     text: "I connected six accounts, scheduled a post, and it went out that same hour.",
     highlight: "it went out that same hour",
-    initials: "DO",
   },
   {
-    name: "Sofia Marino",
-    handle: "@sofiamarino",
+    person: landingPeople.sofia,
     text: "Our LinkedIn posts are longer. TikTok is messier. Both come from the same draft.",
     highlight: "Both come from the same draft",
-    initials: "SM",
   },
   {
-    name: "Ryan Whitfield",
-    handle: "@ryanwhit",
+    person: landingPeople.ryan,
     text: "Approvals used to live in email. Now everyone looks at the same calendar, so we don't post twice.",
     highlight: "we don't post twice",
-    initials: "RW",
   },
   {
-    name: "Amara Diallo",
-    handle: "@amaracreates",
+    person: landingPeople.amara,
     text: "Sundays I batch the week. MultiFeed posts it. That's the job.",
     highlight: "That's the job",
-    initials: "AD",
   },
 ] as const;
 
@@ -104,7 +79,7 @@ function Quote({ text, highlight }: { text: string; highlight?: string }) {
   );
 }
 
-function Card({ t }: { t: Testimonial }) {
+function Card({ t }: { t: (typeof testimonials)[number] }) {
   return (
     <div className="flex break-inside-avoid flex-col overflow-hidden rounded-card border-0 bg-card">
       <div className="flex flex-1 flex-col px-5 py-4">
@@ -122,17 +97,18 @@ function Card({ t }: { t: Testimonial }) {
         <div className="mt-auto pt-3">
           <div className="border-t border-foreground/[0.08]" />
           <div className="flex items-center gap-3 pt-3">
-            <Avatar className="size-10">
+            <Avatar className="size-10" size="lg">
+              <AvatarImage alt="" src={t.person.src} />
               <AvatarFallback className="bg-card text-xs font-semibold text-foreground">
-                {t.initials}
+                {t.person.initials}
               </AvatarFallback>
             </Avatar>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm leading-5 font-semibold text-foreground">
-                {t.name}
+                {t.person.name}
               </span>
               <span className="mt-0.5 block truncate text-xs leading-4 text-muted-foreground">
-                {t.handle}
+                {t.person.handle}
               </span>
             </span>
           </div>
@@ -163,7 +139,7 @@ export function Testimonials() {
           )}
         >
           {testimonials.map((t) => (
-            <div className="break-inside-avoid" key={t.name}>
+            <div className="break-inside-avoid" key={t.person.name}>
               <Card t={t} />
             </div>
           ))}

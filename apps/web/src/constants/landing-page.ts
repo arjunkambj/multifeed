@@ -1,5 +1,78 @@
 import { PLANS, type PlanKey } from "@multifeed/plans";
 
+export const landingPeople = {
+  priya: {
+    name: "Priya Sharma",
+    handle: "@priyabuilds",
+    initials: "PS",
+    src: "/avatars/priya.jpg",
+  },
+  marcus: {
+    name: "Marcus Lee",
+    handle: "@marcuslee",
+    initials: "ML",
+    src: "/avatars/marcus.jpg",
+  },
+  ana: {
+    name: "Ana Rodrigues",
+    handle: "@anarod",
+    initials: "AR",
+    src: "/avatars/ana.jpg",
+  },
+  tom: {
+    name: "Tom Becker",
+    handle: "@tbecker",
+    initials: "TB",
+    src: "/avatars/tom.jpg",
+  },
+  jess: {
+    name: "Jess Nguyen",
+    handle: "@jesswrites",
+    initials: "JN",
+    src: "/avatars/jess.jpg",
+  },
+  david: {
+    name: "David Okafor",
+    handle: "@dokafor",
+    initials: "DO",
+    src: "/avatars/david.jpg",
+  },
+  sofia: {
+    name: "Sofia Marino",
+    handle: "@sofiamarino",
+    initials: "SM",
+    src: "/avatars/sofia.jpg",
+  },
+  ryan: {
+    name: "Ryan Whitfield",
+    handle: "@ryanwhit",
+    initials: "RW",
+    src: "/avatars/ryan.jpg",
+  },
+  amara: {
+    name: "Amara Diallo",
+    handle: "@amaracreates",
+    initials: "AD",
+    src: "/avatars/amara.jpg",
+  },
+  maya: {
+    name: "Maya Chen",
+    handle: "@maya.studio",
+    initials: "MC",
+    src: "/avatars/maya.jpg",
+  },
+} as const;
+
+export type LandingPerson = (typeof landingPeople)[keyof typeof landingPeople];
+
+export const socialProofPeople = [
+  landingPeople.priya,
+  landingPeople.marcus,
+  landingPeople.ana,
+  landingPeople.tom,
+  landingPeople.jess,
+] as const;
+
 export const faqItems = [
   {
     content:
