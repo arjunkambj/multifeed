@@ -124,10 +124,7 @@ export function AppSidebar() {
             readOnly
             aria-label="Search"
             placeholder="Search"
-            onFocus={(event) => {
-              event.currentTarget.blur();
-              setSearchOpen(true);
-            }}
+            onMouseDown={(event) => event.preventDefault()}
           />
           <InputGroupAddon align="inline-end" className="shrink-0">
             <KbdGroup>
