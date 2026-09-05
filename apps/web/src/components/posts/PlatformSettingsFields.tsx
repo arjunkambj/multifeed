@@ -3,6 +3,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -70,22 +71,28 @@ export function PlatformSettingsFields({
       <div className="grid gap-3 sm:grid-cols-2">
         {placements.length > 1 && (
           <Select
+            items={placements.map((placement) => ({
+              value: placement.id,
+              label: placement.label,
+            }))}
             value={value.placement ?? placements[0].id}
             onValueChange={(placement) =>
               onChange({ placement: placement as PostPlacement })
             }
           >
             <div className="flex w-full flex-col gap-1.5">
-              <Label>Placement</Label>
-              <SelectTrigger className="w-full">
+              <Label htmlFor={`placement-${accountId}`}>Placement</Label>
+              <SelectTrigger id={`placement-${accountId}`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {placements.map((placement) => (
-                  <SelectItem key={placement.id} value={placement.id}>
-                    {placement.label}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  {placements.map((placement) => (
+                    <SelectItem key={placement.id} value={placement.id}>
+                      {placement.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </div>
           </Select>
@@ -93,22 +100,28 @@ export function PlatformSettingsFields({
 
         {showVisibility && (
           <Select
+            items={VISIBILITY_OPTIONS.map((visibility) => ({
+              value: visibility.id,
+              label: visibility.label,
+            }))}
             value={value.visibility ?? "public"}
             onValueChange={(visibility) =>
               onChange({ visibility: visibility as PostVisibility })
             }
           >
             <div className="flex w-full flex-col gap-1.5">
-              <Label>Visibility</Label>
-              <SelectTrigger className="w-full">
+              <Label htmlFor={`visibility-${accountId}`}>Visibility</Label>
+              <SelectTrigger id={`visibility-${accountId}`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {VISIBILITY_OPTIONS.map((visibility) => (
-                  <SelectItem key={visibility.id} value={visibility.id}>
-                    {visibility.label}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  {VISIBILITY_OPTIONS.map((visibility) => (
+                    <SelectItem key={visibility.id} value={visibility.id}>
+                      {visibility.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </div>
           </Select>

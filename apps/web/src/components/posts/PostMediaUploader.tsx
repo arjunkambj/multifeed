@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { Icon } from "@iconify/react";
 import { useUploadFile } from "@convex-dev/r2/react";
@@ -186,6 +187,7 @@ export function PostMediaUploader({
   const deleteMedia = useMutation(api.media.r2.deleteMedia);
   const [pendingMedia, setPendingMedia] = useState<PendingMedia[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [deletingMediaId, setDeletingMediaId] = useState<
     ComposerMedia["_id"] | null
   >(null);
@@ -317,6 +319,7 @@ export function PostMediaUploader({
         ref={inputRef}
         aria-label="Select media files"
         className="sr-only"
+        tabIndex={-1}
         type="file"
         accept={acceptedMedia(kind)}
         multiple={maxFiles > 1}
@@ -335,20 +338,65 @@ export function PostMediaUploader({
               ? "Add media"
               : "Add another media file"
           }
-          className="h-24 w-36 shrink-0 flex-col gap-1.5 rounded-xl border border-dashed border-border bg-transparent px-3 py-3 hover:border-primary/50 hover:bg-muted"
+          onDragOver={(event) => {
+            event.preventDefault();
+            if (!uploading && deletingMediaId === null) setIsDragging(true);
+          }}
+          onDragLeave={(event) => {
+            if (
+              !event.currentTarget.contains(event.relatedTarget as Node | null)
+            ) {
+              setIsDragging(false);
+            }
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            setIsDragging(false);
+            void uploadFiles(Array.from(event.dataTransfer.files));
+          }}
+          className={cn(
+            "h-auto min-h-28 w-full gap-4 whitespace-normal rounded-xl border border-dashed px-4 py-4",
+            isDragging
+              ? "border-primary bg-primary/5"
+              : "border-border bg-muted/20",
+          )}
         >
-          <Icon icon="hugeicons:upload-04" width={20} />
-          <span className="text-sm font-medium">
-            {media.length === 0 && pendingMedia.length === 0
-              ? "Add media"
-              : "Add another"}
+          <span
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background"
+            aria-hidden
+          >
+            <Icon
+              icon={
+                kind === "video"
+                  ? "hugeicons:video-01"
+                  : "hugeicons:image-add-02"
+              }
+            />
           </span>
-          <span className="text-[11px] font-normal text-muted-foreground">
-            {kind === "image"
-              ? "Up to 10 images"
-              : kind === "video"
-                ? "One video"
-                : "Image or video"}
+          <span className="flex flex-col items-start gap-1.5 text-left">
+            <span>
+              {isDragging
+                ? "Drop to upload"
+                : media.length === 0 && pendingMedia.length === 0
+                  ? kind === "video"
+                    ? "Add a video"
+                    : "Add media"
+                  : "Add another file"}
+            </span>
+            <span className="text-xs font-normal text-muted-foreground">
+              Drag and drop or{" "}
+              <span className="text-primary underline underline-offset-2">
+                browse files
+              </span>
+            </span>
+            <span className="text-xs font-normal text-muted-foreground">
+              {kind === "image"
+                ? "Up to 10 images"
+                : kind === "video"
+                  ? "One video"
+                  : "Image or video"}{" "}
+              · 100 MB per file
+            </span>
           </span>
         </Button>
       )}

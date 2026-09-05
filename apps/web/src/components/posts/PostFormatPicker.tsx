@@ -1,16 +1,26 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import { Badge } from "@/components/ui/badge";
+import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import { PLATFORM_META, platformLabel } from "@/lib/platform-meta";
 import {
   POST_FORMATS,
+  accountSupportsPostKind,
   POST_KIND_PLATFORMS,
   type PostKind,
 } from "./post-composer-config";
 
 export function PostFormatPicker({
+  accounts,
   onChange,
 }: {
+  accounts?: {
+    platform: string;
+    status: string;
+    scopes: string[];
+    capabilities: string[];
+  }[];
   onChange: (kind: PostKind) => void;
 }) {
   return (
@@ -19,12 +29,18 @@ export function PostFormatPicker({
         {POST_FORMATS.map((format) => {
           const platforms = POST_KIND_PLATFORMS[format.id];
           const platformNames = platforms.map(platformLabel).join(", ");
+          const compatibleCount = accounts?.filter(
+            (account) =>
+              !accountNeedsReconnect(account) &&
+              accountSupportsPostKind(account, format.id),
+          ).length;
 
           return (
             <button
               key={format.id}
               type="button"
               aria-label={`${format.label}. ${format.description}. Supported on ${platformNames}`}
+              aria-describedby={`format-accounts-${format.id}`}
               onClick={() => onChange(format.id)}
               className="group flex h-full min-h-52 w-full flex-col items-center rounded-2xl bg-muted px-5 py-5 text-center outline-none transition-colors hover:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_4%)] focus-visible:ring-3 focus-visible:ring-ring/30"
             >
@@ -59,6 +75,15 @@ export function PostFormatPicker({
                     </span>
                   );
                 })}
+              </span>
+              <span id={`format-accounts-${format.id}`} className="mt-3">
+                <Badge variant="secondary">
+                  {compatibleCount === undefined
+                    ? "Checking accounts…"
+                    : compatibleCount === 0
+                      ? "Connect an account to publish"
+                      : `${compatibleCount} ${compatibleCount === 1 ? "account" : "accounts"} available`}
+                </Badge>
               </span>
             </button>
           );

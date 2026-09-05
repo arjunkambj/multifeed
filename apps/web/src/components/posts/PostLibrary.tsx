@@ -161,8 +161,9 @@ export function PostLibrary() {
         }
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs
+          className="min-w-0 max-w-full overflow-x-auto"
           value={filter}
           onValueChange={(key) => {
             const next = key as PostLibraryFilter;
@@ -192,206 +193,212 @@ export function PostLibrary() {
         </div>
       </div>
 
-      {posts === undefined ? (
-        <PostsListSkeleton />
-      ) : visiblePosts.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Icon icon="hugeicons:note-01" width={24} />
-          </span>
-          <div>
-            <p className="font-medium">
-              {search
-                ? "No matching posts"
-                : filter === "all"
-                  ? "No posts yet"
-                  : `No ${copy.title.toLowerCase()} yet`}
-            </p>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              {search ? "Try another caption, account, or status." : copy.empty}
-            </p>
+      <div key={filter} className="tab-panel-transition">
+        {posts === undefined ? (
+          <PostsListSkeleton />
+        ) : visiblePosts.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-16 text-center">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Icon icon="hugeicons:note-01" width={24} />
+            </span>
+            <div>
+              <p className="font-medium">
+                {search
+                  ? "No matching posts"
+                  : filter === "all"
+                    ? "No posts yet"
+                    : `No ${copy.title.toLowerCase()} yet`}
+              </p>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                {search
+                  ? "Try another caption, account, or status."
+                  : copy.empty}
+              </p>
+            </div>
+            {!search && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => router.push("/posts/new")}
+              >
+                Create post
+              </Button>
+            )}
           </div>
-          {!search && (
-            <Button
-              size="sm"
-              variant="default"
-              onClick={() => router.push("/posts/new")}
-            >
-              Create post
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {visiblePosts.map((post) => (
-            <Card
-              key={post._id}
-              className="border border-border bg-card shadow-none transition hover:border-primary/30"
-            >
-              <CardContent className="flex flex-col gap-4 py-4 lg:flex-row lg:items-start">
-                <div className="min-w-0 flex-1">
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant={
-                        STATUS_BADGE[post.status]?.variant ?? "secondary"
-                      }
-                      className={STATUS_BADGE[post.status]?.className}
-                    >
-                      {post.status}
-                    </Badge>
-                    {post.scheduledFor && (
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {format(
-                          new Date(post.scheduledFor),
-                          "EEE, MMM d · h:mm a",
-                        )}
-                      </span>
-                    )}
-                  </div>
-                  {post.title && (
-                    <p className="text-sm font-semibold">{post.title}</p>
-                  )}
-                  <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-                    {post.body || "No caption"}
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {post.targets.length === 0 ? (
-                      <span className="text-xs text-muted-foreground">
-                        No accounts selected
-                      </span>
-                    ) : (
-                      post.targets.map((target) => (
-                        <span
-                          key={target.targetId}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-1 text-[11px]"
-                        >
-                          <span
-                            className="size-2 rounded-full"
-                            style={{
-                              backgroundColor: platformBrand(target.platform),
-                            }}
-                          />
-                          {platformLabel(target.platform)}
-                          {target.username ? ` · @${target.username}` : ""}
-                          {target.hasCustomCaption && (
-                            <Icon
-                              icon="hugeicons:edit-02"
-                              width={11}
-                              aria-label="Custom caption"
-                            />
-                          )}
-                          {target.failureMessage && (
-                            <span className="text-red-600">
-                              · {target.failureMessage}
-                            </span>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {visiblePosts.map((post) => (
+              <Card
+                key={post._id}
+                className="border border-border bg-card shadow-none transition hover:border-primary/30"
+              >
+                <CardContent className="flex flex-col gap-4 py-4 lg:flex-row lg:items-start">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <Badge
+                        variant={
+                          STATUS_BADGE[post.status]?.variant ?? "secondary"
+                        }
+                        className={STATUS_BADGE[post.status]?.className}
+                      >
+                        {post.status}
+                      </Badge>
+                      {post.scheduledFor && (
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {format(
+                            new Date(post.scheduledFor),
+                            "EEE, MMM d · h:mm a",
                           )}
                         </span>
-                      ))
+                      )}
+                    </div>
+                    {post.title && (
+                      <p className="text-sm font-semibold">{post.title}</p>
                     )}
+                    <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                      {post.body || "No caption"}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {post.targets.length === 0 ? (
+                        <span className="text-xs text-muted-foreground">
+                          No accounts selected
+                        </span>
+                      ) : (
+                        post.targets.map((target) => (
+                          <span
+                            key={target.targetId}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-1 text-[11px]"
+                          >
+                            <span
+                              className="size-2 rounded-full"
+                              style={{
+                                backgroundColor: platformBrand(target.platform),
+                              }}
+                            />
+                            {platformLabel(target.platform)}
+                            {target.username ? ` · @${target.username}` : ""}
+                            {target.hasCustomCaption && (
+                              <Icon
+                                icon="hugeicons:edit-02"
+                                width={11}
+                                aria-label="Custom caption"
+                              />
+                            )}
+                            {target.failureMessage && (
+                              <span className="text-red-600">
+                                · {target.failureMessage}
+                              </span>
+                            )}
+                          </span>
+                        ))
+                      )}
+                    </div>
+                    {post.status === "published" &&
+                      post.targets.some(
+                        (target) => target.platformPermalink,
+                      ) && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {post.targets.map((target) =>
+                            target.platformPermalink ? (
+                              <a
+                                key={target.targetId}
+                                href={target.platformPermalink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs font-medium text-primary hover:underline"
+                              >
+                                Open on {platformLabel(target.platform)}
+                              </a>
+                            ) : null,
+                          )}
+                        </div>
+                      )}
                   </div>
-                  {post.status === "published" &&
-                    post.targets.some((target) => target.platformPermalink) && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {post.targets.map((target) =>
-                          target.platformPermalink ? (
-                            <a
-                              key={target.targetId}
-                              href={target.platformPermalink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-xs font-medium text-primary hover:underline"
-                            >
-                              Open on {platformLabel(target.platform)}
-                            </a>
-                          ) : null,
-                        )}
-                      </div>
+                  <div className="flex shrink-0 flex-wrap gap-1.5">
+                    {post.scheduledFor && post.status !== "draft" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          router.push(`/calendar?highlight=${post._id}`)
+                        }
+                      >
+                        <Icon icon="hugeicons:calendar-03" width={15} />
+                        View
+                      </Button>
                     )}
-                </div>
-                <div className="flex shrink-0 flex-wrap gap-1.5">
-                  {post.scheduledFor && post.status !== "draft" && (
+                    {(post.status === "failed" ||
+                      post.targets.some(
+                        (target) => target.status === "failed",
+                      )) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={retrying === post._id}
+                        onClick={async () => {
+                          setRetrying(post._id);
+                          try {
+                            const result = await retryFailed({
+                              postId: post._id,
+                            });
+                            toast.success(
+                              result.retried === 1
+                                ? "Retrying 1 failed delivery."
+                                : `Retrying ${result.retried} failed deliveries.`,
+                            );
+                          } catch (error) {
+                            toast.error(
+                              error instanceof Error
+                                ? error.message
+                                : "Could not retry this post",
+                            );
+                          } finally {
+                            setRetrying(null);
+                          }
+                        }}
+                      >
+                        <Icon icon="hugeicons:refresh" width={15} />
+                        Retry
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() =>
-                        router.push(`/calendar?highlight=${post._id}`)
+                        router.push(
+                          post.status === "draft"
+                            ? `/posts/new?edit=${post._id}`
+                            : `/posts/new?from=${post._id}`,
+                        )
                       }
                     >
-                      <Icon icon="hugeicons:calendar-03" width={15} />
-                      View
-                    </Button>
-                  )}
-                  {(post.status === "failed" ||
-                    post.targets.some(
-                      (target) => target.status === "failed",
-                    )) && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={retrying === post._id}
-                      onClick={async () => {
-                        setRetrying(post._id);
-                        try {
-                          const result = await retryFailed({
-                            postId: post._id,
-                          });
-                          toast.success(
-                            result.retried === 1
-                              ? "Retrying 1 failed delivery."
-                              : `Retrying ${result.retried} failed deliveries.`,
-                          );
-                        } catch (error) {
-                          toast.error(
-                            error instanceof Error
-                              ? error.message
-                              : "Could not retry this post",
-                          );
-                        } finally {
-                          setRetrying(null);
+                      <Icon
+                        icon={
+                          post.status === "draft"
+                            ? "hugeicons:edit-02"
+                            : "hugeicons:copy-01"
                         }
-                      }}
-                    >
-                      <Icon icon="hugeicons:refresh" width={15} />
-                      Retry
+                        width={15}
+                      />
+                      {post.status === "draft" ? "Continue" : "Duplicate"}
                     </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      router.push(
-                        post.status === "draft"
-                          ? `/posts/new?edit=${post._id}`
-                          : `/posts/new?from=${post._id}`,
-                      )
-                    }
-                  >
-                    <Icon
-                      icon={
-                        post.status === "draft"
-                          ? "hugeicons:edit-02"
-                          : "hugeicons:copy-01"
-                      }
-                      width={15}
-                    />
-                    {post.status === "draft" ? "Continue" : "Duplicate"}
-                  </Button>
-                  {post.status !== "publishing" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={deleting === post._id}
-                      onClick={() => void onDelete(post._id)}
-                    >
-                      <Icon icon="hugeicons:delete-02" width={15} />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                    {post.status !== "publishing" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={deleting === post._id}
+                        onClick={() => void onDelete(post._id)}
+                      >
+                        <Icon icon="hugeicons:delete-02" width={15} />
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
