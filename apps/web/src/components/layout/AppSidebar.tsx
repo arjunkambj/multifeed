@@ -2,7 +2,6 @@
 
 import { SearchIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -97,7 +96,7 @@ export function AppSidebar() {
           render={<Link href={item.href} />}
           tooltip={item.name}
         >
-          <Icon icon={item.icon} width={18} />
+          <HugeiconsIcon icon={item.icon} strokeWidth={2} />
           <span>{item.name}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -178,7 +177,7 @@ export function AppSidebar() {
                     value={`${item.name} ${group.heading ?? ""}`}
                     onSelect={() => goTo(item.href)}
                   >
-                    <Icon icon={item.icon} width={16} />
+                    <HugeiconsIcon icon={item.icon} strokeWidth={2} />
                     {item.name}
                   </CommandItem>
                 ))}

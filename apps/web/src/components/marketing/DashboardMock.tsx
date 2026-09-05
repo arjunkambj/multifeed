@@ -127,7 +127,7 @@ function MockNavItem({
             : "text-sidebar-foreground",
         )}
       >
-        <Icon icon={item.icon} width={18} />
+        <HugeiconsIcon className="size-4" icon={item.icon} strokeWidth={2} />
         <span className="truncate">{item.name}</span>
       </span>
     </li>
