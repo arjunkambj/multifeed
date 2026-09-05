@@ -25,29 +25,32 @@ export function DashboardLoadingSkeleton({
   if (variant === "settings") {
     return (
       <div
-        className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 pt-8 lg:flex-row lg:gap-10"
+        className="flex w-full flex-1 flex-col gap-6"
         aria-busy="true"
         role="status"
       >
         <span className="sr-only">Loading page</span>
-        <aside className="flex w-full shrink-0 flex-col gap-6 lg:w-64">
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-12 shrink-0 rounded-full" />
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-3 w-36" />
+        <PageHeaderSkeleton actions={0} />
+        <div className="flex w-full max-w-4xl flex-col gap-6 lg:flex-row lg:gap-10">
+          <aside className="flex w-full shrink-0 flex-col gap-6 lg:w-64">
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-12 shrink-0 rounded-full" />
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-3 w-36" />
+              </div>
             </div>
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-10 w-full rounded-lg" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+            </div>
+          </aside>
+          <div className="flex min-w-0 flex-1 flex-col gap-5">
+            <Skeleton className="h-7 w-40" />
+            <Skeleton className="h-10 w-full max-w-xl" />
+            <Skeleton className="h-10 w-full max-w-xl" />
+            <Skeleton className="h-10 w-32" />
           </div>
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-10 w-full rounded-lg" />
-            <Skeleton className="h-10 w-full rounded-lg" />
-          </div>
-        </aside>
-        <div className="flex min-w-0 flex-1 flex-col gap-5">
-          <Skeleton className="h-10 w-40" />
-          <Skeleton className="h-10 w-full max-w-xl" />
-          <Skeleton className="h-10 w-full max-w-xl" />
-          <Skeleton className="h-10 w-32" />
         </div>
       </div>
     );
@@ -61,7 +64,7 @@ export function DashboardLoadingSkeleton({
     case "overview":
       actionClassName = "h-8 w-56 rounded-lg";
       content = (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
           {Array.from({ length: 5 }, (_, index) => (
             <Skeleton className="h-28" key={index} />
           ))}

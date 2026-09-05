@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { PasswordModal } from "@/components/settings/PasswordModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { hexclaveClientApp } from "@/hexclave/client";
 
@@ -23,7 +23,8 @@ export function GeneralSettingsForm() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isSaving || !organization || !hasChanges) return;
+    if (isSaving || !organization || !hasChanges || !organizationName.trim())
+      return;
     setIsSaving(true);
 
     void organization
@@ -40,24 +41,32 @@ export function GeneralSettingsForm() {
       className="flex w-full max-w-6xl flex-col gap-5"
       onSubmit={handleSubmit}
     >
-      <div className="flex w-full flex-col gap-1.5">
-        <Label htmlFor="organizationName">Organization name</Label>
-        <Input
-          id="organizationName"
-          name="organizationName"
-          disabled={!organization}
-          placeholder="Organization name"
-          value={organizationName}
-          onChange={(event) => setOrganizationName(event.target.value)}
-        />
-      </div>
+      <FieldGroup>
+        <Field data-disabled={!organization}>
+          <FieldLabel htmlFor="organizationName">Organization name</FieldLabel>
+          <Input
+            id="organizationName"
+            name="organizationName"
+            required
+            disabled={!organization}
+            placeholder="Organization name"
+            value={organizationName}
+            onChange={(event) => setOrganizationName(event.target.value)}
+          />
+        </Field>
+      </FieldGroup>
 
-      <div className="flex items-center gap-3">
-        <Button disabled={!hasChanges || isSaving} type="submit">
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          disabled={
+            !organization || !organizationName.trim() || !hasChanges || isSaving
+          }
+          type="submit"
+        >
           {isSaving ? (
-            <Spinner className="size-4" />
+            <Spinner data-icon="inline-start" />
           ) : (
-            <Icon icon="solar:diskette-linear" width={16} />
+            <Icon icon="solar:diskette-linear" data-icon="inline-start" />
           )}
           Save changes
         </Button>

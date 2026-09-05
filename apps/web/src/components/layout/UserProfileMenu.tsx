@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -88,7 +89,7 @@ export function UserProfileMenu() {
             onValueChange={(value) => setTheme(value as "light" | "dark")}
             value={isDark ? "dark" : "light"}
           >
-            <TabsList className="h-7 justify-between">
+            <TabsList aria-label="Theme" className="h-7 justify-between">
               <TabsTrigger
                 aria-label="Light mode"
                 className="flex-none px-1.5"
@@ -108,17 +109,19 @@ export function UserProfileMenu() {
             </TabsList>
           </Tabs>
         </div>
-        <DropdownMenuItem onClick={() => router.push("/settings")}>
-          <Icon icon="hugeicons:settings-02" width={16} />
-          Settings
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={() => void hexclaveClientApp.signOut()}
-        >
-          <Icon icon="hugeicons:logout-03" width={16} />
-          Logout
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => router.push("/settings")}>
+            <Icon icon="hugeicons:settings-02" width={16} />
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => void hexclaveClientApp.signOut()}
+          >
+            <Icon icon="hugeicons:logout-03" width={16} />
+            Logout
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

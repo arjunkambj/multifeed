@@ -9,7 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <TooltipProvider>
-      <SidebarProvider className="bg-background ">
+      <SidebarProvider className="bg-background">
         <Suspense fallback={null}>
           <AppSidebar />
         </Suspense>
@@ -17,9 +17,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <Suspense fallback={null}>
             <DashboardHeader />
           </Suspense>
-          <main className="flex min-w-0 flex-1 flex-col gap-6 px-4 py-3 sm:px-6 sm:py-3">
+          <div className="flex min-w-0 flex-1 flex-col gap-6 px-4 py-3 sm:px-6 sm:py-3">
             {children}
-          </main>
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

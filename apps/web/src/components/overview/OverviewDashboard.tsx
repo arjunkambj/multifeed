@@ -23,7 +23,7 @@ function percentageChange(current: number, previous: number) {
 
 function MetricsSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
       {Array.from({ length: 5 }, (_, index) => (
         <Skeleton key={index} className="h-28" />
       ))}
@@ -71,7 +71,7 @@ export function OverviewDashboard() {
           )}
           <section
             aria-label="Publishing KPIs"
-            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5"
           >
             <MetricCard
               title="Scheduled posts"

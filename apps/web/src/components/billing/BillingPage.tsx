@@ -176,7 +176,11 @@ export function BillingPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">Billing interval</p>
-        <div className="flex items-center gap-2" role="group">
+        <div
+          className="flex items-center gap-2"
+          role="group"
+          aria-label="Billing interval"
+        >
           <button
             className={`cursor-pointer px-1 py-1 text-sm font-medium transition-colors ${
               !isYearly
@@ -189,6 +193,7 @@ export function BillingPage() {
             Monthly
           </button>
           <Switch
+            aria-label="Bill yearly"
             checked={isYearly}
             onCheckedChange={(checked) =>
               setBillingInterval(checked ? "year" : "month")

@@ -15,11 +15,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import { MetaKbd } from "@/components/ui/kbd";
 import {
   Sidebar,
@@ -32,6 +27,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   Tooltip,
@@ -60,6 +56,7 @@ const SEARCH_SHORTCUT = "k";
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { setOpenMobile } = useSidebar();
   const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
@@ -84,6 +81,7 @@ export function AppSidebar() {
 
   const goTo = (href: MenuItem["href"]) => {
     setSearchOpen(false);
+    setOpenMobile(false);
     router.push(href);
   };
 
@@ -92,6 +90,8 @@ export function AppSidebar() {
       <SidebarMenuItem key={item.name}>
         <SidebarMenuButton
           isActive={isActive(item)}
+          aria-current={isActive(item) ? "page" : undefined}
+          onClick={() => setOpenMobile(false)}
           render={<Link href={item.href} />}
           tooltip={item.name}
         >
@@ -108,33 +108,34 @@ export function AppSidebar() {
           aria-label="MultiFeed"
           className="flex items-center px-1 py-1 group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
           href="/overview"
+          onClick={() => setOpenMobile(false)}
         >
           <Logo markOnly markClassName="size-7" />
         </Link>
-        <InputGroup
-          className="h-8 w-full min-w-0 cursor-pointer rounded-lg group-data-[collapsible=icon]:hidden"
+        <Button
+          variant="secondary"
+          aria-haspopup="dialog"
+          aria-expanded={searchOpen}
+          className="w-full min-w-0 justify-start group-data-[collapsible=icon]:hidden"
           onClick={() => setSearchOpen(true)}
         >
-          <InputGroupAddon>
-            <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
-          </InputGroupAddon>
-          <InputGroupInput
-            readOnly
-            aria-label="Search"
-            placeholder="Search"
-            onMouseDown={(event) => event.preventDefault()}
+          <HugeiconsIcon
+            icon={SearchIcon}
+            strokeWidth={2}
+            data-icon="inline-start"
           />
-          <InputGroupAddon align="inline-end" className="shrink-0">
+          Search
+          <span className="ml-auto">
             <MetaKbd shortcut={SEARCH_SHORTCUT} />
-          </InputGroupAddon>
-        </InputGroup>
+          </span>
+        </Button>
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
                 aria-label="Search"
-                className="hidden size-9 group-data-[collapsible=icon]:flex"
-                size="icon-sm"
+                className="hidden group-data-[collapsible=icon]:flex"
+                size="icon-lg"
                 variant="ghost"
                 onClick={() => setSearchOpen(true)}
               />
@@ -156,7 +157,7 @@ export function AppSidebar() {
         onOpenChange={setSearchOpen}
       >
         <Command>
-          <CommandInput placeholder="Search" />
+          <CommandInput aria-label="Search pages" placeholder="Search" />
           <CommandList>
             <CommandEmpty>No results.</CommandEmpty>
             {searchGroups.map((group) => (

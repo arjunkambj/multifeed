@@ -19,7 +19,11 @@ export function DashboardPageTitle({ title, description, actions }: Props) {
           </p>
         )}
       </div>
-      {actions && <div className="flex shrink-0 gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">
+          {actions}
+        </div>
+      )}
     </header>
   );
 }

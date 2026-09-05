@@ -35,6 +35,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -214,15 +215,25 @@ export function PostCalendar() {
         }
       >
         <div className="flex min-w-0 flex-col gap-4 overflow-hidden">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-1">
-              <Button size="sm" variant="outline" onClick={goPrev}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex min-w-0 flex-wrap items-center gap-1">
+              <Button
+                aria-label="Previous period"
+                size="icon-sm"
+                variant="outline"
+                onClick={goPrev}
+              >
                 <Icon icon="hugeicons:arrow-left-01" width={16} />
               </Button>
               <Button size="sm" variant="outline" onClick={goToday}>
                 Today
               </Button>
-              <Button size="sm" variant="outline" onClick={goNext}>
+              <Button
+                aria-label="Next period"
+                size="icon-sm"
+                variant="outline"
+                onClick={goNext}
+              >
                 <Icon icon="hugeicons:arrow-right-01" width={16} />
               </Button>
               <h2 className="ml-2 text-base font-semibold tracking-tight">
@@ -231,6 +242,13 @@ export function PostCalendar() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Select
+                items={[
+                  { value: "all", label: "All platforms" },
+                  ...platformOptions.map((platform) => ({
+                    value: platform,
+                    label: platformLabel(platform),
+                  })),
+                ]}
                 value={platformFilter}
                 onValueChange={(value) =>
                   setPlatformFilter(String(value ?? "all"))
@@ -243,12 +261,14 @@ export function PostCalendar() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All platforms</SelectItem>
-                  {platformOptions.map((platform) => (
-                    <SelectItem key={platform} value={platform}>
-                      {platformLabel(platform)}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    <SelectItem value="all">All platforms</SelectItem>
+                    {platformOptions.map((platform) => (
+                      <SelectItem key={platform} value={platform}>
+                        {platformLabel(platform)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <Tabs
