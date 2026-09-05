@@ -1,8 +1,10 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import type { Doc, Id } from "@convex/_generated/dataModel";
+import type { Id } from "@convex/_generated/dataModel";
 import { Icon } from "@iconify/react";
+import Link from "next/link";
+import { PlatformConnectionCard } from "@/components/connections/PlatformConnectionCard";
 import { useMutation } from "convex/react";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { useSearchParams } from "next/navigation";
@@ -11,7 +13,6 @@ import { toast } from "sonner";
 import { ConnectionUsageMeter } from "@/components/connections/ConnectionUsageMeter";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { RemoteAvatar } from "@/components/RemoteAvatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,13 +31,6 @@ import {
   PLATFORM_META,
 } from "@/lib/platform-meta";
 import { currentTimeBucket } from "@/lib/time-bucket";
-
-const statusDot: Record<Doc<"connectedAccounts">["status"], string> = {
-  active: "bg-emerald-500",
-  expired: "bg-amber-500",
-  revoked: "bg-red-500",
-  error: "bg-red-500",
-};
 
 function ConnectionsPageInner() {
   const [nowMs] = useState(() => currentTimeBucket());
@@ -104,8 +98,17 @@ function ConnectionsPageInner() {
     list.push(account);
     byPlatform.set(account.platform, list);
   }
+  const platformPriority = (platform: OAuthPlatform) => {
+    const linked = byPlatform.get(platform) ?? [];
+    if (linked.some(accountNeedsReconnect)) return 2;
+    return linked.length > 0 ? 1 : 0;
+  };
+  const orderedPlatforms = [...CONNECTABLE_PLATFORMS].sort(
+    (left, right) => platformPriority(right) - platformPriority(left),
+  );
 
   const onConnect = (platform: OAuthPlatform) => {
+    if (connecting !== null) return;
     setConnecting(platform);
     void fetch("/api/oauth/start", {
       method: "POST",
@@ -113,13 +116,14 @@ function ConnectionsPageInner() {
       body: JSON.stringify({ platform, returnTo: "/connections" }),
     })
       .then(async (response) => {
-        if (!response.ok) throw new Error("Could not start OAuth");
         const payload = (await response.json()) as {
           url?: string;
           error?: string;
         };
-        if (!payload.url) {
-          throw new Error(payload.error ?? "Could not start OAuth");
+        if (!response.ok || !payload.url) {
+          throw new Error(
+            payload.error ?? "Could not connect this account. Try again.",
+          );
         }
         window.location.assign(payload.url);
       })
@@ -151,7 +155,15 @@ function ConnectionsPageInner() {
       <div className="flex flex-col gap-6">
         <DashboardPageTitle
           title="Connections"
-          description="Connect social accounts from one workspace."
+          description="Connect your accounts, check their status, and renew access when needed."
+          actions={
+            accounts.some((account) => !accountNeedsReconnect(account)) ? (
+              <Button nativeButton={false} render={<Link href="/posts/new" />}>
+                <Icon icon="hugeicons:add-01" data-icon="inline-start" />
+                New post
+              </Button>
+            ) : undefined
+          }
         />
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
@@ -159,127 +171,22 @@ function ConnectionsPageInner() {
             used={connectedAccountsCount}
             limit={accountLimit}
           />
-          <section className="min-w-0 flex-1 divide-y divide-border/70 lg:order-first">
-            {CONNECTABLE_PLATFORMS.map((platform) => {
-              const meta = PLATFORM_META[platform] ?? {
-                label: platform,
-                icon: "hugeicons:link-01",
-                brand: "#666666",
-              };
-              const linked = byPlatform.get(platform) ?? [];
-              const isConnecting = connecting === platform;
-              const hasAccounts = linked.length > 0;
-
-              return (
-                <div
-                  key={platform}
-                  className="grid gap-3 py-3.5 first:pt-0 last:pb-0 md:grid-cols-[220px_minmax(0,1fr)] md:items-center"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <span
-                      className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white"
-                      style={{
-                        backgroundColor: meta.brand,
-                        color: meta.foreground ?? "#FFFFFF",
-                      }}
-                    >
-                      <Icon icon={meta.icon} width={16} />
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="default"
-                      className="justify-start"
-                      disabled={
-                        atLimit || (connecting !== null && !isConnecting)
-                      }
-                      title={
-                        atLimit
-                          ? "Plan limit reached. Upgrade to connect more accounts."
-                          : undefined
-                      }
-                      onClick={() => void onConnect(platform)}
-                    >
-                      {isConnecting ? (
-                        <>
-                          <Spinner className="size-3" />
-                          Redirecting…
-                        </>
-                      ) : hasAccounts ? (
-                        `Add ${meta.label}`
-                      ) : (
-                        `Connect ${meta.label}`
-                      )}
-                    </Button>
-                  </div>
-
-                  <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    {linked.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">
-                        No {meta.label} accounts connected
-                      </p>
-                    ) : (
-                      linked.map((account) => {
-                        const needsAttention = accountNeedsReconnect(account);
-                        return (
-                          <div
-                            key={account._id}
-                            className={[
-                              "flex max-w-full items-center gap-2 rounded-full bg-muted py-1 pl-1.5 pr-1",
-                              needsAttention ? "ring-1 ring-amber-500/50" : "",
-                            ].join(" ")}
-                          >
-                            {account.avatarUrl ? (
-                              <RemoteAvatar
-                                src={account.avatarUrl}
-                                size={24}
-                                className="size-6 rounded-full object-cover"
-                              />
-                            ) : (
-                              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-card text-[10px] font-semibold">
-                                {account.username.slice(0, 1).toUpperCase()}
-                              </span>
-                            )}
-                            <span
-                              className={`size-1.5 shrink-0 rounded-full ${statusDot[account.status] ?? "bg-muted"}`}
-                              title={account.status}
-                            />
-                            <p className="max-w-40 truncate text-xs font-medium">
-                              @{account.username}
-                            </p>
-                            {needsAttention && (
-                              <Button
-                                size="xs"
-                                variant="ghost"
-                                className="h-6 min-h-6 px-1.5 text-[11px] text-amber-500"
-                                disabled={connecting !== null && !isConnecting}
-                                onClick={() => void onConnect(platform)}
-                              >
-                                Reconnect
-                              </Button>
-                            )}
-                            <Button
-                              size="icon-xs"
-                              variant="ghost"
-                              aria-label={`Disconnect @${account.username}`}
-                              className="size-6 min-w-6 rounded-full text-muted-foreground hover:text-red-600"
-                              disabled={disconnecting === account._id}
-                              onClick={() =>
-                                setAccountToDisconnect({
-                                  id: account._id,
-                                  username: account.username,
-                                })
-                              }
-                            >
-                              <Icon icon="hugeicons:delete-02" width={13} />
-                            </Button>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+          <section
+            aria-label="Social platforms"
+            className="flex min-w-0 flex-1 flex-col gap-4 lg:order-first"
+          >
+            {orderedPlatforms.map((platform) => (
+              <PlatformConnectionCard
+                key={platform}
+                platform={platform}
+                accounts={byPlatform.get(platform) ?? []}
+                atLimit={atLimit}
+                connecting={connecting}
+                disconnecting={disconnecting}
+                onConnect={onConnect}
+                onDisconnect={setAccountToDisconnect}
+              />
+            ))}
           </section>
         </div>
       </div>
@@ -317,7 +224,8 @@ function ConnectionsPageInner() {
                 }
               }}
             >
-              Disconnect
+              {disconnecting !== null && <Spinner data-icon="inline-start" />}
+              {disconnecting !== null ? "Disconnecting…" : "Disconnect"}
             </Button>
           </DialogFooter>
         </DialogContent>

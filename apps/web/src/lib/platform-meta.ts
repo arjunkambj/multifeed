@@ -1,4 +1,7 @@
-import { OAUTH_PLATFORMS } from "@/lib/oauth/connectors/types";
+import {
+  OAUTH_PLATFORMS,
+  type OAuthPlatform,
+} from "@/lib/oauth/connectors/types";
 
 export type { OAuthPlatform } from "@/lib/oauth/connectors/types";
 
@@ -11,7 +14,8 @@ export type PlatformMeta = {
   maxChars?: number;
 };
 
-export const PLATFORM_META: Record<string, PlatformMeta> = {
+export const PLATFORM_META: Record<OAuthPlatform, PlatformMeta> &
+  Partial<Record<string, PlatformMeta>> = {
   facebook: {
     label: "Facebook",
     // Single-glyph brand mark reads cleaner in small badges than the wordmark.
@@ -45,7 +49,7 @@ export const PLATFORM_META: Record<string, PlatformMeta> = {
     label: "YouTube",
     icon: "fa6-brands:youtube",
     brand: "#FF0000",
-    description: "Channel uploads and metadata",
+    description: "Videos and Shorts on your channel",
     maxChars: 5000,
   },
   x: {
@@ -59,7 +63,7 @@ export const PLATFORM_META: Record<string, PlatformMeta> = {
     label: "TikTok",
     icon: "fa6-brands:tiktok",
     brand: "#010101",
-    description: "Videos and photos via Content Posting API",
+    description: "Videos and photos on TikTok",
     maxChars: 2200,
   },
 };

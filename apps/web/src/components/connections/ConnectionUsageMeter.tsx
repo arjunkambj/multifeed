@@ -73,6 +73,11 @@ export function ConnectionUsageMeter({
           </Button>
         ) : null}
       </div>
+      {atLimit && (
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          Upgrade to add accounts. You can still reconnect existing accounts.
+        </p>
+      )}
     </div>
   );
 }
