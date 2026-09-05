@@ -20,7 +20,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { Kbd } from "@/components/ui/kbd";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { landingPeople } from "@/constants/landing-page";
 import {
@@ -226,10 +226,7 @@ export function DashboardMock() {
                     placeholder="Search"
                   />
                   <InputGroupAddon align="inline-end" className="shrink-0">
-                    <KbdGroup>
-                      <Kbd>⌘</Kbd>
-                      <Kbd>K</Kbd>
-                    </KbdGroup>
+                    <Kbd>⌘K</Kbd>
                   </InputGroupAddon>
                 </InputGroup>
               </div>

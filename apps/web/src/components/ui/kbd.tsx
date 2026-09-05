@@ -36,4 +36,22 @@ function useMetaKeyLabel() {
   return label;
 }
 
-export { Kbd, KbdGroup, useMetaKeyLabel };
+function formatMetaShortcut(metaKey: string, shortcut: string) {
+  const key = shortcut.toUpperCase();
+  return metaKey === "⌘" ? `${metaKey}${key}` : `${metaKey}+${key}`;
+}
+
+function MetaKbd({
+  shortcut,
+  className,
+  ...props
+}: React.ComponentProps<"kbd"> & { shortcut: string }) {
+  const metaKey = useMetaKeyLabel();
+  return (
+    <Kbd className={className} {...props}>
+      {formatMetaShortcut(metaKey, shortcut)}
+    </Kbd>
+  );
+}
+
+export { Kbd, KbdGroup, MetaKbd, useMetaKeyLabel };

@@ -20,7 +20,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Kbd, KbdGroup, useMetaKeyLabel } from "@/components/ui/kbd";
+import { MetaKbd } from "@/components/ui/kbd";
 import {
   Sidebar,
   SidebarContent,
@@ -61,7 +61,6 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
-  const metaKey = useMetaKeyLabel();
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -126,10 +125,7 @@ export function AppSidebar() {
             onMouseDown={(event) => event.preventDefault()}
           />
           <InputGroupAddon align="inline-end" className="shrink-0">
-            <KbdGroup>
-              <Kbd>{metaKey}</Kbd>
-              <Kbd>{SEARCH_SHORTCUT.toUpperCase()}</Kbd>
-            </KbdGroup>
+            <MetaKbd shortcut={SEARCH_SHORTCUT} />
           </InputGroupAddon>
         </InputGroup>
         <Tooltip>
@@ -148,10 +144,7 @@ export function AppSidebar() {
           </TooltipTrigger>
           <TooltipContent side="right">
             Search
-            <KbdGroup>
-              <Kbd>{metaKey}</Kbd>
-              <Kbd>{SEARCH_SHORTCUT.toUpperCase()}</Kbd>
-            </KbdGroup>
+            <MetaKbd shortcut={SEARCH_SHORTCUT} />
           </TooltipContent>
         </Tooltip>
       </SidebarHeader>

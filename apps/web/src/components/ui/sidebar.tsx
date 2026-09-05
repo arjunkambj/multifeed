@@ -8,7 +8,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Kbd, KbdGroup, useMetaKeyLabel } from "@/components/ui/kbd";
+import { MetaKbd } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -258,7 +258,6 @@ function SidebarTrigger({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar();
-  const metaKey = useMetaKeyLabel();
 
   return (
     <Tooltip>
@@ -283,10 +282,7 @@ function SidebarTrigger({
       </TooltipTrigger>
       <TooltipContent side="bottom" align="start">
         Toggle sidebar
-        <KbdGroup>
-          <Kbd>{metaKey}</Kbd>
-          <Kbd>{SIDEBAR_KEYBOARD_SHORTCUT.toUpperCase()}</Kbd>
-        </KbdGroup>
+        <MetaKbd shortcut={SIDEBAR_KEYBOARD_SHORTCUT} />
       </TooltipContent>
     </Tooltip>
   );
