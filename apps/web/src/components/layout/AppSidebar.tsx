@@ -103,7 +103,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="gap-2 p-2 group-data-[collapsible=icon]:items-center">
+      <SidebarHeader className="group-data-[collapsible=icon]:items-center">
         <Link
           aria-label="MultiFeed"
           className="flex items-center px-1 py-1 group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"

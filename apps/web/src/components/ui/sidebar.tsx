@@ -346,7 +346,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-header"
       data-sidebar="header"
       className={cn(
-        "flex flex-col gap-2 p-2 [--radius:var(--radius-xl)]",
+        "flex flex-col gap-2 px-2 pt-2 pb-1 [--radius:var(--radius-xl)] group-data-[collapsible=icon]:p-2",
         className,
       )}
       {...props}
@@ -360,7 +360,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-footer"
       data-sidebar="footer"
       className={cn(
-        "flex flex-col gap-2 p-2 [--radius:var(--radius-xl)]",
+        "flex flex-col gap-2 px-2 pt-4 pb-2 [--radius:var(--radius-xl)] group-data-[collapsible=icon]:p-2",
         className,
       )}
       {...props}
@@ -388,7 +388,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-content"
       data-sidebar="content"
       className={cn(
-        "no-scrollbar flex min-h-0 flex-1 flex-col gap-3 overflow-auto pt-3 [--radius:var(--radius-xl)] group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:pt-1 group-data-[collapsible=icon]:overflow-hidden",
+        "no-scrollbar flex min-h-0 flex-1 flex-col gap-0 overflow-auto pt-1 [--radius:var(--radius-xl)] group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:pt-1 group-data-[collapsible=icon]:overflow-hidden",
         className,
       )}
       {...props}
@@ -402,7 +402,7 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-group"
       data-sidebar="group"
       className={cn(
-        "relative flex w-full min-w-0 flex-col px-2 py-0",
+        "relative mt-4 flex w-full min-w-0 flex-col px-2 py-0 first:mt-0 group-data-[collapsible=icon]:mt-2 group-data-[collapsible=icon]:first:mt-0",
         className,
       )}
       {...props}
@@ -420,7 +420,7 @@ function SidebarGroupLabel({
     props: mergeProps<"div">(
       {
         className: cn(
-          "flex h-7 shrink-0 items-center rounded-xl px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear group-data-[collapsible=icon]:hidden focus-visible:ring-3 [&>svg]:size-4 [&>svg]:shrink-0",
+          "flex h-auto shrink-0 items-center rounded-xl px-2 pb-1 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear group-data-[collapsible=icon]:hidden focus-visible:ring-3 [&>svg]:size-4 [&>svg]:shrink-0",
           className,
         ),
       },

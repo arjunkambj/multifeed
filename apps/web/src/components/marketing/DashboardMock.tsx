@@ -212,7 +212,7 @@ export function DashboardMock() {
             }}
           >
             <aside className="flex w-60 shrink-0 flex-col border-r bg-sidebar">
-              <div className="flex flex-col gap-2 p-2">
+              <div className="flex flex-col gap-2 px-2 pt-2 pb-1">
                 <span className="flex items-center px-1 py-1">
                   <Logo markOnly markClassName="size-7" />
                 </span>
@@ -231,13 +231,13 @@ export function DashboardMock() {
                 </InputGroup>
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-3 pt-3">
+              <div className="flex min-h-0 flex-1 flex-col pt-1">
                 <div className="px-2">
                   <MockNavList items={sidebarMainItems} />
                 </div>
                 {sidebarCategories.map((category) => (
-                  <div className="px-2" key={category.name}>
-                    <p className="flex h-7 items-center px-2 text-xs font-medium text-sidebar-foreground/70">
+                  <div className="mt-4 px-2" key={category.name}>
+                    <p className="px-2 pb-1 text-xs font-medium text-sidebar-foreground/70">
                       {category.name}
                     </p>
                     <MockNavList activeName="Calendar" items={category.items} />
@@ -245,7 +245,7 @@ export function DashboardMock() {
                 ))}
               </div>
 
-              <div className="p-2">
+              <div className="px-2 pt-4 pb-2">
                 <MockNavList items={sidebarFooterItems} />
               </div>
             </aside>
