@@ -7,7 +7,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { encryptSecret } from "./oauth/crypto";
-import schema, { targetClaimStatus } from "./schema";
+import schema, { publishAttempt, targetClaimStatus } from "./schema";
 import { mediaAssetOutputValidator } from "./media/r2";
 
 const postValidator = v.object({
@@ -253,7 +253,7 @@ export const markAccountExpired = internalMutation({
 export const savePublishAttempt = internalMutation({
   args: {
     targetId: v.id("postTargets"),
-    attempt: v.any(),
+    attempt: publishAttempt,
   },
   returns: v.null(),
   handler: async (ctx, args) => {

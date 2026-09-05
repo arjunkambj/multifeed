@@ -79,9 +79,7 @@ async function facebookPermalink(
 async function facebookPublished(
   id: string,
   accessToken: string,
-  saveAttempt:
-    | ((attempt: Record<string, unknown>) => Promise<void>)
-    | undefined,
+  saveAttempt: PublishInput["saveAttempt"],
   fallback: string,
 ) {
   const permalink = await facebookPermalink(id, accessToken, fallback);
@@ -132,7 +130,7 @@ export async function publishToFacebook(
     const url = mediaUrl(asset);
     if (asset.kind === "video" || post.kind === "video") {
       let videoId =
-        typeof existingAttempt?.videoId === "string"
+        existingAttempt?.kind === "facebook_story_video"
           ? existingAttempt.videoId
           : undefined;
       if (!videoId) {
@@ -392,7 +390,7 @@ export async function publishToInstagram(
     return { platformPostId: id, permalink };
   }
 
-  if (typeof existingAttempt?.creationId === "string") {
+  if (existingAttempt?.kind === "instagram") {
     return finishContainer(existingAttempt.creationId);
   }
 

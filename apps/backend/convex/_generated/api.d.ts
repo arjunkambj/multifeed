@@ -9,6 +9,7 @@
  */
 
 import type * as billing from "../billing.js";
+import type * as billingWebhook from "../billingWebhook.js";
 import type * as crons from "../crons.js";
 import type * as errors from "../errors.js";
 import type * as hexclave_auth from "../hexclave/auth.js";
@@ -17,8 +18,10 @@ import type * as media_r2 from "../media/r2.js";
 import type * as oauth_accounts from "../oauth/accounts.js";
 import type * as oauth_crypto from "../oauth/crypto.js";
 import type * as oauth_limits from "../oauth/limits.js";
+import type * as oauth_returnPath from "../oauth/returnPath.js";
 import type * as oauth_server from "../oauth/server.js";
 import type * as oauth_sessions from "../oauth/sessions.js";
+import type * as postConfig from "../postConfig.js";
 import type * as posts from "../posts.js";
 import type * as publishing from "../publishing.js";
 import type * as publishing_actions from "../publishing/actions.js";
@@ -40,6 +43,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   billing: typeof billing;
+  billingWebhook: typeof billingWebhook;
   crons: typeof crons;
   errors: typeof errors;
   "hexclave/auth": typeof hexclave_auth;
@@ -48,8 +52,10 @@ declare const fullApi: ApiFromModules<{
   "oauth/accounts": typeof oauth_accounts;
   "oauth/crypto": typeof oauth_crypto;
   "oauth/limits": typeof oauth_limits;
+  "oauth/returnPath": typeof oauth_returnPath;
   "oauth/server": typeof oauth_server;
   "oauth/sessions": typeof oauth_sessions;
+  postConfig: typeof postConfig;
   posts: typeof posts;
   publishing: typeof publishing;
   "publishing/actions": typeof publishing_actions;

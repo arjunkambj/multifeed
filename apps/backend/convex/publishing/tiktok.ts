@@ -125,7 +125,7 @@ export async function publishToTiktok(
 ): Promise<PublishedPost> {
   const { post, target, media, accessToken, existingAttempt, saveAttempt } =
     params;
-  if (typeof existingAttempt?.publishId === "string") {
+  if (existingAttempt?.kind === "tiktok") {
     return waitForTikTokPublish(
       accessToken,
       existingAttempt.publishId,

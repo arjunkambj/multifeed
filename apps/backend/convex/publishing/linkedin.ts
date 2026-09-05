@@ -244,11 +244,8 @@ export async function publishToLinkedIn(
     account.providerAccountId,
     account.metadata as Record<string, unknown> | undefined,
   );
-  const existingIds = Array.isArray(existingAttempt?.mediaIds)
-    ? existingAttempt.mediaIds.filter(
-        (id): id is string => typeof id === "string",
-      )
-    : [];
+  const existingIds =
+    existingAttempt?.kind === "linkedin" ? (existingAttempt.mediaIds ?? []) : [];
   const mediaIds: string[] = existingIds;
 
   if (existingIds.length > 0 && media.some((asset) => asset.kind === "video")) {

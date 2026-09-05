@@ -91,6 +91,53 @@ export const targetClaimStatus = v.union(
   v.literal("missing"),
 );
 
+const publishedResult = {
+  platformPostId: v.optional(v.string()),
+  permalink: v.optional(v.string()),
+};
+
+/** Provider-specific checkpoints used to resume interrupted publishing. */
+export const publishAttempt = v.union(
+  v.object({
+    kind: v.literal("x"),
+    mediaIds: v.optional(v.array(v.string())),
+    ...publishedResult,
+  }),
+  v.object({
+    kind: v.literal("linkedin"),
+    mediaIds: v.optional(v.array(v.string())),
+    ...publishedResult,
+  }),
+  v.object({
+    kind: v.literal("threads"),
+    creationId: v.string(),
+    ...publishedResult,
+  }),
+  v.object({
+    kind: v.literal("instagram"),
+    creationId: v.string(),
+    childIds: v.optional(v.array(v.string())),
+    ...publishedResult,
+  }),
+  v.object({
+    kind: v.literal("tiktok"),
+    publishId: v.string(),
+    ...publishedResult,
+  }),
+  v.object({
+    kind: v.literal("youtube"),
+    uploadStarted: v.optional(v.boolean()),
+    ...publishedResult,
+  }),
+  v.object({ kind: v.literal("facebook"), ...publishedResult }),
+  v.object({
+    kind: v.literal("facebook_story_video"),
+    videoId: v.string(),
+    pageId: v.string(),
+    ...publishedResult,
+  }),
+);
+
 const metricSyncStatus = v.union(
   v.literal("idle"),
   v.literal("queued"),
@@ -285,7 +332,7 @@ export default defineSchema({
     platformPermalink: v.optional(v.string()),
     failureCode: v.optional(v.string()),
     failureMessage: v.optional(v.string()),
-    publishAttempt: v.optional(v.any()),
+    publishAttempt: v.optional(publishAttempt),
     attempts: v.number(),
     metricSyncStatus,
     metricSyncError: v.optional(v.string()),

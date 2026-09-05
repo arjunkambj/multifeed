@@ -1,13 +1,15 @@
 import type { Doc } from "../_generated/dataModel";
 
+export type PublishAttempt = NonNullable<Doc<"postTargets">["publishAttempt"]>;
+
 export type PublishInput = {
   post: Doc<"posts">;
   target: Doc<"postTargets">;
   account: Doc<"connectedAccounts">;
   media: Doc<"mediaAssets">[];
   accessToken: string;
-  existingAttempt?: Record<string, unknown>;
-  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
+  existingAttempt?: PublishAttempt;
+  saveAttempt?: (attempt: PublishAttempt) => Promise<void>;
 };
 
 export type PublishedPost = { platformPostId: string; permalink?: string };
@@ -78,7 +80,9 @@ export function interpretTikTokStatus(status?: string) {
   return "pending" as const;
 }
 
-export function publishedFromAttempt(attempt?: Record<string, unknown>) {
+export function publishedFromAttempt(
+  attempt?: PublishAttempt | Partial<PublishedPost>,
+) {
   if (typeof attempt?.platformPostId !== "string" || !attempt.platformPostId) {
     return null;
   }
@@ -101,7 +105,8 @@ export function isResumablePublishError(error: unknown) {
   return (
     error instanceof ResumablePublishError ||
     (error instanceof Error &&
-      (error as Error & { resumable?: boolean }).resumable === true)
+      "resumable" in error &&
+      error.resumable === true)
   );
 }
 

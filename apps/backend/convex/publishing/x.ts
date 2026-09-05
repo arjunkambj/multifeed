@@ -302,11 +302,8 @@ export async function publishToX(params: PublishInput): Promise<PublishedPost> {
   if (!text && media.length === 0)
     throw new Error("X post requires text or media");
 
-  let mediaIds: string[] | undefined = Array.isArray(existingAttempt?.mediaIds)
-    ? existingAttempt.mediaIds.filter(
-        (id): id is string => typeof id === "string",
-      )
-    : undefined;
+  let mediaIds =
+    existingAttempt?.kind === "x" ? existingAttempt.mediaIds : undefined;
   const hasVideo = media.some(
     (asset) => asset.kind === "video" || asset.mimeType.startsWith("video/"),
   );

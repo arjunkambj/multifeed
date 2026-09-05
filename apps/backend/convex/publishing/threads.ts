@@ -118,7 +118,7 @@ export async function publishToThreads(
     return { platformPostId: id, permalink };
   }
 
-  if (typeof existingAttempt?.creationId === "string") {
+  if (existingAttempt?.kind === "threads") {
     return finish(existingAttempt.creationId);
   }
 

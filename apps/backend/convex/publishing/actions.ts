@@ -308,12 +308,8 @@ export const publishOneTarget = internalAction({
     }
 
     const existingAttempt =
-      claim === "resume" &&
-      target.publishAttempt &&
-      typeof target.publishAttempt === "object"
-        ? (target.publishAttempt as Record<string, unknown>)
-        : undefined;
-    const saveAttempt = async (attempt: Record<string, unknown>) => {
+      claim === "resume" ? target.publishAttempt : undefined;
+    const saveAttempt: PublishInput["saveAttempt"] = async (attempt) => {
       try {
         await ctx.runMutation(internal.publishing.savePublishAttempt, {
           targetId: target._id,
