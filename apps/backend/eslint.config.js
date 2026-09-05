@@ -7,9 +7,4 @@ export default [
   {
     ignores: ["convex/_generated/**"],
   },
-  {
-    rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-    },
-  },
 ];

@@ -44,10 +44,14 @@ export async function POST(request: NextRequest) {
     return errorResponse("No selected team", 400);
   }
 
-  const payload = (await request.json().catch(() => ({}))) as {
-    email?: unknown;
-  };
-  const email = typeof payload.email === "string" ? payload.email.trim() : null;
+  const payload: unknown = await request.json().catch(() => null);
+  const email =
+    typeof payload === "object" &&
+    payload !== null &&
+    "email" in payload &&
+    typeof payload.email === "string"
+      ? payload.email.trim()
+      : null;
 
   if (!isEmail(email)) {
     return errorResponse("Enter a valid email address", 400);

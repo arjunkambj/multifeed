@@ -307,12 +307,6 @@
   --sidebar-ring: oklch(0.54 0.13 153.45);
 }
 
-.dark [data-dashboard] {
-  --background: oklch(0.141 0.005 285.823); /* zinc-950 */
-  --card: oklch(0.21 0.006 285.885); /* zinc-900 */
-  --sidebar: var(--background);
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;

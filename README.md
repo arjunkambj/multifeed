@@ -23,7 +23,7 @@ pnpm --filter @multifeed/web dev
 
 ## Environment variables
 
-Samples live next to each app (do **not** put provider secrets in Convex, or Convex secrets in Next):
+Samples live next to each app. OAuth server authentication and social provider credentials are shared between the two runtimes; configure each using the tables below.
 
 | File                                                   | App     | Loaded by                               |
 | ------------------------------------------------------ | ------- | --------------------------------------- |
@@ -68,7 +68,6 @@ Set on the **deployment** (Dashboard or `npx convex env set` from `apps/backend`
 | **OAuth server auth** | `OAUTH_SERVER_SECRET` (same 64-char hex value as `apps/web`)                       |
 | **Social app secrets** | `X_*`, `LINKEDIN_*`, `GOOGLE_*`, `TIKTOK_*`, `META_*`, `THREADS_*` (same values as `apps/web`) |
 | **Dodo webhook**      | `DODO_PAYMENTS_WEBHOOK_KEY` → `https://<CONVEX_SITE_URL>/webhook/dodopayment`      |
-| **Limits (prod)**     | `BILLING_SOFT_LIMITS=false`                                                        |
 | **R2 media**          | `R2_BUCKET`, `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_TOKEN` |
 
 ```bash
@@ -77,7 +76,6 @@ npx convex env set NEXT_PUBLIC_HEXCLAVE_PROJECT_ID "..."
 npx convex env set TOKEN_ENCRYPTION_KEY "$(openssl rand -hex 32)"
 npx convex env set OAUTH_SERVER_SECRET "<same value as apps/web>"
 npx convex env set DODO_PAYMENTS_WEBHOOK_KEY "whsec_..."
-# npx convex env set BILLING_SOFT_LIMITS false
 # npx convex env set R2_BUCKET ...
 ```
 

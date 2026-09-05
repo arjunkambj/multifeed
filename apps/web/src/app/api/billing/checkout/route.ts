@@ -15,11 +15,6 @@ import {
 } from "@/hexclave/server";
 import { appOrigin, assertSameOrigin } from "@/lib/oauth/env";
 
-type CheckoutPayload = {
-  planKey?: unknown;
-  interval?: unknown;
-};
-
 const responseOptions = {
   headers: { "Cache-Control": "private, no-store" },
 };
@@ -46,7 +41,7 @@ export async function POST(request: NextRequest) {
   const [user, token, payload] = await Promise.all([
     hexclaveServerApp.getUser({ tokenStore: request }),
     getHexclaveConvexServerToken(request),
-    request.json().catch(() => ({})) as Promise<CheckoutPayload>,
+    request.json().catch(() => null) as Promise<unknown>,
   ]);
 
   if (!user || !token) {
@@ -61,7 +56,14 @@ export async function POST(request: NextRequest) {
     return errorResponse("Billing requires a primary email", 400);
   }
 
-  if (!isPlanKey(payload.planKey) || !isBillingInterval(payload.interval)) {
+  if (
+    typeof payload !== "object" ||
+    payload === null ||
+    !("planKey" in payload) ||
+    !isPlanKey(payload.planKey) ||
+    !("interval" in payload) ||
+    !isBillingInterval(payload.interval)
+  ) {
     return errorResponse("Invalid plan", 400);
   }
 

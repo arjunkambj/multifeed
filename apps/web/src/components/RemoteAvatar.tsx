@@ -1,10 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import type { ImageLoader } from "next/image";
-
-const passthroughLoader: ImageLoader = ({ src }) => src;
-
 export function RemoteAvatar({
   src,
   alt = "",
@@ -21,7 +17,6 @@ export function RemoteAvatar({
       alt={alt}
       className={className}
       height={size}
-      loader={passthroughLoader}
       sizes={`${size}px`}
       src={src}
       unoptimized

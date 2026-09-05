@@ -26,8 +26,6 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
   year: "numeric",
 });
 
-const formatDate = (value: Date) => dateFormatter.format(value);
-
 export type { TeamTableRow };
 
 export function TeamMembersContent({
@@ -79,7 +77,7 @@ export function TeamMembersContent({
       email: invitation.recipientEmail,
       id: invitation.id,
       imageUrl: null,
-      lastActivity: `Expires ${formatDate(invitation.expiresAt)}`,
+      lastActivity: `Expires ${dateFormatter.format(invitation.expiresAt)}`,
       name: "Pending invite",
       status: "Invited" as const,
       subtitle: "Awaiting response",
@@ -109,7 +107,7 @@ export function TeamMembersContent({
         teamSeatLimit={entitlements?.teamSeatLimit}
       />
 
-      <TeamMembersTable membersError={null} rows={rows} />
+      <TeamMembersTable rows={rows} />
     </div>
   );
 }

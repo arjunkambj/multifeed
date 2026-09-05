@@ -12,9 +12,6 @@ export const HEADER_GAP = "mt-10 md:mt-12";
 /** Gap between cards or tiles in any grid on the page. */
 export const GRID_GAP = "gap-3 md:gap-4";
 
-/** Padding inside a standalone card or tile. */
-export const CARD_PADDING = "p-6";
-
 /** Padding for the copy column of a full-width panel. */
 export const PANEL_PADDING =
   "px-6 py-8 sm:px-8 md:px-9 md:py-9 lg:px-10 lg:py-10";

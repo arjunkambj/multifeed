@@ -20,13 +20,7 @@ const getInitials = (value: string | null) =>
     .map((part) => part[0]?.toUpperCase())
     .join("");
 
-export function TeamMembersTable({
-  membersError,
-  rows,
-}: {
-  membersError: Error | null;
-  rows: TeamTableRow[];
-}) {
+export function TeamMembersTable({ rows }: { rows: TeamTableRow[] }) {
   return (
     <Table className="min-w-[880px]">
       <TableHeader>
@@ -44,7 +38,7 @@ export function TeamMembersTable({
               className="px-4 py-10 text-center text-muted-foreground"
               colSpan={4}
             >
-              {membersError?.message ?? "No team members yet."}
+              No team members yet.
             </TableCell>
           </TableRow>
         ) : (

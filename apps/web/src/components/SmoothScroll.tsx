@@ -2,11 +2,9 @@
 
 import Lenis from "lenis";
 import { cancelFrame, frame } from "motion";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 export function SmoothScroll({ children }: { children: ReactNode }) {
-  const lenisRef = useRef<Lenis | null>(null);
-
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
@@ -22,7 +20,6 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       wheelMultiplier: 1,
       touchMultiplier: 1.25,
     });
-    lenisRef.current = lenis;
 
     const update = ({ timestamp }: { timestamp: number }) => {
       lenis.raf(timestamp);
@@ -32,7 +29,6 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     return () => {
       cancelFrame(update);
       lenis.destroy();
-      lenisRef.current = null;
     };
   }, []);
 
