@@ -54,9 +54,6 @@ importers:
       svix:
         specifier: ^1.96.1
         version: 1.96.1
-      zod:
-        specifier: 4.4.3
-        version: 4.4.3
     devDependencies:
       '@convex-dev/eslint-plugin':
         specifier: ^4.0.0
@@ -64,9 +61,6 @@ importers:
       '@multifeed/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@multifeed/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@types/node':
         specifier: ^25.6.2
         version: 25.6.2
@@ -5157,7 +5151,7 @@ snapshots:
   '@hexclave/next@1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.0)(zod@3.25.76)':
     dependencies:
       '@ai-sdk/react': 3.0.207(react@19.2.8)(zod@3.25.76)
-      '@hexclave/sc': 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@hexclave/sc': 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@hexclave/shared': 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(yup@1.7.1)
       '@hexclave/ui': 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(yup@1.7.1)
       '@hookform/resolvers': 5.4.0(react-hook-form@7.79.0(react@19.2.8))
@@ -5195,7 +5189,7 @@ snapshots:
   '@hexclave/next@1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(zod@4.4.3)':
     dependencies:
       '@ai-sdk/react': 3.0.207(react@19.2.8)(zod@4.4.3)
-      '@hexclave/sc': 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@hexclave/sc': 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@hexclave/shared': 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(yup@1.7.1)
       '@hexclave/ui': 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(yup@1.7.1)
       '@hookform/resolvers': 5.4.0(react-hook-form@7.79.0(react@19.2.8))
@@ -5230,7 +5224,7 @@ snapshots:
       - tailwindcss
       - zod
 
-  '@hexclave/sc@1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@hexclave/sc@1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       next: 16.3.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8

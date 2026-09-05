@@ -76,27 +76,6 @@ export const tiktokConnector: SocialConnector = {
     return tokenBundle(data) satisfies TokenBundle;
   },
 
-  async refreshAccessToken(refreshToken) {
-    const { clientKey, clientSecret } = credentials();
-    const res = await oauthFetch(TOKEN_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_key: clientKey,
-        client_secret: clientSecret,
-        grant_type: "refresh_token",
-        refresh_token: refreshToken,
-      }),
-    });
-    const data = (await res.json()) as TokenResponse;
-    if (!res.ok || !data.access_token) {
-      throw new Error(
-        data.error_description ?? data.error ?? "TikTok refresh failed",
-      );
-    }
-    return tokenBundle(data, refreshToken) satisfies TokenBundle;
-  },
-
   async fetchProfile(accessToken) {
     const fields = [
       "open_id",

@@ -10,14 +10,14 @@ import type { AccountOption, AccountProfile, TokenBundle } from "../types";
 
 const GRAPH = META_GRAPH;
 
-export function metaAppCredentials() {
+function metaAppCredentials() {
   return {
     appId: requireEnv("META_APP_ID"),
     appSecret: requireEnv("META_APP_SECRET"),
   };
 }
 
-export function threadsAppCredentials() {
+function threadsAppCredentials() {
   return {
     appId: requireEnv("THREADS_APP_ID"),
     appSecret: requireEnv("THREADS_APP_SECRET"),
@@ -109,32 +109,6 @@ export async function metaExchangeCode(input: {
       }
       return acc;
     }, []),
-    tokenType: "user",
-  };
-}
-
-export async function metaFetchMe(
-  accessToken: string,
-): Promise<AccountProfile> {
-  const params = new URLSearchParams({
-    fields: "id,name,picture.type(large)",
-    access_token: accessToken,
-  });
-  const res = await oauthFetch(`${GRAPH}/me?${params}`);
-  const data = (await res.json()) as {
-    id?: string;
-    name?: string;
-    picture?: { data?: { url?: string } };
-    error?: { message?: string };
-  };
-  if (!res.ok || !data.id) {
-    throw new Error(data.error?.message ?? "Meta profile fetch failed");
-  }
-  return {
-    providerAccountId: data.id,
-    username: data.name ?? data.id,
-    displayName: data.name,
-    avatarUrl: data.picture?.data?.url,
     tokenType: "user",
   };
 }
@@ -400,37 +374,6 @@ export async function threadsExchangeCodeNative(input: {
     accessToken: longData.access_token,
     // Threads refreshes a long-lived access token with that same token.
     refreshToken: longData.access_token,
-    expiresAt,
-    refreshTokenExpiresAt: expiresAt,
-    scopes: [],
-    tokenType: "user",
-  };
-}
-
-export async function threadsRefreshAccessToken(
-  longLivedToken: string,
-): Promise<TokenBundle> {
-  const params = new URLSearchParams({
-    grant_type: "th_refresh_token",
-    access_token: longLivedToken,
-  });
-  const res = await oauthFetch(
-    `${THREADS_GRAPH}/refresh_access_token?${params}`,
-  );
-  const data = (await res.json()) as {
-    access_token?: string;
-    expires_in?: number;
-    error?: { message?: string };
-  };
-  if (!res.ok || !data.access_token) {
-    throw new Error(data.error?.message ?? "Threads token refresh failed");
-  }
-  const expiresAt = data.expires_in
-    ? Date.now() + data.expires_in * 1000
-    : undefined;
-  return {
-    accessToken: data.access_token,
-    refreshToken: data.access_token,
     expiresAt,
     refreshTokenExpiresAt: expiresAt,
     scopes: [],

@@ -93,22 +93,11 @@ function toPublicAccount(doc: Doc<"connectedAccounts">): PublicAccount {
   };
 }
 
-export async function listAccountsForTeam(
-  ctx: QueryCtx,
-  teamId: string,
-  selectedPlatform?: Doc<"connectedAccounts">["platform"],
-) {
-  const rows = selectedPlatform
-    ? await ctx.db
-        .query("connectedAccounts")
-        .withIndex("by_team_provider", (q) =>
-          q.eq("teamId", teamId).eq("platform", selectedPlatform),
-        )
-        .take(MAX_ACCOUNTS_PER_TEAM)
-    : await ctx.db
-        .query("connectedAccounts")
-        .withIndex("by_team_provider", (q) => q.eq("teamId", teamId))
-        .take(MAX_ACCOUNTS_PER_TEAM);
+export async function listAccountsForTeam(ctx: QueryCtx, teamId: string) {
+  const rows = await ctx.db
+    .query("connectedAccounts")
+    .withIndex("by_team_provider", (q) => q.eq("teamId", teamId))
+    .take(MAX_ACCOUNTS_PER_TEAM);
 
   return rows.map(toPublicAccount);
 }
@@ -169,18 +158,6 @@ async function upsertAccount(
     createdAt: now,
   });
 }
-
-/** Team-scoped connected accounts (never includes tokens). */
-export const list = query({
-  args: {
-    platform: v.optional(platformValidator),
-  },
-  returns: v.array(publicAccountValidator),
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    return await listAccountsForTeam(ctx, user.selectedTeamId, args.platform);
-  },
-});
 
 /** One consistent subscription for everything rendered on Connections. */
 export const getConnectionsPageData = query({

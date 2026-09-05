@@ -1,3 +1,4 @@
+import { sanitizeReturnTo } from "./returnPath";
 import { v } from "convex/values";
 import { internalMutation, mutation } from "../_generated/server";
 import { fail } from "../errors";
@@ -7,31 +8,6 @@ import { randomUrlSafe } from "./crypto";
 import { requireOAuthServer } from "./server";
 
 const SESSION_TTL_MS = 10 * 60 * 1000;
-
-/** Same rules as web sanitizeReturnTo — keep relative, same-app paths only. */
-function sanitizeReturnTo(value: string | undefined): string | undefined {
-  if (!value) return undefined;
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return undefined;
-  if (trimmed.includes("\\") || trimmed.includes("://")) return undefined;
-  if (trimmed.length > 512) return undefined;
-  const pathOnly = trimmed.split("?")[0]!.split("#")[0]!;
-  const allowed = [
-    "/connections",
-    "/posts",
-    "/calendar",
-    "/inbox",
-    "/settings",
-    "/billing",
-    "/team",
-    "/overview",
-  ];
-  if (!allowed.some((p) => pathOnly === p || pathOnly.startsWith(`${p}/`))) {
-    return undefined;
-  }
-  return trimmed;
-}
 
 /**
  * Create OAuth session for the current team user.
@@ -212,7 +188,9 @@ export const purgeExpired = internalMutation({
       .withIndex("by_expiresAt", (q) => q.lt("expiresAt", now))
       .take(200);
 
-    await Promise.all(expired.map((session) => ctx.db.delete("oauthSessions", session._id)));
+    await Promise.all(
+      expired.map((session) => ctx.db.delete("oauthSessions", session._id)),
+    );
 
     return { deleted: expired.length };
   },

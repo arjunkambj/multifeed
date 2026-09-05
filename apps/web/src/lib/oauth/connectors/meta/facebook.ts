@@ -3,7 +3,6 @@ import type { AccountProfile, SocialConnector, TokenBundle } from "../types";
 import {
   metaAuthorizeUrl,
   metaExchangeCode,
-  metaFetchMe,
   metaListPages,
   pagesToFacebookOptions,
 } from "./shared";
@@ -39,18 +38,14 @@ export const facebookConnector: SocialConnector = {
     return tokens;
   },
 
-  async fetchProfile(accessToken) {
-    return metaFetchMe(accessToken);
-  },
-
   async listAccounts(accessToken) {
     const pages = await metaListPages(accessToken);
     return pagesToFacebookOptions(pages);
   },
 
-  async resolveAccount(userTokens, optionId, option) {
-    const pageAccessToken = option?.metadata?.pageAccessToken;
-    if (option?.id !== optionId || typeof pageAccessToken !== "string") {
+  async resolveAccount(userTokens, option) {
+    const pageAccessToken = option.metadata?.pageAccessToken;
+    if (typeof pageAccessToken !== "string") {
       throw new Error("Facebook Page access token not available");
     }
 
@@ -64,12 +59,12 @@ export const facebookConnector: SocialConnector = {
     };
 
     const profile: AccountProfile = {
-      providerAccountId: optionId,
+      providerAccountId: option.id,
       username: option.username ?? option.label,
       displayName: option.label,
       avatarUrl: option.avatarUrl,
       tokenType: "page",
-      metadata: { pageId: optionId, pageName: option.label },
+      metadata: { pageId: option.id, pageName: option.label },
     };
 
     return { tokens, profile };

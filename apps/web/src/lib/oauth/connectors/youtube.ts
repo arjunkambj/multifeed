@@ -76,39 +76,6 @@ export const youtubeConnector: SocialConnector = {
     };
   },
 
-  async refreshAccessToken(refreshToken) {
-    const { clientId, clientSecret } = credentials();
-    const body = new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: "refresh_token",
-    });
-    const res = await oauthFetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
-    });
-    const data = (await res.json()) as {
-      access_token?: string;
-      expires_in?: number;
-      scope?: string;
-      error_description?: string;
-    };
-    if (!res.ok || !data.access_token) {
-      throw new Error(data.error_description ?? "Google refresh failed");
-    }
-    return {
-      accessToken: data.access_token,
-      refreshToken,
-      expiresAt: data.expires_in
-        ? Date.now() + data.expires_in * 1000
-        : undefined,
-      scopes: data.scope?.split(" ").filter(Boolean) ?? SCOPES,
-      tokenType: "user",
-    };
-  },
-
   async fetchProfile(accessToken) {
     const res = await oauthFetch(
       "https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true",

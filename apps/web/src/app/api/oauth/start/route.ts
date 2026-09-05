@@ -28,10 +28,7 @@ export async function POST(request: NextRequest) {
 
   const [token, body] = await Promise.all([
     getHexclaveConvexServerToken(request),
-    request.json().catch(() => ({})) as Promise<{
-      platform?: unknown;
-      returnTo?: unknown;
-    }>,
+    request.json().catch(() => null) as Promise<unknown>,
   ]);
   if (token == null) {
     return NextResponse.json(
@@ -40,14 +37,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (typeof body.platform !== "string" || !isOAuthPlatform(body.platform)) {
+  if (
+    typeof body !== "object" ||
+    body === null ||
+    !("platform" in body) ||
+    typeof body.platform !== "string" ||
+    !isOAuthPlatform(body.platform)
+  ) {
     return NextResponse.json(
       { error: "Invalid platform" },
       { status: 400, ...responseOptions },
     );
   }
 
-  const returnTo = sanitizeReturnTo(body.returnTo);
+  const returnTo = sanitizeReturnTo(
+    "returnTo" in body ? body.returnTo : undefined,
+  );
   let serverSecret: string | undefined;
   let state: string | undefined;
 

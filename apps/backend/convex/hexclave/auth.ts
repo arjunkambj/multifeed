@@ -1,42 +1,25 @@
-import { z } from "zod";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { fail } from "../errors";
-
-const HexclaveUserSchema = z.object({
-  id: z.string(),
-  email: z.string(),
-  isAnonymous: z.boolean(),
-  isRestricted: z.boolean(),
-  name: z.string(),
-  role: z.literal("authenticated"),
-  selectedTeamId: z.string(),
-});
 
 export async function getCurrentHexclaveUser(ctx: MutationCtx | QueryCtx) {
   const identity = await ctx.auth.getUserIdentity();
 
-  if (identity == null) {
+  if (!identity) {
     return { authenticated: false as const, error: "Unauthenticated." };
   }
 
-  const user = HexclaveUserSchema.safeParse({
-    id: identity.tokenIdentifier,
-    email: identity.email,
-    isAnonymous: identity.is_anonymous,
-    isRestricted: identity.is_restricted,
-    name: identity.name,
-    role: identity.role,
-    selectedTeamId: identity.selected_team_id,
-  });
-
-  if (!user.success) {
-    return {
-      authenticated: false as const,
-      error: "Missing Hexclave user claims.",
-    };
-  }
-
-  return { authenticated: true as const, user: user.data };
+  return {
+    authenticated: true as const,
+    user: {
+      id: identity.tokenIdentifier,
+      email: identity.email,
+      isAnonymous: identity.is_anonymous as boolean,
+      isRestricted: identity.is_restricted as boolean,
+      name: identity.name,
+      role: identity.role as "authenticated",
+      selectedTeamId: identity.selected_team_id as string,
+    },
+  };
 }
 
 export async function requireUser(ctx: MutationCtx | QueryCtx) {

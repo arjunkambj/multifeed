@@ -72,47 +72,6 @@ export const linkedinConnector: SocialConnector = {
     } satisfies TokenBundle;
   },
 
-  async refreshAccessToken(refreshToken) {
-    const { clientId, clientSecret } = credentials();
-    const body = new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: clientId,
-      client_secret: clientSecret,
-    });
-    const res = await oauthFetch(
-      "https://www.linkedin.com/oauth/v2/accessToken",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body,
-      },
-    );
-    const data = (await res.json()) as {
-      access_token?: string;
-      expires_in?: number;
-      refresh_token?: string;
-      refresh_token_expires_in?: number;
-      scope?: string;
-      error_description?: string;
-    };
-    if (!res.ok || !data.access_token) {
-      throw new Error(data.error_description ?? "LinkedIn refresh failed");
-    }
-    return {
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token ?? refreshToken,
-      expiresAt: data.expires_in
-        ? Date.now() + data.expires_in * 1000
-        : undefined,
-      refreshTokenExpiresAt: data.refresh_token_expires_in
-        ? Date.now() + data.refresh_token_expires_in * 1000
-        : undefined,
-      scopes: data.scope?.split(/[,\s]+/).filter(Boolean) ?? SCOPES,
-      tokenType: "user",
-    };
-  },
-
   async fetchProfile(accessToken) {
     const res = await oauthFetch("https://api.linkedin.com/v2/userinfo", {
       headers: { Authorization: `Bearer ${accessToken}` },

@@ -1,9 +1,24 @@
+import type { Doc } from "../_generated/dataModel";
+
+export type PublishInput = {
+  post: Doc<"posts">;
+  target: Doc<"postTargets">;
+  account: Doc<"connectedAccounts">;
+  media: Doc<"mediaAssets">[];
+  accessToken: string;
+  existingAttempt?: Record<string, unknown>;
+  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
+};
+
+export type PublishedPost = { platformPostId: string; permalink?: string };
+
 export function effectiveCaption(body: string, override?: string) {
-  return (override?.trim() || body.trim() || "").trim();
+  return override?.trim() || body.trim();
 }
 
 export function tiktokPrivacyLevel(visibility?: string) {
-  if (visibility === "followers" || visibility === "private") return "SELF_ONLY";
+  if (visibility === "followers" || visibility === "private")
+    return "SELF_ONLY";
   return "PUBLIC_TO_EVERYONE";
 }
 
@@ -45,16 +60,11 @@ export function linkedinAuthorUrn(
   providerAccountId: string,
   metadata?: Record<string, unknown>,
 ) {
-  const candidate =
-    (metadata?.authorUrn as string | undefined) ??
-    (metadata?.author as string | undefined) ??
-    (metadata?.urn as string | undefined);
+  const candidate = metadata?.authorUrn ?? metadata?.author ?? metadata?.urn;
   if (typeof candidate === "string" && candidate.startsWith("urn:li:")) {
     return candidate;
   }
-  const orgId = (metadata?.organizationId ?? metadata?.organizationUrn) as
-    | string
-    | undefined;
+  const orgId = metadata?.organizationId ?? metadata?.organizationUrn;
   if (typeof orgId === "string" && orgId) {
     return orgId.startsWith("urn:li:") ? orgId : `urn:li:organization:${orgId}`;
   }
@@ -74,7 +84,8 @@ export function publishedFromAttempt(attempt?: Record<string, unknown>) {
   }
   return {
     platformPostId: attempt.platformPostId,
-    permalink: typeof attempt.permalink === "string" ? attempt.permalink : undefined,
+    permalink:
+      typeof attempt.permalink === "string" ? attempt.permalink : undefined,
   };
 }
 
@@ -87,11 +98,14 @@ export class ResumablePublishError extends Error {
 }
 
 export function isResumablePublishError(error: unknown) {
-  return error instanceof ResumablePublishError ||
-    (error instanceof Error && (error as Error & { resumable?: boolean }).resumable === true);
+  return (
+    error instanceof ResumablePublishError ||
+    (error instanceof Error &&
+      (error as Error & { resumable?: boolean }).resumable === true)
+  );
 }
 
-export const REQUIRED_PUBLISH_SCOPES: Record<string, string[]> = {
+const REQUIRED_PUBLISH_SCOPES: Record<string, string[]> = {
   x: ["tweet.write", "media.write"],
   tiktok: ["video.publish", "video.upload"],
   threads: ["threads_content_publish"],

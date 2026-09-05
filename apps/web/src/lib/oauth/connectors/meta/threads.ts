@@ -3,7 +3,6 @@ import {
   threadsAuthorizeUrl,
   threadsExchangeCodeNative,
   threadsFetchProfile,
-  threadsRefreshAccessToken,
 } from "./shared";
 
 const SCOPES = [
@@ -24,11 +23,6 @@ export const threadsConnector: SocialConnector = {
 
   async exchangeCode(input) {
     const tokens = await threadsExchangeCodeNative(input);
-    return { ...tokens, scopes: SCOPES };
-  },
-
-  async refreshAccessToken(refreshToken) {
-    const tokens = await threadsRefreshAccessToken(refreshToken);
     return { ...tokens, scopes: SCOPES };
   },
 

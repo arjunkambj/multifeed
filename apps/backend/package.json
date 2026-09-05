@@ -2,21 +2,16 @@
   "name": "@multifeed/backend",
   "version": "1.0.0",
   "type": "module",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "dev": "convex dev",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test publishing-helpers.test.ts"
+    "test": "node --experimental-strip-types --test *.test.ts"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "devDependencies": {
     "@convex-dev/eslint-plugin": "^4.0.0",
     "@multifeed/eslint-config": "workspace:*",
-    "@multifeed/typescript-config": "workspace:*",
     "@types/node": "^25.6.2",
     "eslint": "^10.3.0",
     "typescript": "7.0.2"
@@ -28,7 +23,7 @@
     "@hexclave/next": "^1.0.71",
     "@multifeed/plans": "workspace:*",
     "convex": "^1.44.0",
-    "svix": "^1.96.1",
-    "zod": "4.4.3"
-  }
+    "svix": "^1.96.1"
+  },
+  "private": true
 }

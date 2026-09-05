@@ -95,45 +95,6 @@ export const xConnector: SocialConnector = {
     };
   },
 
-  async refreshAccessToken(refreshToken) {
-    const { clientId, clientSecret } = credentials();
-    const body = new URLSearchParams({
-      refresh_token: refreshToken,
-      grant_type: "refresh_token",
-    });
-    if (!clientSecret) body.set("client_id", clientId);
-    const res = await oauthFetch("https://api.x.com/2/oauth2/token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        ...authHeader(clientId, clientSecret),
-      },
-      body,
-    });
-    const data = (await res.json()) as {
-      access_token?: string;
-      refresh_token?: string;
-      expires_in?: number;
-      scope?: string;
-      error_description?: string;
-      error?: string;
-    };
-    if (!res.ok || !data.access_token) {
-      throw new Error(
-        data.error_description ?? data.error ?? "X refresh failed",
-      );
-    }
-    return {
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token ?? refreshToken,
-      expiresAt: data.expires_in
-        ? Date.now() + data.expires_in * 1000
-        : undefined,
-      scopes: data.scope?.split(" ").filter(Boolean) ?? SCOPES,
-      tokenType: "user",
-    };
-  },
-
   async fetchProfile(accessToken) {
     const res = await oauthFetch(
       "https://api.x.com/2/users/me?user.fields=profile_image_url,name,username",

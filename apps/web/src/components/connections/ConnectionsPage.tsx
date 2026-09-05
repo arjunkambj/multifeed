@@ -5,7 +5,7 @@ import type { Doc, Id } from "@convex/_generated/dataModel";
 import { Icon } from "@iconify/react";
 import { useMutation } from "convex/react";
 import { useQuery } from "convex-helpers/react/cache/hooks";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConnectionUsageMeter } from "@/components/connections/ConnectionUsageMeter";
@@ -45,7 +45,6 @@ function ConnectionsPageInner() {
   });
   const disconnect = useMutation(api.oauth.accounts.disconnect);
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const [connecting, setConnecting] = useState<OAuthPlatform | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
@@ -65,7 +64,7 @@ function ConnectionsPageInner() {
   ).length;
 
   useEffect(() => {
-    if (flashKey === "\0") return;
+    if (!connected && !oauthError && !skipped) return;
 
     if (handledFlash.current !== flashKey) {
       handledFlash.current = flashKey;
@@ -87,7 +86,7 @@ function ConnectionsPageInner() {
     }
 
     window.history.replaceState(null, "", "/connections");
-  }, [connected, flashKey, oauthError, router, skipped]);
+  }, [connected, flashKey, oauthError, skipped]);
 
   if (!accounts || !entitlements) {
     return <DashboardLoadingSkeleton variant="connections" />;

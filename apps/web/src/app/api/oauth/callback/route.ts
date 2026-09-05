@@ -137,16 +137,8 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      if (!connector.resolveAccount) {
-        throw new Error(
-          `${session.platform} account resolution is unavailable`,
-        );
-      }
-
       const accounts = await Promise.all(
-        options.map((option) =>
-          connector.resolveAccount!(tokens, option.id, option),
-        ),
+        options.map((option) => connector.resolveAccount(tokens, option)),
       );
 
       const saved = await saveConnectedAccounts({

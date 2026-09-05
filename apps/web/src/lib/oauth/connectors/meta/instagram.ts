@@ -40,34 +40,19 @@ export const instagramConnector: SocialConnector = {
     return tokens;
   },
 
-  async fetchProfile(accessToken) {
-    const pages = await metaListPages(accessToken);
-    const withIg = pages.find((p) => p.instagram_business_account?.id);
-    if (!withIg?.instagram_business_account || !withIg.access_token) {
-      throw new Error(
-        "No Instagram professional account linked to your Facebook Pages",
-      );
-    }
-    return metaFetchIgProfile(
-      withIg.access_token,
-      withIg.instagram_business_account.id,
-    );
-  },
-
   async listAccounts(accessToken) {
     const pages = await metaListPages(accessToken);
     return pagesToInstagramOptions(pages);
   },
 
-  async resolveAccount(userTokens, optionId, option) {
-    const pageAccessToken = option?.metadata?.pageAccessToken;
-    const pageId = option?.metadata?.pageId;
-    const igUserId = option?.metadata?.igUserId;
+  async resolveAccount(userTokens, option) {
+    const pageAccessToken = option.metadata?.pageAccessToken;
+    const pageId = option.metadata?.pageId;
+    const igUserId = option.metadata?.igUserId;
     if (
-      option?.id !== optionId ||
       typeof pageAccessToken !== "string" ||
       typeof pageId !== "string" ||
-      igUserId !== optionId
+      igUserId !== option.id
     ) {
       throw new Error("Instagram account not found");
     }
