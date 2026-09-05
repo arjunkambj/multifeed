@@ -5,7 +5,7 @@ import type { CurrentUser, Team } from "@hexclave/next";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { InvitePopover } from "@/components/team/InvitePopover";
+import { InviteModal } from "@/components/team/InviteModal";
 import { TeamMembersTable } from "@/components/team/TeamMembersTable";
 import { TeamStats } from "@/components/team/TeamStats";
 import { currentTimeBucket } from "@/lib/time-bucket";
@@ -93,7 +93,7 @@ export function TeamMembersContent({
         description={`Manage who can work inside ${team.displayName}.`}
         actions={
           canInviteMembers ? (
-            <InvitePopover
+            <InviteModal
               invitationsCount={invitations.length}
               membersCount={members.length}
               team={team}
