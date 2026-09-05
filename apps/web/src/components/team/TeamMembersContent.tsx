@@ -1,10 +1,14 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { api } from "@convex/_generated/api";
+import type { CurrentUser, Team } from "@hexclave/next";
+import { useQuery } from "convex-helpers/react/cache/hooks";
+import { useState } from "react";
+import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
+import { InvitePopover } from "@/components/team/InvitePopover";
 import { TeamMembersTable } from "@/components/team/TeamMembersTable";
 import { TeamStats } from "@/components/team/TeamStats";
-import { TeamTableSkeleton } from "@/components/team/TeamTableSkeleton";
-import { loadTeamData, teamDataQueryKey, type TeamData } from "@/lib/team-data";
+import { currentTimeBucket } from "@/lib/time-bucket";
 
 type TeamTableRow = {
   email: string | null;
@@ -27,37 +31,55 @@ const formatDate = (value: Date) => dateFormatter.format(value);
 export type { TeamTableRow };
 
 export function TeamMembersContent({
-  initialData,
-  teamId,
+  team,
+  user,
 }: {
-  initialData?: TeamData;
-  teamId: string;
+  team: Team;
+  user: CurrentUser;
 }) {
-  const teamDataQuery = useQuery({
-    initialData,
-    queryFn: loadTeamData,
-    queryKey: teamDataQueryKey(teamId),
-  });
-  const isPending = teamDataQuery.isPending;
-  const teamMembers = teamDataQuery.data?.members ?? [];
-  const invitations = teamDataQuery.data?.invitations ?? [];
-  const error = teamDataQuery.error;
+  const canReadMembers = user.usePermission(team, "$read_members") != null;
+  const canInviteMembers = user.usePermission(team, "$invite_members") != null;
+  const members = team.useUsers();
+  const invitations = team.useInvitations();
+  const [nowMs] = useState(() => currentTimeBucket());
+  const entitlements = useQuery(api.billing.getEntitlements, { nowMs });
+
+  if (!canReadMembers) {
+    return (
+      <div className="flex w-full flex-1 flex-col gap-6">
+        <DashboardPageTitle
+          title="Manage team"
+          description={`Manage who can work inside ${team.displayName}.`}
+        />
+        <div className="rounded-4xl border border-border bg-background/40 p-5 text-sm text-muted-foreground">
+          You do not have permission to read team members.
+        </div>
+      </div>
+    );
+  }
 
   const rows: TeamTableRow[] = [
-    ...teamMembers.map((member) => ({
-      email: member.primaryEmail,
-      id: member.id,
-      imageUrl: member.profileImageUrl,
-      lastActivity: formatDate(new Date(member.lastActiveAt)),
-      name: member.displayName,
-      status: "Active" as const,
-      subtitle: "Team member",
-    })),
+    ...members.map((member) => {
+      const isCurrentUser = member.id === user.id;
+      return {
+        email: isCurrentUser ? user.primaryEmail : null,
+        id: member.id,
+        imageUrl:
+          member.teamProfile.profileImageUrl ??
+          (isCurrentUser ? user.profileImageUrl : null),
+        lastActivity: "—",
+        name:
+          member.teamProfile.displayName ??
+          (isCurrentUser ? user.displayName : null),
+        status: "Active" as const,
+        subtitle: "Team member",
+      };
+    }),
     ...invitations.map((invitation) => ({
       email: invitation.recipientEmail,
       id: invitation.id,
       imageUrl: null,
-      lastActivity: `Expires ${formatDate(new Date(invitation.expiresAt))}`,
+      lastActivity: `Expires ${formatDate(invitation.expiresAt)}`,
       name: "Pending invite",
       status: "Invited" as const,
       subtitle: "Awaiting response",
@@ -65,18 +87,29 @@ export function TeamMembersContent({
   ];
 
   return (
-    <>
-      <TeamStats
-        invitationsCount={invitations.length}
-        membersCount={teamMembers.length}
-        teamSeatLimit={teamDataQuery.data?.entitlements.teamSeatLimit}
+    <div className="flex w-full flex-1 flex-col gap-6">
+      <DashboardPageTitle
+        title="Manage team"
+        description={`Manage who can work inside ${team.displayName}.`}
+        actions={
+          canInviteMembers ? (
+            <InvitePopover
+              invitationsCount={invitations.length}
+              membersCount={members.length}
+              team={team}
+              teamSeatLimit={entitlements?.teamSeatLimit}
+            />
+          ) : undefined
+        }
       />
 
-      {isPending ? (
-        <TeamTableSkeleton />
-      ) : (
-        <TeamMembersTable membersError={error} rows={rows} />
-      )}
-    </>
+      <TeamStats
+        invitationsCount={invitations.length}
+        membersCount={members.length}
+        teamSeatLimit={entitlements?.teamSeatLimit}
+      />
+
+      <TeamMembersTable membersError={null} rows={rows} />
+    </div>
   );
 }

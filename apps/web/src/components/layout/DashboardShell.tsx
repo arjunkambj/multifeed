@@ -14,7 +14,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <AppSidebar />
         </Suspense>
         <SidebarInset className="overflow-hidden">
-          <DashboardHeader />
+          <Suspense fallback={null}>
+            <DashboardHeader />
+          </Suspense>
           <main className="flex min-w-0 flex-1 flex-col gap-6 px-4 py-3 sm:px-6 sm:py-3">
             {children}
           </main>

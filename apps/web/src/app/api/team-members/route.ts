@@ -1,15 +1,13 @@
-import type { ServerTeam } from "@hexclave/next";
-
-import { fetchQuery } from "convex/nextjs";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
+import type { ServerTeam } from "@hexclave/next";
+import { fetchQuery } from "convex/nextjs";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import {
   getHexclaveConvexServerToken,
   hexclaveServerApp,
 } from "@/hexclave/server";
 import { assertSameOrigin } from "@/lib/oauth/env";
-import { loadServerTeamData } from "@/lib/team-data.server";
 import { countUsedTeamSeats } from "@/lib/team-seats";
 import { currentTimeBucket } from "@/lib/time-bucket";
 
@@ -25,45 +23,6 @@ const isEmail = (value: unknown): value is string =>
   value.length <= 320 &&
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-async function getRouteContext(request: NextRequest) {
-  const [user, token] = await Promise.all([
-    hexclaveServerApp.getUser({ tokenStore: request }),
-    getHexclaveConvexServerToken(request),
-  ]);
-
-  return {
-    user,
-    token,
-    team: (user?.selectedTeam as ServerTeam | null | undefined) ?? null,
-  };
-}
-
-export async function GET(request: NextRequest) {
-  const { user, token, team } = await getRouteContext(request);
-
-  if (!user || !token) {
-    return errorResponse("Unauthorized", 401);
-  }
-
-  if (!team) {
-    return errorResponse("No selected team", 400);
-  }
-
-  const canReadMembers = await user.hasPermission(team, "$read_members");
-
-  if (!canReadMembers) {
-    return errorResponse(
-      "You do not have permission to read team members",
-      403,
-    );
-  }
-
-  return NextResponse.json(
-    await loadServerTeamData(team, token),
-    responseOptions,
-  );
-}
-
 export async function POST(request: NextRequest) {
   try {
     assertSameOrigin(request);
@@ -71,7 +30,11 @@ export async function POST(request: NextRequest) {
     return errorResponse("Invalid request origin", 403);
   }
 
-  const { user, token, team } = await getRouteContext(request);
+  const [user, token] = await Promise.all([
+    hexclaveServerApp.getUser({ tokenStore: request }),
+    getHexclaveConvexServerToken(request),
+  ]);
+  const team = (user?.selectedTeam as ServerTeam | null | undefined) ?? null;
 
   if (!user || !token) {
     return errorResponse("Unauthorized", 401);
