@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Image, { type ImageLoader } from "next/image";
+import Image from "next/image";
 import { Icon } from "@iconify/react";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
@@ -34,8 +34,6 @@ type Props = {
 type PlatformPreviewProps = Props & {
   displayName: string;
 };
-
-const passthroughLoader: ImageLoader = ({ src }) => src;
 
 function AccountAvatar({
   account,
@@ -102,7 +100,6 @@ function RawMedia({ media }: { media: ComposerMedia[] }) {
     <Image
       fill
       unoptimized
-      loader={passthroughLoader}
       alt={asset.filename}
       className="object-cover"
       sizes="(max-width: 768px) 100vw, 720px"
@@ -681,10 +678,6 @@ function VerticalPreview(
   );
 }
 
-function TikTokPreview(props: PlatformPreviewProps) {
-  return <VerticalPreview {...props} variant="tiktok" />;
-}
-
 export function PlatformPostPreview(props: Props) {
   const displayName =
     props.account.displayName?.trim() || props.account.username;
@@ -712,7 +705,7 @@ export function PlatformPostPreview(props: Props) {
       preview = <XPreview {...previewProps} />;
       break;
     case "tiktok":
-      preview = <TikTokPreview {...previewProps} />;
+      preview = <VerticalPreview {...previewProps} variant="tiktok" />;
       break;
     default:
       return null;

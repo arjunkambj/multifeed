@@ -1,4 +1,5 @@
-import { v } from "convex/values";
+import { type Infer, v } from "convex/values";
+import { POST_KIND_PLATFORMS } from "./postConfig";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
   mutation,
@@ -10,7 +11,12 @@ import { internal } from "./_generated/api";
 import { requireUser } from "./hexclave/auth";
 import { fail } from "./errors";
 import { listAccountsForTeam } from "./oauth/accounts";
-import { platform as platformValidator, platformSettings, postKind, postStatus } from "./schema";
+import {
+  platform as platformValidator,
+  platformSettings,
+  postKind,
+  postStatus,
+} from "./schema";
 import { publicAccountValidator } from "./oauth/accounts";
 import { mediaAssetOutputValidator } from "./media/r2";
 import { missingPublishScopes } from "./publishing/helpers";
@@ -115,21 +121,6 @@ const MAX_TARGETS_PER_POST = 100;
 const MAX_MEDIA_ASSETS_PER_POST = 10;
 const OVERVIEW_TARGET_STATUSES = ["published", "failed"] as const;
 
-const POST_KIND_PLATFORMS = {
-  text: ["facebook", "linkedin", "threads", "x"],
-  image: ["facebook", "instagram", "linkedin", "threads", "x", "tiktok"],
-  video: [
-    "facebook",
-    "instagram",
-    "threads",
-    "tiktok",
-    "youtube",
-    "linkedin",
-    "x",
-  ],
-  story: ["facebook", "instagram"],
-} as const;
-
 function colorForIndex(i: number) {
   return CALENDAR_COLORS[i % CALENDAR_COLORS.length]!;
 }
@@ -141,7 +132,10 @@ async function loadTargets(ctx: QueryCtx | MutationCtx, postId: Id<"posts">) {
     .take(MAX_TARGETS_PER_POST + 1);
 
   if (targets.length > MAX_TARGETS_PER_POST) {
-    fail("INVALID_INPUT", `Post exceeds the ${MAX_TARGETS_PER_POST} target limit`);
+    fail(
+      "INVALID_INPUT",
+      `Post exceeds the ${MAX_TARGETS_PER_POST} target limit`,
+    );
   }
   return targets;
 }
@@ -179,7 +173,9 @@ async function assertMediaOwnedByTeam(
   if (new Set(mediaAssetIds).size !== mediaAssetIds.length) {
     fail("INVALID_INPUT", "A media file can only be attached once per post");
   }
-  const assets = await Promise.all(mediaAssetIds.map((id) => ctx.db.get("mediaAssets", id)));
+  const assets = await Promise.all(
+    mediaAssetIds.map((id) => ctx.db.get("mediaAssets", id)),
+  );
   return assets.map((asset) => {
     if (!asset || asset.teamId !== teamId) {
       fail("NOT_FOUND", "Invalid media asset");
@@ -221,10 +217,12 @@ function validateMediaForKind(
   assets: Doc<"mediaAssets">[],
 ) {
   if (kind === "text") {
-    if (assets.length > 0) fail("INVALID_INPUT", "Text posts cannot include media");
+    if (assets.length > 0)
+      fail("INVALID_INPUT", "Text posts cannot include media");
     return;
   }
-  if (assets.length === 0) fail("INVALID_INPUT", `Add media for this ${kind} post`);
+  if (assets.length === 0)
+    fail("INVALID_INPUT", `Add media for this ${kind} post`);
 
   if (kind === "image") {
     if (assets.length > 10 || assets.some((asset) => asset.kind !== "image")) {
@@ -270,13 +268,7 @@ function accountSupportsKind(
   return account.capabilities.includes(kind);
 }
 
-type TargetInput = {
-  connectedAccountId: Id<"connectedAccounts">;
-  bodyOverride?: string;
-  firstComment?: string;
-  referenceUrl?: string;
-  platformSettings?: Doc<"postTargets">["platformSettings"];
-};
+type TargetInput = Infer<typeof targetInput>;
 
 async function replaceTargets(
   ctx: MutationCtx,
@@ -291,19 +283,27 @@ async function replaceTargets(
   },
 ) {
   if (input.targets.length > MAX_TARGETS_PER_POST) {
-    fail("INVALID_INPUT", `Posts support up to ${MAX_TARGETS_PER_POST} targets`);
+    fail(
+      "INVALID_INPUT",
+      `Posts support up to ${MAX_TARGETS_PER_POST} targets`,
+    );
   }
   if (
     new Set(input.targets.map((target) => target.connectedAccountId)).size !==
     input.targets.length
   ) {
-    fail("INVALID_INPUT", "A connected account can only be targeted once per post");
+    fail(
+      "INVALID_INPUT",
+      "A connected account can only be targeted once per post",
+    );
   }
 
   const [existing, accounts] = await Promise.all([
     loadTargets(ctx, input.postId),
     Promise.all(
-      input.targets.map((target) => ctx.db.get("connectedAccounts", target.connectedAccountId)),
+      input.targets.map((target) =>
+        ctx.db.get("connectedAccounts", target.connectedAccountId),
+      ),
     ),
   ]);
   const targetsWithAccounts = input.targets.map((target, index) => {
@@ -312,7 +312,10 @@ async function replaceTargets(
     if (!account || account.teamId !== input.teamId) {
       fail("NOT_FOUND", "Invalid connected account");
     }
-    const missingScopes = missingPublishScopes(account.platform, account.scopes);
+    const missingScopes = missingPublishScopes(
+      account.platform,
+      account.scopes,
+    );
     if (missingScopes.length > 0) {
       fail(
         "CONFLICT",
@@ -607,10 +610,9 @@ export const update = mutation({
     }
 
     const now = Date.now();
-    const requestedStatus = args.status ?? post.status;
-    const status = requestedStatus;
+    const status = args.status ?? post.status;
     let scheduledFor = post.scheduledFor;
-    if (requestedStatus === "publishing") scheduledFor = now;
+    if (status === "publishing") scheduledFor = now;
     else if (args.clearSchedule) scheduledFor = undefined;
     else if (args.scheduledFor !== undefined) scheduledFor = args.scheduledFor;
 
@@ -831,7 +833,9 @@ export const remove = mutation({
     if (metricSnapshots.some(Boolean)) {
       fail("CONFLICT", "Posts with analytics history cannot be deleted");
     }
-    await Promise.all(targets.map((target) => ctx.db.delete("postTargets", target._id)));
+    await Promise.all(
+      targets.map((target) => ctx.db.delete("postTargets", target._id)),
+    );
     const mediaLinks = await ctx.db
       .query("postMediaAssets")
       .withIndex("by_post_position", (q) => q.eq("postId", args.postId))
@@ -919,7 +923,9 @@ export const composerData = query({
     const user = await requireUser(ctx);
     const [accounts, sourcePost] = await Promise.all([
       listAccountsForTeam(ctx, user.selectedTeamId),
-      args.sourcePostId ? ctx.db.get("posts", args.sourcePostId) : Promise.resolve(null),
+      args.sourcePostId
+        ? ctx.db.get("posts", args.sourcePostId)
+        : Promise.resolve(null),
     ]);
 
     return {
@@ -967,7 +973,8 @@ export const listInRange = query({
       ),
     );
 
-    const truncated = postsByStatus.some((rows) => rows.length > 500);
+    const truncated =
+      postsByStatus.reduce((count, rows) => count + rows.length, 0) > 500;
 
     const posts = postsByStatus
       .flat()
@@ -1005,7 +1012,6 @@ export const overviewMetrics = query({
     const durationMs = args.endMs - args.startMs + 1;
     const previousEndMs = args.startMs - 1;
     const previousStartMs = previousEndMs - durationMs + 1;
-    const combinedStartMs = previousStartMs;
     const teamId = user.selectedTeamId;
 
     const [posts, targetRows, metricSnapshots, activeAccounts] =
@@ -1015,7 +1021,7 @@ export const overviewMetrics = query({
           .withIndex("by_team_scheduledFor", (q) =>
             q
               .eq("teamId", teamId)
-              .gte("scheduledFor", combinedStartMs)
+              .gte("scheduledFor", previousStartMs)
               .lte("scheduledFor", args.endMs),
           )
           .take(2_001),
@@ -1027,7 +1033,7 @@ export const overviewMetrics = query({
                 q
                   .eq("teamId", teamId)
                   .eq("status", status)
-                  .gte("scheduledFor", combinedStartMs)
+                  .gte("scheduledFor", previousStartMs)
                   .lte("scheduledFor", args.endMs),
               )
               .take(5_001),
@@ -1038,7 +1044,7 @@ export const overviewMetrics = query({
           .withIndex("by_team_time", (q) =>
             q
               .eq("teamId", teamId)
-              .gte("capturedAt", combinedStartMs)
+              .gte("capturedAt", previousStartMs)
               .lte("capturedAt", args.endMs),
           )
           .take(5_001),
@@ -1132,23 +1138,5 @@ export const overviewMetrics = query({
         .size,
       truncated,
     };
-  },
-});
-
-export const listScheduled = query({
-  args: { limit: v.optional(v.number()) },
-  returns: v.array(listPostValidator),
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    const limit = Math.max(1, Math.min(args.limit ?? 40, 100));
-    const posts = await ctx.db
-      .query("posts")
-      .withIndex("by_team_status", (q) =>
-        q.eq("teamId", user.selectedTeamId).eq("status", "scheduled"),
-      )
-      .order("desc")
-      .take(limit);
-
-    return await enrichListPosts(ctx, posts);
   },
 });

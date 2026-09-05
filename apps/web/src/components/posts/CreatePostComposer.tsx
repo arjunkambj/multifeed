@@ -58,8 +58,6 @@ function fromLocalInputValue(value: string) {
   return Number.isNaN(ms) ? null : ms;
 }
 
-const currentTimestamp = () => Date.now();
-
 type ComposerFormProps = {
   initialScheduledFor?: number;
   duplicateFromId?: Id<"posts">;
@@ -111,7 +109,6 @@ type ComposerAction =
   | { type: "bodyChanged"; value: string }
   | { type: "titleChanged"; value: string }
   | { type: "notesChanged"; value: string }
-  | { type: "postKindChanged"; value: PostKind }
   | { type: "mediaChanged"; value: ComposerMedia[] }
   | { type: "uploadingMediaChanged"; value: boolean }
   | { type: "selectedChanged"; value: Set<string> }
@@ -174,8 +171,6 @@ function composerReducer(
       return { ...state, title: action.value };
     case "notesChanged":
       return { ...state, notes: action.value };
-    case "postKindChanged":
-      return { ...state, postKind: action.value };
     case "mediaChanged":
       return { ...state, media: action.value };
     case "uploadingMediaChanged":
@@ -268,11 +263,7 @@ export function CreatePostComposer() {
   );
 }
 
-function PostComposerForm(props: ComposerFormProps) {
-  return usePostComposerForm(props);
-}
-
-function usePostComposerForm({
+function PostComposerForm({
   initialScheduledFor,
   duplicateFromId,
   editPostId,
@@ -364,21 +355,17 @@ function usePostComposerForm({
       durationMs: asset.durationMs,
     }));
     const activeAccountsSet = new Set(
-      (accounts ?? []).reduce<Id<"connectedAccounts">[]>((acc, a) => {
-        if (!accountNeedsReconnect(a)) acc.push(a._id);
-        return acc;
-      }, []),
+      (accounts ?? [])
+        .filter((account) => !accountNeedsReconnect(account))
+        .map((account) => account._id),
     );
     const activeIds = new Set(
-      (sourcePost.targets ?? []).reduce<Id<"connectedAccounts">[]>((acc, t) => {
-        if (activeAccountsSet.has(t.connectedAccountId)) {
-          acc.push(t.connectedAccountId);
-        }
-        return acc;
-      }, []),
+      sourcePost.targets
+        .filter((target) => activeAccountsSet.has(target.connectedAccountId))
+        .map((target) => target.connectedAccountId),
     );
     const nextTargetOptions = Object.fromEntries(
-      (sourcePost.targets ?? []).map((target) => [
+      sourcePost.targets.map((target) => [
         target.connectedAccountId,
         {
           bodyOverride: target.bodyOverride ?? "",
@@ -397,7 +384,7 @@ function usePostComposerForm({
         : Date.now() + 60 * 60 * 1000;
     dispatch({
       type: "sourceLoaded",
-      body: sourcePost.body ?? "",
+      body: sourcePost.body,
       title: sourcePost.title
         ? duplicateFromId
           ? `${sourcePost.title} (copy)`
@@ -434,13 +421,11 @@ function usePostComposerForm({
     return new Set([...selected].filter((id) => compatibleIds.has(id)));
   })();
 
+  const selectedAccounts = compatibleAccounts.filter((account) =>
+    selectedAccountIds.has(account._id),
+  );
   const selectedPlatforms = [
-    ...new Set(
-      compatibleAccounts.reduce<string[]>((acc, account) => {
-        if (selectedAccountIds.has(account._id)) acc.push(account.platform);
-        return acc;
-      }, []),
-    ),
+    ...new Set(selectedAccounts.map((account) => account.platform)),
   ];
 
   const strictestLimit = (() => {
@@ -451,10 +436,6 @@ function usePostComposerForm({
     }
     return Number.isFinite(min) ? min : null;
   })();
-
-  const selectedAccounts = compatibleAccounts.filter((account) =>
-    selectedAccountIds.has(account._id),
-  );
 
   const pastCaptions = (() => {
     const seen = new Set<string>();
@@ -513,11 +494,7 @@ function usePostComposerForm({
 
     const parsed = fromLocalInputValue(scheduleLocal);
     const scheduledFor: number | undefined =
-      mode === "now"
-        ? currentTimestamp()
-        : parsed === null
-          ? undefined
-          : parsed;
+      mode === "now" ? Date.now() : parsed === null ? undefined : parsed;
     if (mode === "schedule" && scheduledFor == null) {
       dispatch({ type: "savingChanged", value: null });
       toast.error("Choose a valid schedule date and time");
@@ -525,17 +502,15 @@ function usePostComposerForm({
     }
 
     try {
-      const targets = [...selectedAccountIds].map((connectedAccountId) => {
+      const targets = selectedAccounts.map((account) => {
+        const connectedAccountId = account._id;
         const options = targetOptions[connectedAccountId];
-        const account = activeAccounts.find(
-          (candidate) => candidate._id === connectedAccountId,
-        );
         const settings = {
-          ...defaultPlatformSettings(account?.platform ?? "", postKind),
+          ...defaultPlatformSettings(account.platform, postKind),
           ...options?.platformSettings,
         };
         return {
-          connectedAccountId: connectedAccountId as Id<"connectedAccounts">,
+          connectedAccountId,
           bodyOverride: options?.bodyOverride.trim() || undefined,
           firstComment: options?.firstComment.trim() || undefined,
           referenceUrl: options?.referenceUrl.trim() || undefined,

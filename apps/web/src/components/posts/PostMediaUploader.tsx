@@ -210,8 +210,9 @@ export function PostMediaUploader({
     throw new Error(`Timed out while processing ${file.name}`);
   };
 
-  const uploadFiles = (files: File[]) => {
-    const room = maxFiles - media.length;
+  const uploadFiles = async (files: File[]) => {
+    if (uploading || deletingMediaId !== null) return;
+    const room = Math.max(0, maxFiles - media.length);
     const selectedFiles = files.slice(0, room);
     if (files.length > room) {
       toast.error(
@@ -223,121 +224,79 @@ export function PostMediaUploader({
     setUploading(true);
     onUploadingChange?.(true);
     const uploaded: ComposerMedia[] = [];
-    let pendingUploads: PendingMedia[] = [];
 
-    const finishUpload = (caught: unknown) => {
-      if (uploaded.length > 0) onChange([...media, ...uploaded]);
-      setPendingMedia([]);
+    try {
+      for (const file of selectedFiles) {
+        if (file.size > MAX_UPLOAD_BYTES) {
+          throw new Error(`${file.name} is larger than 100 MB`);
+        }
+        const isAllowed =
+          (kind === "image" && file.type.startsWith("image/")) ||
+          (kind === "video" && file.type.startsWith("video/")) ||
+          (kind === "story" &&
+            (file.type.startsWith("image/") || file.type.startsWith("video/")));
+        if (!isAllowed) {
+          throw new Error(`${file.name} is not valid for this format`);
+        }
+      }
+
+      const pendingUploads = await Promise.all(
+        selectedFiles.map(async (file, index) => ({
+          id: `${file.name}-${file.lastModified}-${index}`,
+          file,
+          previewUrl: await readPreviewUrl(file),
+          progress: 0,
+        })),
+      );
+      setPendingMedia(pendingUploads);
+
+      for (const { file, id, previewUrl } of pendingUploads) {
+        const details = await mediaMetadata(file, previewUrl);
+        let key: string;
+        try {
+          key = await uploadFile(file, {
+            onProgress: ({ loaded, total }) => {
+              const progress =
+                total > 0 ? Math.round((loaded / total) * 100) : 0;
+              setPendingMedia((current) =>
+                current.map((item) =>
+                  item.id === id ? { ...item, progress } : item,
+                ),
+              );
+            },
+          });
+        } catch (caught) {
+          throw uploadTransportError(file, caught);
+        }
+        const mediaAssetId = await confirmUpload(key, file, details);
+        uploaded.push({
+          _id: mediaAssetId,
+          filename: file.name,
+          mimeType: file.type,
+          kind: file.type.startsWith("image/") ? "image" : "video",
+          sizeBytes: file.size,
+          previewUrl,
+          ...details,
+        });
+      }
+      toast.success(
+        `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`,
+      );
+    } catch (caught) {
       toast.error(
         caught instanceof Error ? caught.message : "Media upload failed",
       );
+    } finally {
+      if (uploaded.length > 0) onChange([...media, ...uploaded]);
+      setPendingMedia([]);
       setUploading(false);
       onUploadingChange?.(false);
       if (inputRef.current) inputRef.current.value = "";
-    };
-
-    for (const file of selectedFiles) {
-      if (file.size > MAX_UPLOAD_BYTES) {
-        finishUpload(new Error(`${file.name} is larger than 100 MB`));
-        return;
-      }
-      const isAllowed =
-        (kind === "image" && file.type.startsWith("image/")) ||
-        (kind === "video" && file.type.startsWith("video/")) ||
-        (kind === "story" &&
-          (file.type.startsWith("image/") || file.type.startsWith("video/")));
-      if (!isAllowed) {
-        finishUpload(new Error(`${file.name} is not valid for this format`));
-        return;
-      }
     }
-
-    void (async () => {
-      try {
-        pendingUploads = await Promise.all(
-          selectedFiles.map(async (file, index) => ({
-            id: `${file.name}-${file.lastModified}-${index}`,
-            file,
-            previewUrl: await readPreviewUrl(file),
-            progress: 0,
-          })),
-        );
-        setPendingMedia(pendingUploads);
-      } catch (caught) {
-        finishUpload(caught);
-        return;
-      }
-
-      const uploadPending = (pending: PendingMedia) => {
-        const { file, id, previewUrl } = pending;
-        return mediaMetadata(file, previewUrl)
-          .then((details) =>
-            uploadFile(file, {
-              onProgress: ({ loaded, total }) => {
-                const progress =
-                  total > 0 ? Math.round((loaded / total) * 100) : 0;
-                setPendingMedia((current) =>
-                  current.map((item) =>
-                    item.id === id ? { ...item, progress } : item,
-                  ),
-                );
-              },
-            })
-              .catch((caught) =>
-                Promise.reject(uploadTransportError(file, caught)),
-              )
-              .then((key) => confirmUpload(key, file, details))
-              .then((mediaAssetId) => ({
-                _id: mediaAssetId,
-                filename: file.name,
-                mimeType: file.type,
-                kind: (file.type.startsWith("image/") ? "image" : "video") as
-                  | "image"
-                  | "video",
-                sizeBytes: file.size,
-                previewUrl,
-                ...details,
-              })),
-          )
-          .then((asset) => {
-            setPendingMedia((current) =>
-              current.map((item) =>
-                item.id === id ? { ...item, progress: 100 } : item,
-              ),
-            );
-            return asset;
-          });
-      };
-
-      const uploadSequence = pendingUploads.reduce<Promise<void>>(
-        (chain, pending) =>
-          chain.then(() =>
-            uploadPending(pending).then((asset) => {
-              uploaded.push(asset);
-            }),
-          ),
-        Promise.resolve(),
-      );
-
-      void uploadSequence
-        .then(() => {
-          onChange([...media, ...uploaded]);
-          setPendingMedia([]);
-          toast.success(
-            `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`,
-          );
-        })
-        .catch(finishUpload)
-        .finally(() => {
-          setUploading(false);
-          onUploadingChange?.(false);
-          if (inputRef.current) inputRef.current.value = "";
-        });
-    })();
   };
 
   const removeMedia = (asset: ComposerMedia) => {
-    if (deletingMediaId !== null) return;
+    if (uploading || deletingMediaId !== null) return;
     setDeletingMediaId(asset._id);
     void deleteMedia({ mediaAssetId: asset._id })
       .then(() => {
@@ -369,7 +328,7 @@ export function PostMediaUploader({
       {media.length + pendingMedia.length < maxFiles && (
         <Button
           variant="ghost"
-          disabled={uploading}
+          disabled={uploading || deletingMediaId !== null}
           onClick={() => inputRef.current?.click()}
           aria-label={
             media.length === 0 && pendingMedia.length === 0
@@ -401,10 +360,10 @@ export function PostMediaUploader({
               key={asset._id}
               filename={asset.filename}
               kind={asset.kind}
-              previewUrl={asset.previewUrl}
+              previewUrl={asset.previewUrl ?? asset.publicUrl}
               busyLabel={deletingMediaId === asset._id ? "Deleting" : undefined}
               onRemove={
-                deletingMediaId === null
+                !uploading && deletingMediaId === null
                   ? () => void removeMedia(asset)
                   : undefined
               }

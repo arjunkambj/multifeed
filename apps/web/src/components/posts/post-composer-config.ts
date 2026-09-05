@@ -1,39 +1,13 @@
-import type { Id } from "@convex/_generated/dataModel";
-import type { OAuthPlatform } from "@/lib/platform-meta";
+import type { Doc, Id } from "@convex/_generated/dataModel";
+import { POST_KIND_PLATFORMS } from "@convex/postConfig";
+export { POST_KIND_PLATFORMS } from "@convex/postConfig";
 
-export type PostKind = "text" | "image" | "video" | "story";
-
-export const POST_KIND_PLATFORMS = {
-  text: ["facebook", "linkedin", "threads", "x"],
-  image: ["facebook", "instagram", "linkedin", "threads", "x", "tiktok"],
-  video: [
-    "facebook",
-    "instagram",
-    "threads",
-    "tiktok",
-    "youtube",
-    "linkedin",
-    "x",
-  ],
-  story: ["facebook", "instagram"],
-} satisfies Record<PostKind, readonly OAuthPlatform[]>;
-
-export type PostPlacement = "feed" | "reel" | "story" | "short";
-
-export type PostVisibility = "public" | "followers" | "private" | "unlisted";
-
-export type PlatformSettings = {
-  placement?: PostPlacement;
-  title?: string;
-  altText?: string;
-  visibility?: PostVisibility;
-  shareToFeed?: boolean;
-  allowComments?: boolean;
-  allowDuet?: boolean;
-  allowStitch?: boolean;
-  notifySubscribers?: boolean;
-  madeForKids?: boolean;
-};
+export type PostKind = Doc<"posts">["kind"];
+export type PlatformSettings = NonNullable<
+  Doc<"postTargets">["platformSettings"]
+>;
+export type PostPlacement = NonNullable<PlatformSettings["placement"]>;
+export type PostVisibility = NonNullable<PlatformSettings["visibility"]>;
 
 export type ComposerMedia = {
   _id: Id<"mediaAssets">;

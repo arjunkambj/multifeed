@@ -15,7 +15,6 @@ import {
 } from "@/lib/date-ranges";
 
 const numberFormatter = new Intl.NumberFormat("en-US");
-const formatNumber = (n: number) => numberFormatter.format(n);
 
 function percentageChange(current: number, previous: number) {
   if (previous === 0) return current === 0 ? 0 : 100;
@@ -71,13 +70,12 @@ export function OverviewDashboard() {
             </p>
           )}
           <section
-            aria-busy={metrics === undefined}
             aria-label="Publishing KPIs"
             className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
           >
             <MetricCard
               title="Scheduled posts"
-              value={formatNumber(metrics.scheduledPosts)}
+              value={numberFormatter.format(metrics.scheduledPosts)}
               icon="hugeicons:calendar-03"
               change={percentageChange(
                 metrics.scheduledPosts,
@@ -86,7 +84,7 @@ export function OverviewDashboard() {
             />
             <MetricCard
               title="Published posts"
-              value={formatNumber(metrics.publishedPosts)}
+              value={numberFormatter.format(metrics.publishedPosts)}
               icon="hugeicons:sent"
               change={percentageChange(
                 metrics.publishedPosts,
@@ -104,7 +102,7 @@ export function OverviewDashboard() {
             />
             <MetricCard
               title="Engagements"
-              value={formatNumber(metrics.engagement)}
+              value={numberFormatter.format(metrics.engagement)}
               icon="hugeicons:favourite"
               change={percentageChange(
                 metrics.engagement,
@@ -113,7 +111,7 @@ export function OverviewDashboard() {
             />
             <MetricCard
               title="Active channels"
-              value={formatNumber(metrics.activeChannels)}
+              value={numberFormatter.format(metrics.activeChannels)}
               icon="hugeicons:share-08"
             />
           </section>

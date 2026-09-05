@@ -2,40 +2,19 @@ import { R2 } from "@convex-dev/r2";
 import { v } from "convex/values";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
-import { mutation, query } from "../_generated/server";
+import { mutation } from "../_generated/server";
 import { fail } from "../errors";
 import { requireUser } from "../hexclave/auth";
+import schema from "../schema";
 
-export const r2 = new R2(components.r2);
+const r2 = new R2(components.r2);
 
 const MAX_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 MB
 
 export const mediaAssetOutputValidator = v.object({
+  ...schema.tables.mediaAssets.validator.fields,
   _id: v.id("mediaAssets"),
   _creationTime: v.number(),
-  teamId: v.string(),
-  storageId: v.optional(v.id("_storage")),
-  r2Key: v.optional(v.string()),
-  publicUrl: v.optional(v.string()),
-  externalUrl: v.optional(v.string()),
-  kind: v.union(
-    v.literal("image"),
-    v.literal("video"),
-    v.literal("document"),
-  ),
-  filename: v.string(),
-  mimeType: v.string(),
-  sizeBytes: v.number(),
-  width: v.optional(v.number()),
-  height: v.optional(v.number()),
-  durationMs: v.optional(v.number()),
-  status: v.union(
-    v.literal("uploading"),
-    v.literal("ready"),
-    v.literal("failed"),
-  ),
-  createdByUserId: v.string(),
-  createdAt: v.number(),
 });
 
 export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
@@ -189,32 +168,5 @@ export const deleteMedia = mutation({
     await r2.deleteObject(ctx, asset.r2Key);
     await ctx.db.delete("mediaAssets", asset._id);
     return null;
-  },
-});
-
-export const listMedia = query({
-  args: {
-    kind: v.union(
-      v.literal("image"),
-      v.literal("video"),
-      v.literal("document"),
-    ),
-    limit: v.optional(v.number()),
-  },
-  returns: v.array(mediaAssetOutputValidator),
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    const limit = Math.max(1, Math.min(args.limit ?? 50, 100));
-
-    return await ctx.db
-      .query("mediaAssets")
-      .withIndex("by_team_status_kind", (q) =>
-        q
-          .eq("teamId", user.selectedTeamId)
-          .eq("status", "ready")
-          .eq("kind", args.kind),
-      )
-      .order("desc")
-      .take(limit);
   },
 });

@@ -61,10 +61,6 @@ export function getPresetRange(
   }
 }
 
-export function calendarDateToInputValue(date: CalendarDate) {
-  return `${date.year}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
-}
-
 /** Wide, timezone-agnostic window so calendar preload covers month/week views. */
 export function defaultCalendarRangeMs(now = Date.now()) {
   return {

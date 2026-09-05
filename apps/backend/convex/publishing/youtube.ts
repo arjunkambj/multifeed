@@ -1,24 +1,19 @@
 "use node";
 
-import type { Doc } from "../_generated/dataModel";
-import { effectiveCaption, publishedFromAttempt, youtubePrivacy } from "./helpers";
+import type { PublishInput, PublishedPost } from "./helpers";
+import {
+  effectiveCaption,
+  publishedFromAttempt,
+  youtubePrivacy,
+} from "./helpers";
 
 const TIMEOUT = 8 * 60 * 1000;
 
-function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {
-  return effectiveCaption(post.body, target.bodyOverride);
-}
-
-export async function publishToYoutube(params: {
-  post: Doc<"posts">;
-  target: Doc<"postTargets">;
-  account: Doc<"connectedAccounts">;
-  media: Doc<"mediaAssets">[];
-  accessToken: string;
-  existingAttempt?: Record<string, unknown>;
-  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
-}): Promise<{ platformPostId: string; permalink?: string }> {
-  const { post, target, media, accessToken, existingAttempt, saveAttempt } = params;
+export async function publishToYoutube(
+  params: PublishInput,
+): Promise<PublishedPost> {
+  const { post, target, media, accessToken, existingAttempt, saveAttempt } =
+    params;
   const alreadyPublished = publishedFromAttempt(existingAttempt);
   if (alreadyPublished) return alreadyPublished;
   if (existingAttempt?.kind === "youtube") {
@@ -33,15 +28,17 @@ export async function publishToYoutube(params: {
   if (!asset) throw new Error("YouTube video missing");
   if (asset.kind !== "video") throw new Error("Unsupported kind for YouTube");
 
-  const url = asset.publicUrl ?? (asset as unknown as { externalUrl?: string }).externalUrl;
+  const url = asset.publicUrl ?? asset.externalUrl;
   if (!url) throw new Error("YouTube video URL missing");
 
-  const body = effectiveBody(post, target);
+  const body = effectiveCaption(post.body, target.bodyOverride);
   const title =
-    (target.platformSettings?.title?.trim() ||
+    (
+      target.platformSettings?.title?.trim() ||
       post.title?.trim() ||
       body.slice(0, 100).trim() ||
-      "Untitled").slice(0, 100) || "Untitled";
+      "Untitled"
+    ).slice(0, 100) || "Untitled";
 
   const snippet = {
     title,
@@ -50,7 +47,7 @@ export async function publishToYoutube(params: {
     categoryId: "22",
   };
 
-  const status: Record<string, unknown> = {
+  const status = {
     privacyStatus: youtubePrivacy(target.platformSettings?.visibility),
     selfDeclaredMadeForKids: target.platformSettings?.madeForKids ?? false,
   };
@@ -83,7 +80,7 @@ export async function publishToYoutube(params: {
     throw new Error(msg);
   }
 
-  const uploadUrl = initRes.headers.get("Location") ?? initRes.headers.get("location");
+  const uploadUrl = initRes.headers.get("Location");
   if (!uploadUrl) throw new Error("YouTube: no upload URL");
   await saveAttempt?.({ kind: "youtube", uploadStarted: true });
 
@@ -107,10 +104,16 @@ export async function publishToYoutube(params: {
     error?: { message?: string };
   };
   if (!putRes.ok || !putJson.id) {
-    throw new Error(putJson.error?.message ?? `YouTube upload failed: ${putRes.status}`);
+    throw new Error(
+      putJson.error?.message ?? `YouTube upload failed: ${putRes.status}`,
+    );
   }
 
   const permalink = `https://www.youtube.com/watch?v=${putJson.id}`;
-  await saveAttempt?.({ kind: "youtube", platformPostId: putJson.id, permalink });
+  await saveAttempt?.({
+    kind: "youtube",
+    platformPostId: putJson.id,
+    permalink,
+  });
   return { platformPostId: putJson.id, permalink };
 }

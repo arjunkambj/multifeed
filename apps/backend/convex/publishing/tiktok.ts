@@ -1,13 +1,16 @@
 "use node";
 
-import type { Doc } from "../_generated/dataModel";
-import { effectiveCaption, interpretTikTokStatus, ResumablePublishError, tiktokChunkPlan, tiktokInteractionDisabled, tiktokPrivacyLevel } from "./helpers";
+import type { PublishInput, PublishedPost } from "./helpers";
+import {
+  effectiveCaption,
+  interpretTikTokStatus,
+  ResumablePublishError,
+  tiktokChunkPlan,
+  tiktokInteractionDisabled,
+  tiktokPrivacyLevel,
+} from "./helpers";
 
 const TIMEOUT = 8 * 60 * 1000;
-function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {
-  return effectiveCaption(post.body, target.bodyOverride).slice(0, 2200);
-}
-
 type TikTokInitResponse = {
   data?: { publish_id?: string; upload_url?: string };
   error?: { code?: string; message?: string };
@@ -60,7 +63,11 @@ async function waitForTikTokPublish(
       );
     }
     if (status === "failed") {
-      throw new Error(json.data?.fail_reason ?? json.error?.message ?? "TikTok publish failed");
+      throw new Error(
+        json.data?.fail_reason ??
+          json.error?.message ??
+          "TikTok publish failed",
+      );
     }
     await new Promise((resolve) => setTimeout(resolve, 10_000));
   }
@@ -76,7 +83,8 @@ async function uploadVideoFromUrl(
   const { chunkSize, totalChunkCount } = tiktokChunkPlan(videoSize);
   for (let index = 0; index < totalChunkCount; index += 1) {
     const start = index * chunkSize;
-    const end = index === totalChunkCount - 1 ? videoSize - 1 : start + chunkSize - 1;
+    const end =
+      index === totalChunkCount - 1 ? videoSize - 1 : start + chunkSize - 1;
     const source = await fetch(sourceUrl, {
       headers: {
         Range: `bytes=${start}-${end}`,
@@ -105,25 +113,26 @@ async function uploadVideoFromUrl(
     } as RequestInit);
     if (!putRes.ok && putRes.status !== 206) {
       const text = await putRes.text().catch(() => "");
-      throw new Error(`TikTok video upload failed: ${putRes.status} ${text.slice(0, 500)}`);
+      throw new Error(
+        `TikTok video upload failed: ${putRes.status} ${text.slice(0, 500)}`,
+      );
     }
   }
 }
 
-export async function publishToTiktok(params: {
-  post: Doc<"posts">;
-  target: Doc<"postTargets">;
-  account: Doc<"connectedAccounts">;
-  media: Doc<"mediaAssets">[];
-  accessToken: string;
-  existingAttempt?: Record<string, unknown>;
-  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
-}): Promise<{ platformPostId: string; permalink?: string }> {
-  const { post, target, media, accessToken, existingAttempt, saveAttempt } = params;
+export async function publishToTiktok(
+  params: PublishInput,
+): Promise<PublishedPost> {
+  const { post, target, media, accessToken, existingAttempt, saveAttempt } =
+    params;
   if (typeof existingAttempt?.publishId === "string") {
-    return waitForTikTokPublish(accessToken, existingAttempt.publishId, params.account.username);
+    return waitForTikTokPublish(
+      accessToken,
+      existingAttempt.publishId,
+      params.account.username,
+    );
   }
-  const title = effectiveBody(post, target);
+  const title = effectiveCaption(post.body, target.bodyOverride).slice(0, 2200);
   const settings = target.platformSettings;
 
   if (media.length === 0) throw new Error("TikTok requires media");
@@ -136,7 +145,8 @@ export async function publishToTiktok(params: {
     const url = primary.publicUrl ?? primary.externalUrl;
     if (!url) throw new Error("TikTok video URL missing");
     const size = primary.sizeBytes;
-    if (!size || !Number.isFinite(size)) throw new Error("TikTok video size missing");
+    if (!size || !Number.isFinite(size))
+      throw new Error("TikTok video size missing");
 
     const { chunkSize, totalChunkCount } = tiktokChunkPlan(size);
     const initRes = await fetch(
@@ -166,14 +176,35 @@ export async function publishToTiktok(params: {
         signal: AbortSignal.timeout(TIMEOUT),
       },
     );
-    const initJson = (await initRes.json().catch(() => ({}))) as TikTokInitResponse;
-    if (!initRes.ok || !initJson.data?.publish_id || !initJson.data.upload_url) {
-      throw new Error(initJson.error?.message ?? `TikTok video init failed: ${initRes.status}`);
+    const initJson = (await initRes
+      .json()
+      .catch(() => ({}))) as TikTokInitResponse;
+    if (
+      !initRes.ok ||
+      !initJson.data?.publish_id ||
+      !initJson.data.upload_url
+    ) {
+      throw new Error(
+        initJson.error?.message ??
+          `TikTok video init failed: ${initRes.status}`,
+      );
     }
 
-    await saveAttempt?.({ kind: "tiktok", publishId: initJson.data.publish_id });
-    await uploadVideoFromUrl(initJson.data.upload_url, url, size, primary.mimeType);
-    return waitForTikTokPublish(accessToken, initJson.data.publish_id, params.account.username);
+    await saveAttempt?.({
+      kind: "tiktok",
+      publishId: initJson.data.publish_id,
+    });
+    await uploadVideoFromUrl(
+      initJson.data.upload_url,
+      url,
+      size,
+      primary.mimeType,
+    );
+    return waitForTikTokPublish(
+      accessToken,
+      initJson.data.publish_id,
+      params.account.username,
+    );
   }
 
   if (primary.kind === "image" || post.kind === "image") {
@@ -211,10 +242,16 @@ export async function publishToTiktok(params: {
     );
     const json = (await res.json().catch(() => ({}))) as TikTokInitResponse;
     if (!res.ok || !json.data?.publish_id) {
-      throw new Error(json.error?.message ?? `TikTok photo init failed: ${res.status}`);
+      throw new Error(
+        json.error?.message ?? `TikTok photo init failed: ${res.status}`,
+      );
     }
     await saveAttempt?.({ kind: "tiktok", publishId: json.data.publish_id });
-    return waitForTikTokPublish(accessToken, json.data.publish_id, params.account.username);
+    return waitForTikTokPublish(
+      accessToken,
+      json.data.publish_id,
+      params.account.username,
+    );
   }
 
   throw new Error(`TikTok: unsupported kind ${post.kind}`);

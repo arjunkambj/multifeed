@@ -103,40 +103,30 @@ export function PostCalendar() {
     ),
   ].sort();
 
-  const events: EventInput[] = (() => {
-    if (!posts) return [];
-    return posts.reduce<EventInput[]>((acc, post) => {
-      if (
+  const events: EventInput[] = (posts ?? [])
+    .filter(
+      (post) =>
         platformFilter === "all" ||
-        post.targets.some((target) => target.platform === platformFilter)
-      ) {
-        const platforms = [
-          ...new Set(post.targets.map((t) => t.platform)),
-        ].join(", ");
-        const label =
-          post.title?.trim() ||
-          post.body.trim().slice(0, 48) ||
-          "Untitled post";
-        acc.push({
-          id: post._id,
-          title: label,
-          start: post.scheduledFor,
-          backgroundColor:
-            post.calendarColor ??
-            platformBrand(post.targets[0]?.platform ?? "x"),
-          borderColor: "transparent",
-          textColor: "#fff",
-          editable: post.status === "scheduled" || post.status === "failed",
-          extendedProps: {
-            status: post.status,
-            platforms,
-            body: post.body,
-          },
-        });
-      }
-      return acc;
-    }, []);
-  })();
+        post.targets.some((target) => target.platform === platformFilter),
+    )
+    .map((post) => ({
+      id: post._id,
+      title:
+        post.title?.trim() || post.body.trim().slice(0, 48) || "Untitled post",
+      start: post.scheduledFor,
+      backgroundColor:
+        post.calendarColor ?? platformBrand(post.targets[0]?.platform ?? "x"),
+      borderColor: "transparent",
+      textColor: "#fff",
+      editable: post.status === "scheduled" || post.status === "failed",
+      extendedProps: {
+        status: post.status,
+        platforms: [
+          ...new Set(post.targets.map((target) => target.platform)),
+        ].join(", "),
+        body: post.body,
+      },
+    }));
 
   const onDatesSet = (arg: DatesSetArg) => {
     const startMs = arg.start.getTime();

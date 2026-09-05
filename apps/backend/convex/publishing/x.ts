@@ -1,18 +1,24 @@
 "use node";
 
+import type { PublishInput, PublishedPost } from "./helpers";
 import type { Doc } from "../_generated/dataModel";
-import { effectiveCaption, publishedFromAttempt, ResumablePublishError, tweetIdFromUrl } from "./helpers";
+import {
+  effectiveCaption,
+  publishedFromAttempt,
+  ResumablePublishError,
+  tweetIdFromUrl,
+} from "./helpers";
 
 const TIMEOUT_MS = 8 * 60 * 1000;
 
-function effectiveBody(post: Doc<"posts">, target: Doc<"postTargets">): string {
-  return effectiveCaption(post.body, target.bodyOverride);
-}
-
-async function downloadBytes(url: string): Promise<{ bytes: Uint8Array; mimeType: string }> {
+async function downloadBytes(
+  url: string,
+): Promise<{ bytes: Uint8Array; mimeType: string }> {
   const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
-  if (!res.ok) throw new Error(`Media download failed: ${res.status} ${res.statusText}`);
-  const mimeType = res.headers.get("content-type") ?? "application/octet-stream";
+  if (!res.ok)
+    throw new Error(`Media download failed: ${res.status} ${res.statusText}`);
+  const mimeType =
+    res.headers.get("content-type") ?? "application/octet-stream";
   const bytes = new Uint8Array(await res.arrayBuffer());
   if (bytes.length === 0) throw new Error("Media download returned empty body");
   return { bytes, mimeType };
@@ -27,7 +33,10 @@ async function parseJson<T>(res: Response): Promise<T> {
 }
 
 function asArrayBuffer(bytes: Uint8Array): ArrayBuffer {
-  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+  return bytes.buffer.slice(
+    bytes.byteOffset,
+    bytes.byteOffset + bytes.byteLength,
+  ) as ArrayBuffer;
 }
 
 function extractXError(payload: unknown, fallback: string): string {
@@ -41,12 +50,14 @@ function extractXError(payload: unknown, fallback: string): string {
     if (first && typeof first.detail === "string") return first.detail;
   }
   if (typeof p.message === "string") return p.message;
-  if (typeof p.title === "string" && typeof p.detail === "string") return `${p.title}: ${p.detail}`;
   if (typeof p.title === "string") return p.title;
   return fallback;
 }
 
-async function mediaIdFrom(payload: Record<string, unknown>, fallback: string): Promise<string> {
+function mediaIdFrom(
+  payload: Record<string, unknown>,
+  fallback: string,
+): string {
   const nested = payload.data as Record<string, unknown> | undefined;
   const id =
     (typeof payload.id === "string" && payload.id) ||
@@ -57,10 +68,18 @@ async function mediaIdFrom(payload: Record<string, unknown>, fallback: string): 
   return id;
 }
 
-async function uploadImageToX(bytes: Uint8Array, accessToken: string, mimeType: string): Promise<string> {
+async function uploadImageToX(
+  bytes: Uint8Array,
+  accessToken: string,
+  mimeType: string,
+): Promise<string> {
   const isGif = mimeType === "image/gif";
   const form = new FormData();
-  form.set("media", new Blob([asArrayBuffer(bytes)], { type: mimeType }), isGif ? "image.gif" : "image.jpg");
+  form.set(
+    "media",
+    new Blob([asArrayBuffer(bytes)], { type: mimeType }),
+    isGif ? "image.gif" : "image.jpg",
+  );
   form.set("media_category", isGif ? "tweet_gif" : "tweet_image");
   const res = await fetch("https://api.x.com/2/media/upload", {
     method: "POST",
@@ -69,7 +88,10 @@ async function uploadImageToX(bytes: Uint8Array, accessToken: string, mimeType: 
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   const json = await parseJson<Record<string, unknown>>(res);
-  if (!res.ok) throw new Error(extractXError(json, `X image upload failed: ${res.status}`));
+  if (!res.ok)
+    throw new Error(
+      extractXError(json, `X image upload failed: ${res.status}`),
+    );
   return mediaIdFrom(json, `X image upload failed: ${res.status}`);
 }
 
@@ -94,8 +116,14 @@ async function uploadVideoToX(
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   const initJson = await parseJson<Record<string, unknown>>(initRes);
-  if (!initRes.ok) throw new Error(extractXError(initJson, `X video INIT failed: ${initRes.status}`));
-  const mediaId = await mediaIdFrom(initJson, `X video INIT failed: ${initRes.status}`);
+  if (!initRes.ok)
+    throw new Error(
+      extractXError(initJson, `X video INIT failed: ${initRes.status}`),
+    );
+  const mediaId = mediaIdFrom(
+    initJson,
+    `X video INIT failed: ${initRes.status}`,
+  );
 
   const CHUNK = 1024 * 1024;
   let segmentIndex = 0;
@@ -118,46 +146,82 @@ async function uploadVideoToX(
     const chunk = new Uint8Array(await source.arrayBuffer());
     const form = new FormData();
     form.set("segment_index", String(segmentIndex));
-    form.set("media", new Blob([asArrayBuffer(chunk)], { type: mimeType }), `chunk-${segmentIndex}`);
-    const appendRes = await fetch(`https://api.x.com/2/media/upload/${mediaId}/append`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-      body: form,
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
+    form.set(
+      "media",
+      new Blob([asArrayBuffer(chunk)], { type: mimeType }),
+      `chunk-${segmentIndex}`,
+    );
+    const appendRes = await fetch(
+      `https://api.x.com/2/media/upload/${mediaId}/append`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: form,
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      },
+    );
     if (!appendRes.ok) {
       const json = await parseJson<Record<string, unknown>>(appendRes);
-      throw new Error(extractXError(json, `X video APPEND failed: ${appendRes.status}`));
+      throw new Error(
+        extractXError(json, `X video APPEND failed: ${appendRes.status}`),
+      );
     }
     segmentIndex += 1;
   }
 
-  const finalizeRes = await fetch(`https://api.x.com/2/media/upload/${mediaId}/finalize`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-  });
+  const finalizeRes = await fetch(
+    `https://api.x.com/2/media/upload/${mediaId}/finalize`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    },
+  );
   const finalizeJson = await parseJson<Record<string, unknown>>(finalizeRes);
   if (!finalizeRes.ok) {
-    throw new Error(extractXError(finalizeJson, `X video FINALIZE failed: ${finalizeRes.status}`));
+    throw new Error(
+      extractXError(
+        finalizeJson,
+        `X video FINALIZE failed: ${finalizeRes.status}`,
+      ),
+    );
   }
 
   const processingInfo = (finalizeJson.processing_info ??
-    (finalizeJson.data as Record<string, unknown> | undefined)?.processing_info) as
-    | { state?: string; check_after_secs?: number; error?: { message?: string } }
+    (finalizeJson.data as Record<string, unknown> | undefined)
+      ?.processing_info) as
+    | {
+        state?: string;
+        check_after_secs?: number;
+        error?: { message?: string };
+      }
     | undefined;
-  if (!processingInfo || processingInfo.state === "succeeded" || !processingInfo.state) {
+  if (
+    !processingInfo ||
+    processingInfo.state === "succeeded" ||
+    !processingInfo.state
+  ) {
     return mediaId;
   }
   if (processingInfo.state === "failed") {
-    throw new Error(processingInfo.error?.message ?? "X video processing failed");
+    throw new Error(
+      processingInfo.error?.message ?? "X video processing failed",
+    );
   }
   await onReady?.(mediaId);
 
-  return waitForXVideo(mediaId, accessToken, processingInfo.check_after_secs ?? 2);
+  return waitForXVideo(
+    mediaId,
+    accessToken,
+    processingInfo.check_after_secs ?? 2,
+  );
 }
 
-async function waitForXVideo(mediaId: string, accessToken: string, firstWaitSecs = 2) {
+async function waitForXVideo(
+  mediaId: string,
+  accessToken: string,
+  firstWaitSecs = 2,
+) {
   let waitedMs = 0;
   let nextWaitMs = firstWaitSecs * 1000;
   while (waitedMs < 7 * 60 * 1000) {
@@ -171,11 +235,23 @@ async function waitForXVideo(mediaId: string, accessToken: string, firstWaitSecs
       },
     );
     const statusJson = await parseJson<{
-      data?: { processing_info?: { state?: string; error?: { message?: string }; check_after_secs?: number } };
-      processing_info?: { state?: string; error?: { message?: string }; check_after_secs?: number };
+      data?: {
+        processing_info?: {
+          state?: string;
+          error?: { message?: string };
+          check_after_secs?: number;
+        };
+      };
+      processing_info?: {
+        state?: string;
+        error?: { message?: string };
+        check_after_secs?: number;
+      };
     }>(statusRes);
     if (!statusRes.ok) {
-      throw new Error(extractXError(statusJson, `X video STATUS failed: ${statusRes.status}`));
+      throw new Error(
+        extractXError(statusJson, `X video STATUS failed: ${statusRes.status}`),
+      );
     }
     const info = statusJson.processing_info ?? statusJson.data?.processing_info;
     if (!info?.state || info.state === "succeeded") return mediaId;
@@ -195,31 +271,41 @@ async function uploadMediaToX(
   const url = asset.publicUrl ?? asset.externalUrl;
   if (!url) throw new Error(`X media URL missing for ${asset.filename}`);
   if (asset.kind === "video" || asset.mimeType.startsWith("video/")) {
-    if (!asset.sizeBytes) throw new Error(`X video size missing for ${asset.filename}`);
-    return uploadVideoToX(url, asset.mimeType, accessToken, asset.sizeBytes, onVideoReady);
+    if (!asset.sizeBytes)
+      throw new Error(`X video size missing for ${asset.filename}`);
+    return uploadVideoToX(
+      url,
+      asset.mimeType,
+      accessToken,
+      asset.sizeBytes,
+      onVideoReady,
+    );
   }
   const { bytes, mimeType } = await downloadBytes(url);
   return uploadImageToX(bytes, accessToken, mimeType || asset.mimeType);
 }
 
-export async function publishToX(params: {
-  post: Doc<"posts">;
-  target: Doc<"postTargets">;
-  account: Doc<"connectedAccounts">;
-  media: Doc<"mediaAssets">[];
-  accessToken: string;
-  existingAttempt?: Record<string, unknown>;
-  saveAttempt?: (attempt: Record<string, unknown>) => Promise<void>;
-}): Promise<{ platformPostId: string; permalink?: string }> {
-  const { post, target, account, media, accessToken, existingAttempt, saveAttempt } = params;
+export async function publishToX(params: PublishInput): Promise<PublishedPost> {
+  const {
+    post,
+    target,
+    account,
+    media,
+    accessToken,
+    existingAttempt,
+    saveAttempt,
+  } = params;
   const alreadyPublished = publishedFromAttempt(existingAttempt);
   if (alreadyPublished) return alreadyPublished;
 
-  const text = effectiveBody(post, target);
-  if (!text && media.length === 0) throw new Error("X post requires text or media");
+  const text = effectiveCaption(post.body, target.bodyOverride);
+  if (!text && media.length === 0)
+    throw new Error("X post requires text or media");
 
   let mediaIds: string[] | undefined = Array.isArray(existingAttempt?.mediaIds)
-    ? existingAttempt.mediaIds.filter((id): id is string => typeof id === "string")
+    ? existingAttempt.mediaIds.filter(
+        (id): id is string => typeof id === "string",
+      )
     : undefined;
   const hasVideo = media.some(
     (asset) => asset.kind === "video" || asset.mimeType.startsWith("video/"),
@@ -271,7 +357,9 @@ export async function publishToX(params: {
 
   const id = json.data.id;
   const handle = account.username?.trim();
-  const permalink = handle ? `https://x.com/${handle}/status/${id}` : `https://x.com/i/web/status/${id}`;
+  const permalink = handle
+    ? `https://x.com/${handle}/status/${id}`
+    : `https://x.com/i/web/status/${id}`;
   await saveAttempt?.({ kind: "x", platformPostId: id, permalink, mediaIds });
   return { platformPostId: id, permalink };
 }

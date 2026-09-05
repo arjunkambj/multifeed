@@ -1,14 +1,5 @@
 import { OAUTH_PLATFORMS } from "@/lib/oauth/connectors/types";
 
-export type PlatformKey =
-  | "x"
-  | "instagram"
-  | "facebook"
-  | "threads"
-  | "linkedin"
-  | "youtube"
-  | "tiktok";
-
 export type { OAuthPlatform } from "@/lib/oauth/connectors/types";
 
 export type PlatformMeta = {
