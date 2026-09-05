@@ -8,16 +8,38 @@ export async function getCurrentHexclaveUser(ctx: MutationCtx | QueryCtx) {
     return { authenticated: false as const, error: "Unauthenticated." };
   }
 
+  if (
+    !identity.subject ||
+    identity.role !== "authenticated" ||
+    typeof identity.is_anonymous !== "boolean" ||
+    typeof identity.is_restricted !== "boolean" ||
+    typeof identity.selected_team_id !== "string" ||
+    !identity.selected_team_id
+  ) {
+    return {
+      authenticated: false as const,
+      error: "Missing Hexclave user or team claims.",
+    };
+  }
+
+  if (identity.is_anonymous || identity.is_restricted) {
+    return {
+      authenticated: false as const,
+      error: "An unrestricted account is required.",
+    };
+  }
+
   return {
     authenticated: true as const,
     user: {
-      id: identity.tokenIdentifier,
+      id: identity.subject,
+      tokenIdentifier: identity.tokenIdentifier,
       email: identity.email,
-      isAnonymous: identity.is_anonymous as boolean,
-      isRestricted: identity.is_restricted as boolean,
+      isAnonymous: identity.is_anonymous,
+      isRestricted: identity.is_restricted,
       name: identity.name,
-      role: identity.role as "authenticated",
-      selectedTeamId: identity.selected_team_id as string,
+      role: identity.role,
+      selectedTeamId: identity.selected_team_id,
     },
   };
 }

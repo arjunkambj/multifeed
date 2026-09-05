@@ -1,5 +1,6 @@
 import { sanitizeReturnTo } from "./returnPath";
 import { v } from "convex/values";
+import type { Doc } from "../_generated/dataModel";
 import { internalMutation, mutation } from "../_generated/server";
 import { fail } from "../errors";
 import { requireUser } from "../hexclave/auth";
@@ -8,6 +9,17 @@ import { randomUrlSafe } from "./crypto";
 import { requireOAuthServer } from "./server";
 
 const SESSION_TTL_MS = 10 * 60 * 1000;
+
+function isSessionOwner(
+  session: Doc<"oauthSessions">,
+  user: Awaited<ReturnType<typeof requireUser>>,
+) {
+  // Accept existing sessions until their ten-minute TTL expires after deployment.
+  return (
+    session.teamId === user.selectedTeamId &&
+    (session.userId === user.id || session.userId === user.tokenIdentifier)
+  );
+}
 
 /**
  * Create OAuth session for the current team user.
@@ -85,11 +97,7 @@ export const beginExchange = mutation({
       .withIndex("by_state", (q) => q.eq("state", args.state))
       .unique();
 
-    if (
-      !session ||
-      session.teamId !== user.selectedTeamId ||
-      session.userId !== user.id
-    ) {
+    if (!session || !isSessionOwner(session, user)) {
       return null;
     }
 
@@ -137,11 +145,7 @@ export const complete = mutation({
       .withIndex("by_state", (q) => q.eq("state", args.state))
       .unique();
 
-    if (
-      !session ||
-      session.teamId !== user.selectedTeamId ||
-      session.userId !== user.id
-    ) {
+    if (!session || !isSessionOwner(session, user)) {
       fail("NOT_FOUND", "OAuth session not found");
     }
 
@@ -168,7 +172,7 @@ export const remove = mutation({
       .unique();
 
     if (!session) return { ok: true as const };
-    if (session.teamId !== user.selectedTeamId || session.userId !== user.id) {
+    if (!isSessionOwner(session, user)) {
       fail("NOT_FOUND", "OAuth session not found");
     }
 

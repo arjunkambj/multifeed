@@ -4,10 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
 import { getDodoApiKey, getDodoEnvironment } from "@/lib/billing-config";
-import {
-  getHexclaveConvexServerToken,
-  hexclaveServerApp,
-} from "@/hexclave/server";
+import { getHexclaveConvexServerToken } from "@/hexclave/server";
 import { appOrigin, assertSameOrigin } from "@/lib/oauth/env";
 
 const responseOptions = {
@@ -27,12 +24,9 @@ export async function POST(request: NextRequest) {
     return errorResponse("Invalid request origin", 403);
   }
 
-  const [user, token] = await Promise.all([
-    hexclaveServerApp.getUser({ tokenStore: request }),
-    getHexclaveConvexServerToken(request),
-  ]);
+  const token = await getHexclaveConvexServerToken(request);
 
-  if (!user || !token) {
+  if (!token) {
     return errorResponse("Unauthorized", 401);
   }
 
