@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import "../styles/globals.css";
 import { Bricolage_Grotesque, Figtree, Inter } from "next/font/google";
 import Providers from "@/components/Providers";
@@ -22,6 +23,12 @@ const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
   display: "swap",
 });
+
+const fontFamilies = {
+  "--font-heading": figtreeHeading.style.fontFamily,
+  "--font-display": bricolage.style.fontFamily,
+  "--font-sans": inter.style.fontFamily,
+} as CSSProperties;
 
 export const metadata: Metadata = {
   metadataBase: new URL(clientEnv.NEXT_PUBLIC_APP_URL),
@@ -63,6 +70,7 @@ export default function RootLayout({
         "font-sans",
         inter.variable,
       )}
+      style={fontFamilies}
       suppressHydrationWarning
     >
       <body className="font-sans">
