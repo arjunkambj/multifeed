@@ -14,9 +14,9 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthProviders>
-      <DashboardProviders>
-        <DashboardShell>{children}</DashboardShell>
-      </DashboardProviders>
+      <DashboardShell>
+        <DashboardProviders>{children}</DashboardProviders>
+      </DashboardShell>
     </AuthProviders>
   );
 }
