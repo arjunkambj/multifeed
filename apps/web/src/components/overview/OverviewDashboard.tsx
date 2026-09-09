@@ -1,6 +1,13 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
+import {
+  Calendar03Icon,
+  CheckmarkBadge01Icon,
+  FavouriteIcon,
+  SentIcon,
+  Share08Icon,
+} from "@hugeicons/core-free-icons";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
@@ -76,7 +83,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Scheduled posts"
               value={numberFormatter.format(metrics.scheduledPosts)}
-              icon="hugeicons:calendar-03"
+              icon={Calendar03Icon}
               change={percentageChange(
                 metrics.scheduledPosts,
                 metrics.previousScheduledPosts,
@@ -85,7 +92,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Published posts"
               value={numberFormatter.format(metrics.publishedPosts)}
-              icon="hugeicons:sent"
+              icon={SentIcon}
               change={percentageChange(
                 metrics.publishedPosts,
                 metrics.previousPublishedPosts,
@@ -94,7 +101,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Publishing success"
               value={`${metrics.publishingSuccessRate.toFixed(1)}%`}
-              icon="hugeicons:checkmark-badge-01"
+              icon={CheckmarkBadge01Icon}
               change={
                 metrics.publishingSuccessRate -
                 metrics.previousPublishingSuccessRate
@@ -103,7 +110,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Engagements"
               value={numberFormatter.format(metrics.engagement)}
-              icon="hugeicons:favourite"
+              icon={FavouriteIcon}
               change={percentageChange(
                 metrics.engagement,
                 metrics.previousEngagement,
@@ -112,7 +119,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Active channels"
               value={numberFormatter.format(metrics.activeChannels)}
-              icon="hugeicons:share-08"
+              icon={Share08Icon}
             />
           </section>
         </>

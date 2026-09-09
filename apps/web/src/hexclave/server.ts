@@ -2,20 +2,11 @@ import "server-only";
 
 import { HexclaveServerApp } from "@hexclave/next";
 import type { NextRequest } from "next/server";
-import { serverEnv } from "@/env";
+import { hexclaveClientApp } from "./client";
 
 export const hexclaveServerApp = new HexclaveServerApp({
-  tokenStore: "nextjs-cookie",
-  projectId: serverEnv.NEXT_PUBLIC_HEXCLAVE_PROJECT_ID,
-  publishableClientKey: serverEnv.NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY,
+  inheritsFrom: hexclaveClientApp,
   secretServerKey: process.env.HEXCLAVE_SECRET_SERVER_KEY!,
-  urls: {
-    handler: "/handler",
-    signIn: "/sign-in",
-    afterSignIn: "/overview",
-    afterSignUp: "/overview",
-    afterSignOut: "/",
-  },
 });
 
 export const getHexclaveConvexServerToken = async (request?: NextRequest) => {

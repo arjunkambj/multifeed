@@ -1,4 +1,6 @@
-import { Icon } from "@iconify/react";
+import { ArrowDown02Icon, ArrowUp02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import type { ComponentProps } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -6,7 +8,7 @@ import { cn } from "@/lib/utils";
 type MetricCardProps = {
   title: string;
   value: string;
-  icon: string;
+  icon: ComponentProps<typeof HugeiconsIcon>["icon"];
   change?: number;
 };
 
@@ -24,9 +26,9 @@ export function MetricCard({ title, value, icon, change }: MetricCardProps) {
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <CardTitle>{title}</CardTitle>
-          <Icon
+          <HugeiconsIcon
             icon={icon}
-            width={18}
+            size={18}
             className="shrink-0 text-muted-foreground"
           />
         </div>
@@ -50,13 +52,9 @@ export function MetricCard({ title, value, icon, change }: MetricCardProps) {
                 )}
               >
                 {trend !== 0 ? (
-                  <Icon
-                    icon={
-                      trend < 0
-                        ? "hugeicons:arrow-down-02"
-                        : "hugeicons:arrow-up-02"
-                    }
-                    width={13}
+                  <HugeiconsIcon
+                    icon={trend < 0 ? ArrowDown02Icon : ArrowUp02Icon}
+                    size={13}
                   />
                 ) : null}
                 {trend > 0 ? "+" : ""}

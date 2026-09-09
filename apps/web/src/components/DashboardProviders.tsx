@@ -13,7 +13,11 @@ import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSk
 import { clientEnv } from "@/env";
 import { hexclaveClientApp } from "@/hexclave/client";
 
-const convex = new ConvexReactClient(clientEnv.NEXT_PUBLIC_CONVEX_URL);
+const convex = new ConvexReactClient(clientEnv.NEXT_PUBLIC_CONVEX_URL, {
+  // Keep the accepted token until its scheduled refresh instead of immediately
+  // authenticating twice and rerunning every active query on dashboard entry.
+  initialAuthTokenReuse: true,
+});
 const fetchHexclaveToken = hexclaveClientApp.getConvexClientAuth({});
 
 function useHexclaveAuth() {
@@ -89,6 +93,28 @@ export function DashboardProviders({
 }: {
   children: React.ReactNode;
 }) {
+  const [tokenError, setTokenError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    // Warm the SDK's token cache while useUser resolves inside Suspense.
+    // Convex still validates the token before dashboard queries can mount.
+    void fetchHexclaveToken({ forceRefreshToken: false }).catch(() => {
+      if (active) {
+        setTokenError(
+          new Error(
+            "Could not prepare dashboard authentication. Please try again.",
+          ),
+        );
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (tokenError) throw tokenError;
+
   return (
     <Suspense fallback={<DashboardLoadingSkeleton />}>
       <DashboardSession>{children}</DashboardSession>

@@ -1,9 +1,11 @@
+"use client";
+
 import { HexclaveProvider, HexclaveTheme } from "@hexclave/next";
-import { hexclaveServerApp } from "@/hexclave/server";
+import { hexclaveClientApp } from "@/hexclave/client";
 
 export function AuthProviders({ children }: { children: React.ReactNode }) {
   return (
-    <HexclaveProvider app={hexclaveServerApp}>
+    <HexclaveProvider app={hexclaveClientApp}>
       <HexclaveTheme>{children}</HexclaveTheme>
     </HexclaveProvider>
   );
