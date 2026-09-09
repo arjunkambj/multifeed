@@ -186,10 +186,10 @@ export function PostLibrary() {
         >
           <TabsList
             aria-label="Filter posts by status"
-            className="bg-transparent p-0 [&_[data-slot=tabs-indicator]]:rounded-md [&_[data-slot=tabs-indicator]]:bg-muted"
+            className="rounded-lg bg-transparent p-0 [&_[data-slot=tabs-indicator]]:rounded-lg [&_[data-slot=tabs-indicator]]:bg-card"
           >
             {FILTERS.map((item) => (
-              <TabsTrigger key={item.id} value={item.id} className="rounded-md">
+              <TabsTrigger key={item.id} value={item.id} className="rounded-lg">
                 {item.label}
               </TabsTrigger>
             ))}
@@ -259,7 +259,7 @@ export function PostLibrary() {
           <div className="min-w-0">
             <div
               aria-hidden
-              className="hidden grid-cols-[minmax(0,1fr)_11rem_8rem_9rem_2rem] items-center gap-5 px-5 py-3 text-xs font-medium text-muted-foreground xl:grid"
+              className="hidden grid-cols-[minmax(0,1fr)_11rem_8rem_9rem_2rem] items-center gap-5 rounded-lg bg-card px-5 py-3 text-xs font-medium text-muted-foreground xl:grid"
             >
               <span>Post</span>
               <span>Accounts</span>
