@@ -13,10 +13,20 @@ import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { PostsListSkeleton } from "@/components/layout/PostsListSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { platformBrand, platformLabel } from "@/lib/platform-meta";
+import {
+  PLATFORM_META,
+  platformBrand,
+  platformLabel,
+} from "@/lib/platform-meta";
+import { cn } from "@/lib/utils";
 import {
   isPostLibraryFilter,
   type PostLibraryFilter,
@@ -71,16 +81,15 @@ const STATUS_BADGE: Record<
   draft: { variant: "secondary" },
   scheduled: {
     variant: "outline",
-    className: "border-amber-500/40 bg-amber-500/10 text-amber-600",
+    className: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
   },
   publishing: {
     variant: "outline",
-    className: "border-amber-500/40 bg-amber-500/10 text-amber-600",
+    className: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
   },
   published: {
     variant: "outline",
-    className:
-      "border-emerald-600/40 bg-emerald-600/10 text-emerald-700 dark:text-emerald-400",
+    className: "bg-emerald-600/10 text-emerald-700 dark:text-emerald-400",
   },
   failed: { variant: "destructive" },
 };
@@ -175,21 +184,42 @@ export function PostLibrary() {
             });
           }}
         >
-          <TabsList aria-label="Filter posts by status">
+          <TabsList
+            aria-label="Filter posts by status"
+            className="bg-transparent p-0 [&_[data-slot=tabs-indicator]]:rounded-md [&_[data-slot=tabs-indicator]]:bg-muted"
+          >
             {FILTERS.map((item) => (
-              <TabsTrigger key={item.id} value={item.id}>
+              <TabsTrigger key={item.id} value={item.id} className="rounded-md">
                 {item.label}
               </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
-        <div className="w-full sm:w-64">
+        <div className="relative w-full sm:w-64">
+          <Icon
+            icon="hugeicons:search-01"
+            width={16}
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
+            className="rounded-lg border-0 bg-muted pr-9 pl-9 shadow-none"
             aria-label="Search posts"
             placeholder="Search posts or accounts"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
+          {search && (
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              aria-label="Clear search"
+              className="absolute top-1/2 right-1.5 -translate-y-1/2"
+              onClick={() => setSearch("")}
+            >
+              <Icon icon="hugeicons:cancel-01" width={14} />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -197,7 +227,7 @@ export function PostLibrary() {
         {posts === undefined ? (
           <PostsListSkeleton />
         ) : visiblePosts.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-16 text-center">
+          <div className="flex flex-col items-center gap-3 px-6 py-20 text-center">
             <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Icon icon="hugeicons:note-01" width={24} />
             </span>
@@ -226,57 +256,83 @@ export function PostLibrary() {
             )}
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            {visiblePosts.map((post) => (
-              <Card
-                key={post._id}
-                className="border border-border bg-card shadow-none transition hover:border-primary/30"
-              >
-                <CardContent className="flex flex-col gap-4 py-4 lg:flex-row lg:items-start">
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex flex-wrap items-center gap-2">
-                      <Badge
-                        variant={
-                          STATUS_BADGE[post.status]?.variant ?? "secondary"
+          <div className="min-w-0">
+            <div
+              aria-hidden
+              className="hidden grid-cols-[minmax(0,1fr)_11rem_8rem_9rem_2rem] items-center gap-5 px-5 py-3 text-xs font-medium text-muted-foreground xl:grid"
+            >
+              <span>Post</span>
+              <span>Accounts</span>
+              <span>Status</span>
+              <span>Date</span>
+              <span />
+            </div>
+            <ul className="flex flex-col gap-1">
+              {visiblePosts.map((post) => (
+                <li
+                  key={post._id}
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-5 gap-y-4 rounded-lg px-4 py-4 transition-colors hover:bg-muted/30 sm:px-5 xl:grid-cols-[minmax(0,1fr)_11rem_8rem_9rem_2rem]"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span
+                      className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground"
+                      aria-hidden
+                    >
+                      <Icon
+                        icon={
+                          post.kind === "text"
+                            ? "hugeicons:note-01"
+                            : post.kind === "video"
+                              ? "hugeicons:video-01"
+                              : "hugeicons:image-01"
                         }
-                        className={STATUS_BADGE[post.status]?.className}
-                      >
-                        {post.status}
-                      </Badge>
-                      {post.scheduledFor && (
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {format(
-                            new Date(post.scheduledFor),
-                            "EEE, MMM d · h:mm a",
-                          )}
-                        </span>
-                      )}
+                        width={20}
+                      />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">
+                        {post.title || "Untitled post"}
+                      </p>
+                      <p className="mt-1 line-clamp-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">
+                        {post.body || "No caption"}
+                      </p>
                     </div>
-                    {post.title && (
-                      <p className="text-sm font-semibold">{post.title}</p>
-                    )}
-                    <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-                      {post.body || "No caption"}
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {post.targets.length === 0 ? (
-                        <span className="text-xs text-muted-foreground">
-                          No accounts selected
-                        </span>
-                      ) : (
-                        post.targets.map((target) => (
-                          <span
-                            key={target.targetId}
-                            className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-1 text-[11px]"
-                          >
+                  </div>
+                  <div className="col-span-2 flex min-w-0 flex-col items-start gap-2 xl:col-span-1">
+                    {post.targets.length === 0 ? (
+                      <span className="text-xs text-muted-foreground">
+                        No accounts selected
+                      </span>
+                    ) : (
+                      post.targets.map((target) => (
+                        <span
+                          key={target.targetId}
+                          className="flex max-w-full flex-col gap-1"
+                        >
+                          <span className="inline-flex min-w-0 items-center gap-2 text-xs">
                             <span
-                              className="size-2 rounded-full"
+                              className="flex size-5 shrink-0 items-center justify-center rounded-md text-white"
                               style={{
                                 backgroundColor: platformBrand(target.platform),
                               }}
-                            />
-                            {platformLabel(target.platform)}
-                            {target.username ? ` · @${target.username}` : ""}
+                            >
+                              <Icon
+                                icon={
+                                  PLATFORM_META[target.platform]?.icon ??
+                                  "hugeicons:link-01"
+                                }
+                                width={11}
+                                aria-hidden
+                              />
+                            </span>
+                            <span className="sr-only">
+                              {platformLabel(target.platform)}{" "}
+                            </span>
+                            <span className="truncate">
+                              {target.username
+                                ? `@${target.username}`
+                                : platformLabel(target.platform)}
+                            </span>
                             {target.hasCustomCaption && (
                               <Icon
                                 icon="hugeicons:edit-02"
@@ -284,20 +340,20 @@ export function PostLibrary() {
                                 aria-label="Custom caption"
                               />
                             )}
-                            {target.failureMessage && (
-                              <span className="text-red-600">
-                                · {target.failureMessage}
-                              </span>
-                            )}
                           </span>
-                        ))
-                      )}
-                    </div>
+                          {target.failureMessage && (
+                            <span className="break-words text-xs text-destructive">
+                              {target.failureMessage}
+                            </span>
+                          )}
+                        </span>
+                      ))
+                    )}
                     {post.status === "published" &&
                       post.targets.some(
                         (target) => target.platformPermalink,
                       ) && (
-                        <div className="mt-3 flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2">
                           {post.targets.map((target) =>
                             target.platformPermalink ? (
                               <a
@@ -305,97 +361,151 @@ export function PostLibrary() {
                                 href={target.platformPermalink}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-xs font-medium text-primary hover:underline"
+                                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                               >
                                 Open on {platformLabel(target.platform)}
+                                <Icon
+                                  icon="hugeicons:arrow-up-right-01"
+                                  width={12}
+                                  aria-hidden
+                                />
                               </a>
                             ) : null,
                           )}
                         </div>
                       )}
                   </div>
-                  <div className="flex shrink-0 flex-wrap gap-1.5">
-                    {post.scheduledFor && post.status !== "draft" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          router.push(`/calendar?highlight=${post._id}`)
-                        }
-                      >
-                        <Icon icon="hugeicons:calendar-03" width={15} />
-                        View
-                      </Button>
-                    )}
-                    {(post.status === "failed" ||
-                      post.targets.some(
-                        (target) => target.status === "failed",
-                      )) && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={retrying === post._id}
-                        onClick={async () => {
-                          setRetrying(post._id);
-                          try {
-                            const result = await retryFailed({
-                              postId: post._id,
-                            });
-                            toast.success(
-                              result.retried === 1
-                                ? "Retrying 1 failed delivery."
-                                : `Retrying ${result.retried} failed deliveries.`,
-                            );
-                          } catch (error) {
-                            toast.error(
-                              error instanceof Error
-                                ? error.message
-                                : "Could not retry this post",
-                            );
-                          } finally {
-                            setRetrying(null);
-                          }
-                        }}
-                      >
-                        <Icon icon="hugeicons:refresh" width={15} />
-                        Retry
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        router.push(
-                          post.status === "draft"
-                            ? `/posts/new?edit=${post._id}`
-                            : `/posts/new?from=${post._id}`,
-                        )
+                  <div>
+                    <Badge
+                      variant={
+                        STATUS_BADGE[post.status]?.variant ?? "secondary"
                       }
+                      className={cn(
+                        "gap-1.5 rounded-md border-0 px-2 py-1 text-[11px] font-medium capitalize",
+                        STATUS_BADGE[post.status]?.className,
+                      )}
                     >
-                      <Icon
-                        icon={
-                          post.status === "draft"
-                            ? "hugeicons:edit-02"
-                            : "hugeicons:copy-01"
-                        }
-                        width={15}
+                      <span
+                        className={cn(
+                          "size-1.5 rounded-full bg-current",
+                          post.status === "publishing" &&
+                            "motion-safe:animate-pulse",
+                        )}
                       />
-                      {post.status === "draft" ? "Continue" : "Duplicate"}
-                    </Button>
-                    {post.status !== "publishing" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={deleting === post._id}
-                        onClick={() => void onDelete(post._id)}
-                      >
-                        <Icon icon="hugeicons:delete-02" width={15} />
-                      </Button>
-                    )}
+                      {post.status === "published" ? "Posted" : post.status}
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <div className="text-right text-xs xl:text-left">
+                    <p className="font-medium">
+                      {format(
+                        new Date(post.scheduledFor ?? post.createdAt),
+                        "MMM d, yyyy",
+                      )}
+                    </p>
+                    <p className="mt-1 text-muted-foreground">
+                      {post.scheduledFor
+                        ? format(new Date(post.scheduledFor), "h:mm a")
+                        : "Created"}
+                    </p>
+                  </div>
+                  <div className="col-start-2 row-start-1 justify-self-end xl:col-start-auto xl:row-start-auto">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            aria-label={`Actions for ${post.title || "untitled post"}`}
+                          />
+                        }
+                      >
+                        <Icon icon="hugeicons:more-horizontal" width={18} />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-44 border-0"
+                      >
+                        {post.scheduledFor && post.status !== "draft" && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              router.push(`/calendar?highlight=${post._id}`)
+                            }
+                          >
+                            <Icon icon="hugeicons:calendar-03" width={15} />
+                            View in calendar
+                          </DropdownMenuItem>
+                        )}
+                        {(post.status === "failed" ||
+                          post.targets.some(
+                            (target) => target.status === "failed",
+                          )) && (
+                          <DropdownMenuItem
+                            disabled={retrying === post._id}
+                            onClick={async () => {
+                              setRetrying(post._id);
+                              try {
+                                const result = await retryFailed({
+                                  postId: post._id,
+                                });
+                                toast.success(
+                                  result.retried === 1
+                                    ? "Retrying 1 failed delivery."
+                                    : `Retrying ${result.retried} failed deliveries.`,
+                                );
+                              } catch (error) {
+                                toast.error(
+                                  error instanceof Error
+                                    ? error.message
+                                    : "Could not retry this post",
+                                );
+                              } finally {
+                                setRetrying(null);
+                              }
+                            }}
+                          >
+                            <Icon icon="hugeicons:refresh" width={15} />
+                            {retrying === post._id
+                              ? "Retrying…"
+                              : "Retry delivery"}
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(
+                              post.status === "draft"
+                                ? `/posts/new?edit=${post._id}`
+                                : `/posts/new?from=${post._id}`,
+                            )
+                          }
+                        >
+                          <Icon
+                            icon={
+                              post.status === "draft"
+                                ? "hugeicons:edit-02"
+                                : "hugeicons:copy-01"
+                            }
+                            width={15}
+                          />
+                          {post.status === "draft" ? "Continue" : "Duplicate"}
+                        </DropdownMenuItem>
+                        {post.status !== "publishing" && (
+                          <DropdownMenuItem
+                            variant="destructive"
+                            disabled={deleting === post._id}
+                            onClick={() => void onDelete(post._id)}
+                          >
+                            <Icon icon="hugeicons:delete-02" width={15} />
+                            {deleting === post._id
+                              ? "Deleting…"
+                              : "Delete post"}
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>

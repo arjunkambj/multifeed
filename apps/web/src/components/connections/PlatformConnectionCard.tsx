@@ -16,8 +16,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import {
   type OAuthPlatform,
-  type PlatformMeta,
   PLATFORM_META,
+  type PlatformMeta,
 } from "@/lib/platform-meta";
 
 type ConnectionAccount = Pick<
@@ -61,27 +61,31 @@ export function PlatformConnectionCard({
   const isConnecting = connecting === platform;
 
   return (
-    <Card size="sm">
-      <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+    <Card
+      size="sm"
+      className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-2 rounded-xl px-3 py-2.5"
+    >
+      <CardHeader className="contents">
+        <div className="contents">
+          <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-2 sm:min-w-32">
             <span
-              className="flex size-9 shrink-0 items-center justify-center rounded-xl"
+              className="flex size-7 shrink-0 items-center justify-center rounded-lg"
               style={{
                 backgroundColor: meta.brand,
                 color: meta.foreground ?? "#FFFFFF",
               }}
             >
-              <Icon icon={meta.icon} width={18} aria-hidden />
+              <Icon icon={meta.icon} width={14} aria-hidden />
             </span>
             <div className="flex min-w-0 flex-col gap-1">
-              <CardTitle>
+              <CardTitle className="text-sm">
                 <h2>{meta.label}</h2>
               </CardTitle>
             </div>
           </div>
           <Button
-            size="sm"
+            className="col-start-3 row-start-1"
+            size="xs"
             variant={accounts.length > 0 ? "secondary" : "default"}
             disabled={atLimit || connecting !== null}
             aria-label={`${accounts.length > 0 ? "Add another" : "Connect"} ${meta.label} account`}
@@ -101,9 +105,9 @@ export function PlatformConnectionCard({
         </div>
       </CardHeader>
       {accounts.length > 0 && (
-        <CardContent>
+        <CardContent className="col-span-3 row-start-2 min-w-0 px-0 sm:col-span-1 sm:col-start-2 sm:row-start-1">
           <ul
-            className="flex flex-wrap items-center gap-4"
+            className="flex flex-wrap items-center gap-3"
             aria-label={`${meta.label} accounts`}
           >
             {accounts.map((account) => {
@@ -112,11 +116,11 @@ export function PlatformConnectionCard({
                 <li key={account._id} className="shrink-0">
                   <Popover>
                     <PopoverTrigger
-                      className="relative flex size-14 cursor-pointer rounded-full outline-none transition-shadow hover:ring-4 hover:ring-foreground/10 focus-visible:ring-4 focus-visible:ring-ring/50 data-popup-open:ring-4 data-popup-open:ring-ring/50"
+                      className="relative flex size-8 cursor-pointer rounded-full outline-none transition-shadow hover:ring-1 hover:ring-foreground/10 focus-visible:ring-1 focus-visible:ring-ring/50 data-popup-open:ring-1 data-popup-open:ring-ring/50"
                       aria-label={`Manage @${account.username} on ${meta.label}${needsReconnect ? ", reconnect needed" : ""}`}
                       title={`@${account.username}${needsReconnect ? " · Reconnect needed" : ""}`}
                     >
-                      <Avatar className="size-14">
+                      <Avatar className="size-8">
                         {account.avatarUrl && (
                           <AvatarImage src={account.avatarUrl} alt="" />
                         )}
@@ -125,14 +129,14 @@ export function PlatformConnectionCard({
                         </AvatarFallback>
                       </Avatar>
                       <span
-                        className="absolute -right-0.5 -bottom-0.5 flex size-5 items-center justify-center rounded-full ring-2 ring-card"
+                        className="absolute -right-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full ring-2 ring-card"
                         style={{
                           backgroundColor: meta.brand,
                           color: meta.foreground ?? "#FFFFFF",
                         }}
                         aria-hidden
                       >
-                        <Icon icon={meta.icon} width={12} />
+                        <Icon icon={meta.icon} width={10} />
                       </span>
                       {needsReconnect && (
                         <span

@@ -4,8 +4,8 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { Icon } from "@iconify/react";
 import { useMutation } from "convex/react";
-import { useQuery } from "convex-helpers/react/cache/hooks";
 import type { FunctionReturnType } from "convex/server";
+import { useQuery } from "convex-helpers/react/cache/hooks";
 import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useReducer, useRef, useState } from "react";
@@ -14,14 +14,6 @@ import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSk
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
 import { Button } from "@/components/ui/button";
-import {
-  Empty,
-  EmptyContent,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
@@ -31,22 +23,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import {
+  Empty,
+  EmptyContent,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import {
   PLATFORM_META,
   platformBrand,
   platformLabel,
 } from "@/lib/platform-meta";
-import { PlatformPostPreview } from "./PlatformPostPreview";
+import { cn } from "@/lib/utils";
 import { ComposerPanel } from "./ComposerPanel";
+import { PlatformPostPreview } from "./PlatformPostPreview";
 import { PlatformSettingsFields } from "./PlatformSettingsFields";
 import { PostFormatPicker } from "./PostFormatPicker";
 import { PostMediaUploader } from "./PostMediaUploader";
@@ -640,7 +640,7 @@ function PostComposerForm({
         }
       />
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px] xl:gap-8">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_420px] xl:gap-8">
         <div className="flex min-w-0 flex-col gap-4">
           <section className="flex min-w-0 flex-col gap-4">
             <div className="flex flex-col gap-1">
@@ -1396,7 +1396,7 @@ function PostComposerForm({
                 </ToggleGroup>
               )}
               {previewAccount ? (
-                <div className="mx-auto flex w-full max-w-80 justify-center">
+                <div className="mx-auto flex w-full max-w-[520px] justify-center">
                   <PlatformPostPreview
                     account={previewAccount}
                     body={

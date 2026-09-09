@@ -362,6 +362,26 @@ function PostDetailsCard({
   onDelete: () => Promise<void>;
   router: ReturnType<typeof useRouter>;
 }) {
+  const retryFailed = useMutation(api.posts.retryFailed);
+  const [retrying, setRetrying] = useState(false);
+
+  const onRetry = async () => {
+    if (!selectedPost || retrying) return;
+    setRetrying(true);
+    try {
+      const { retried } = await retryFailed({ postId: selectedPost._id });
+      toast.success(
+        `Retrying ${retried} failed ${retried === 1 ? "delivery" : "deliveries"}.`,
+      );
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not retry post",
+      );
+    } finally {
+      setRetrying(false);
+    }
+  };
+
   return (
     <Card className="bg-card shadow-none xl:sticky xl:top-4 xl:self-start">
       <CardHeader className="pb-2">
@@ -441,14 +461,47 @@ function PostDetailsCard({
                       <p className="truncate text-[11px] text-muted-foreground">
                         {platformLabel(t.platform)}
                       </p>
+                      {t.failureMessage && (
+                        <p
+                          className="mt-1 break-words text-xs text-destructive"
+                          role="status"
+                        >
+                          {t.failureMessage}
+                        </p>
+                      )}
+                      {t.platformPermalink && (
+                        <a
+                          href={t.platformPermalink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-block text-xs text-primary underline"
+                        >
+                          View published post
+                        </a>
+                      )}
                     </div>
-                    <Badge variant="secondary"></Badge>
+                    <Badge variant="secondary" className="capitalize">
+                      {t.status}
+                    </Badge>
                   </div>
                 ))
               )}
             </div>
 
             <div className="flex flex-wrap gap-2 pt-1">
+              {selectedPost.status !== "publishing" &&
+                selectedPost.status !== "archived" &&
+                selectedPost.targets.some(
+                  (target) => target.status === "failed",
+                ) && (
+                  <Button
+                    size="sm"
+                    disabled={retrying}
+                    onClick={() => void onRetry()}
+                  >
+                    {retrying ? "Retrying…" : "Retry failed"}
+                  </Button>
+                )}
               {!["publishing", "published", "archived"].includes(
                 selectedPost.status,
               ) && (
