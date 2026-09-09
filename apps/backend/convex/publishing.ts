@@ -46,17 +46,27 @@ async function scheduleTargets(
   const targets = await loadTargets(ctx, post._id);
   if (targets.length === 0) {
     await ctx.db.patch("posts", post._id, {
-      status: "published",
+      status: "failed",
       updatedAt: now,
     });
     return;
   }
 
-  if (post.status !== "publishing") {
-    await ctx.db.patch("posts", post._id, {
-      status: "publishing",
-      updatedAt: now,
-    });
+  await ctx.db.patch("posts", post._id, {
+    status: "publishing",
+    updatedAt: now,
+  });
+
+  if (
+    targets.every(
+      (target) =>
+        target.status === "published" ||
+        target.status === "failed" ||
+        target.status === "skipped",
+    )
+  ) {
+    await reconcileStatus(ctx, post._id);
+    return;
   }
 
   for (const target of targets) {
@@ -64,6 +74,7 @@ async function scheduleTargets(
     if (target.status === "failed") continue;
     if (
       target.status === "publishing" &&
+      target.attempts > 0 &&
       now - target.updatedAt < STALE_PUBLISH_MS
     ) {
       continue;
@@ -85,7 +96,9 @@ export const publishPost = internalMutation({
   handler: async (ctx, args) => {
     const post = await ctx.db.get("posts", args.postId);
     if (!post) return null;
-    if (post.status === "published" || post.status === "archived") return null;
+    // Old jobs can still run after rescheduling or moving a post back to drafts.
+    if (post.status !== "scheduled" && post.status !== "publishing")
+      return null;
     if (
       post.status === "scheduled" &&
       post.scheduledFor != null &&
@@ -111,15 +124,21 @@ export const publishDuePosts = internalMutation({
       .take(BATCH);
     const publishingDue = await ctx.db
       .query("posts")
-      .withIndex("by_status_scheduledFor", (q) =>
-        q.eq("status", "publishing").lte("scheduledFor", now),
+      .withIndex("by_status_updatedAt", (q) =>
+        q.eq("status", "publishing").lte("updatedAt", now - 60_000),
       )
       .take(BATCH);
-    const due = [...scheduledDue, ...publishingDue].slice(0, BATCH);
+    const due = [...scheduledDue, ...publishingDue];
     for (const post of due) {
-      await scheduleTargets(ctx, post, now);
+      // Isolate each post so the cron cannot exceed the scheduler's fan-out limit.
+      await ctx.scheduler.runAfter(0, internal.publishing.publishPost, {
+        postId: post._id,
+      });
     }
-    return { processed: due.length, hasMore: due.length === BATCH };
+    return {
+      processed: due.length,
+      hasMore: scheduledDue.length === BATCH || publishingDue.length === BATCH,
+    };
   },
 });
 
@@ -164,25 +183,28 @@ export const claimTargetForPublish = internalMutation({
   handler: async (ctx, args) => {
     const target = await ctx.db.get("postTargets", args.targetId);
     if (!target) return "missing";
+    const post = await ctx.db.get("posts", target.postId);
+    if (!post || post.status !== "publishing") return "missing";
     if (target.status === "published" || target.status === "skipped")
       return "done";
     const now = Date.now();
     if (
       target.status === "publishing" &&
+      target.attempts > 0 &&
       now - target.updatedAt < STALE_PUBLISH_MS
     ) {
       return "busy";
     }
     if (target.status === "failed") return "done";
     const hasAttempt = target.publishAttempt != null;
-    if (target.status === "publishing" && hasAttempt) {
+    if (target.status === "publishing" && target.attempts > 0 && hasAttempt) {
       await ctx.db.patch("postTargets", args.targetId, {
         attempts: target.attempts + 1,
         updatedAt: now,
       });
       return "resume";
     }
-    if (target.status === "publishing") {
+    if (target.status === "publishing" && target.attempts > 0) {
       await ctx.db.patch("postTargets", args.targetId, {
         status: "failed",
         failureCode: "stale_publish",
@@ -330,28 +352,36 @@ export const markTargetFailed = internalMutation({
   },
 });
 
+async function reconcileStatus(ctx: MutationCtx, postId: Doc<"posts">["_id"]) {
+  const post = await ctx.db.get("posts", postId);
+  if (!post || post.status !== "publishing") return null;
+  const targets = await loadTargets(ctx, postId);
+  if (targets.length === 0) {
+    await ctx.db.patch("posts", postId, {
+      status: "failed",
+      updatedAt: Date.now(),
+    });
+    return null;
+  }
+  const hasPublished = targets.some((target) => target.status === "published");
+  const hasFailed = targets.some((target) => target.status === "failed");
+  const hasPublishing = targets.some(
+    (target) =>
+      target.status === "publishing" ||
+      target.status === "scheduled" ||
+      target.status === "draft",
+  );
+  const status: Doc<"posts">["status"] = hasPublishing
+    ? "publishing"
+    : !hasPublished && hasFailed
+      ? "failed"
+      : "published";
+  await ctx.db.patch("posts", postId, { status, updatedAt: Date.now() });
+  return null;
+}
+
 export const reconcilePostStatus = internalMutation({
   args: { postId: v.id("posts") },
   returns: v.null(),
-  handler: async (ctx, args) => {
-    const targets = await loadTargets(ctx, args.postId);
-    if (targets.length === 0) return null;
-    const hasPublished = targets.some(
-      (target) => target.status === "published",
-    );
-    const hasFailed = targets.some((target) => target.status === "failed");
-    const hasPublishing = targets.some(
-      (target) =>
-        target.status === "publishing" ||
-        target.status === "scheduled" ||
-        target.status === "draft",
-    );
-    const status: Doc<"posts">["status"] = hasPublishing
-      ? "publishing"
-      : !hasPublished && hasFailed
-        ? "failed"
-        : "published";
-    await ctx.db.patch("posts", args.postId, { status, updatedAt: Date.now() });
-    return null;
-  },
+  handler: async (ctx, args) => reconcileStatus(ctx, args.postId),
 });

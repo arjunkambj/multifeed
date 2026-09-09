@@ -103,4 +103,4 @@ UI: `/connections`
 - Do not edit `apps/backend/convex/_generated`.
 - Do not use Convex HTTP for OAuth (Dodo webhook only).
 - Media uploads use presigned R2 URLs and require the bucket CORS policy above.
-- “Post now” publishes immediately via `publishing.publishPost`; scheduled posts publish when due via the 1-minute `publishDuePosts` cron.
+- “Post now” queues delivery immediately via `publishing.publishPost`. Scheduled posts register a durable job at their scheduled time; the 1-minute `publishDuePosts` cron recovers missed jobs and stalled deliveries. Targets stay queued until a worker claims them.

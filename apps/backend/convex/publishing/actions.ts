@@ -199,86 +199,57 @@ export const publishOneTarget = internalAction({
       return null;
     }
 
-    const post = await ctx.runQuery(internal.publishing.getPostForPublish, {
-      postId: args.postId,
-    });
-    const target = await ctx.runQuery(internal.publishing.getTargetForPublish, {
-      targetId: args.targetId,
-    });
-    if (!post || !target || target.postId !== post._id) {
-      await ctx.runMutation(internal.publishing.markTargetFailed, {
-        targetId: args.targetId,
-        failureCode: "missing_post",
-        failureMessage: "Post or target disappeared before publishing",
+    try {
+      const post = await ctx.runQuery(internal.publishing.getPostForPublish, {
+        postId: args.postId,
       });
-      return null;
-    }
-
-    const account = await ctx.runQuery(
-      internal.publishing.getAccountForPublish,
-      {
-        accountId: target.connectedAccountId,
-      },
-    );
-    if (!account || account.status !== "active") {
-      await ctx.runMutation(internal.publishing.markTargetFailed, {
-        targetId: target._id,
-        failureCode: "account_inactive",
-        failureMessage: account
-          ? `Account @${account.username} is ${account.status}`
-          : "Account not found",
-      });
-      await ctx.runMutation(internal.publishing.reconcilePostStatus, {
-        postId: post._id,
-      });
-      return null;
-    }
-
-    let freshAccount = account;
-    const now = Date.now();
-    const expiresSoon =
-      account.tokenExpiresAt == null || account.tokenExpiresAt < now + 60_000;
-    if (expiresSoon) {
-      if (!account.encryptedRefreshToken) {
-        await ctx.runMutation(internal.publishing.markAccountExpired, {
-          accountId: account._id,
-          errorMessage: "Reconnect this account to refresh its access token",
+      const target = await ctx.runQuery(
+        internal.publishing.getTargetForPublish,
+        {
+          targetId: args.targetId,
+        },
+      );
+      if (!post || !target || target.postId !== post._id) {
+        await ctx.runMutation(internal.publishing.markTargetFailed, {
+          targetId: args.targetId,
+          failureCode: "missing_post",
+          failureMessage: "Post or target disappeared before publishing",
         });
+        return null;
+      }
+
+      const account = await ctx.runQuery(
+        internal.publishing.getAccountForPublish,
+        {
+          accountId: target.connectedAccountId,
+        },
+      );
+      if (!account || account.status !== "active") {
         await ctx.runMutation(internal.publishing.markTargetFailed, {
           targetId: target._id,
-          failureCode: "no_token",
-          failureMessage: "Reconnect this account and try again",
+          failureCode: "account_inactive",
+          failureMessage: account
+            ? `Account @${account.username} is ${account.status}`
+            : "Account not found",
         });
         await ctx.runMutation(internal.publishing.reconcilePostStatus, {
           postId: post._id,
         });
         return null;
       }
-      try {
-        const refreshToken = await decryptSecret(account.encryptedRefreshToken);
-        const refreshed = await refreshAccessTokenForPlatform(
-          account,
-          refreshToken,
-        );
-        if (!refreshed?.accessToken)
-          throw new Error("Could not refresh this account");
-        freshAccount =
-          (await ctx.runMutation(internal.publishing.applyRefreshedToken, {
-            accountId: account._id,
-            accessToken: refreshed.accessToken,
-            refreshToken: refreshed.refreshToken,
-            expiresAt: refreshed.expiresAt,
-            refreshTokenExpiresAt: refreshed.refreshTokenExpiresAt,
-          })) ?? account;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        const stillUsable =
-          Boolean(account.encryptedAccessToken) &&
-          (account.tokenExpiresAt == null || account.tokenExpiresAt > now);
-        if (!stillUsable) {
+
+      let freshAccount = account;
+      const now = Date.now();
+      const expiresSoon =
+        account.tokenExpiresAt == null
+          ? Boolean(account.encryptedRefreshToken)
+          : account.tokenExpiresAt <=
+            now + (account.encryptedRefreshToken ? 60_000 : 0);
+      if (expiresSoon) {
+        if (!account.encryptedRefreshToken) {
           await ctx.runMutation(internal.publishing.markAccountExpired, {
             accountId: account._id,
-            errorMessage: message,
+            errorMessage: "Reconnect this account to refresh its access token",
           });
           await ctx.runMutation(internal.publishing.markTargetFailed, {
             targetId: target._id,
@@ -290,40 +261,78 @@ export const publishOneTarget = internalAction({
           });
           return null;
         }
+        try {
+          const refreshToken = await decryptSecret(
+            account.encryptedRefreshToken,
+          );
+          const refreshed = await refreshAccessTokenForPlatform(
+            account,
+            refreshToken,
+          );
+          if (!refreshed?.accessToken)
+            throw new Error("Could not refresh this account");
+          freshAccount =
+            (await ctx.runMutation(internal.publishing.applyRefreshedToken, {
+              accountId: account._id,
+              accessToken: refreshed.accessToken,
+              refreshToken: refreshed.refreshToken,
+              expiresAt: refreshed.expiresAt,
+              refreshTokenExpiresAt: refreshed.refreshTokenExpiresAt,
+            })) ?? account;
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          const stillUsable =
+            Boolean(account.encryptedAccessToken) &&
+            (account.tokenExpiresAt == null || account.tokenExpiresAt > now);
+          if (!stillUsable) {
+            await ctx.runMutation(internal.publishing.markAccountExpired, {
+              accountId: account._id,
+              errorMessage: message,
+            });
+            await ctx.runMutation(internal.publishing.markTargetFailed, {
+              targetId: target._id,
+              failureCode: "no_token",
+              failureMessage: "Reconnect this account and try again",
+            });
+            await ctx.runMutation(internal.publishing.reconcilePostStatus, {
+              postId: post._id,
+            });
+            return null;
+          }
+        }
       }
-    }
-    const accessToken = freshAccount.encryptedAccessToken
-      ? await decryptSecret(freshAccount.encryptedAccessToken)
-      : null;
-    if (!accessToken) {
-      await ctx.runMutation(internal.publishing.markTargetFailed, {
-        targetId: target._id,
-        failureCode: "no_token",
-        failureMessage: "Reconnect this account and try again",
-      });
-      await ctx.runMutation(internal.publishing.reconcilePostStatus, {
-        postId: post._id,
-      });
-      return null;
-    }
-
-    const existingAttempt =
-      claim === "resume" ? target.publishAttempt : undefined;
-    const saveAttempt: PublishInput["saveAttempt"] = async (attempt) => {
-      try {
-        await ctx.runMutation(internal.publishing.savePublishAttempt, {
+      const accessToken = freshAccount.encryptedAccessToken
+        ? await decryptSecret(freshAccount.encryptedAccessToken)
+        : null;
+      if (!accessToken) {
+        await ctx.runMutation(internal.publishing.markTargetFailed, {
           targetId: target._id,
-          attempt,
+          failureCode: "no_token",
+          failureMessage: "Reconnect this account and try again",
         });
-      } catch (error) {
-        console.error(
-          `[publishing] could not persist publish checkpoint for ${target._id}:`,
-          error,
-        );
+        await ctx.runMutation(internal.publishing.reconcilePostStatus, {
+          postId: post._id,
+        });
+        return null;
       }
-    };
 
-    try {
+      const existingAttempt =
+        claim === "resume" ? target.publishAttempt : undefined;
+      const saveAttempt: PublishInput["saveAttempt"] = async (attempt) => {
+        try {
+          await ctx.runMutation(internal.publishing.savePublishAttempt, {
+            targetId: target._id,
+            attempt,
+          });
+        } catch (error) {
+          console.error(
+            `[publishing] could not persist publish checkpoint for ${target._id}:`,
+            error,
+          );
+        }
+      };
+
       const storedMedia = await ctx.runQuery(
         internal.publishing.getMediaForPost,
         {
@@ -396,23 +405,20 @@ export const publishOneTarget = internalAction({
       const message = error instanceof Error ? error.message : String(error);
       if (isResumablePublishError(error)) {
         console.error(
-          `[publishing] publish still in progress ${target.platform} ${target._id}:`,
+          `[publishing] publish still in progress ${args.targetId}:`,
           message,
         );
       } else {
-        console.error(
-          `[publishing] publish failed ${target.platform} ${target._id}:`,
-          message,
-        );
+        console.error(`[publishing] publish failed ${args.targetId}:`, message);
         await ctx.runMutation(internal.publishing.markTargetFailed, {
-          targetId: target._id,
+          targetId: args.targetId,
           failureCode: "publish_failed",
           failureMessage: message.slice(0, 1000),
         });
       }
     } finally {
       await ctx.runMutation(internal.publishing.reconcilePostStatus, {
-        postId: post._id,
+        postId: args.postId,
       });
     }
     return null;

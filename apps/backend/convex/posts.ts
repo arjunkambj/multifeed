@@ -364,6 +364,8 @@ function targetStatusFromPost(
   status: Doc<"posts">["status"],
 ): Doc<"postTargets">["status"] {
   if (status === "archived") return "skipped";
+  // Only the publishing worker can claim a target as actively publishing.
+  if (status === "publishing") return "scheduled";
   return status;
 }
 
@@ -555,10 +557,14 @@ export const create = mutation({
       });
     }
 
-    if (status === "publishing") {
-      await ctx.scheduler.runAfter(0, internal.publishing.publishPost, {
-        postId,
-      });
+    if (status === "publishing" || status === "scheduled") {
+      await ctx.scheduler.runAt(
+        scheduledFor!,
+        internal.publishing.publishPost,
+        {
+          postId,
+        },
+      );
     }
 
     return { postId };
@@ -700,10 +706,14 @@ export const update = mutation({
       );
     }
 
-    if (status === "publishing") {
-      await ctx.scheduler.runAfter(0, internal.publishing.publishPost, {
-        postId: args.postId,
-      });
+    if (status === "publishing" || status === "scheduled") {
+      await ctx.scheduler.runAt(
+        scheduledFor!,
+        internal.publishing.publishPost,
+        {
+          postId: args.postId,
+        },
+      );
     }
 
     return { ok: true as const };
@@ -747,6 +757,9 @@ export const reschedule = mutation({
     });
 
     const targets = await loadTargets(ctx, args.postId);
+    if (targets.length === 0) {
+      fail("INVALID_INPUT", "Select at least one account before scheduling");
+    }
     const targetUpdates = [];
     for (const target of targets) {
       if (target.status === "published") continue;
@@ -759,6 +772,14 @@ export const reschedule = mutation({
       );
     }
     await Promise.all(targetUpdates);
+
+    await ctx.scheduler.runAt(
+      args.scheduledFor,
+      internal.publishing.publishPost,
+      {
+        postId: args.postId,
+      },
+    );
 
     return { ok: true as const };
   },
