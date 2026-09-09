@@ -11,6 +11,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { PostsListSkeleton } from "@/components/layout/PostsListSkeleton";
+import { POST_FORMATS } from "@/components/posts/post-composer-config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -280,11 +281,8 @@ export function PostLibrary() {
                     >
                       <Icon
                         icon={
-                          post.kind === "text"
-                            ? "hugeicons:note-01"
-                            : post.kind === "video"
-                              ? "hugeicons:video-01"
-                              : "hugeicons:image-01"
+                          POST_FORMATS.find((format) => format.id === post.kind)
+                            ?.icon ?? "hugeicons:note-01"
                         }
                         width={20}
                       />
