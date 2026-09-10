@@ -133,7 +133,6 @@ export function OverviewDateRangeContent({
           {(Object.keys(DATE_RANGE_PRESETS) as DateRangePreset[]).map((key) => (
             <Button
               key={key}
-              size="sm"
               variant={preset === key ? "secondary" : "ghost"}
               className="h-7 justify-start whitespace-nowrap px-3 py-0 text-xs"
               onClick={() => selectPreset(key)}

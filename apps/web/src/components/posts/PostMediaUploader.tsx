@@ -355,7 +355,7 @@ export function PostMediaUploader({
             void uploadFiles(Array.from(event.dataTransfer.files));
           }}
           className={cn(
-            "h-auto min-h-28 w-full gap-4 whitespace-normal rounded-xl border border-dashed px-4 py-4",
+            "h-auto min-h-28 w-full gap-4 whitespace-normal border border-dashed px-4 py-4",
             isDragging
               ? "border-primary bg-primary/5"
               : "border-border bg-muted/20",

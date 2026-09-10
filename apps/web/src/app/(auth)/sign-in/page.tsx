@@ -181,7 +181,6 @@ export default function SignInPage() {
                 <InputOTPSlot
                   key={index}
                   index={index}
-                  className="rounded-xl"
                 />
               ))}
             </InputOTPGroup>

@@ -42,7 +42,7 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
       <DropdownMenuTrigger
         aria-label="Open user profile"
         render={
-          <Button className="rounded-full" size="icon-lg" variant="ghost" />
+          <Button size="icon-lg" variant="ghost" />
         }
       >
         <Avatar className="size-8">

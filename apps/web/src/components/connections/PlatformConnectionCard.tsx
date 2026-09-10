@@ -85,7 +85,6 @@ export function PlatformConnectionCard({
           </div>
           <Button
             className="col-start-3 row-start-1"
-            size="xs"
             variant={accounts.length > 0 ? "secondary" : "default"}
             disabled={atLimit || connecting !== null}
             aria-label={`${accounts.length > 0 ? "Add another" : "Connect"} ${meta.label} account`}
@@ -184,7 +183,6 @@ export function PlatformConnectionCard({
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="destructive">Reconnect needed</Badge>
                           <Button
-                            size="sm"
                             disabled={connecting !== null}
                             onClick={() => onConnect(platform)}
                             aria-label={`Reconnect @${account.username} on ${meta.label}`}

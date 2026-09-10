@@ -15,7 +15,7 @@ export function ConnectionsRowsSkeleton() {
               <Skeleton className="h-4 w-32 max-w-full" />
             </div>
           </div>
-          <Skeleton className="h-7 w-20 shrink-0" />
+          <Skeleton className="h-8 w-20 shrink-0" />
         </div>
       ))}
     </section>

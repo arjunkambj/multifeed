@@ -164,7 +164,6 @@ export function BillingPage() {
               className="font-medium"
               disabled={openingPortal}
               onClick={openCustomerPortal}
-              size="sm"
               variant="secondary"
             >
               {openingPortal ? <Spinner className="size-3" /> : null}

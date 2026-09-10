@@ -628,7 +628,6 @@ function PostComposerForm({
         actions={
           onChooseDifferentFormat ? (
             <Button
-              size="sm"
               variant="secondary"
               disabled={uploadingMedia || saving !== null}
               onClick={chooseDifferentFormat}
@@ -656,7 +655,6 @@ function PostComposerForm({
                 {compatibleAccounts.length > 1 && (
                   <div className="flex gap-1">
                     <Button
-                      size="sm"
                       variant="secondary"
                       disabled={
                         selectedAccountIds.size === compatibleAccounts.length
@@ -666,7 +664,6 @@ function PostComposerForm({
                       Select all
                     </Button>
                     <Button
-                      size="sm"
                       variant="secondary"
                       disabled={selectedAccountIds.size === 0}
                       onClick={clearAll}
@@ -685,7 +682,7 @@ function PostComposerForm({
                       ? "Connected accounts need a reconnect before they can publish."
                       : "Connect a social account to publish this post."}
                   </p>
-                  <Button size="sm" onClick={() => router.push("/connections")}>
+                  <Button onClick={() => router.push("/connections")}>
                     {(accounts ?? []).length > 0
                       ? "Reconnect accounts"
                       : "Connect accounts"}
@@ -699,14 +696,12 @@ function PostComposerForm({
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      size="sm"
                       onClick={() => router.push("/connections")}
                     >
                       Manage connections
                     </Button>
                     {onChooseDifferentFormat ? (
                       <Button
-                        size="sm"
                         variant="secondary"
                         className="bg-background"
                         onClick={chooseDifferentFormat}
@@ -878,7 +873,6 @@ function PostComposerForm({
               <div>
                 <div className="flex flex-wrap gap-2">
                   <Button
-                    size="sm"
                     variant={activeTool === "account" ? "secondary" : "ghost"}
                     disabled={selectedAccountIds.size === 0}
                     aria-expanded={activeTool === "account"}
@@ -894,7 +888,6 @@ function PostComposerForm({
                     Account settings
                   </Button>
                   <Button
-                    size="sm"
                     variant={activeTool === "history" ? "secondary" : "ghost"}
                     aria-expanded={activeTool === "history"}
                     aria-controls="composer-caption-history"
@@ -909,7 +902,6 @@ function PostComposerForm({
                     Past captions
                   </Button>
                   <Button
-                    size="sm"
                     variant={showNotes ? "secondary" : "ghost"}
                     aria-expanded={showNotes}
                     aria-controls="composer-notes"
@@ -1109,7 +1101,7 @@ function PostComposerForm({
                               dispatch({ type: "bodyChanged", value: caption });
                               dispatch({ type: "toolChanged", value: null });
                             }}
-                            className="h-auto w-full justify-start rounded-xl bg-muted px-3 py-2 text-left text-sm leading-relaxed"
+                            className="h-auto w-full justify-start bg-muted px-3 py-2 text-left text-sm leading-relaxed"
                           >
                             <span className="line-clamp-2">{caption}</span>
                           </Button>
@@ -1235,7 +1227,6 @@ function PostComposerForm({
                 ).map((chip) => (
                   <Button
                     key={chip.label}
-                    size="sm"
                     variant="secondary"
                     onClick={() => {
                       if (chip.kind === "tomorrow") {
@@ -1342,7 +1333,6 @@ function PostComposerForm({
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-sm font-semibold">Live preview</h2>
               <Button
-                size="sm"
                 variant="ghost"
                 className="lg:hidden"
                 aria-expanded={showPreview}
@@ -1440,7 +1430,6 @@ function PostComposerForm({
                   </EmptyHeader>
                   <EmptyContent>
                     <Button
-                      size="sm"
                       variant="secondary"
                       onClick={() => {
                         if (compatibleAccounts.length === 0) {
