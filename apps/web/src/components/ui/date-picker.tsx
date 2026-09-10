@@ -2,7 +2,7 @@
 
 import { Calendar03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -41,9 +41,14 @@ export function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState(value ?? new Date());
+  const wasOpen = useRef(open);
 
+  // Initialize the visible month when the popover opens. `value` is often a
+  // fresh Date instance on every parent render, so reacting to it while the
+  // popover is open would snap the calendar back to the selected month.
   useEffect(() => {
-    if (open) setMonth(value ?? new Date());
+    if (open && !wasOpen.current) setMonth(value ?? new Date());
+    wasOpen.current = open;
   }, [open, value]);
 
   const disabled = [

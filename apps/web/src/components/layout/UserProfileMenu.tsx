@@ -101,7 +101,7 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
                 title="Light mode"
                 value="light"
               >
-                <Icon icon="hugeicons:sun-03" width={14} />
+                <Icon icon="hugeicons:sun-03" className="size-3" />
               </TabsTrigger>
               <TabsTrigger
                 aria-label="Dark mode"
@@ -109,7 +109,7 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
                 title="Dark mode"
                 value="dark"
               >
-                <Icon icon="hugeicons:moon-02" width={14} />
+                <Icon icon="hugeicons:moon-02" className="size-3" />
               </TabsTrigger>
             </TabsList>
           </Tabs>

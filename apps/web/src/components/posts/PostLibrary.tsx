@@ -36,6 +36,11 @@ const EMPTY_COPY: Record<PostLibraryFilter, string> = {
   draft: "No drafts yet",
 };
 
+// posts.list takes a `limit` (no cursor) and clamps it to 100 server-side, so
+// "load more" raises the limit in steps rather than paging.
+const PAGE_SIZE = 50;
+const MAX_LIMIT = 100;
+
 export function PostLibrary() {
   const searchParams = useSearchParams();
   const rawStatus = searchParams.get("status");
@@ -43,9 +48,10 @@ export function PostLibrary() {
   const router = useRouter();
   const removePost = useMutation(api.posts.remove);
   const retryFailed = useMutation(api.posts.retryFailed);
+  const [limit, setLimit] = useState(PAGE_SIZE);
   const posts = useQuery(
     api.posts.list,
-    filter === "all" ? { limit: 100 } : { status: filter, limit: 100 },
+    filter === "all" ? { limit } : { status: filter, limit },
   );
   const [, startTransition] = useTransition();
   const [search, setSearch] = useState("");
@@ -175,34 +181,55 @@ export function PostLibrary() {
           {posts === undefined ? (
             <PostsListSkeleton />
           ) : (
-            <PostsTable
-              deletingId={deleting}
-              emptyAction={
-                search.trim() ? undefined : (
-                  <Button
-                    onClick={() => router.push("/posts/new")}
-                    variant="default"
-                  >
-                    Create post
-                  </Button>
-                )
-              }
-              emptyMessage={emptyMessage}
-              onDelete={onDelete}
-              onEdit={(postId, isDraft) =>
-                router.push(
-                  isDraft
-                    ? `/posts/new?edit=${postId}`
-                    : `/posts/new?from=${postId}`,
-                )
-              }
-              onRetry={onRetry}
-              onViewCalendar={(postId) =>
-                router.push(`/calendar?highlight=${postId}`)
-              }
-              posts={visiblePosts}
-              retryingId={retrying}
-            />
+            <>
+              <PostsTable
+                deletingId={deleting}
+                emptyAction={
+                  search.trim() ? undefined : (
+                    <Button
+                      onClick={() => router.push("/posts/new")}
+                      variant="default"
+                    >
+                      Create post
+                    </Button>
+                  )
+                }
+                emptyMessage={emptyMessage}
+                onDelete={onDelete}
+                onEdit={(postId, isDraft) =>
+                  router.push(
+                    isDraft
+                      ? `/posts/new?edit=${postId}`
+                      : `/posts/new?from=${postId}`,
+                  )
+                }
+                onRetry={onRetry}
+                onViewCalendar={(postId) =>
+                  router.push(`/calendar?highlight=${postId}`)
+                }
+                posts={visiblePosts}
+                retryingId={retrying}
+              />
+              {posts.length >= limit &&
+                (limit < MAX_LIMIT ? (
+                  <div className="mt-4 flex justify-center">
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        setLimit((current) =>
+                          Math.min(current + PAGE_SIZE, MAX_LIMIT),
+                        )
+                      }
+                    >
+                      Load more
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="mt-4 text-center text-xs text-muted-foreground">
+                    Showing your {MAX_LIMIT} most recent posts.
+                  </p>
+                ))}
+            </>
           )}
         </TabsContent>
       </Tabs>

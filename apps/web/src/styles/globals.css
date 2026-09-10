@@ -205,6 +205,15 @@
   border-color: var(--border);
 }
 
+.multifeed-calendar .fc-daygrid-day {
+  cursor: pointer;
+}
+
+.multifeed-calendar .fc-daygrid-day-events {
+  min-height: 0;
+  margin-top: 0.15rem;
+}
+
 .multifeed-calendar .fc-daygrid-body td.fc-daygrid-day {
   border-top: none;
   border-left: none;
@@ -281,21 +290,12 @@
   color: var(--primary-foreground);
 }
 
-.multifeed-calendar .fc-daygrid-day {
-  cursor: pointer;
-}
-
 .multifeed-calendar .fc-daygrid-day:hover:not(.fc-day-other) {
   background-color: color-mix(in oklch, var(--muted) 70%, transparent);
 }
 
 .multifeed-calendar .fc-daygrid-day.fc-day-today:hover {
   background-color: var(--fc-today-bg-color);
-}
-
-.multifeed-calendar .fc-daygrid-day-events {
-  min-height: 0;
-  margin-top: 0.15rem;
 }
 
 .multifeed-calendar .fc-daygrid-event {

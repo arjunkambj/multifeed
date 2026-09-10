@@ -18,7 +18,7 @@ import { useMutation } from "convex/react";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CalendarGridSkeleton } from "@/components/layout/CalendarGridSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
@@ -78,6 +78,11 @@ export function PostCalendar() {
   const [selectedPostId, setSelectedPostId] = useState<Id<"posts"> | null>(
     (highlight as Id<"posts">) || null,
   );
+  const [panelPostId, setPanelPostId] = useState<Id<"posts"> | null>(
+    selectedPostId,
+  );
+  const [panelOpen, setPanelOpen] = useState(selectedPostId !== null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [title, setTitle] = useState("");
 
   const postsResult = useQuery(api.posts.listInRange, {
@@ -87,10 +92,12 @@ export function PostCalendar() {
   const posts = postsResult?.posts;
   const selectedPost = useQuery(
     api.posts.get,
-    selectedPostId ? { postId: selectedPostId } : "skip",
+    panelPostId ? { postId: panelPostId } : "skip",
   );
   const reschedule = useMutation(api.posts.reschedule);
   const removePost = useMutation(api.posts.remove);
+  // Synchronous in-flight guard against double-clicking delete.
+  const deletingRef = useRef(false);
 
   const platformOptions = [
     ...new Set(
@@ -152,8 +159,39 @@ export function PostCalendar() {
   const goPrev = () => calendarRef.current?.getApi().prev();
   const goNext = () => calendarRef.current?.getApi().next();
 
+  useEffect(() => {
+    if (!panelPostId) return;
+    const frame = requestAnimationFrame(() =>
+      requestAnimationFrame(() => setPanelOpen(true)),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [panelPostId]);
+
+  useEffect(
+    () => () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    },
+    [],
+  );
+
+  const openPanel = (postId: Id<"posts">) => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+    setSelectedPostId(postId);
+    setPanelPostId(postId);
+    if (panelPostId) setPanelOpen(true);
+  };
+
+  const closePanel = () => {
+    setSelectedPostId(null);
+    setPanelOpen(false);
+    closeTimer.current = setTimeout(() => setPanelPostId(null), 300);
+  };
+
   const onEventClick = (info: EventClickArg) => {
-    setSelectedPostId(info.event.id as Id<"posts">);
+    openPanel(info.event.id as Id<"posts">);
   };
 
   const onSelect = (info: DateSelectArg) => {
@@ -182,15 +220,18 @@ export function PostCalendar() {
   };
 
   const onDelete = async () => {
-    if (!selectedPostId) return;
+    if (!selectedPostId || deletingRef.current) return;
+    deletingRef.current = true;
     try {
+      closePanel();
       await removePost({ postId: selectedPostId });
-      setSelectedPostId(null);
       toast.success("Post deleted.");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Could not delete post",
       );
+    } finally {
+      deletingRef.current = false;
     }
   };
 
@@ -208,11 +249,12 @@ export function PostCalendar() {
       />
 
       <div
-        className={
-          selectedPostId
-            ? "grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]"
-            : "grid"
-        }
+        className={cn(
+          "grid transition-all duration-300 ease-in-out motion-reduce:transition-none",
+          panelOpen
+            ? "gap-5 xl:grid-cols-[minmax(0,1fr)_320px]"
+            : "gap-0 xl:grid-cols-[minmax(0,1fr)_0px]",
+        )}
       >
         <div className="flex min-w-0 flex-col gap-5 overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -244,6 +286,14 @@ export function PostCalendar() {
               <h2 className="text-base font-semibold tracking-tight">
                 {title || "…"}
               </h2>
+              {postsResult?.truncated && (
+                <Badge
+                  variant="secondary"
+                  title="This range has more posts than can be shown at once"
+                >
+                  Showing first 500 posts
+                </Badge>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Select
@@ -336,13 +386,27 @@ export function PostCalendar() {
           </div>
         </div>
 
-        {selectedPostId && (
-          <PostDetailsCard
-            selectedPost={selectedPost}
-            onClose={() => setSelectedPostId(null)}
-            onDelete={onDelete}
-            router={router}
-          />
+        {panelPostId && (
+          <div
+            aria-hidden={!panelOpen}
+            className={cn(
+              "grid min-w-0 transition-all duration-300 ease-in-out motion-reduce:transition-none xl:sticky xl:top-4 xl:self-start",
+              panelOpen
+                ? "visible translate-x-0 translate-y-0 opacity-100 [grid-template-rows:1fr]"
+                : "invisible translate-y-2 opacity-0 [grid-template-rows:0fr] xl:translate-x-6 xl:translate-y-0 xl:[grid-template-rows:1fr]",
+            )}
+          >
+            <div className="min-h-0 min-w-0 overflow-hidden">
+              <div className="xl:w-[320px]">
+                <PostDetailsCard
+                  selectedPost={selectedPost}
+                  onClose={closePanel}
+                  onDelete={onDelete}
+                  router={router}
+                />
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -381,10 +445,20 @@ function PostDetailsCard({
   };
 
   return (
-    <Card className="bg-card shadow-none xl:sticky xl:top-4 xl:self-start">
+    <Card className="bg-card shadow-none">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Post details</CardTitle>
         <CardDescription>Review or jump into editing</CardDescription>
+        <Button
+          data-slot="card-action"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Close post details"
+          onClick={onClose}
+          className="col-start-2 row-span-2 row-start-1 -mt-1 -mr-1 self-start justify-self-end"
+        >
+          <Icon icon="hugeicons:cancel-01" width={14} />
+        </Button>
       </CardHeader>
       <CardContent>
         {selectedPost === undefined && (
@@ -516,9 +590,6 @@ function PostDetailsCard({
                 }
               >
                 Duplicate
-              </Button>
-              <Button variant="outline" onClick={onClose}>
-                Close
               </Button>
               {selectedPost.status !== "publishing" && (
                 <Button variant="destructive" onClick={() => void onDelete()}>
