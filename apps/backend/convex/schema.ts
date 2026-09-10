@@ -228,7 +228,6 @@ export default defineSchema({
     expiresAt: v.number(),
   })
     .index("by_state", ["state"])
-    .index("by_team", ["teamId"])
     .index("by_expiresAt", ["expiresAt"]),
 
   connectedAccounts: defineTable({
@@ -254,8 +253,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_team_status", ["teamId", "status"])
-    .index("by_team_provider", ["teamId", "platform", "providerAccountId"])
-    .index("by_provider_account", ["platform", "providerAccountId"]),
+    .index("by_team_provider", ["teamId", "platform", "providerAccountId"]),
 
   mediaAssets: defineTable({
     teamId: v.string(),
@@ -282,7 +280,6 @@ export default defineSchema({
     createdByUserId: v.string(),
     createdAt: v.number(),
   })
-    .index("by_team_status_kind", ["teamId", "status", "kind"])
     .index("by_status_created", ["status", "createdAt"])
     .index("by_r2_key", ["r2Key"]),
 
@@ -356,8 +353,7 @@ export default defineSchema({
       "connectedAccountId",
       "status",
       "scheduledFor",
-    ])
-    .index("by_metric_sync", ["metricSyncStatus", "nextMetricSyncAt"]),
+    ]),
 
   postMetrics: defineTable({
     teamId: v.string(),
@@ -393,6 +389,5 @@ export default defineSchema({
     receivedAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_team_status_time", ["teamId", "status", "receivedAt"])
     .index("by_account_external", ["connectedAccountId", "externalId"]),
 });
