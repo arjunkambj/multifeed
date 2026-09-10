@@ -5,6 +5,7 @@ import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
   PLATFORM_META,
   platformBrand,
+  platformInk,
   platformLabel,
 } from "@/lib/platform-meta";
 import type {
@@ -220,7 +221,7 @@ function PreviewHeading({
       <Icon
         icon={PLATFORM_META[account.platform]?.icon ?? "hugeicons:link-01"}
         width={14}
-        style={{ color: platformBrand(account.platform) }}
+        style={{ color: platformInk(account.platform) }}
       />
       <span>{platformLabel(account.platform)}</span>
       <span aria-hidden>·</span>

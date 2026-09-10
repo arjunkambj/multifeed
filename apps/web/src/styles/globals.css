@@ -487,6 +487,24 @@
   --sidebar-accent-foreground: var(--card-foreground);
   --sidebar-border: oklch(0.92 0.004 286.32); /* zinc-200 */
   --sidebar-ring: oklch(0.54 0.13 153.45);
+
+  /* Platform brands. Black networks are lifted off #000 so badges and
+     calendar chips don't punch a hole in the page; TikTok uses Shocking
+     Pink because charcoal is still invisible on a dark calendar. */
+  --platform-facebook: #1877f2;
+  --platform-instagram: #e4405f;
+  --platform-linkedin: #0a66c2;
+  --platform-youtube: #ff0000;
+  --platform-x: #2c2c2c;
+  --platform-threads: #2c2c2c;
+  --platform-tiktok: #fe2c55;
+  --platform-facebook-ink: var(--platform-facebook);
+  --platform-instagram-ink: var(--platform-instagram);
+  --platform-linkedin-ink: var(--platform-linkedin);
+  --platform-youtube-ink: var(--platform-youtube);
+  --platform-x-ink: #2c2c2c;
+  --platform-threads-ink: #2c2c2c;
+  --platform-tiktok-ink: #fe2c55;
 }
 
 .dark {
@@ -521,6 +539,13 @@
   --sidebar-accent-foreground: var(--card-foreground);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.54 0.13 153.45);
+
+  --platform-x: #5c5c64;
+  --platform-threads: #5c5c64;
+  --platform-tiktok: #fe2c55;
+  --platform-x-ink: #e8e8ed;
+  --platform-threads-ink: #e8e8ed;
+  --platform-tiktok-ink: #fe2c55;
 }
 
 @layer base {

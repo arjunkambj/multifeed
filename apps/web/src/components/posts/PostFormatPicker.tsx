@@ -3,10 +3,10 @@
 import { Icon } from "@iconify/react";
 import { Badge } from "@/components/ui/badge";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
-import { PLATFORM_META, platformLabel } from "@/lib/platform-meta";
+import { PLATFORM_META, platformInk, platformLabel } from "@/lib/platform-meta";
 import {
-  POST_FORMATS,
   accountSupportsPostKind,
+  POST_FORMATS,
   POST_KIND_PLATFORMS,
   type PostKind,
 } from "./post-composer-config";
@@ -42,9 +42,9 @@ export function PostFormatPicker({
               aria-label={`${format.label}. ${format.description}. Supported on ${platformNames}`}
               aria-describedby={`format-accounts-${format.id}`}
               onClick={() => onChange(format.id)}
-              className="group flex h-full min-h-52 w-full flex-col items-center rounded-2xl bg-muted px-5 py-5 text-center outline-none transition-colors hover:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_4%)] focus-visible:ring-3 focus-visible:ring-ring/30"
+              className="group flex h-full min-h-52 w-full flex-col items-center rounded-2xl bg-muted px-5 py-5 text-center outline-none transition-colors hover:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_2%)] focus-visible:ring-3 focus-visible:ring-ring/30"
             >
-              <span className="flex size-11 items-center justify-center rounded-xl bg-background text-muted-foreground transition-colors group-hover:text-primary">
+              <span className="flex size-11 items-center justify-center rounded-xl bg-background text-muted-foreground transition-colors group-hover:text-foreground">
                 <Icon icon={format.icon} width={22} />
               </span>
 
@@ -69,7 +69,7 @@ export function PostFormatPicker({
                       <Icon
                         icon={meta?.icon ?? "hugeicons:link-01"}
                         width={13}
-                        style={{ color: meta?.brand }}
+                        style={{ color: platformInk(platform) }}
                         aria-hidden
                       />
                     </span>

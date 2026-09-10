@@ -9,6 +9,7 @@ export type PlatformMeta = {
   label: string;
   icon: string;
   brand: string;
+  ink?: string;
   foreground?: string;
   description?: string;
   maxChars?: number;
@@ -20,49 +21,52 @@ export const PLATFORM_META: Record<OAuthPlatform, PlatformMeta> &
     label: "Facebook",
     // Single-glyph brand mark reads cleaner in small badges than the wordmark.
     icon: "fa6-brands:facebook-f",
-    brand: "#1877F2",
+    brand: "var(--platform-facebook)",
     description: "Pages for posts, photos, and video",
     maxChars: 63206,
   },
   instagram: {
     label: "Instagram",
     icon: "fa6-brands:instagram",
-    brand: "#E4405F",
+    brand: "var(--platform-instagram)",
     description: "Professional accounts via Meta",
     maxChars: 2200,
   },
   threads: {
     label: "Threads",
     icon: "fa6-brands:threads",
-    brand: "#111111",
+    brand: "var(--platform-threads)",
+    ink: "var(--platform-threads-ink)",
     description: "Text and media on Threads",
     maxChars: 500,
   },
   linkedin: {
     label: "LinkedIn",
     icon: "fa6-brands:linkedin-in",
-    brand: "#0A66C2",
+    brand: "var(--platform-linkedin)",
     description: "Personal profile posting",
     maxChars: 3000,
   },
   youtube: {
     label: "YouTube",
     icon: "fa6-brands:youtube",
-    brand: "#FF0000",
+    brand: "var(--platform-youtube)",
     description: "Videos and Shorts on your channel",
     maxChars: 5000,
   },
   x: {
     label: "X",
     icon: "fa6-brands:x-twitter",
-    brand: "#111111",
+    brand: "var(--platform-x)",
+    ink: "var(--platform-x-ink)",
     description: "Posts and media on X",
     maxChars: 280,
   },
   tiktok: {
     label: "TikTok",
     icon: "fa6-brands:tiktok",
-    brand: "#010101",
+    brand: "var(--platform-tiktok)",
+    ink: "var(--platform-tiktok-ink)",
     description: "Videos and photos on TikTok",
     maxChars: 2200,
   },
@@ -76,4 +80,8 @@ export function platformLabel(platform: string) {
 
 export function platformBrand(platform: string) {
   return PLATFORM_META[platform]?.brand ?? "#E85D04";
+}
+
+export function platformInk(platform: string) {
+  return PLATFORM_META[platform]?.ink ?? platformBrand(platform);
 }

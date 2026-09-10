@@ -50,12 +50,36 @@ export const MOCK_FRAME =
 /** Supported platforms, in one order, with one icon set. Hero, Features and
     Pricing each render this list so the strips never drift apart. */
 export const platforms = [
-  { label: "Twitter/X", icon: "simple-icons:x", color: "#000000" },
-  { label: "Instagram", icon: "simple-icons:instagram", color: "#E4405F" },
-  { label: "LinkedIn", icon: "simple-icons:linkedin", color: "#0A66C2" },
-  { label: "Facebook", icon: "simple-icons:facebook", color: "#1877F2" },
-  { label: "TikTok", icon: "simple-icons:tiktok", color: "#000000" },
-  { label: "YouTube", icon: "simple-icons:youtube", color: "#FF0000" },
+  {
+    label: "Twitter/X",
+    icon: "simple-icons:x",
+    color: "var(--platform-x-ink)",
+  },
+  {
+    label: "Instagram",
+    icon: "simple-icons:instagram",
+    color: "var(--platform-instagram-ink)",
+  },
+  {
+    label: "LinkedIn",
+    icon: "simple-icons:linkedin",
+    color: "var(--platform-linkedin-ink)",
+  },
+  {
+    label: "Facebook",
+    icon: "simple-icons:facebook",
+    color: "var(--platform-facebook-ink)",
+  },
+  {
+    label: "TikTok",
+    icon: "simple-icons:tiktok",
+    color: "var(--platform-tiktok-ink)",
+  },
+  {
+    label: "YouTube",
+    icon: "simple-icons:youtube",
+    color: "var(--platform-youtube-ink)",
+  },
 ] as const;
 
 /** Icon size for the flat platform strips in Hero and Pricing. */

@@ -42,6 +42,7 @@ import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import {
   PLATFORM_META,
   platformBrand,
+  platformInk,
   platformLabel,
 } from "@/lib/platform-meta";
 import { cn } from "@/lib/utils";
@@ -725,7 +726,6 @@ function PostComposerForm({
                 >
                   {compatibleAccounts.map((account) => {
                     const isOn = selectedAccountIds.has(account._id);
-                    const brand = platformBrand(account.platform);
                     const label =
                       account.displayName?.trim() || `@${account.username}`;
                     const platformName = platformLabel(account.platform);
@@ -758,7 +758,7 @@ function PostComposerForm({
                                 "hugeicons:link-01"
                               }
                               width={12}
-                              style={{ color: brand }}
+                              style={{ color: platformInk(account.platform) }}
                               className="shrink-0 drop-shadow-[0_0_1px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_0_1px_rgba(0,0,0,0.8)]"
                             />
                           </span>
