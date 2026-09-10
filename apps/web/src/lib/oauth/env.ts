@@ -29,6 +29,9 @@ export function oauthServerSecret(): string {
   return value;
 }
 
+const DEFAULT_OAUTH_ERROR =
+  "Could not complete connection. Please try again.";
+
 /** Stable user-facing OAuth error codes (never raw provider messages). */
 export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   auth_required: "Sign in to finish connecting your account.",
@@ -41,7 +44,7 @@ export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   oauth_denied: "Connection was cancelled or denied.",
   permission_denied:
     "You do not have permission to connect accounts for this team.",
-  oauth_failed: "Could not complete connection. Please try again.",
+  oauth_failed: DEFAULT_OAUTH_ERROR,
   token_exchange_failed:
     "Could not exchange authorization code. Please try again.",
   account_limit:
@@ -49,7 +52,7 @@ export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
 };
 
 export function oauthErrorMessage(code: string): string {
-  return OAUTH_ERROR_MESSAGES[code] ?? OAUTH_ERROR_MESSAGES.oauth_failed!;
+  return OAUTH_ERROR_MESSAGES[code] ?? DEFAULT_OAUTH_ERROR;
 }
 
 export function connectionsUrl(query?: Record<string, string>): string {
