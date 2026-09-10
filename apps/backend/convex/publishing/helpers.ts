@@ -38,7 +38,7 @@ export function tiktokChunkPlan(videoSize: number) {
   }
   return {
     chunkSize: TIKTOK_CHUNK_SIZE,
-    totalChunkCount: Math.floor(videoSize / TIKTOK_CHUNK_SIZE),
+    totalChunkCount: Math.ceil(videoSize / TIKTOK_CHUNK_SIZE),
   };
 }
 
@@ -46,6 +46,14 @@ export function youtubePrivacy(visibility?: string) {
   if (visibility === "private") return "private";
   if (visibility === "unlisted") return "unlisted";
   return "public";
+}
+
+/** LinkedIn only supports PUBLIC and CONNECTIONS for member/org posts. */
+export function linkedinVisibility(visibility?: string) {
+  if (visibility === "followers" || visibility === "private") {
+    return "CONNECTIONS";
+  }
+  return "PUBLIC";
 }
 
 export function tweetIdFromUrl(url: string | undefined) {

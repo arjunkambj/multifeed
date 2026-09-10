@@ -10,6 +10,102 @@ export type RefreshedToken = {
   refreshTokenExpiresAt?: number;
 };
 
+/**
+ * Thrown when the provider definitively rejects a refresh grant (e.g.
+ * invalid_grant, revoked token). Transient failures must not mark the
+ * connected account expired, so callers distinguish this from other errors.
+ */
+export class TokenRefreshRejectedError extends Error {
+  readonly rejected = true;
+  constructor(message: string) {
+    super(message);
+    this.name = "TokenRefreshRejectedError";
+  }
+}
+
+export function isTokenRefreshRejected(error: unknown) {
+  return (
+    error instanceof TokenRefreshRejectedError ||
+    (error instanceof Error &&
+      "rejected" in error &&
+      (error as { rejected?: unknown }).rejected === true)
+  );
+}
+
+const DEFINITIVE_GRANT_ERRORS = [
+  "invalid_grant",
+  "invalid_token",
+  "unauthorized_client",
+];
+
+function errorCode(json: Record<string, unknown>): string | number | undefined {
+  const err = json.error;
+  if (typeof err === "string") return err;
+  if (err && typeof err === "object") {
+    const e = err as Record<string, unknown>;
+    if (typeof e.code === "string" || typeof e.code === "number") {
+      return e.code;
+    }
+    if (typeof e.type === "string") return e.type;
+  }
+  return undefined;
+}
+
+function errorText(json: Record<string, unknown>): string {
+  const parts: string[] = [];
+  const err = json.error;
+  if (typeof err === "string") parts.push(err);
+  if (err && typeof err === "object") {
+    const e = err as Record<string, unknown>;
+    for (const key of ["code", "type", "error_subcode", "message"]) {
+      if (e[key] != null) parts.push(String(e[key]));
+    }
+  }
+  for (const key of ["error_description", "error_message", "message"]) {
+    if (typeof json[key] === "string") parts.push(json[key] as string);
+  }
+  return parts.join(" ").toLowerCase();
+}
+
+/** True when the provider's response means the grant is dead for good. */
+function isDefinitiveRejection(json: Record<string, unknown>): boolean {
+  const code = errorCode(json);
+  if (
+    typeof code === "string" &&
+    DEFINITIVE_GRANT_ERRORS.includes(code.toLowerCase())
+  ) {
+    return true;
+  }
+  // Meta uses error code 190 / OAuthException for invalid or expired tokens.
+  if (code === 190 || code === "OAuthException") return true;
+  return DEFINITIVE_GRANT_ERRORS.some((pattern) =>
+    errorText(json).includes(pattern),
+  );
+}
+
+function rejectionMessage(
+  json: Record<string, unknown>,
+  fallback: string,
+): string {
+  const err = json.error;
+  if (typeof err === "string") return err;
+  if (err && typeof err === "object") {
+    const e = err as Record<string, unknown>;
+    if (typeof e.message === "string") return e.message;
+  }
+  if (typeof json.error_description === "string") return json.error_description;
+  return fallback;
+}
+
+function throwIfRejected(
+  json: Record<string, unknown>,
+  fallback: string,
+): void {
+  if (isDefinitiveRejection(json)) {
+    throw new TokenRefreshRejectedError(rejectionMessage(json, fallback));
+  }
+}
+
 async function fetchJson(url: string, init: RequestInit = {}) {
   const res = await fetch(url, { ...init, signal: AbortSignal.timeout(15_000) });
   const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
@@ -28,6 +124,9 @@ async function refreshMetaPageToken(
   const exchanged = await fetchJson(
     `${META_GRAPH}/oauth/access_token?grant_type=fb_exchange_token&client_id=${encodeURIComponent(appId)}&client_secret=${encodeURIComponent(appSecret)}&fb_exchange_token=${encodeURIComponent(userToken)}`,
   );
+  if (!exchanged.ok) {
+    throwIfRejected(exchanged.json, "Meta rejected this account's token");
+  }
   const nextUserToken =
     exchanged.ok && typeof exchanged.json.access_token === "string"
       ? exchanged.json.access_token
@@ -40,7 +139,11 @@ async function refreshMetaPageToken(
   const pages = await fetchJson(
     `${META_GRAPH}/me/accounts?fields=id,access_token,instagram_business_account&limit=100&access_token=${encodeURIComponent(nextUserToken)}`,
   );
-  if (!pages.ok || !Array.isArray(pages.json.data)) return null;
+  if (!pages.ok) {
+    throwIfRejected(pages.json, "Meta rejected this account's token");
+    return null;
+  }
+  if (!Array.isArray(pages.json.data)) return null;
 
   const page = (pages.json.data as Array<Record<string, unknown>>).find((entry) => {
     if (platform === "facebook") return entry.id === providerAccountId;
@@ -80,7 +183,8 @@ export async function refreshAccessTokenForPlatform(
       headers,
       body,
     });
-    if (!ok || typeof json.access_token !== "string") return null;
+    if (!ok) throwIfRejected(json, "X rejected this account's token");
+    if (typeof json.access_token !== "string") return null;
     return {
       accessToken: json.access_token,
       refreshToken:
@@ -110,7 +214,8 @@ export async function refreshAccessTokenForPlatform(
         body,
       },
     );
-    if (!ok || typeof json.access_token !== "string") return null;
+    if (!ok) throwIfRejected(json, "LinkedIn rejected this account's token");
+    if (typeof json.access_token !== "string") return null;
     return {
       accessToken: json.access_token,
       refreshToken:
@@ -141,7 +246,8 @@ export async function refreshAccessTokenForPlatform(
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,
     });
-    if (!ok || typeof json.access_token !== "string") return null;
+    if (!ok) throwIfRejected(json, "Google rejected this account's token");
+    if (typeof json.access_token !== "string") return null;
     return {
       accessToken: json.access_token,
       refreshToken,
@@ -170,7 +276,8 @@ export async function refreshAccessTokenForPlatform(
         body,
       },
     );
-    if (!ok || typeof json.access_token !== "string") return null;
+    if (!ok) throwIfRejected(json, "TikTok rejected this account's token");
+    if (typeof json.access_token !== "string") return null;
     return {
       accessToken: json.access_token,
       refreshToken:
@@ -190,7 +297,8 @@ export async function refreshAccessTokenForPlatform(
     const { ok, json } = await fetchJson(
       `https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token=${encodeURIComponent(refreshToken)}`,
     );
-    if (!ok || typeof json.access_token !== "string") return null;
+    if (!ok) throwIfRejected(json, "Threads rejected this account's token");
+    if (typeof json.access_token !== "string") return null;
     const expiresAt =
       typeof json.expires_in === "number"
         ? Date.now() + json.expires_in * 1000

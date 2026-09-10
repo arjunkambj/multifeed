@@ -8,6 +8,7 @@ import {
   publishedFromAttempt,
   ResumablePublishError,
   linkedinAuthorUrn,
+  linkedinVisibility,
   tiktokChunkPlan,
   tiktokInteractionDisabled,
   tiktokPrivacyLevel,
@@ -34,6 +35,41 @@ test("tiktok privacy and chunking match Content Posting API rules", () => {
   assert.equal(tiktokInteractionDisabled(undefined), false);
   assert.equal(tiktokInteractionDisabled(true), false);
   assert.equal(tiktokInteractionDisabled(false), true);
+});
+
+test("tiktok chunking rounds up for non-10MB multiples", () => {
+  const MB = 1024 * 1024;
+  // Single chunk at and below the 64MB threshold.
+  assert.deepEqual(tiktokChunkPlan(64 * MB), {
+    chunkSize: 64 * MB,
+    totalChunkCount: 1,
+  });
+  // Just above the threshold: chunked, and the remainder gets its own chunk.
+  assert.deepEqual(tiktokChunkPlan(64 * MB + 1), {
+    chunkSize: 10 * MB,
+    totalChunkCount: 7,
+  });
+  assert.deepEqual(tiktokChunkPlan(81 * MB), {
+    chunkSize: 10 * MB,
+    totalChunkCount: 9,
+  });
+  // Exact multiples keep their count.
+  assert.deepEqual(tiktokChunkPlan(70 * MB), {
+    chunkSize: 10 * MB,
+    totalChunkCount: 7,
+  });
+  assert.deepEqual(tiktokChunkPlan(70 * MB + 1), {
+    chunkSize: 10 * MB,
+    totalChunkCount: 8,
+  });
+});
+
+test("linkedin visibility maps composer visibility", () => {
+  assert.equal(linkedinVisibility("public"), "PUBLIC");
+  assert.equal(linkedinVisibility("unlisted"), "PUBLIC");
+  assert.equal(linkedinVisibility("followers"), "CONNECTIONS");
+  assert.equal(linkedinVisibility("private"), "CONNECTIONS");
+  assert.equal(linkedinVisibility(undefined), "PUBLIC");
 });
 
 test("youtube privacy maps composer visibility", () => {

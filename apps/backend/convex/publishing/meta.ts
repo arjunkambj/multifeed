@@ -26,7 +26,10 @@ type GraphResponse = {
   permalink?: string;
   permalink_url?: string;
   status_code?: string;
-  status?: { video_status?: string };
+  status?: {
+    video_status?: string;
+    uploading_phase?: { status?: string };
+  };
   error?: { message?: string; code?: number };
   message?: string;
 };
@@ -82,6 +85,9 @@ async function facebookPublished(
   saveAttempt: PublishInput["saveAttempt"],
   fallback: string,
 ) {
+  // Checkpoint the post id before any further I/O so a crash cannot
+  // double-publish; the permalink lookup is best-effort and retried.
+  await saveAttempt?.({ kind: "facebook", platformPostId: id });
   const permalink = await facebookPermalink(id, accessToken, fallback);
   await saveAttempt?.({ kind: "facebook", platformPostId: id, permalink });
   return { platformPostId: id, permalink };
@@ -129,10 +135,24 @@ export async function publishToFacebook(
     const asset = media[0]!;
     const url = mediaUrl(asset);
     if (asset.kind === "video" || post.kind === "video") {
-      let videoId =
+      const storyAttempt =
         existingAttempt?.kind === "facebook_story_video"
-          ? existingAttempt.videoId
+          ? existingAttempt
           : undefined;
+      let videoId = storyAttempt?.videoId;
+      const transferToStoryUpload = async (uploadUrl: string) => {
+        // Meta's rupload endpoint takes the hosted file URL as a header.
+        const uploadRes = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { Authorization: `OAuth ${accessToken}`, file_url: url },
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        });
+        if (!uploadRes.ok) {
+          throw new Error(
+            `Facebook story video upload failed: ${uploadRes.status}`,
+          );
+        }
+      };
       if (!videoId) {
         const start = await graphFetch(`${GRAPH}/${pageId}/video_stories`, {
           method: "POST",
@@ -146,16 +166,25 @@ export async function publishToFacebook(
         const uploadUrl = start.upload_url;
         if (!videoId || !uploadUrl)
           throw new Error("Facebook story video start failed");
-        await saveAttempt?.({ kind: "facebook_story_video", videoId, pageId });
-        const uploadRes = await fetch(uploadUrl, {
-          method: "POST",
-          headers: { Authorization: `OAuth ${accessToken}`, file_url: url },
-          signal: AbortSignal.timeout(TIMEOUT_MS),
+        await saveAttempt?.({
+          kind: "facebook_story_video",
+          videoId,
+          pageId,
+          uploadUrl,
         });
-        if (!uploadRes.ok) {
-          throw new Error(
-            `Facebook story video upload failed: ${uploadRes.status}`,
-          );
+        await transferToStoryUpload(uploadUrl);
+      } else if (storyAttempt?.uploadUrl) {
+        // A resume may have lost the transfer POST: re-send file_url unless
+        // the upload session already reports it complete.
+        const status = await graphFetch(
+          `${GRAPH}/${videoId}?fields=status&access_token=${encodeURIComponent(accessToken)}`,
+          { method: "GET" },
+        ).catch((): GraphResponse => ({}));
+        const phase = String(
+          status.status?.uploading_phase?.status ?? "",
+        ).toLowerCase();
+        if (phase !== "complete") {
+          await transferToStoryUpload(storyAttempt.uploadUrl);
         }
       }
       for (let attempt = 0; attempt < 24; attempt += 1) {
@@ -380,6 +409,9 @@ export async function publishToInstagram(
     const state = await waitForContainer(creationId);
     const id =
       state === "published" ? creationId : await publishContainer(creationId);
+    // Checkpoint the media id before the permalink lookup so a crash cannot
+    // publish the same container twice.
+    await saveAttempt?.({ kind: "instagram", platformPostId: id, creationId });
     const permalink = await permalinkFor(id);
     await saveAttempt?.({
       kind: "instagram",

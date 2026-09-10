@@ -127,6 +127,8 @@ export const publishAttempt = v.union(
   v.object({
     kind: v.literal("youtube"),
     uploadStarted: v.optional(v.boolean()),
+    /** Resumable upload session URL so an interrupted upload can resume. */
+    uploadUrl: v.optional(v.string()),
     ...publishedResult,
   }),
   v.object({ kind: v.literal("facebook"), ...publishedResult }),
@@ -134,6 +136,8 @@ export const publishAttempt = v.union(
     kind: v.literal("facebook_story_video"),
     videoId: v.string(),
     pageId: v.string(),
+    /** rupload endpoint so a resume can re-send file_url if needed. */
+    uploadUrl: v.optional(v.string()),
     ...publishedResult,
   }),
 );
@@ -297,6 +301,8 @@ export default defineSchema({
     notes: v.optional(v.string()),
     /** Hex color hint for calendar chips. */
     calendarColor: v.optional(v.string()),
+    /** Pending publishPost scheduler job so reschedules can cancel it. */
+    publishJobId: v.optional(v.id("_scheduled_functions")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -334,6 +340,8 @@ export default defineSchema({
     failureCode: v.optional(v.string()),
     failureMessage: v.optional(v.string()),
     publishAttempt: v.optional(publishAttempt),
+    /** When set, a resumable target may be retried before the stale window. */
+    resumeAt: v.optional(v.number()),
     attempts: v.number(),
     metricSyncStatus,
     metricSyncError: v.optional(v.string()),

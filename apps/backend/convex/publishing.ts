@@ -30,6 +30,21 @@ const BATCH = 100;
 const MAX_TARGETS_PER_POST = 100;
 const MAX_MEDIA_PER_POST = 10;
 const STALE_PUBLISH_MS = 12 * 60 * 1000;
+const MAX_PUBLISH_ATTEMPTS = 40;
+
+/** Serialize mutations that touch the same logical scope via OCC. */
+async function serializeScope(ctx: MutationCtx, scope: string) {
+  const guard = await ctx.db
+    .query("writeGuards")
+    .withIndex("by_scope", (q) => q.eq("scope", scope))
+    .unique();
+  const now = Date.now();
+  if (guard) {
+    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
+  } else {
+    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
+  }
+}
 
 async function loadTargets(ctx: MutationCtx, postId: Doc<"posts">["_id"]) {
   return await ctx.db
@@ -44,9 +59,15 @@ async function scheduleTargets(
   now: number,
 ) {
   const targets = await loadTargets(ctx, post._id);
-  if (targets.length === 0) {
+  if (targets.length === 0 || targets.length > MAX_TARGETS_PER_POST) {
+    if (targets.length > MAX_TARGETS_PER_POST) {
+      console.error(
+        `[publishing] post ${post._id} exceeds the ${MAX_TARGETS_PER_POST} target limit`,
+      );
+    }
     await ctx.db.patch("posts", post._id, {
       status: "failed",
+      publishJobId: undefined,
       updatedAt: now,
     });
     return;
@@ -54,6 +75,7 @@ async function scheduleTargets(
 
   await ctx.db.patch("posts", post._id, {
     status: "publishing",
+    publishJobId: undefined,
     updatedAt: now,
   });
 
@@ -72,9 +94,12 @@ async function scheduleTargets(
   for (const target of targets) {
     if (target.status === "published" || target.status === "skipped") continue;
     if (target.status === "failed") continue;
+    const resumeDue =
+      target.resumeAt != null && target.resumeAt <= now;
     if (
       target.status === "publishing" &&
       target.attempts > 0 &&
+      !resumeDue &&
       now - target.updatedAt < STALE_PUBLISH_MS
     ) {
       continue;
@@ -94,6 +119,8 @@ export const publishPost = internalMutation({
   args: { postId: v.id("posts") },
   returns: v.null(),
   handler: async (ctx, args) => {
+    // Serialize fan-out per post so concurrent triggers cannot double-schedule.
+    await serializeScope(ctx, `publish-post:${args.postId}`);
     const post = await ctx.db.get("posts", args.postId);
     if (!post) return null;
     // Old jobs can still run after rescheduling or moving a post back to drafts.
@@ -188,9 +215,12 @@ export const claimTargetForPublish = internalMutation({
     if (target.status === "published" || target.status === "skipped")
       return "done";
     const now = Date.now();
+    // A resumable checkpoint may opt back in before the stale window ends.
+    const resumeDue = target.resumeAt != null && target.resumeAt <= now;
     if (
       target.status === "publishing" &&
       target.attempts > 0 &&
+      !resumeDue &&
       now - target.updatedAt < STALE_PUBLISH_MS
     ) {
       return "busy";
@@ -200,6 +230,7 @@ export const claimTargetForPublish = internalMutation({
     if (target.status === "publishing" && target.attempts > 0 && hasAttempt) {
       await ctx.db.patch("postTargets", args.targetId, {
         attempts: target.attempts + 1,
+        resumeAt: undefined,
         updatedAt: now,
       });
       return "resume";
@@ -211,6 +242,7 @@ export const claimTargetForPublish = internalMutation({
         failureMessage:
           "This publish timed out after the network may have already accepted it. Check the account before retrying.",
         publishAttempt: undefined,
+        resumeAt: undefined,
         attempts: target.attempts + 1,
         updatedAt: now,
       });
@@ -221,7 +253,12 @@ export const claimTargetForPublish = internalMutation({
       attempts: target.attempts + 1,
       failureCode: undefined,
       failureMessage: undefined,
-      publishAttempt: undefined,
+      // Keep a checkpoint that already reached the provider so a reclaim
+      // can short-circuit instead of publishing a duplicate.
+      publishAttempt: target.publishAttempt?.platformPostId
+        ? target.publishAttempt
+        : undefined,
+      resumeAt: undefined,
       updatedAt: now,
     });
     return "claimed";
@@ -238,6 +275,9 @@ export const applyRefreshedToken = internalMutation({
   },
   returns: v.union(accountValidator, v.null()),
   handler: async (ctx, args) => {
+    // Serialize token writes per account so concurrent targets cannot
+    // interleave a refresh apply with an expire (or another refresh).
+    await serializeScope(ctx, `token-refresh:${args.accountId}`);
     const account = await ctx.db.get("connectedAccounts", args.accountId);
     if (!account) return null;
     const now = Date.now();
@@ -261,8 +301,19 @@ export const markAccountExpired = internalMutation({
   args: { accountId: v.id("connectedAccounts"), errorMessage: v.string() },
   returns: v.null(),
   handler: async (ctx, args) => {
+    await serializeScope(ctx, `token-refresh:${args.accountId}`);
     const account = await ctx.db.get("connectedAccounts", args.accountId);
     if (!account) return null;
+    // A concurrent refresh may have already stored a fresh token; only expire
+    // the account when it still lacks a usable access token.
+    if (
+      account.status === "active" &&
+      account.encryptedAccessToken &&
+      (account.tokenExpiresAt == null ||
+        account.tokenExpiresAt > Date.now() + 60_000)
+    ) {
+      return null;
+    }
     await ctx.db.patch("connectedAccounts", args.accountId, {
       status: "expired",
       errorMessage: args.errorMessage.slice(0, 1000),
@@ -280,12 +331,53 @@ export const savePublishAttempt = internalMutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const target = await ctx.db.get("postTargets", args.targetId);
-    if (!target || target.status !== "publishing") return null;
+    if (!target || target.status !== "publishing") {
+      // A lost checkpoint can cause a duplicate post on resume — fail loudly.
+      throw new Error(
+        "Publish target is no longer publishing; checkpoint not saved",
+      );
+    }
     await ctx.db.patch("postTargets", args.targetId, {
       publishAttempt: args.attempt,
       updatedAt: Date.now(),
     });
     return null;
+  },
+});
+
+/**
+ * Arm a resumable target for a near-term retry. Returns false when the target
+ * already reached a terminal state or exhausted its attempt budget (in which
+ * case it is marked failed so it cannot stall forever).
+ */
+export const markTargetResumable = internalMutation({
+  args: {
+    targetId: v.id("postTargets"),
+    resumeAt: v.number(),
+  },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const target = await ctx.db.get("postTargets", args.targetId);
+    if (!target || target.status !== "publishing") return false;
+    if (target.attempts >= MAX_PUBLISH_ATTEMPTS) {
+      await ctx.db.patch("postTargets", args.targetId, {
+        status: "failed",
+        failureCode: "publish_attempts_exceeded",
+        failureMessage:
+          "Publishing kept getting interrupted by the platform. Check the account before retrying.",
+        publishAttempt: target.publishAttempt?.platformPostId
+          ? target.publishAttempt
+          : undefined,
+        resumeAt: undefined,
+        updatedAt: Date.now(),
+      });
+      return false;
+    }
+    await ctx.db.patch("postTargets", args.targetId, {
+      resumeAt: args.resumeAt,
+      updatedAt: Date.now(),
+    });
+    return true;
   },
 });
 
@@ -345,7 +437,12 @@ export const markTargetFailed = internalMutation({
       status: "failed",
       failureCode: args.failureCode,
       failureMessage: args.failureMessage,
-      publishAttempt: undefined,
+      // Keep a checkpoint that already reached the provider so a retry can
+      // dedupe instead of publishing a duplicate.
+      publishAttempt: target.publishAttempt?.platformPostId
+        ? target.publishAttempt
+        : undefined,
+      resumeAt: undefined,
       updatedAt: Date.now(),
     });
     return null;
@@ -356,7 +453,12 @@ async function reconcileStatus(ctx: MutationCtx, postId: Doc<"posts">["_id"]) {
   const post = await ctx.db.get("posts", postId);
   if (!post || post.status !== "publishing") return null;
   const targets = await loadTargets(ctx, postId);
-  if (targets.length === 0) {
+  if (targets.length === 0 || targets.length > MAX_TARGETS_PER_POST) {
+    if (targets.length > MAX_TARGETS_PER_POST) {
+      console.error(
+        `[publishing] post ${postId} exceeds the ${MAX_TARGETS_PER_POST} target limit`,
+      );
+    }
     await ctx.db.patch("posts", postId, {
       status: "failed",
       updatedAt: Date.now(),

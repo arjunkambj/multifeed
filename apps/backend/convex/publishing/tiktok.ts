@@ -92,23 +92,29 @@ async function uploadVideoFromUrl(
       },
       signal: AbortSignal.timeout(TIMEOUT),
     });
-    if (source.status !== 206) {
-      throw new Error(
-        source.status === 200
-          ? "Media storage did not return the requested video range"
-          : `Video download failed: ${source.status}`,
+    let chunkBody: Uint8Array;
+    if (source.status === 206) {
+      chunkBody = new Uint8Array(await source.arrayBuffer());
+    } else if (source.status === 200) {
+      // The storage backend ignored Range and sent the whole object — slice it.
+      chunkBody = new Uint8Array(await source.arrayBuffer()).subarray(
+        start,
+        end + 1,
       );
+    } else {
+      throw new Error(`Video download failed: ${source.status}`);
     }
-    if (!source.body) throw new Error("Video download returned an empty body");
+    if (chunkBody.length !== end - start + 1) {
+      throw new Error("Media storage returned a truncated video body");
+    }
     const putRes = await fetch(uploadUrl, {
       method: "PUT",
       headers: {
         "Content-Type": mimeType || "video/mp4",
-        "Content-Length": String(end - start + 1),
+        "Content-Length": String(chunkBody.length),
         "Content-Range": `bytes ${start}-${end}/${videoSize}`,
       },
-      body: source.body,
-      duplex: "half",
+      body: chunkBody,
       signal: AbortSignal.timeout(TIMEOUT),
     } as RequestInit);
     if (!putRes.ok && putRes.status !== 206) {

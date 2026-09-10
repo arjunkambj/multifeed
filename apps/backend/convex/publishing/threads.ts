@@ -108,6 +108,13 @@ export async function publishToThreads(
     await saveAttempt?.({ kind: "threads", creationId: cid });
     const state = await waitForContainer(cid);
     const id = state === "published" ? cid : await publishContainer(cid);
+    // Checkpoint the thread id before the permalink lookup so a crash cannot
+    // publish the same container twice.
+    await saveAttempt?.({
+      kind: "threads",
+      platformPostId: id,
+      creationId: cid,
+    });
     const permalink = await permalinkFor(id);
     await saveAttempt?.({
       kind: "threads",

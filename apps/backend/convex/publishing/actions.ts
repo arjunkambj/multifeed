@@ -37,7 +37,13 @@ const publishers: Record<
   x: publishToX,
   youtube: publishToYoutube,
 };
-import { refreshAccessTokenForPlatform } from "./tokenRefresh";
+import {
+  isTokenRefreshRejected,
+  refreshAccessTokenForPlatform,
+} from "./tokenRefresh";
+
+/** How long a resumable target waits before the scheduler retries it. */
+const RESUMABLE_RETRY_MS = 25_000;
 
 function r2Client() {
   const endpoint = process.env.R2_ENDPOINT;
@@ -239,12 +245,12 @@ export const publishOneTarget = internalAction({
       }
 
       let freshAccount = account;
-      const now = Date.now();
+      // Refresh only when the access token is actually expired (or within a
+      // small skew window when a refresh token exists).
       const expiresSoon =
-        account.tokenExpiresAt == null
-          ? Boolean(account.encryptedRefreshToken)
-          : account.tokenExpiresAt <=
-            now + (account.encryptedRefreshToken ? 60_000 : 0);
+        account.tokenExpiresAt != null &&
+        account.tokenExpiresAt <=
+          Date.now() + (account.encryptedRefreshToken ? 60_000 : 0);
       if (expiresSoon) {
         if (!account.encryptedRefreshToken) {
           await ctx.runMutation(internal.publishing.markAccountExpired, {
@@ -282,18 +288,37 @@ export const publishOneTarget = internalAction({
         } catch (error) {
           const message =
             error instanceof Error ? error.message : String(error);
-          const stillUsable =
-            Boolean(account.encryptedAccessToken) &&
-            (account.tokenExpiresAt == null || account.tokenExpiresAt > now);
-          if (!stillUsable) {
-            await ctx.runMutation(internal.publishing.markAccountExpired, {
-              accountId: account._id,
-              errorMessage: message,
-            });
+          // Re-read the account: a concurrent target may have already
+          // refreshed it, in which case this failure is irrelevant.
+          const current = await ctx.runQuery(
+            internal.publishing.getAccountForPublish,
+            { accountId: account._id },
+          );
+          const usable =
+            current != null &&
+            current.status === "active" &&
+            Boolean(current.encryptedAccessToken) &&
+            (current.tokenExpiresAt == null ||
+              current.tokenExpiresAt > Date.now());
+          if (usable) {
+            freshAccount = current;
+          } else {
+            // Only expire the account on a definitive provider rejection
+            // (e.g. invalid_grant); transient network failures keep it active.
+            if (isTokenRefreshRejected(error)) {
+              await ctx.runMutation(internal.publishing.markAccountExpired, {
+                accountId: account._id,
+                errorMessage: message,
+              });
+            }
             await ctx.runMutation(internal.publishing.markTargetFailed, {
               targetId: target._id,
-              failureCode: "no_token",
-              failureMessage: "Reconnect this account and try again",
+              failureCode: isTokenRefreshRejected(error)
+                ? "no_token"
+                : "token_refresh_failed",
+              failureMessage: isTokenRefreshRejected(error)
+                ? "Reconnect this account and try again"
+                : "Could not refresh this account's token. Try again.",
             });
             await ctx.runMutation(internal.publishing.reconcilePostStatus, {
               postId: post._id,
@@ -317,20 +342,33 @@ export const publishOneTarget = internalAction({
         return null;
       }
 
-      const existingAttempt =
-        claim === "resume" ? target.publishAttempt : undefined;
+      // Pass any persisted checkpoint through: resumed targets continue from
+      // it, and reclaimed targets carrying a platformPostId dedupe to a
+      // no-op publish instead of creating a duplicate.
+      const existingAttempt = target.publishAttempt ?? undefined;
       const saveAttempt: PublishInput["saveAttempt"] = async (attempt) => {
-        try {
-          await ctx.runMutation(internal.publishing.savePublishAttempt, {
-            targetId: target._id,
-            attempt,
-          });
-        } catch (error) {
-          console.error(
-            `[publishing] could not persist publish checkpoint for ${target._id}:`,
-            error,
-          );
+        // A lost checkpoint can cause a duplicate post on resume — retry once
+        // for transient failures, then propagate so the publish aborts rather
+        // than progressing without its checkpoint.
+        let lastError: unknown;
+        for (let i = 0; i < 2; i += 1) {
+          try {
+            await ctx.runMutation(internal.publishing.savePublishAttempt, {
+              targetId: target._id,
+              attempt,
+            });
+            return;
+          } catch (error) {
+            lastError = error;
+            console.error(
+              `[publishing] could not persist publish checkpoint for ${target._id}:`,
+              error,
+            );
+          }
         }
+        throw lastError instanceof Error
+          ? lastError
+          : new Error(String(lastError));
       };
 
       const storedMedia = await ctx.runQuery(
@@ -408,6 +446,20 @@ export const publishOneTarget = internalAction({
           `[publishing] publish still in progress ${args.targetId}:`,
           message,
         );
+        // Schedule a near-term retry instead of stalling until the stale
+        // window; the claim check dedupes if another runner already resumed.
+        const resumeAt = Date.now() + RESUMABLE_RETRY_MS;
+        const armed = await ctx.runMutation(
+          internal.publishing.markTargetResumable,
+          { targetId: args.targetId, resumeAt },
+        );
+        if (armed) {
+          await ctx.scheduler.runAfter(
+            RESUMABLE_RETRY_MS,
+            internal.publishing.actions.publishOneTarget,
+            { postId: args.postId, targetId: args.targetId },
+          );
+        }
       } else {
         console.error(`[publishing] publish failed ${args.targetId}:`, message);
         await ctx.runMutation(internal.publishing.markTargetFailed, {

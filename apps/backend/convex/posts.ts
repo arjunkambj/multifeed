@@ -95,6 +95,7 @@ const enrichedPostValidator = v.object({
   mediaAssetIds: v.array(v.id("mediaAssets")),
   notes: v.optional(v.string()),
   calendarColor: v.optional(v.string()),
+  publishJobId: v.optional(v.id("_scheduled_functions")),
   createdAt: v.number(),
   updatedAt: v.number(),
   targets: v.array(targetOutputValidator),
@@ -123,6 +124,36 @@ const OVERVIEW_TARGET_STATUSES = ["published", "failed"] as const;
 
 function colorForIndex(i: number) {
   return CALENDAR_COLORS[i % CALENDAR_COLORS.length]!;
+}
+
+/** Replace a post's pending publish job so stale jobs don't stack up. */
+async function schedulePublishJob(
+  ctx: MutationCtx,
+  post: Doc<"posts">,
+  when: number,
+) {
+  if (post.publishJobId) {
+    try {
+      await ctx.scheduler.cancel(post.publishJobId);
+    } catch {
+      // The job already ran or was cancelled — nothing to clean up.
+    }
+  }
+  const publishJobId = await ctx.scheduler.runAt(
+    when,
+    internal.publishing.publishPost,
+    { postId: post._id },
+  );
+  await ctx.db.patch("posts", post._id, { publishJobId });
+}
+
+async function cancelPublishJob(ctx: MutationCtx, post: Doc<"posts">) {
+  if (!post.publishJobId) return;
+  try {
+    await ctx.scheduler.cancel(post.publishJobId);
+  } catch {
+    // The job already ran or was cancelled — nothing to clean up.
+  }
 }
 
 async function loadTargets(ctx: QueryCtx | MutationCtx, postId: Id<"posts">) {
@@ -558,13 +589,14 @@ export const create = mutation({
     }
 
     if (status === "publishing" || status === "scheduled") {
-      await ctx.scheduler.runAt(
+      const publishJobId = await ctx.scheduler.runAt(
         scheduledFor!,
         internal.publishing.publishPost,
         {
           postId,
         },
       );
+      await ctx.db.patch("posts", postId, { publishJobId });
     }
 
     return { postId };
@@ -707,13 +739,10 @@ export const update = mutation({
     }
 
     if (status === "publishing" || status === "scheduled") {
-      await ctx.scheduler.runAt(
-        scheduledFor!,
-        internal.publishing.publishPost,
-        {
-          postId: args.postId,
-        },
-      );
+      await schedulePublishJob(ctx, post, scheduledFor!);
+    } else if (post.publishJobId) {
+      await cancelPublishJob(ctx, post);
+      await ctx.db.patch("posts", args.postId, { publishJobId: undefined });
     }
 
     return { ok: true as const };
@@ -773,13 +802,7 @@ export const reschedule = mutation({
     }
     await Promise.all(targetUpdates);
 
-    await ctx.scheduler.runAt(
-      args.scheduledFor,
-      internal.publishing.publishPost,
-      {
-        postId: args.postId,
-      },
-    );
+    await schedulePublishJob(ctx, post, args.scheduledFor);
 
     return { ok: true as const };
   },
@@ -811,7 +834,12 @@ export const retryFailed = mutation({
           status: "scheduled",
           failureCode: undefined,
           failureMessage: undefined,
-          publishAttempt: undefined,
+          // Keep a checkpoint that already reached the provider so the retry
+          // dedupes instead of publishing a duplicate.
+          publishAttempt: target.publishAttempt?.platformPostId
+            ? target.publishAttempt
+            : undefined,
+          resumeAt: undefined,
           scheduledFor: now,
           updatedAt: now,
         }),
@@ -823,9 +851,7 @@ export const retryFailed = mutation({
       updatedByUserId: user.id,
       updatedAt: now,
     });
-    await ctx.scheduler.runAfter(0, internal.publishing.publishPost, {
-      postId: args.postId,
-    });
+    await schedulePublishJob(ctx, post, now);
     return { retried: failed.length };
   },
 });
@@ -864,6 +890,7 @@ export const remove = mutation({
     await Promise.all(
       mediaLinks.map((link) => ctx.db.delete("postMediaAssets", link._id)),
     );
+    await cancelPublishJob(ctx, post);
     await ctx.db.delete("posts", args.postId);
     return { ok: true as const };
   },

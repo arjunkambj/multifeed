@@ -5,6 +5,7 @@ import { LINKEDIN_VERSION } from "./apiVersions";
 import {
   effectiveCaption,
   linkedinAuthorUrn,
+  linkedinVisibility,
   publishedFromAttempt,
   ResumablePublishError,
 } from "./helpers";
@@ -132,14 +133,21 @@ async function uploadVideo(
       },
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (source.status !== 206) {
-      throw new Error(
-        source.status === 200
-          ? "Media storage did not return the requested video range"
-          : `LinkedIn video download failed: ${source.status}`,
+    let chunk: Uint8Array;
+    if (source.status === 206) {
+      chunk = new Uint8Array(await source.arrayBuffer());
+    } else if (source.status === 200) {
+      // The storage backend ignored Range and sent the whole object — slice it.
+      chunk = new Uint8Array(await source.arrayBuffer()).subarray(
+        start,
+        end + 1,
       );
+      if (chunk.length !== end - start + 1) {
+        throw new Error("Media storage returned a truncated video body");
+      }
+    } else {
+      throw new Error(`LinkedIn video download failed: ${source.status}`);
     }
-    const chunk = new Uint8Array(await source.arrayBuffer());
     const upload = await fetch(uploadUrl, {
       method: "PUT",
       headers: headers(accessToken, {
@@ -295,7 +303,7 @@ export async function publishToLinkedIn(
   const payload = {
     author,
     commentary: text,
-    visibility: "PUBLIC",
+    visibility: linkedinVisibility(target.platformSettings?.visibility),
     distribution: {
       feedDistribution: "MAIN_FEED",
       targetEntities: [] as string[],

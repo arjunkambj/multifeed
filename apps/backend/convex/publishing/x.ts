@@ -136,14 +136,21 @@ async function uploadVideoToX(
       },
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (source.status !== 206) {
-      throw new Error(
-        source.status === 200
-          ? "Media storage did not return the requested video range"
-          : `X video download failed: ${source.status}`,
+    let chunk: Uint8Array;
+    if (source.status === 206) {
+      chunk = new Uint8Array(await source.arrayBuffer());
+    } else if (source.status === 200) {
+      // The storage backend ignored Range and sent the whole object — slice it.
+      chunk = new Uint8Array(await source.arrayBuffer()).subarray(
+        offset,
+        end + 1,
       );
+      if (chunk.length !== end - offset + 1) {
+        throw new Error("Media storage returned a truncated video body");
+      }
+    } else {
+      throw new Error(`X video download failed: ${source.status}`);
     }
-    const chunk = new Uint8Array(await source.arrayBuffer());
     const form = new FormData();
     form.set("segment_index", String(segmentIndex));
     form.set(
