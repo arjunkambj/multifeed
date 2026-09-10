@@ -1,5 +1,22 @@
 import { countUsedTeamSeats } from "@/lib/team-seats";
 
+function KpiCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-2xl bg-muted px-5 py-3.5">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-semibold leading-none text-foreground">
+        {value}
+      </p>
+    </div>
+  );
+}
+
 export function TeamStats({
   invitationsCount,
   membersCount,
@@ -13,26 +30,16 @@ export function TeamStats({
 
   return (
     <section className="grid gap-4 md:grid-cols-3">
-      <div className="rounded-2xl bg-muted p-5">
-        <p className="text-sm text-muted-foreground">Members</p>
-        <p className="mt-2 text-2xl font-semibold text-foreground">
-          {membersCount}
-        </p>
-      </div>
-      <div className="rounded-2xl bg-muted p-5">
-        <p className="text-sm text-muted-foreground">Pending invites</p>
-        <p className="mt-2 text-2xl font-semibold text-foreground">
-          {invitationsCount}
-        </p>
-      </div>
-      <div className="rounded-2xl bg-muted p-5">
-        <p className="text-sm text-muted-foreground">Plan seats used</p>
-        <p className="mt-2 text-2xl font-semibold text-foreground">
-          {teamSeatLimit === undefined
+      <KpiCard label="Members" value={membersCount} />
+      <KpiCard label="Pending invites" value={invitationsCount} />
+      <KpiCard
+        label="Plan seats used"
+        value={
+          teamSeatLimit === undefined
             ? "—"
-            : `${usedSeats} / ${teamSeatLimit}`}
-        </p>
-      </div>
+            : `${usedSeats} / ${teamSeatLimit}`
+        }
+      />
     </section>
   );
 }

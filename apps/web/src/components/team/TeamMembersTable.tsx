@@ -22,20 +22,20 @@ const getInitials = (value: string | null) =>
 
 export function TeamMembersTable({ rows }: { rows: TeamTableRow[] }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-card">
+    <div className="overflow-hidden rounded-2xl border-4 border-card">
       <Table className="min-w-[880px]">
         <TableHeader className="bg-card [&_tr]:border-b-0">
           <TableRow className="border-b-0 hover:bg-card">
-            <TableHead className="relative bg-card px-4 after:absolute after:inset-y-2 after:right-0 after:w-px after:bg-border">
+            <TableHead className="relative h-8 bg-card px-4 py-2 after:absolute after:inset-y-1 after:right-0 after:w-px after:bg-border">
               Member
             </TableHead>
-            <TableHead className="relative bg-card px-4 after:absolute after:inset-y-2 after:right-0 after:w-px after:bg-border">
+            <TableHead className="relative h-8 bg-card px-4 py-2 after:absolute after:inset-y-1 after:right-0 after:w-px after:bg-border">
               Email
             </TableHead>
-            <TableHead className="relative bg-card px-4 after:absolute after:inset-y-2 after:right-0 after:w-px after:bg-border">
+            <TableHead className="relative h-8 bg-card px-4 py-2 after:absolute after:inset-y-1 after:right-0 after:w-px after:bg-border">
               Last active
             </TableHead>
-            <TableHead className="bg-card px-4">Status</TableHead>
+            <TableHead className="h-8 bg-card px-4 py-2">Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

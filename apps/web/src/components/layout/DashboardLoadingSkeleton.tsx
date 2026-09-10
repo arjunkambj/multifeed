@@ -169,7 +169,7 @@ export function DashboardLoadingSkeleton({
         <>
           <div className="grid gap-4 md:grid-cols-3">
             {Array.from({ length: 3 }, (_, index) => (
-              <Skeleton className="h-28" key={index} />
+              <Skeleton className="h-20" key={index} />
             ))}
           </div>
           <TeamTableSkeleton />

@@ -94,8 +94,8 @@ export function InviteModal({
         <form onSubmit={handleInvite}>
           <DialogHeader>
             <DialogTitle>Invite teammate</DialogTitle>
-            <DialogDescription>
-              Hexclave will email a team invitation.
+            <DialogDescription className="sr-only">
+              Email a team invitation.
             </DialogDescription>
           </DialogHeader>
 
@@ -113,13 +113,8 @@ export function InviteModal({
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
               />
-              {teamSeatLimit !== undefined && (
-                <p className="text-sm text-muted-foreground">
-                  {usedSeats} of {teamSeatLimit} plan seats used
-                  {isAtLimit
-                    ? ". Upgrade your plan to invite more people."
-                    : "."}
-                </p>
+              {isAtLimit && (
+                <p className="text-sm text-muted-foreground">No seats left.</p>
               )}
             </div>
           </div>

@@ -3,18 +3,18 @@ import { cn } from "@/lib/utils";
 
 export function TeamTableSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-card">
+    <div className="overflow-hidden rounded-2xl border-4 border-card">
       <div className="grid grid-cols-[1.5fr_1fr_1fr_0.7fr] bg-card">
-        <div className="relative px-4 py-3 after:absolute after:inset-y-2 after:right-0 after:w-px after:bg-border">
+        <div className="relative h-8 px-4 py-2 after:absolute after:inset-y-1 after:right-0 after:w-px after:bg-border">
           <Skeleton className="h-4 w-24 rounded-xl" />
         </div>
-        <div className="relative px-4 py-3 after:absolute after:inset-y-2 after:right-0 after:w-px after:bg-border">
+        <div className="relative h-8 px-4 py-2 after:absolute after:inset-y-1 after:right-0 after:w-px after:bg-border">
           <Skeleton className="h-4 w-20 rounded-xl" />
         </div>
-        <div className="relative px-4 py-3 after:absolute after:inset-y-2 after:right-0 after:w-px after:bg-border">
+        <div className="relative h-8 px-4 py-2 after:absolute after:inset-y-1 after:right-0 after:w-px after:bg-border">
           <Skeleton className="h-4 w-24 rounded-xl" />
         </div>
-        <div className="px-4 py-3">
+        <div className="h-8 px-4 py-2">
           <Skeleton className="h-4 w-16 rounded-xl" />
         </div>
       </div>
