@@ -22,6 +22,10 @@ import { publishToFacebook, publishToInstagram } from "./meta";
 import { publishToLinkedIn } from "./linkedin";
 import { publishToThreads } from "./threads";
 import { publishToTiktok } from "./tiktok";
+import {
+  isTokenRefreshRejected,
+  refreshAccessTokenForPlatform,
+} from "./tokenRefresh";
 import { publishToX } from "./x";
 import { publishToYoutube } from "./youtube";
 
@@ -37,10 +41,6 @@ const publishers: Record<
   x: publishToX,
   youtube: publishToYoutube,
 };
-import {
-  isTokenRefreshRejected,
-  refreshAccessTokenForPlatform,
-} from "./tokenRefresh";
 
 /** How long a resumable target waits before the scheduler retries it. */
 const RESUMABLE_RETRY_MS = 25_000;
