@@ -4,8 +4,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
 import { getDodoApiKey, getDodoEnvironment } from "@/lib/billing-config";
-import { getHexclaveConvexServerToken } from "@/hexclave/server";
+import {
+  getHexclaveConvexServerToken,
+  hexclaveServerApp,
+} from "@/hexclave/server";
 import { appOrigin, assertSameOrigin } from "@/lib/oauth/env";
+import { MANAGE_BILLING_PERMISSION } from "@/lib/team-permissions";
 
 const responseOptions = {
   headers: { "Cache-Control": "private, no-store" },
@@ -24,15 +28,68 @@ export async function POST(request: NextRequest) {
     return errorResponse("Invalid request origin", 403);
   }
 
-  const token = await getHexclaveConvexServerToken(request);
+  const auth = await Promise.all([
+    hexclaveServerApp.getUser({ tokenStore: request }),
+    getHexclaveConvexServerToken(request),
+  ]).catch((error) => {
+    console.error(
+      "[billing/portal-auth]",
+      error instanceof Error ? error.message : error,
+    );
+    return null;
+  });
 
-  if (!token) {
+  if (!auth) {
     return errorResponse("Unauthorized", 401);
+  }
+
+  const [user, token] = auth;
+
+  if (!user || !token) {
+    return errorResponse("Unauthorized", 401);
+  }
+
+  const team = user.selectedTeam;
+  if (!team) {
+    return errorResponse("No selected team", 400);
+  }
+
+  let canManageBilling: boolean;
+  try {
+    canManageBilling = await user.hasPermission(
+      team,
+      MANAGE_BILLING_PERMISSION,
+    );
+  } catch (error) {
+    console.error(
+      "[billing/portal-permission]",
+      error instanceof Error ? error.message : error,
+    );
+    return errorResponse("Could not verify permissions", 502);
+  }
+
+  if (!canManageBilling) {
+    return errorResponse(
+      "You do not have permission to manage billing for this team",
+      403,
+    );
   }
 
   const apiKey = getDodoApiKey();
   if (!apiKey) {
-    return errorResponse("Dodo API key is not configured", 500);
+    console.error("[billing/portal] DODO_PAYMENTS_API_KEY is not configured");
+    return errorResponse("Billing is not configured", 500);
+  }
+
+  let environment: ReturnType<typeof getDodoEnvironment>;
+  try {
+    environment = getDodoEnvironment();
+  } catch (error) {
+    console.error(
+      "[billing/portal]",
+      error instanceof Error ? error.message : error,
+    );
+    return errorResponse("Billing is not configured", 500);
   }
 
   let subscription: Awaited<ReturnType<typeof fetchCurrentSubscription>>;
@@ -53,7 +110,7 @@ export async function POST(request: NextRequest) {
   const origin = appOrigin();
   const client = new DodoPayments({
     bearerToken: apiKey,
-    environment: getDodoEnvironment(),
+    environment,
   });
 
   try {

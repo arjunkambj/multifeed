@@ -3,10 +3,12 @@ import { getPlanLimits, type PlanKey } from "@multifeed/plans";
 import type { Doc } from "./_generated/dataModel";
 import {
   internalMutation,
+  mutation,
   query,
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
+import { fail } from "./errors";
 import { requireUser } from "./hexclave/auth";
 import {
   billingInterval,
@@ -36,16 +38,37 @@ const STATUSES = [
 
 type BillingStatus = (typeof STATUSES)[number];
 
-const SUBSCRIPTION_EVENTS = new Set([
-  "subscription.active",
+/**
+ * Lifecycle events whose type alone determines the resulting status. The
+ * payload's `status` field is deliberately ignored for these — the event type
+ * is the authoritative signal.
+ *
+ * Dodo emits `subscription.paused`/`unpaused`; the schema has no `paused`
+ * literal, so paused maps to `on_hold` (also non-entitled and recoverable).
+ */
+const EVENT_STATUS: Record<string, BillingStatus> = {
+  "subscription.active": "active",
+  "subscription.renewed": "renewed",
+  "subscription.plan_changed": "plan_changed",
+  "subscription.cancelled": "cancelled",
+  "subscription.on_hold": "on_hold",
+  "subscription.paused": "on_hold",
+  "subscription.failed": "failed",
+  "subscription.expired": "expired",
+};
+
+/**
+ * Generic sync events — fired on any field change — where the payload's
+ * `status` describes the subscription's actual state.
+ */
+const SYNC_EVENTS = new Set([
   "subscription.updated",
-  "subscription.renewed",
-  "subscription.plan_changed",
-  "subscription.cancelled",
-  "subscription.on_hold",
-  "subscription.failed",
-  "subscription.expired",
+  "subscription.unpaused",
+  "subscription.update_payment_method",
 ]);
+
+/** How long a checkout intent may sit pending before it stops blocking. */
+const PENDING_CHECKOUT_TTL_MS = 30 * 60 * 1000;
 
 export const entitlementValidator = v.object({
   planKey: v.union(planKeyValidator, v.null()),
@@ -105,33 +128,20 @@ function webhookStatus(
   eventType: string,
   event: Record<string, unknown>,
 ): BillingStatus | undefined {
-  if (!SUBSCRIPTION_EVENTS.has(eventType)) return undefined;
+  const mapped = EVENT_STATUS[eventType];
+  if (mapped) return mapped;
 
-  const rawStatus = str(event.status);
-  if (rawStatus && (STATUSES as readonly string[]).includes(rawStatus)) {
-    return rawStatus as BillingStatus;
+  if (SYNC_EVENTS.has(eventType)) {
+    // Only generic sync events consult the payload status, and only when it is
+    // a status we actually model.
+    const rawStatus = str(event.status);
+    if (rawStatus && (STATUSES as readonly string[]).includes(rawStatus)) {
+      return rawStatus as BillingStatus;
+    }
+    return "updated";
   }
 
-  switch (eventType) {
-    case "subscription.active":
-      return "active";
-    case "subscription.renewed":
-      return "renewed";
-    case "subscription.plan_changed":
-      return "plan_changed";
-    case "subscription.updated":
-      return "updated";
-    case "subscription.cancelled":
-      return "cancelled";
-    case "subscription.on_hold":
-      return "on_hold";
-    case "subscription.failed":
-      return "failed";
-    case "subscription.expired":
-      return "expired";
-    default:
-      return undefined;
-  }
+  return undefined;
 }
 
 export function grantsPlanAccess(
@@ -146,7 +156,10 @@ export function grantsPlanAccess(
   );
 }
 
-/** Only terminal subscriptions may be replaced with a new checkout. */
+/**
+ * Only terminal or suspended subscriptions may be replaced with a new checkout.
+ * `on_hold` (failed renewal) grants no access, so a fresh checkout is allowed.
+ */
 export function canStartCheckout(
   sub: Pick<Doc<"billingSubscriptions">, "status" | "accessEndsAt">,
   now: number,
@@ -154,6 +167,7 @@ export function canStartCheckout(
   return (
     sub.status === "failed" ||
     sub.status === "expired" ||
+    sub.status === "on_hold" ||
     (sub.status === "cancelled" && !grantsPlanAccess(sub, now))
   );
 }
@@ -245,6 +259,170 @@ export const getSubscription = query({
   },
 });
 
+/**
+ * Serialize all checkout-intent writes for a team so concurrent checkouts
+ * cannot both pass the "no pending checkout" check.
+ */
+async function serializeTeamCheckoutWrites(ctx: MutationCtx, teamId: string) {
+  const scope = `billing-checkout:${teamId}`;
+  const guard = await ctx.db
+    .query("writeGuards")
+    .withIndex("by_scope", (q) => q.eq("scope", scope))
+    .unique();
+  const now = Date.now();
+  if (guard) {
+    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
+  } else {
+    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
+  }
+}
+
+/**
+ * Latest local checkout intent (status `pending`) for a team. These rows are
+ * never subscription truth — `latestForTeam` ignores them — they only record
+ * that a checkout was initiated so webhooks can be tied back to it.
+ */
+async function latestPendingCheckout(
+  ctx: QueryCtx | MutationCtx,
+  teamId: string,
+) {
+  return await ctx.db
+    .query("billingSubscriptions")
+    .withIndex("by_team_status_updated", (q) =>
+      q.eq("teamId", teamId).eq("status", "pending"),
+    )
+    .order("desc")
+    .first();
+}
+
+/**
+ * Record checkout intent before creating a Dodo session. Must be called by the
+ * Next.js checkout route BEFORE `checkoutSessions.create`:
+ *
+ *   1. `beginCheckout` — fails CONFLICT if a non-terminal subscription or a
+ *      fresh pending checkout exists. Resumes (returns the stored URL) when the
+ *      pending intent already has a checkout URL for the same plan.
+ *   2. Create the Dodo checkout session.
+ *   3. `completeCheckout` — stamps `dodoCheckoutSessionId`/`dodoCheckoutUrl`
+ *      onto the intent row (or pass them directly to `beginCheckout` if the
+ *      session already exists).
+ *   4. On Dodo failure, `abandonCheckout` clears the intent so the team is not
+ *      blocked for the pending TTL.
+ */
+export const beginCheckout = mutation({
+  args: {
+    planKey: planKeyValidator,
+    interval: billingInterval,
+    dodoProductId: v.string(),
+    checkoutSessionId: v.optional(v.string()),
+    checkoutUrl: v.optional(v.string()),
+  },
+  returns: v.object({
+    checkoutIntentId: v.id("billingSubscriptions"),
+    checkoutUrl: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const now = Date.now();
+    await serializeTeamCheckoutWrites(ctx, user.selectedTeamId);
+
+    const sub = await latestForTeam(ctx, user.selectedTeamId, now);
+    if (sub && !canStartCheckout(sub, now)) {
+      fail(
+        "CONFLICT",
+        "An existing subscription must be managed before starting a new checkout",
+      );
+    }
+
+    const pending = await latestPendingCheckout(ctx, user.selectedTeamId);
+    if (pending && now - pending.updatedAt < PENDING_CHECKOUT_TTL_MS) {
+      if (
+        pending.dodoCheckoutUrl &&
+        pending.planKey === args.planKey &&
+        pending.interval === args.interval
+      ) {
+        // Same checkout already has a URL — let the client resume it rather
+        // than spawning a second Dodo session.
+        return {
+          checkoutIntentId: pending._id,
+          checkoutUrl: pending.dodoCheckoutUrl,
+        };
+      }
+      fail("CONFLICT", "A checkout is already in progress for this team");
+    }
+
+    // A stale pending intent is checkout litter, not subscription truth —
+    // expire it so it cannot be confused with a real subscription later.
+    if (pending) {
+      await ctx.db.patch("billingSubscriptions", pending._id, {
+        status: "expired",
+        updatedAt: now,
+      });
+    }
+
+    const checkoutIntentId = await ctx.db.insert("billingSubscriptions", {
+      teamId: user.selectedTeamId,
+      userId: user.id,
+      planKey: args.planKey,
+      interval: args.interval,
+      status: "pending",
+      dodoProductId: args.dodoProductId,
+      dodoCheckoutSessionId: args.checkoutSessionId,
+      dodoCheckoutUrl: args.checkoutUrl,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return { checkoutIntentId, checkoutUrl: args.checkoutUrl };
+  },
+});
+
+/** Attach the created Dodo session to the team's in-flight checkout intent. */
+export const completeCheckout = mutation({
+  args: {
+    checkoutSessionId: v.string(),
+    checkoutUrl: v.string(),
+  },
+  returns: v.object({ ok: v.literal(true) }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const now = Date.now();
+    await serializeTeamCheckoutWrites(ctx, user.selectedTeamId);
+
+    const pending = await latestPendingCheckout(ctx, user.selectedTeamId);
+    if (!pending || now - pending.updatedAt >= PENDING_CHECKOUT_TTL_MS) {
+      fail("CONFLICT", "No checkout is in progress for this team");
+    }
+
+    await ctx.db.patch("billingSubscriptions", pending._id, {
+      dodoCheckoutSessionId: args.checkoutSessionId,
+      dodoCheckoutUrl: args.checkoutUrl,
+      updatedAt: now,
+    });
+    return { ok: true as const };
+  },
+});
+
+/** Clear a pending intent when checkout-session creation fails or is aborted. */
+export const abandonCheckout = mutation({
+  args: {},
+  returns: v.object({ ok: v.literal(true) }),
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    const now = Date.now();
+    await serializeTeamCheckoutWrites(ctx, user.selectedTeamId);
+
+    const pending = await latestPendingCheckout(ctx, user.selectedTeamId);
+    if (pending) {
+      await ctx.db.patch("billingSubscriptions", pending._id, {
+        status: "expired",
+        updatedAt: now,
+      });
+    }
+    return { ok: true as const };
+  },
+});
+
 /** Dodo webhook handler — idempotent by webhookId. */
 export const handleWebhook = internalMutation({
   args: {
@@ -309,7 +487,21 @@ async function upsertSubscription(
   rawEventTimestamp: number | undefined,
 ) {
   const dodoSubscriptionId = str(event.subscription_id, event.subscriptionId);
-  const existing = dodoSubscriptionId
+  const metadata = (event.metadata ?? {}) as Record<string, unknown>;
+  const customer = (event.customer ?? {}) as Record<string, unknown>;
+  const metaTeamId = str(metadata.teamId);
+  const metaUserId = str(metadata.userId);
+  const metaPlan = asPlan(metadata.planKey);
+  const metaInterval = asInterval(metadata.interval);
+  const eventProductId = str(event.product_id, event.productId);
+  const eventCustomerId = str(
+    event.customer_id,
+    event.customerId,
+    customer.customer_id,
+    customer.customerId,
+  );
+
+  let existing = dodoSubscriptionId
     ? await ctx.db
         .query("billingSubscriptions")
         .withIndex("by_subscription", (q) =>
@@ -318,23 +510,54 @@ async function upsertSubscription(
         .first()
     : null;
 
-  if (
-    existing?.rawEventTimestamp &&
-    rawEventTimestamp &&
-    rawEventTimestamp < existing.rawEventTimestamp
-  ) {
-    return existing._id;
+  if (existing) {
+    // Checkout metadata is supplied by us at session creation, but never let a
+    // webhook move an existing subscription across teams, users, or customers.
+    if (
+      (metaTeamId !== undefined && metaTeamId !== existing.teamId) ||
+      (metaUserId !== undefined && metaUserId !== existing.userId) ||
+      (eventCustomerId !== undefined &&
+        existing.dodoCustomerId !== undefined &&
+        eventCustomerId !== existing.dodoCustomerId)
+    ) {
+      console.warn(
+        `[billing] ignored event for subscription ${dodoSubscriptionId}: ` +
+          "metadata team/user/customer does not match the stored subscription",
+      );
+      return null;
+    }
+
+    if (
+      existing.rawEventTimestamp &&
+      rawEventTimestamp &&
+      rawEventTimestamp < existing.rawEventTimestamp
+    ) {
+      return existing._id;
+    }
   }
 
-  const metadata = (event.metadata ?? {}) as Record<string, unknown>;
-  const customer = (event.customer ?? {}) as Record<string, unknown>;
+  // A brand-new subscription: adopt the matching pending checkout intent so the
+  // row written at checkout start becomes the subscription record instead of
+  // leaving a duplicate pending row behind.
+  if (!existing && metaTeamId && metaPlan) {
+    const pending = await latestPendingCheckout(ctx, metaTeamId);
+    if (
+      pending &&
+      pending.planKey === metaPlan &&
+      (metaInterval === undefined || metaInterval === pending.interval) &&
+      (metaUserId === undefined || metaUserId === pending.userId) &&
+      (eventProductId === undefined ||
+        eventProductId === pending.dodoProductId)
+    ) {
+      existing = pending;
+    }
+  }
 
-  const teamId = str(metadata.teamId) ?? existing?.teamId;
-  const userId = str(metadata.userId) ?? existing?.userId;
-  const plan = asPlan(metadata.planKey) ?? existing?.planKey;
-  const interval = asInterval(metadata.interval) ?? existing?.interval;
-  const dodoProductId =
-    str(event.product_id, event.productId) ?? existing?.dodoProductId;
+  const teamId = existing?.teamId ?? metaTeamId;
+  const userId = existing?.userId ?? metaUserId;
+  const plan = metaPlan ?? existing?.planKey;
+  const interval = metaInterval ?? existing?.interval;
+  const dodoProductId = eventProductId ?? existing?.dodoProductId;
 
   if (
     !dodoSubscriptionId ||
@@ -372,13 +595,7 @@ async function upsertSubscription(
     interval,
     status,
     dodoSubscriptionId,
-    dodoCustomerId:
-      str(
-        event.customer_id,
-        event.customerId,
-        customer.customer_id,
-        customer.customerId,
-      ) ?? existing?.dodoCustomerId,
+    dodoCustomerId: eventCustomerId ?? existing?.dodoCustomerId,
     dodoProductId,
     currentPeriodEnd: periodEnd,
     accessEndsAt,

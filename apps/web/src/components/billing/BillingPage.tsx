@@ -5,7 +5,7 @@ import { Icon } from "@iconify/react";
 import type { BillingInterval, PlanKey } from "@multifeed/plans";
 import { PLANS } from "@multifeed/plans";
 import { useQuery } from "convex-helpers/react/cache/hooks";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
@@ -64,6 +64,10 @@ export function BillingPage() {
     useState<BillingInterval>("month");
   const [checkingOut, setCheckingOut] = useState<PlanKey | null>(null);
   const [openingPortal, setOpeningPortal] = useState(false);
+  // Synchronous in-flight guards: state updates are batched, so a fast
+  // double-click could otherwise start checkout/portal requests twice.
+  const checkingOutRef = useRef(false);
+  const openingPortalRef = useRef(false);
   const subscription = useQuery(api.billing.getSubscription, { nowMs });
   const isYearly = billingInterval === "year";
   const activePlan = subscription?.hasPlanAccess
@@ -72,6 +76,8 @@ export function BillingPage() {
   const checkoutBlocked = subscription?.canStartCheckout === false;
 
   const startCheckout = (planKey: PlanKey) => {
+    if (checkingOut !== null || checkingOutRef.current) return;
+    checkingOutRef.current = true;
     setCheckingOut(planKey);
 
     void fetch("/api/billing/checkout", {
@@ -91,12 +97,15 @@ export function BillingPage() {
         window.location.assign(payload.checkoutUrl);
       })
       .catch((err) => {
+        checkingOutRef.current = false;
         setCheckingOut(null);
         toast.error(err instanceof Error ? err.message : String(err));
       });
   };
 
   const openCustomerPortal = () => {
+    if (openingPortal || openingPortalRef.current) return;
+    openingPortalRef.current = true;
     setOpeningPortal(true);
     void fetch("/api/billing/portal", {
       method: "POST",
@@ -114,6 +123,7 @@ export function BillingPage() {
         window.location.assign(payload.url);
       })
       .catch((err) => {
+        openingPortalRef.current = false;
         setOpeningPortal(false);
         toast.error(err instanceof Error ? err.message : String(err));
       });

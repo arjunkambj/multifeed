@@ -1,8 +1,10 @@
 import DodoPayments from "dodopayments";
-import { fetchQuery } from "convex/nextjs";
+import { fetchMutation } from "convex/nextjs";
+import { ConvexError } from "convex/values";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { type BillingInterval, type PlanKey } from "@multifeed/plans";
 import {
   getDodoApiKey,
@@ -14,6 +16,7 @@ import {
   hexclaveServerApp,
 } from "@/hexclave/server";
 import { appOrigin, assertSameOrigin } from "@/lib/oauth/env";
+import { MANAGE_BILLING_PERMISSION } from "@/lib/team-permissions";
 
 const responseOptions = {
   headers: { "Cache-Control": "private, no-store" },
@@ -28,8 +31,14 @@ const isBillingInterval = (value: unknown): value is BillingInterval =>
 const errorResponse = (message: string, status: number) =>
   NextResponse.json({ error: message }, { status, ...responseOptions });
 
-const fetchCurrentSubscription = (token: string) =>
-  fetchQuery(api.billing.getSubscription, { nowMs: Date.now() }, { token });
+const convexErrorStatus = (error: unknown): number | null => {
+  if (!(error instanceof ConvexError)) return null;
+  const code = (error.data as { code?: unknown } | undefined)?.code;
+  if (code === "CONFLICT") return 409;
+  if (code === "UNAUTHENTICATED") return 401;
+  if (code === "FORBIDDEN") return 403;
+  return 500;
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,18 +47,52 @@ export async function POST(request: NextRequest) {
     return errorResponse("Invalid request origin", 403);
   }
 
-  const [user, token, payload] = await Promise.all([
+  const auth = await Promise.all([
     hexclaveServerApp.getUser({ tokenStore: request }),
     getHexclaveConvexServerToken(request),
     request.json().catch(() => null) as Promise<unknown>,
-  ]);
+  ]).catch((error) => {
+    console.error(
+      "[billing/checkout-auth]",
+      error instanceof Error ? error.message : error,
+    );
+    return null;
+  });
+
+  if (!auth) {
+    return errorResponse("Unauthorized", 401);
+  }
+
+  const [user, token, payload] = auth;
 
   if (!user || !token) {
     return errorResponse("Unauthorized", 401);
   }
 
-  if (!user.selectedTeam) {
+  const team = user.selectedTeam;
+  if (!team) {
     return errorResponse("No selected team", 400);
+  }
+
+  let canManageBilling: boolean;
+  try {
+    canManageBilling = await user.hasPermission(
+      team,
+      MANAGE_BILLING_PERMISSION,
+    );
+  } catch (error) {
+    console.error(
+      "[billing/checkout-permission]",
+      error instanceof Error ? error.message : error,
+    );
+    return errorResponse("Could not verify permissions", 502);
+  }
+
+  if (!canManageBilling) {
+    return errorResponse(
+      "You do not have permission to manage billing for this team",
+      403,
+    );
   }
 
   if (!user.primaryEmail) {
@@ -71,35 +114,84 @@ export async function POST(request: NextRequest) {
   const apiKey = getDodoApiKey();
 
   if (!productId) {
-    return errorResponse("Billing plan is not configured", 500);
+    console.error(
+      `[billing/checkout] no Dodo product configured for plan=${payload.planKey} interval=${payload.interval}`,
+    );
+    return errorResponse("Billing is not configured", 500);
   }
 
   if (!apiKey) {
-    return errorResponse("Dodo API key is not configured", 500);
+    console.error("[billing/checkout] DODO_PAYMENTS_API_KEY is not configured");
+    return errorResponse("Billing is not configured", 500);
   }
 
-  let subscription: Awaited<ReturnType<typeof fetchCurrentSubscription>>;
+  let environment: ReturnType<typeof getDodoEnvironment>;
   try {
-    subscription = await fetchCurrentSubscription(token);
+    environment = getDodoEnvironment();
   } catch (error) {
     console.error(
-      "[billing/subscription-check]",
+      "[billing/checkout]",
       error instanceof Error ? error.message : error,
     );
-    return errorResponse("Could not verify subscription status", 503);
+    return errorResponse("Billing is not configured", 500);
   }
 
-  if (subscription && !subscription.canStartCheckout) {
-    return errorResponse(
-      "An existing subscription must be managed before starting a new checkout",
-      409,
+  // Record the checkout intent first: beginCheckout serializes per team,
+  // enforces canStartCheckout, and dedupes concurrent/pending checkouts.
+  let intent: {
+    checkoutIntentId: Id<"billingSubscriptions">;
+    checkoutUrl?: string;
+  };
+  try {
+    intent = await fetchMutation(
+      api.billing.beginCheckout,
+      {
+        planKey: payload.planKey,
+        interval: payload.interval,
+        dodoProductId: productId,
+      },
+      { token },
+    );
+  } catch (error) {
+    const status = convexErrorStatus(error);
+    if (status !== null && error instanceof ConvexError) {
+      const message = (error.data as { message?: unknown } | undefined)
+        ?.message;
+      return errorResponse(
+        typeof message === "string" ? message : "Checkout conflict",
+        status,
+      );
+    }
+    console.error(
+      "[billing/begin-checkout]",
+      error instanceof Error ? error.message : error,
+    );
+    return errorResponse("Could not start checkout", 503);
+  }
+
+  // A pending checkout for the same plan already has a URL — resume it
+  // instead of creating a second Dodo session.
+  if (intent.checkoutUrl) {
+    return NextResponse.json(
+      { checkoutUrl: intent.checkoutUrl },
+      responseOptions,
     );
   }
+
+  const abandonCheckout = () =>
+    fetchMutation(api.billing.abandonCheckout, {}, { token }).catch(
+      (error: unknown) => {
+        console.error(
+          "[billing/abandon-checkout]",
+          error instanceof Error ? error.message : error,
+        );
+      },
+    );
 
   const origin = appOrigin();
   const client = new DodoPayments({
     bearerToken: apiKey,
-    environment: getDodoEnvironment(),
+    environment,
   });
 
   let session: Awaited<ReturnType<typeof client.checkoutSessions.create>>;
@@ -111,7 +203,7 @@ export async function POST(request: NextRequest) {
         name: user.displayName,
       },
       metadata: {
-        teamId: user.selectedTeam.id,
+        teamId: team.id,
         userId: user.id,
         planKey: payload.planKey,
         interval: payload.interval,
@@ -124,11 +216,29 @@ export async function POST(request: NextRequest) {
       "[billing/checkout]",
       error instanceof Error ? error.message : error,
     );
+    await abandonCheckout();
     return errorResponse("Could not start checkout", 502);
   }
 
   if (!session.checkout_url) {
+    await abandonCheckout();
     return errorResponse("Dodo did not return a checkout URL", 502);
+  }
+
+  try {
+    await fetchMutation(
+      api.billing.completeCheckout,
+      {
+        checkoutSessionId: session.session_id,
+        checkoutUrl: session.checkout_url,
+      },
+      { token },
+    );
+  } catch (error) {
+    console.error(
+      "[billing/complete-checkout]",
+      error instanceof Error ? error.message : error,
+    );
   }
 
   return NextResponse.json(

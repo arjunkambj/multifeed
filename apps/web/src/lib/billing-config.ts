@@ -21,10 +21,38 @@ const productEnvNames: Record<PlanKey, Record<BillingInterval, string>> = {
 
 const optionalEnv = (name: string) => process.env[name]?.trim();
 
-export const getDodoEnvironment = (): DodoEnvironment =>
-  process.env.DODO_PAYMENTS_ENVIRONMENT === "live_mode"
-    ? "live_mode"
-    : "test_mode";
+/**
+ * True when this deployment is not a local development app — a missing or
+ * misspelled DODO_PAYMENTS_ENVIRONMENT must fail loudly there instead of
+ * silently talking to Dodo test mode.
+ */
+const isProductionRuntime = (): boolean => {
+  if (process.env.NODE_ENV === "production") return true;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) return false;
+  try {
+    const { hostname } = new URL(appUrl);
+    return hostname !== "localhost" && hostname !== "127.0.0.1";
+  } catch {
+    return false;
+  }
+};
+
+export const getDodoEnvironment = (): DodoEnvironment => {
+  const value = optionalEnv("DODO_PAYMENTS_ENVIRONMENT");
+  if (value === "live_mode" || value === "test_mode") return value;
+  if (isProductionRuntime()) {
+    throw new Error(
+      'DODO_PAYMENTS_ENVIRONMENT must be set to "live_mode" or "test_mode" in production',
+    );
+  }
+  if (value) {
+    console.warn(
+      `[billing] Ignoring unrecognized DODO_PAYMENTS_ENVIRONMENT (${JSON.stringify(value)}); defaulting to test_mode`,
+    );
+  }
+  return "test_mode";
+};
 
 export const getDodoApiKey = () => optionalEnv("DODO_PAYMENTS_API_KEY");
 
