@@ -105,7 +105,7 @@ export function Pricing() {
                 role="img"
                 title={platform.label}
                 aria-label={platform.label}
-                className="flex cursor-pointer items-center justify-center transition-transform duration-200 hover:scale-[1.12] active:scale-95"
+                className="flex items-center justify-center transition-transform duration-200 hover:scale-[1.12]"
                 style={{ color: platform.color }}
               >
                 <Icon
@@ -132,7 +132,7 @@ function PriceCard({
     <div
       className={cn(
         "flex h-full flex-col rounded-card border border-transparent bg-card px-6 py-7 md:px-7 md:py-8",
-        "px-6 py-7 md:px-7 md:py-8",
+        "transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-md",
       )}
     >
       <header>

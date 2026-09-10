@@ -29,7 +29,7 @@
 @keyframes marketing-rise {
   from {
     opacity: 0;
-    transform: translateY(0.75rem);
+    transform: translateY(1.25rem);
   }
   to {
     opacity: 1;
@@ -38,16 +38,32 @@
 }
 
 .marketing-hero-rise {
-  animation: marketing-rise 0.45s ease-out both;
+  animation: marketing-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .marketing-hero-mock {
-  animation: marketing-rise 0.55s ease-out 0.18s both;
+  animation: marketing-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+}
+
+@keyframes marketing-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.marketing-nav-enter {
+  animation: marketing-drop 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .marketing-hero-rise,
-  .marketing-hero-mock {
+  .marketing-hero-mock,
+  .marketing-nav-enter {
     animation: none;
   }
 }

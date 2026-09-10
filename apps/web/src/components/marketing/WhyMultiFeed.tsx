@@ -155,7 +155,7 @@ function PlatformMarqueeSet({ hidden = false }: { hidden?: boolean }) {
           <li
             key={`${copy}-${platform.label}`}
             aria-hidden={hidden || copy > 0 || undefined}
-            className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-2xl bg-card px-4.5 py-2 text-[0.9375rem] font-medium text-foreground md:px-5 dark:text-zinc-100"
+            className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-card px-4.5 py-2 text-[0.9375rem] font-medium text-foreground md:px-5 dark:text-zinc-100"
           >
             <Icon
               icon={platform.icon}
@@ -213,7 +213,7 @@ export function WhyMultiFeed() {
         y={0}
         className="relative mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]"
       >
-        <div className="marketing-marquee-track flex w-max">
+        <div className="marketing-marquee-track flex w-max hover:[animation-play-state:paused]">
           <PlatformMarqueeSet />
           <PlatformMarqueeSet hidden />
         </div>
@@ -228,7 +228,7 @@ export function WhyMultiFeed() {
       >
         {steps.map((step, index) => (
           <Reveal key={step.title} delay={index * 0.12} className="flex">
-            <article className="flex h-full w-full flex-col overflow-hidden rounded-panel bg-card">
+            <article className="flex h-full w-full flex-col overflow-hidden rounded-panel bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-md">
               {step.mediaFirst ? (
                 <div className="relative min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
                   <Image

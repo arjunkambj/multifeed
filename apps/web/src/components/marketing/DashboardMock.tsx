@@ -7,6 +7,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Icon } from "@iconify/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import Logo from "@/components/layout/Logo";
@@ -71,6 +72,8 @@ const MOCK_DAYS = [
 ];
 
 function MockMonthGrid() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
       <div className="grid shrink-0 grid-cols-7 rounded-t-2xl border-4 border-b-0 border-card bg-card">
@@ -106,8 +109,22 @@ function MockMonthGrid() {
                   />
                 ) : null}
                 {cell.today ? (
-                  <span className="relative inline-flex size-[1.6rem] items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                    {cell.day}
+                  <span className="relative inline-flex size-[1.6rem] items-center justify-center">
+                    {reduceMotion ? null : (
+                      <motion.span
+                        aria-hidden
+                        animate={{ opacity: [0.4, 0], scale: [1, 1.9] }}
+                        className="absolute inset-0 rounded-full bg-primary"
+                        transition={{
+                          duration: 2.4,
+                          ease: "easeOut",
+                          repeat: Infinity,
+                        }}
+                      />
+                    )}
+                    <span className="relative inline-flex size-full items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                      {cell.day}
+                    </span>
                   </span>
                 ) : (
                   <span

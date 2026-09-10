@@ -81,7 +81,7 @@ function Quote({ text, highlight }: { text: string; highlight?: string }) {
 
 function Card({ t }: { t: (typeof testimonials)[number] }) {
   return (
-    <div className="flex break-inside-avoid flex-col overflow-hidden rounded-card border-0 bg-card">
+    <div className="flex break-inside-avoid flex-col overflow-hidden rounded-card border-0 bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-md">
       <div className="flex flex-1 flex-col px-5 py-4">
         <span
           aria-hidden
@@ -126,7 +126,7 @@ export function Testimonials() {
         title="What people say."
       />
 
-      <Reveal
+      <div
         className={cn(
           HEADER_GAP,
           "[mask-image:linear-gradient(to_bottom,black_78%,transparent)]",
@@ -139,19 +139,20 @@ export function Testimonials() {
           )}
         >
           {testimonials.map((t, i) => (
-            <div
+            <Reveal
               className={cn(
                 "break-inside-avoid",
                 // Middle column on the 3-col layout (items 4–6).
                 i >= 3 && i < 6 && "lg:translate-y-10",
               )}
+              delay={i * 0.05}
               key={t.person.name}
             >
               <Card t={t} />
-            </div>
+            </Reveal>
           ))}
         </div>
-      </Reveal>
+      </div>
     </Section>
   );
 }

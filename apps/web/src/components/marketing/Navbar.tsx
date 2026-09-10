@@ -87,7 +87,7 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "sticky z-50 mx-auto rounded-2xl backdrop-blur-lg transition-[width,background-color,transform] duration-300",
+        "marketing-nav-enter sticky z-50 mx-auto rounded-2xl backdrop-blur-lg transition-[width,background-color,transform] duration-300",
         isScrolled
           ? "top-1.5 mt-1.5 w-[min(42rem,calc(100%-0.75rem))] translate-y-1 bg-card/95 sm:top-2 sm:mt-2 sm:w-[min(42rem,calc(100%-2rem))] dark:bg-card/80"
           : "top-1.5 mt-1.5 w-[min(80rem,calc(100%-0.75rem))] bg-background/95 sm:top-3 sm:mt-3 sm:w-[min(80rem,calc(100%-2rem))]",
@@ -138,7 +138,7 @@ export function Navbar() {
       </nav>
 
       {isMenuOpen && (
-        <div className="border-t border-border/50 px-2 pb-2 lg:hidden">
+        <div className="tab-panel-transition border-t border-border/50 px-2 pb-2 lg:hidden">
           <div className="flex flex-col gap-1 pt-2">
             {navLinks.map((link) => {
               const isActive = activeSection === link.href.slice(1);
