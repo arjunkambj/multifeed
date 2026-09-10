@@ -56,7 +56,7 @@ export function Hero() {
     <Section
       id="hero"
       className="overflow-hidden"
-      containerClassName="relative pt-24 pb-16 md:pt-28 md:pb-20 lg:pt-32 lg:pb-24 xl:pt-36 xl:pb-28"
+      containerClassName="relative pt-16 pb-16 md:pt-20 md:pb-20 lg:pt-24 lg:pb-24 xl:pt-28 xl:pb-28"
     >
       <div className="relative mx-auto w-full min-w-0 max-w-5xl text-center">
         <div
@@ -92,7 +92,7 @@ export function Hero() {
         </h1>
 
         <p
-          className="marketing-hero-rise mx-auto mt-5 max-w-xl text-[1.0625rem] leading-8 text-pretty text-muted-foreground md:mt-6 md:text-[1.125rem]"
+          className="marketing-hero-rise mx-auto mt-3 max-w-xl text-[1.0625rem] leading-8 text-pretty text-muted-foreground md:mt-4 md:text-[1.125rem]"
           style={{ animationDelay: "140ms" }}
         >
           Write the post once. Change the caption if a platform needs it. Drop
@@ -100,7 +100,7 @@ export function Hero() {
         </p>
 
         <div
-          className="marketing-hero-rise mt-9 flex flex-col items-center gap-5 md:mt-10 md:gap-6"
+          className="marketing-hero-rise mt-7 flex flex-col items-center gap-4 md:mt-8 md:gap-5"
           style={{ animationDelay: "200ms" }}
         >
           <Link
@@ -132,7 +132,7 @@ export function Hero() {
 
       <div
         id="hero-mock"
-        className="marketing-hero-mock relative mx-auto mt-10 w-full md:mt-12 lg:mt-16 xl:mt-20"
+        className="marketing-hero-mock relative mx-auto mt-9 w-full md:mt-10 lg:mt-12 xl:mt-14"
       >
         <div
           aria-label="MultiFeed calendar"
