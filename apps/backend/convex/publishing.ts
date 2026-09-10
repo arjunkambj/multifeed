@@ -9,6 +9,11 @@ import { internal } from "./_generated/api";
 import { encryptSecret } from "./oauth/crypto";
 import schema, { publishAttempt, targetClaimStatus } from "./schema";
 import { mediaAssetOutputValidator } from "./media/r2";
+import {
+  MAX_MEDIA_ASSETS_PER_POST,
+  MAX_TARGETS_PER_POST,
+} from "./postConfig";
+import { serializeScope } from "./writeGuards";
 
 const postValidator = v.object({
   ...schema.tables.posts.validator.fields,
@@ -27,24 +32,8 @@ const accountValidator = v.object({
 });
 
 const BATCH = 100;
-const MAX_TARGETS_PER_POST = 100;
-const MAX_MEDIA_PER_POST = 10;
 const STALE_PUBLISH_MS = 12 * 60 * 1000;
 const MAX_PUBLISH_ATTEMPTS = 40;
-
-/** Serialize mutations that touch the same logical scope via OCC. */
-async function serializeScope(ctx: MutationCtx, scope: string) {
-  const guard = await ctx.db
-    .query("writeGuards")
-    .withIndex("by_scope", (q) => q.eq("scope", scope))
-    .unique();
-  const now = Date.now();
-  if (guard) {
-    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
-  } else {
-    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
-  }
-}
 
 async function loadTargets(ctx: MutationCtx, postId: Doc<"posts">["_id"]) {
   return await ctx.db
@@ -194,7 +183,7 @@ export const getMediaForPost = internalQuery({
     const links = await ctx.db
       .query("postMediaAssets")
       .withIndex("by_post_position", (q) => q.eq("postId", args.postId))
-      .take(MAX_MEDIA_PER_POST + 1);
+      .take(MAX_MEDIA_ASSETS_PER_POST + 1);
     const assets = await Promise.all(
       links.map((link) => ctx.db.get("mediaAssets", link.mediaAssetId)),
     );

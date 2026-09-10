@@ -1,5 +1,9 @@
 import { type Infer, v } from "convex/values";
-import { POST_KIND_PLATFORMS } from "./postConfig";
+import {
+  MAX_MEDIA_ASSETS_PER_POST,
+  MAX_TARGETS_PER_POST,
+  POST_KIND_PLATFORMS,
+} from "./postConfig";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
   mutation,
@@ -121,8 +125,6 @@ const CALENDAR_COLORS = [
   "#7C3AED",
   "#D97706",
 ];
-const MAX_TARGETS_PER_POST = 100;
-const MAX_MEDIA_ASSETS_PER_POST = 10;
 const OVERVIEW_TARGET_STATUSES = ["published", "failed"] as const;
 
 function colorForIndex(i: number) {
@@ -423,12 +425,18 @@ async function loadAccountMap(
 }
 
 async function enrichListPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
-  const targetsByPost = await Promise.all(
-    posts.map((post) => loadTargets(ctx, post._id)),
+  const loaded = await Promise.all(
+    posts.map(async (post) => ({
+      post,
+      targets: await loadTargets(ctx, post._id),
+    })),
   );
-  const accountsById = await loadAccountMap(ctx, targetsByPost);
+  const accountsById = await loadAccountMap(
+    ctx,
+    loaded.map((entry) => entry.targets),
+  );
 
-  return posts.map((post, index) => ({
+  return loaded.map(({ post, targets }) => ({
     _id: post._id,
     title: post.title,
     body: post.body,
@@ -438,7 +446,7 @@ async function enrichListPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
     calendarColor: post.calendarColor,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
-    targets: (targetsByPost[index] ?? []).map((target) => {
+    targets: targets.map((target) => {
       const account = accountsById.get(target.connectedAccountId);
       return {
         targetId: target._id,
@@ -455,23 +463,29 @@ async function enrichListPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
 }
 
 async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
-  const [targetsByPost, mediaIdsByPost] = await Promise.all([
-    Promise.all(posts.map((post) => loadTargets(ctx, post._id))),
-    Promise.all(posts.map((post) => loadMediaAssetIds(ctx, post._id))),
-  ]);
-  const mediaIds = [...new Set(mediaIdsByPost.flat())];
+  const loaded = await Promise.all(
+    posts.map(async (post) => ({
+      post,
+      targets: await loadTargets(ctx, post._id),
+      mediaIds: await loadMediaAssetIds(ctx, post._id),
+    })),
+  );
+  const mediaIds = [...new Set(loaded.flatMap((entry) => entry.mediaIds))];
   const [accountsById, mediaAssets] = await Promise.all([
-    loadAccountMap(ctx, targetsByPost),
+    loadAccountMap(
+      ctx,
+      loaded.map((entry) => entry.targets),
+    ),
     Promise.all(mediaIds.map((id) => ctx.db.get("mediaAssets", id))),
   ]);
   const mediaById = new Map(
     mediaAssets.flatMap((asset) => (asset ? [[asset._id, asset]] : [])),
   );
 
-  return posts.map((post, index) => ({
+  return loaded.map(({ post, targets, mediaIds: ids }) => ({
     ...post,
-    mediaAssetIds: mediaIdsByPost[index] ?? [],
-    targets: (targetsByPost[index] ?? []).map((target) => {
+    mediaAssetIds: ids,
+    targets: targets.map((target) => {
       const account = accountsById.get(target.connectedAccountId);
       return {
         targetId: target._id,
@@ -491,7 +505,7 @@ async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
         avatarUrl: account?.avatarUrl,
       };
     }),
-    mediaAssets: (mediaIdsByPost[index] ?? []).flatMap((id) => {
+    mediaAssets: ids.flatMap((id) => {
       const asset = mediaById.get(id);
       return asset ? [toPublicMediaAsset(asset)] : [];
     }),
