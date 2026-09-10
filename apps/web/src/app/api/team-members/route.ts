@@ -30,10 +30,22 @@ export async function POST(request: NextRequest) {
     return errorResponse("Invalid request origin", 403);
   }
 
-  const [user, token] = await Promise.all([
+  const auth = await Promise.all([
     hexclaveServerApp.getUser({ tokenStore: request }),
     getHexclaveConvexServerToken(request),
-  ]);
+  ]).catch((error) => {
+    console.error(
+      "[team-members/auth]",
+      error instanceof Error ? error.message : error,
+    );
+    return null;
+  });
+
+  if (!auth) {
+    return errorResponse("Unauthorized", 401);
+  }
+
+  const [user, token] = auth;
   const team = (user?.selectedTeam as ServerTeam | null | undefined) ?? null;
 
   if (!user || !token) {

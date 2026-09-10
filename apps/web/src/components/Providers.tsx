@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { ThemeProvider } from "next-themes";
+import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { clientEnv } from "@/env";
 import { hexclaveClientApp } from "@/hexclave/client";
@@ -16,6 +17,10 @@ function createClients() {
     initialAuthTokenReuse: true,
   });
   if (typeof window !== "undefined") {
+    // Register the token fetcher while constructing the client. The client
+    // connects on the first query subscription, which can run before mount
+    // effects — deferring this to useEffect would let queries authenticate
+    // twice and rerun.
     convex.setAuth(hexclaveClientApp.getConvexClientAuth({}));
   }
   const queryClient = new QueryClient({
@@ -40,7 +45,9 @@ function getClients() {
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const { convex, queryClient } = getClients();
+  // Lazy useState init creates the clients exactly once per component
+  // instance instead of on every render.
+  const [{ convex, queryClient }] = useState(getClients);
   return (
     <HexclaveProvider app={hexclaveClientApp}>
       <HexclaveTheme>

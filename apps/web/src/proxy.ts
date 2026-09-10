@@ -8,7 +8,10 @@ export const config = {
 };
 
 export async function proxy(request: NextRequest) {
-  const user = await hexclaveServerApp.getUser({ tokenStore: request });
+  // A malformed/expired session must not 500 the sign-in pages.
+  const user = await hexclaveServerApp
+    .getUser({ tokenStore: request })
+    .catch(() => null);
 
   if (user) {
     return NextResponse.redirect(new URL("/overview", request.url));
