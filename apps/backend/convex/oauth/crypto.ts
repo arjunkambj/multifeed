@@ -70,15 +70,26 @@ export async function decryptSecret(payload: string): Promise<string> {
   if (!ivB64 || !dataB64) {
     fail("INVALID_INPUT", "Invalid encrypted payload");
   }
+  // importKey fails with INTERNAL_ERROR for misconfiguration — let it through.
   const key = await importKey();
-  const ivRaw = base64ToBytes(ivB64);
-  const dataRaw = base64ToBytes(dataB64);
-  const iv = new Uint8Array(ivRaw.byteLength);
-  iv.set(ivRaw);
-  const data = new Uint8Array(dataRaw.byteLength);
-  data.set(dataRaw);
-  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
-  return new TextDecoder().decode(plain);
+  try {
+    const ivRaw = base64ToBytes(ivB64);
+    const dataRaw = base64ToBytes(dataB64);
+    const iv = new Uint8Array(ivRaw.byteLength);
+    iv.set(ivRaw);
+    const data = new Uint8Array(dataRaw.byteLength);
+    data.set(dataRaw);
+    const plain = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv },
+      key,
+      data,
+    );
+    return new TextDecoder().decode(plain);
+  } catch {
+    // Corrupt/malformed payloads surface as DOMException from atob/decrypt —
+    // convert to a structured error callers can distinguish.
+    fail("INVALID_INPUT", "Could not decrypt stored credential");
+  }
 }
 
 export function randomUrlSafe(bytes = 32): string {

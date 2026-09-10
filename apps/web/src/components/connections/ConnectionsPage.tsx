@@ -41,6 +41,9 @@ function ConnectionsPageInner() {
   const searchParams = useSearchParams();
 
   const [connecting, setConnecting] = useState<OAuthPlatform | null>(null);
+  // Synchronous in-flight guard: state updates are batched, so a fast
+  // double-click could otherwise start the OAuth flow twice.
+  const connectingRef = useRef(false);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
   const [accountToDisconnect, setAccountToDisconnect] = useState<{
     id: Id<"connectedAccounts">;
@@ -108,7 +111,8 @@ function ConnectionsPageInner() {
   );
 
   const onConnect = (platform: OAuthPlatform) => {
-    if (connecting !== null) return;
+    if (connecting !== null || connectingRef.current) return;
+    connectingRef.current = true;
     setConnecting(platform);
     void fetch("/api/oauth/start", {
       method: "POST",
@@ -128,6 +132,7 @@ function ConnectionsPageInner() {
         window.location.assign(payload.url);
       })
       .catch((err) => {
+        connectingRef.current = false;
         setConnecting(null);
         toast.error(
           err instanceof Error ? err.message : "Could not start OAuth",

@@ -2,12 +2,17 @@ import { fail } from "../errors";
 
 const MIN_SECRET_LENGTH = 32;
 
-const constantTimeEqual = (left: string, right: string) => {
-  const length = Math.max(left.length, right.length);
-  let mismatch = left.length ^ right.length;
+const constantTimeEqual = (provided: string, expected: string) => {
+  // The expected secret's length is not secret (see MIN_SECRET_LENGTH), so a
+  // length mismatch can reject immediately — this also bounds the loop below
+  // to the configured secret length regardless of attacker-controlled input.
+  if (provided.length !== expected.length) {
+    return false;
+  }
 
-  for (let index = 0; index < length; index += 1) {
-    mismatch |= (left.charCodeAt(index) || 0) ^ (right.charCodeAt(index) || 0);
+  let mismatch = 0;
+  for (let index = 0; index < expected.length; index += 1) {
+    mismatch |= provided.charCodeAt(index) ^ expected.charCodeAt(index);
   }
 
   return mismatch === 0;

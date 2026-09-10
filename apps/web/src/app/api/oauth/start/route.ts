@@ -2,7 +2,10 @@ import { fetchMutation } from "convex/nextjs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
-import { getHexclaveConvexServerToken } from "@/hexclave/server";
+import {
+  getHexclaveConvexServerToken,
+  hexclaveServerApp,
+} from "@/hexclave/server";
 import { getConnector, isOAuthPlatform } from "@/lib/oauth/connectors/registry";
 import {
   assertSameOrigin,
@@ -11,6 +14,7 @@ import {
   sanitizeReturnTo,
 } from "@/lib/oauth/env";
 import { pkceChallenge } from "@/lib/oauth/pkce";
+import { MANAGE_CONNECTIONS_PERMISSION } from "@/lib/team-permissions";
 
 const responseOptions = {
   headers: { "Cache-Control": "private, no-store" },
@@ -26,14 +30,60 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const [token, body] = await Promise.all([
+  const auth = await Promise.all([
+    hexclaveServerApp.getUser({ tokenStore: request }),
     getHexclaveConvexServerToken(request),
     request.json().catch(() => null) as Promise<unknown>,
-  ]);
-  if (token == null) {
+  ]).catch((error) => {
+    console.error(
+      "[oauth/start-auth]",
+      error instanceof Error ? error.message : error,
+    );
+    return null;
+  });
+  if (!auth) {
     return NextResponse.json(
       { error: "Unauthenticated" },
       { status: 401, ...responseOptions },
+    );
+  }
+
+  const [user, token, body] = auth;
+  if (!user || token == null) {
+    return NextResponse.json(
+      { error: "Unauthenticated" },
+      { status: 401, ...responseOptions },
+    );
+  }
+
+  const team = user.selectedTeam;
+  if (!team) {
+    return NextResponse.json(
+      { error: "No selected team" },
+      { status: 400, ...responseOptions },
+    );
+  }
+
+  let canManageConnections: boolean;
+  try {
+    canManageConnections = await user.hasPermission(
+      team,
+      MANAGE_CONNECTIONS_PERMISSION,
+    );
+  } catch (error) {
+    console.error(
+      "[oauth/start-permission]",
+      error instanceof Error ? error.message : error,
+    );
+    return NextResponse.json(
+      { error: "Could not verify permissions" },
+      { status: 502, ...responseOptions },
+    );
+  }
+  if (!canManageConnections) {
+    return NextResponse.json(
+      { error: "You do not have permission to connect accounts for this team" },
+      { status: 403, ...responseOptions },
     );
   }
 
@@ -81,7 +131,7 @@ export async function POST(request: NextRequest) {
       codeChallenge,
     });
 
-    return NextResponse.json({ url, state: session.state }, responseOptions);
+    return NextResponse.json({ url }, responseOptions);
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not start OAuth";

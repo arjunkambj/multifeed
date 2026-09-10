@@ -2,7 +2,10 @@ import { fetchMutation } from "convex/nextjs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { api } from "@convex/_generated/api";
-import { getHexclaveConvexServerToken } from "@/hexclave/server";
+import {
+  getHexclaveConvexServerToken,
+  hexclaveServerApp,
+} from "@/hexclave/server";
 import { getConnector, isOAuthPlatform } from "@/lib/oauth/connectors/registry";
 import type { TokenBundle } from "@/lib/oauth/connectors/types";
 import {
@@ -13,6 +16,7 @@ import {
   oauthServerSecret,
 } from "@/lib/oauth/env";
 import { saveConnectedAccounts } from "@/lib/oauth/save-account";
+import { MANAGE_CONNECTIONS_PERMISSION } from "@/lib/team-permissions";
 
 function redirect(url: string) {
   return NextResponse.redirect(url, {
@@ -38,13 +42,36 @@ function connectedRedirect(
 }
 
 export async function GET(request: NextRequest) {
-  const token = await getHexclaveConvexServerToken(request);
-  if (token == null) {
+  const auth = await Promise.all([
+    hexclaveServerApp.getUser({ tokenStore: request }),
+    getHexclaveConvexServerToken(request),
+  ]).catch((error) => {
+    console.error(
+      "[oauth/callback] auth",
+      error instanceof Error ? error.message : error,
+    );
+    return null;
+  });
+
+  const [user, token] = auth ?? [null, null];
+  if (user == null || token == null) {
     // Never put the OAuth `code` into sign-in returnTo (history/logs/Referer).
     const signIn = new URL("/sign-in", appOrigin());
     signIn.searchParams.set("returnTo", "/connections");
     signIn.searchParams.set("error", "auth_required");
     return redirect(signIn.toString());
+  }
+
+  // Fail closed when the user has no team context or lacks the permission —
+  // e.g. it was revoked between authorize start and provider callback.
+  const team = user.selectedTeam;
+  const canManageConnections =
+    team != null &&
+    (await user
+      .hasPermission(team, MANAGE_CONNECTIONS_PERMISSION)
+      .catch(() => false));
+  if (!canManageConnections) {
+    return errorRedirect("permission_denied");
   }
 
   const url = new URL(request.url);

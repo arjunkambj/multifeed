@@ -79,6 +79,59 @@ const accountInput = v.object({
 type AccountInput = Infer<typeof accountInput>;
 type PublicAccount = Infer<typeof publicAccountValidator>;
 
+const MAX_FIELD_LENGTH = 1024;
+const MAX_TOKEN_LENGTH = 16 * 1024;
+const MAX_SCOPES = 100;
+const MAX_CAPABILITIES = 32;
+
+/** Validators check shape only — bound sizes before encrypting/storing. */
+function validateAccountInput(account: AccountInput) {
+  if (
+    !account.providerAccountId ||
+    account.providerAccountId.length > MAX_FIELD_LENGTH
+  ) {
+    fail("INVALID_INPUT", "Invalid provider account id");
+  }
+  if (!account.username.trim() || account.username.length > MAX_FIELD_LENGTH) {
+    fail("INVALID_INPUT", "Invalid account username");
+  }
+  if (
+    account.displayName !== undefined &&
+    account.displayName.length > MAX_FIELD_LENGTH
+  ) {
+    fail("INVALID_INPUT", "Invalid account display name");
+  }
+  if (account.avatarUrl !== undefined && account.avatarUrl.length > 2048) {
+    fail("INVALID_INPUT", "Invalid account avatar URL");
+  }
+  if (!account.accessToken || account.accessToken.length > MAX_TOKEN_LENGTH) {
+    fail("INVALID_INPUT", "Invalid access token");
+  }
+  if (
+    account.refreshToken !== undefined &&
+    account.refreshToken.length > MAX_TOKEN_LENGTH
+  ) {
+    fail("INVALID_INPUT", "Invalid refresh token");
+  }
+  if (
+    account.scopes.length > MAX_SCOPES ||
+    account.scopes.some((scope) => scope.length > MAX_FIELD_LENGTH)
+  ) {
+    fail("INVALID_INPUT", "Invalid account scopes");
+  }
+  if (account.capabilities.length > MAX_CAPABILITIES) {
+    fail("INVALID_INPUT", "Invalid account capabilities");
+  }
+  for (const value of [
+    account.tokenExpiresAt,
+    account.refreshTokenExpiresAt,
+  ]) {
+    if (value !== undefined && (!Number.isFinite(value) || value < 0)) {
+      fail("INVALID_INPUT", "Invalid token expiry");
+    }
+  }
+}
+
 /** UI fields only — tokens and provider metadata stay on the document. */
 function toPublicAccount(doc: Doc<"connectedAccounts">): PublicAccount {
   return {
@@ -203,6 +256,10 @@ export const saveMany = mutation({
         "INVALID_INPUT",
         `A connection must contain between 1 and ${MAX_ACCOUNTS_PER_CONNECTION} accounts`,
       );
+    }
+
+    for (const account of args.accounts) {
+      validateAccountInput(account);
     }
 
     const identities = args.accounts.map(

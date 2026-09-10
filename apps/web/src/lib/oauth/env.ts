@@ -1,5 +1,3 @@
-import { sanitizeReturnTo } from "@convex/oauth/returnPath";
-export { sanitizeReturnTo } from "@convex/oauth/returnPath";
 import { clientEnv } from "@/env";
 
 function requireEnv(name: string): string {
@@ -41,6 +39,8 @@ export const OAUTH_ERROR_MESSAGES: Record<string, string> = {
     "No pages or accounts found for this login. Check permissions and try again.",
   no_instagram: "No Instagram professional accounts found for this login.",
   oauth_denied: "Connection was cancelled or denied.",
+  permission_denied:
+    "You do not have permission to connect accounts for this team.",
   oauth_failed: "Could not complete connection. Please try again.",
   token_exchange_failed:
     "Could not exchange authorization code. Please try again.",
@@ -60,6 +60,51 @@ export function connectionsUrl(query?: Record<string, string>): string {
     }
   }
   return u.toString();
+}
+
+/**
+ * Relative app paths allowed as OAuth `returnTo` targets. Keep in sync with
+ * `apps/backend/convex/oauth/returnPath.ts` — Convex re-validates server-side.
+ */
+const ALLOWED_RETURN_PREFIXES = [
+  "/connections",
+  "/posts",
+  "/calendar",
+  "/inbox",
+  "/settings",
+  "/billing",
+  "/teams",
+  "/overview",
+] as const;
+
+/**
+ * Accept only same-app relative paths. Normalizes dot segments (`..`, `.`,
+ * percent-encoded variants) via URL parsing *before* the prefix check, so a
+ * raw string like `/connections/../sign-in` cannot pass validation and then
+ * normalize outside the allowlist. Rejects protocol-relative (`//evil.com`),
+ * backslashes, absolute URLs, and unknown prefixes.
+ */
+export function sanitizeReturnTo(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return undefined;
+  if (trimmed.includes("\\") || trimmed.includes("://")) return undefined;
+  if (trimmed.length > 512) return undefined;
+
+  let url: URL;
+  try {
+    url = new URL(trimmed, "http://local.invalid");
+  } catch {
+    return undefined;
+  }
+
+  const allowed = ALLOWED_RETURN_PREFIXES.some(
+    (prefix) =>
+      url.pathname === prefix || url.pathname.startsWith(`${prefix}/`),
+  );
+  if (!allowed) return undefined;
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
 export function connectedReturnPath(

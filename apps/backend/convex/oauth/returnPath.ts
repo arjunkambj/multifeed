@@ -10,9 +10,18 @@ const ALLOWED_RETURN_PREFIXES = [
   "/overview",
 ] as const;
 
+/** Parsing base — only used to normalize the path, never returned. */
+const RETURN_BASE = "https://multifeed.invalid";
+
 /**
  * Accept only same-app relative paths. Rejects protocol-relative (`//evil.com`),
  * backslashes, absolute URLs, and unknown prefixes.
+ *
+ * The path is normalized with the WHATWG URL parser BEFORE the allowlist check
+ * so traversal segments (`/connections/../settings`) and percent-encoded dots
+ * (`%2e%2e`) cannot smuggle the raw string past the prefix check only to
+ * collapse outside the allowlist in the browser. The returned value is the
+ * normalized `pathname + search`, never the raw input.
  */
 export function sanitizeReturnTo(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -22,10 +31,23 @@ export function sanitizeReturnTo(value: unknown): string | undefined {
   if (trimmed.includes("\\") || trimmed.includes("://")) return undefined;
   if (trimmed.length > 512) return undefined;
 
-  const pathOnly = trimmed.split("?")[0]!.split("#")[0]!;
+  let url: URL;
+  try {
+    url = new URL(trimmed, RETURN_BASE);
+  } catch {
+    return undefined;
+  }
+
+  // Belt-and-suspenders: the input cannot redirect off-origin (the checks above
+  // reject `//host`, `scheme://`, and backslashes), but never trust the raw
+  // string — only the normalized result is validated and returned.
+  if (url.origin !== RETURN_BASE) return undefined;
+
   const allowed = ALLOWED_RETURN_PREFIXES.some(
-    (prefix) => pathOnly === prefix || pathOnly.startsWith(`${prefix}/`),
+    (prefix) =>
+      url.pathname === prefix || url.pathname.startsWith(`${prefix}/`),
   );
   if (!allowed) return undefined;
-  return trimmed;
+
+  return `${url.pathname}${url.search}`;
 }

@@ -10,6 +10,18 @@ import type { AccountOption, AccountProfile, TokenBundle } from "../types";
 
 const GRAPH = META_GRAPH;
 
+/** Keep access tokens out of URLs (query strings leak into logs/proxies). */
+const bearerHeaders = (accessToken: string) => ({
+  Authorization: `Bearer ${accessToken}`,
+});
+
+const postForm = (url: string, body: URLSearchParams) =>
+  oauthFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+
 function metaAppCredentials() {
   return {
     appId: requireEnv("META_APP_ID"),
@@ -46,13 +58,15 @@ export async function metaExchangeCode(input: {
   redirectUri: string;
 }): Promise<TokenBundle> {
   const { appId, appSecret } = metaAppCredentials();
-  const params = new URLSearchParams({
-    client_id: appId,
-    client_secret: appSecret,
-    redirect_uri: input.redirectUri,
-    code: input.code,
-  });
-  const res = await oauthFetch(`${GRAPH}/oauth/access_token?${params}`);
+  const res = await postForm(
+    `${GRAPH}/oauth/access_token`,
+    new URLSearchParams({
+      client_id: appId,
+      client_secret: appSecret,
+      redirect_uri: input.redirectUri,
+      code: input.code,
+    }),
+  );
   const data = (await res.json()) as {
     access_token?: string;
     expires_in?: number;
@@ -62,13 +76,15 @@ export async function metaExchangeCode(input: {
     throw new Error(data.error?.message ?? "Meta token exchange failed");
   }
 
-  const longParams = new URLSearchParams({
-    grant_type: "fb_exchange_token",
-    client_id: appId,
-    client_secret: appSecret,
-    fb_exchange_token: data.access_token,
-  });
-  const longRes = await oauthFetch(`${GRAPH}/oauth/access_token?${longParams}`);
+  const longRes = await postForm(
+    `${GRAPH}/oauth/access_token`,
+    new URLSearchParams({
+      grant_type: "fb_exchange_token",
+      client_id: appId,
+      client_secret: appSecret,
+      fb_exchange_token: data.access_token,
+    }),
+  );
   const longData = (await longRes.json()) as {
     access_token?: string;
     expires_in?: number;
@@ -80,12 +96,9 @@ export async function metaExchangeCode(input: {
     );
   }
 
-  const permissionsParams = new URLSearchParams({
-    access_token: longData.access_token,
+  const permissionsRes = await oauthFetch(`${GRAPH}/me/permissions`, {
+    headers: bearerHeaders(longData.access_token),
   });
-  const permissionsRes = await oauthFetch(
-    `${GRAPH}/me/permissions?${permissionsParams}`,
-  );
   const permissionsData = (await permissionsRes.json()) as {
     data?: Array<{ permission?: string; status?: string }>;
     error?: { message?: string };
@@ -128,6 +141,7 @@ const PAGE_FIELDS =
 
 async function metaFetchPageCollection(
   startUrl: string,
+  accessToken: string,
   onError: "throw" | "ignore",
 ): Promise<MetaPage[]> {
   const pages: MetaPage[] = [];
@@ -135,7 +149,9 @@ async function metaFetchPageCollection(
   let url: string | undefined = startUrl;
 
   while (url) {
-    const res = await oauthFetch(url);
+    const res = await oauthFetch(url, {
+      headers: bearerHeaders(accessToken),
+    });
     const data = (await res.json()) as {
       data?: MetaPage[];
       paging?: { cursors?: { after?: string }; next?: string };
@@ -175,11 +191,14 @@ export async function metaListPages(
 
   const accounts = new URLSearchParams({
     fields: PAGE_FIELDS,
-    access_token: userAccessToken,
     limit: "100",
   });
   addPages(
-    await metaFetchPageCollection(`${GRAPH}/me/accounts?${accounts}`, "throw"),
+    await metaFetchPageCollection(
+      `${GRAPH}/me/accounts?${accounts}`,
+      userAccessToken,
+      "throw",
+    ),
   );
 
   // Pages granted through Business Manager often never appear on /me/accounts.
@@ -188,11 +207,12 @@ export async function metaListPages(
     const seenBiz = new Set<string>();
     let bizUrl: string | undefined =
       `${GRAPH}/me/businesses?${new URLSearchParams({
-        access_token: userAccessToken,
         limit: "100",
       })}`;
     while (bizUrl) {
-      const bizRes = await oauthFetch(bizUrl);
+      const bizRes = await oauthFetch(bizUrl, {
+        headers: bearerHeaders(userAccessToken),
+      });
       const bizData = (await bizRes.json()) as {
         data?: Array<{ id?: string }>;
         paging?: { next?: string; cursors?: { after?: string } };
@@ -213,13 +233,13 @@ export async function metaListPages(
     for (const businessId of businessIds) {
       const pageParams = new URLSearchParams({
         fields: PAGE_FIELDS,
-        access_token: userAccessToken,
         limit: "100",
       });
       for (const edge of ["owned_pages", "client_pages"] as const) {
         addPages(
           await metaFetchPageCollection(
             `${GRAPH}/${businessId}/${edge}?${pageParams}`,
+            userAccessToken,
             "ignore",
           ),
         );
@@ -277,9 +297,10 @@ export async function metaFetchIgProfile(
 ): Promise<AccountProfile> {
   const params = new URLSearchParams({
     fields: "id,username,name,profile_picture_url",
-    access_token: pageAccessToken,
   });
-  const res = await oauthFetch(`${GRAPH}/${igUserId}?${params}`);
+  const res = await oauthFetch(`${GRAPH}/${igUserId}?${params}`, {
+    headers: bearerHeaders(pageAccessToken),
+  });
   const data = (await res.json()) as {
     id?: string;
     username?: string;
@@ -321,18 +342,16 @@ export async function threadsExchangeCodeNative(input: {
   redirectUri: string;
 }): Promise<TokenBundle> {
   const { appId, appSecret } = threadsAppCredentials();
-  const body = new URLSearchParams({
-    client_id: appId,
-    client_secret: appSecret,
-    grant_type: "authorization_code",
-    redirect_uri: input.redirectUri,
-    code: input.code,
-  });
-  const res = await oauthFetch(`${THREADS_GRAPH}/oauth/access_token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
+  const res = await postForm(
+    `${THREADS_GRAPH}/oauth/access_token`,
+    new URLSearchParams({
+      client_id: appId,
+      client_secret: appSecret,
+      grant_type: "authorization_code",
+      redirect_uri: input.redirectUri,
+      code: input.code,
+    }),
+  );
   const data = (await res.json()) as {
     access_token?: string;
     expires_in?: number;
@@ -347,13 +366,13 @@ export async function threadsExchangeCodeNative(input: {
     );
   }
 
-  const longParams = new URLSearchParams({
-    grant_type: "th_exchange_token",
-    client_secret: appSecret,
-    access_token: data.access_token,
-  });
-  const longRes = await oauthFetch(
-    `${THREADS_GRAPH}/access_token?${longParams}`,
+  const longRes = await postForm(
+    `${THREADS_GRAPH}/access_token`,
+    new URLSearchParams({
+      grant_type: "th_exchange_token",
+      client_secret: appSecret,
+      access_token: data.access_token,
+    }),
   );
   const longData = (await longRes.json()) as {
     access_token?: string;
@@ -386,9 +405,10 @@ export async function threadsFetchProfile(
 ): Promise<AccountProfile> {
   const params = new URLSearchParams({
     fields: "id,username,name,threads_profile_picture_url",
-    access_token: accessToken,
   });
-  const res = await oauthFetch(`${THREADS_GRAPH_VERSIONED}/me?${params}`);
+  const res = await oauthFetch(`${THREADS_GRAPH_VERSIONED}/me?${params}`, {
+    headers: bearerHeaders(accessToken),
+  });
   const data = (await res.json()) as {
     id?: string;
     username?: string;
