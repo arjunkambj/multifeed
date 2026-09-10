@@ -15,6 +15,7 @@ import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import Logo from "@/components/layout/Logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   InputGroup,
   InputGroupAddon,
@@ -265,7 +266,7 @@ export function DashboardMock() {
                 </div>
               </header>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-6 py-3">
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-6 py-3">
                 <DashboardPageTitle
                   title="Calendar"
                   description="Month, week, day, and list. Drag a post to move it."
@@ -278,17 +279,22 @@ export function DashboardMock() {
                 />
 
                 <div className="flex shrink-0 items-center justify-between gap-3">
-                  <div className="flex items-center gap-1">
-                    <Button tabIndex={-1} variant="outline">
-                      <Icon icon="hugeicons:arrow-left-01" width={16} />
-                    </Button>
-                    <Button tabIndex={-1} variant="outline">
-                      Today
-                    </Button>
-                    <Button tabIndex={-1} variant="outline">
-                      <Icon icon="hugeicons:arrow-right-01" width={16} />
-                    </Button>
-                    <h2 className="ml-2 text-base font-semibold tracking-tight">
+                  <div className="flex items-center gap-3">
+                    <ButtonGroup
+                      aria-hidden
+                      className="rounded-xl bg-secondary"
+                    >
+                      <Button size="icon" tabIndex={-1} variant="outline">
+                        <Icon icon="hugeicons:arrow-left-01" width={16} />
+                      </Button>
+                      <Button tabIndex={-1} variant="outline">
+                        Today
+                      </Button>
+                      <Button size="icon" tabIndex={-1} variant="outline">
+                        <Icon icon="hugeicons:arrow-right-01" width={16} />
+                      </Button>
+                    </ButtonGroup>
+                    <h2 className="text-base font-semibold tracking-tight">
                       March 2026
                     </h2>
                   </div>

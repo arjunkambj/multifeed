@@ -1,5 +1,4 @@
 import { TeamTableSkeleton } from "@/components/team/TeamTableSkeleton";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +11,7 @@ import {
   SidebarMenuSkeleton,
   SidebarProvider,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarGridSkeleton } from "./CalendarGridSkeleton";
 import { ComposerFormSkeleton } from "./ComposerFormSkeleton";
 import { ConnectionsRowsSkeleton } from "./ConnectionsRowsSkeleton";
@@ -132,13 +132,11 @@ export function DashboardLoadingSkeleton({
       break;
     case "calendar":
       content = (
-        <>
+        <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex gap-2">
-              <Skeleton className="h-8 w-8 rounded-lg" />
-              <Skeleton className="h-8 w-16 rounded-lg" />
-              <Skeleton className="h-8 w-8 rounded-lg" />
-              <Skeleton className="h-8 w-40 rounded-lg" />
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-8 w-32 rounded-xl" />
+              <Skeleton className="h-5 w-40 rounded-lg" />
             </div>
             <div className="flex gap-2">
               <Skeleton className="h-8 w-40 rounded-lg" />
@@ -148,7 +146,7 @@ export function DashboardLoadingSkeleton({
           <div className="overflow-hidden rounded-2xl border border-card bg-background">
             <CalendarGridSkeleton />
           </div>
-        </>
+        </div>
       );
       break;
     case "posts":

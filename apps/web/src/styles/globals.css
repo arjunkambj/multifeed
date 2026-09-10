@@ -165,7 +165,7 @@
 .multifeed-calendar .fc-col-header-cell {
   position: relative;
   border: none !important;
-  padding: 0.7rem 0;
+  padding: 0.5rem 0;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -177,9 +177,9 @@
 .multifeed-calendar .fc-col-header-cell:not(:last-child)::after {
   content: "";
   position: absolute;
-  top: 0.5rem;
+  top: 0.4rem;
   right: 0;
-  bottom: 0.5rem;
+  bottom: 0.4rem;
   width: 1px;
   background: var(--border);
 }

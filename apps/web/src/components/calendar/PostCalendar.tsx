@@ -25,6 +25,7 @@ import { CalendarGridSkeleton } from "@/components/layout/CalendarGridSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Card,
   CardContent,
@@ -196,7 +197,7 @@ export function PostCalendar() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <DashboardPageTitle
         title="Calendar"
         description="Month, week, day, and list — drag to reschedule."
@@ -215,29 +216,34 @@ export function PostCalendar() {
             : "grid"
         }
       >
-        <div className="flex min-w-0 flex-col gap-4 overflow-hidden">
+        <div className="flex min-w-0 flex-col gap-3 overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex min-w-0 flex-wrap items-center gap-1">
-              <Button
-                aria-label="Previous period"
-                size="icon-sm"
-                variant="outline"
-                onClick={goPrev}
+            <div className="flex min-w-0 flex-wrap items-center gap-3">
+              <ButtonGroup
+                aria-label="Calendar period"
+                className="rounded-xl bg-secondary"
               >
-                <Icon icon="hugeicons:arrow-left-01" width={16} />
-              </Button>
-              <Button variant="outline" onClick={goToday}>
-                Today
-              </Button>
-              <Button
-                aria-label="Next period"
-                size="icon-sm"
-                variant="outline"
-                onClick={goNext}
-              >
-                <Icon icon="hugeicons:arrow-right-01" width={16} />
-              </Button>
-              <h2 className="ml-2 text-base font-semibold tracking-tight">
+                <Button
+                  aria-label="Previous period"
+                  size="icon"
+                  variant="outline"
+                  onClick={goPrev}
+                >
+                  <Icon icon="hugeicons:arrow-left-01" width={16} />
+                </Button>
+                <Button variant="outline" onClick={goToday}>
+                  Today
+                </Button>
+                <Button
+                  aria-label="Next period"
+                  size="icon"
+                  variant="outline"
+                  onClick={goNext}
+                >
+                  <Icon icon="hugeicons:arrow-right-01" width={16} />
+                </Button>
+              </ButtonGroup>
+              <h2 className="text-base font-semibold tracking-tight">
                 {title || "…"}
               </h2>
             </div>
@@ -503,10 +509,7 @@ function PostDetailsCard({
                 selectedPost.targets.some(
                   (target) => target.status === "failed",
                 ) && (
-                  <Button
-                    disabled={retrying}
-                    onClick={() => void onRetry()}
-                  >
+                  <Button disabled={retrying} onClick={() => void onRetry()}>
                     {retrying ? "Retrying…" : "Retry failed"}
                   </Button>
                 )}
@@ -534,10 +537,7 @@ function PostDetailsCard({
                 Close
               </Button>
               {selectedPost.status !== "publishing" && (
-                <Button
-                  variant="destructive"
-                  onClick={() => void onDelete()}
-                >
+                <Button variant="destructive" onClick={() => void onDelete()}>
                   Delete
                 </Button>
               )}

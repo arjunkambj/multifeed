@@ -9,7 +9,7 @@ export function CalendarGridSkeleton() {
       <div className="grid grid-cols-7 bg-card">
         {WEEKDAYS.map((day) => (
           <div
-            className="relative py-3 text-center text-xs font-semibold tracking-wide text-muted-foreground uppercase after:absolute after:inset-y-2 after:right-0 after:w-px after:bg-border last:after:hidden"
+            className="relative py-2 text-center text-xs font-semibold tracking-wide text-muted-foreground uppercase after:absolute after:inset-y-1.5 after:right-0 after:w-px after:bg-border last:after:hidden"
             key={day}
           >
             {day}
