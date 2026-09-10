@@ -65,6 +65,7 @@ export const accountSupportsPostKind = (
   account: { platform: string; capabilities: string[] },
   kind: PostKind,
   storyMediaKind?: "image" | "video",
+  mediaCount?: number,
 ) => {
   if (
     !POST_KIND_PLATFORMS[kind].some((platform) => platform === account.platform)
@@ -76,6 +77,11 @@ export const accountSupportsPostKind = (
     return (
       storyMediaKind == null || account.capabilities.includes(storyMediaKind)
     );
+  }
+  // Multi-image posts are published as carousels, which some accounts don't
+  // support even though they accept a single image.
+  if (kind === "image" && (mediaCount ?? 1) > 1) {
+    return account.capabilities.includes("carousel");
   }
   return account.capabilities.includes(kind);
 };

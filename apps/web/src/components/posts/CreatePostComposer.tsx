@@ -105,6 +105,17 @@ const EMPTY_TARGET_OPTIONS: TargetOptions = {
   platformSettings: {},
 };
 
+// First comments are published as platform replies/comments.
+const FIRST_COMMENT_MAX_CHARS: Record<string, number> = {
+  x: 280,
+  threads: 500,
+  instagram: 2200,
+  linkedin: 1250,
+  facebook: 8000,
+};
+
+const HTTP_URL_PATTERN = /^https?:\/\//i;
+
 const normalizePlatformSettings = (settings: PlatformSettings) => ({
   ...settings,
   title: settings.title?.trim() || undefined,
@@ -304,6 +315,9 @@ function PostComposerForm({
   const updatePost = useMutation(api.posts.update);
   const deleteMedia = useMutation(api.media.r2.deleteMedia);
   const prefilledFrom = useRef<string | null>(null);
+  // Synchronous in-flight guard: `saving` updates are batched, so a fast
+  // double-click could otherwise fire the mutation twice.
+  const submittingRef = useRef(false);
   const [confirmFormatChange, setConfirmFormatChange] = useState(false);
   const [previewAccountId, setPreviewAccountId] = useState<string | null>(null);
 
@@ -425,7 +439,7 @@ function PostComposerForm({
       : undefined;
 
   const compatibleAccounts = activeAccounts.filter((account) =>
-    accountSupportsPostKind(account, postKind, storyMediaKind),
+    accountSupportsPostKind(account, postKind, storyMediaKind, media.length),
   );
 
   const selectedAccountIds = (() => {
@@ -474,6 +488,10 @@ function PostComposerForm({
   });
 
   const overLimit = overLimitAccounts.length > 0;
+  const invalidReferenceUrl = selectedAccounts.some((account) => {
+    const url = targetOptions[account._id]?.referenceUrl.trim() ?? "";
+    return url.length > 0 && !HTTP_URL_PATTERN.test(url);
+  });
   const hasRequiredContent =
     postKind === "text" ? body.trim().length > 0 : media.length > 0;
   const scheduledAt = fromLocalInputValue(scheduleLocal);
@@ -497,6 +515,9 @@ function PostComposerForm({
     ...(uploadingMedia ? ["Wait for your media to finish uploading."] : []),
     ...(overLimit
       ? ["Shorten the captions that exceed their account limits."]
+      : []),
+    ...(invalidReferenceUrl
+      ? ["Reply URLs must start with http:// or https://."]
       : []),
     ...(scheduleError ? [scheduleError] : []),
   ];
@@ -544,7 +565,8 @@ function PostComposerForm({
   };
 
   const submit = async (mode: "draft" | "schedule" | "now") => {
-    if (saving || uploadingMedia) return;
+    if (saving || uploadingMedia || submittingRef.current) return;
+    submittingRef.current = true;
     dispatch({ type: "savingChanged", value: mode });
 
     const parsed = fromLocalInputValue(scheduleLocal);
@@ -554,6 +576,7 @@ function PostComposerForm({
       mode === "schedule" &&
       (scheduledFor == null || scheduledFor <= Date.now())
     ) {
+      submittingRef.current = false;
       dispatch({ type: "savingChanged", value: null });
       toast.error("Choose a date and time in the future.");
       return;
@@ -602,6 +625,7 @@ function PostComposerForm({
       if (mode === "draft") {
         toast.success("Draft saved.");
         if (!editPostId) router.replace(`/posts/new?edit=${result.postId}`);
+        submittingRef.current = false;
         dispatch({ type: "savingChanged", value: null });
         return;
       }
@@ -609,9 +633,12 @@ function PostComposerForm({
       toast.success(
         mode === "schedule" ? "Post scheduled." : "Post publishing.",
       );
+      submittingRef.current = false;
+      dispatch({ type: "savingChanged", value: null });
       router.push(`/calendar?highlight=${result.postId}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not save post");
+      submittingRef.current = false;
       dispatch({ type: "savingChanged", value: null });
     }
   };
@@ -819,6 +846,7 @@ function PostComposerForm({
                     </FieldLabel>
                     <Input
                       id="post-title"
+                      maxLength={100}
                       placeholder="Add a title"
                       value={title}
                       onChange={(e) =>
@@ -948,6 +976,10 @@ function PostComposerForm({
                         const effectiveLength = (
                           options.bodyOverride.trim() || body
                         ).length;
+                        const trimmedReferenceUrl = options.referenceUrl.trim();
+                        const referenceUrlInvalid =
+                          trimmedReferenceUrl.length > 0 &&
+                          !HTTP_URL_PATTERN.test(trimmedReferenceUrl);
                         return (
                           <div
                             key={account._id}
@@ -1021,6 +1053,11 @@ function PostComposerForm({
                                   </Label>
                                   <Input
                                     id={`comment-${account._id}`}
+                                    maxLength={
+                                      FIRST_COMMENT_MAX_CHARS[
+                                        account.platform
+                                      ] ?? 2000
+                                    }
                                     placeholder="Optional follow-up"
                                     value={options.firstComment}
                                     onChange={(event) =>
@@ -1039,6 +1076,8 @@ function PostComposerForm({
                                   <Input
                                     id={`reference-${account._id}`}
                                     type="url"
+                                    pattern="https?://.*"
+                                    aria-invalid={referenceUrlInvalid}
                                     placeholder="https://x.com/.../status/..."
                                     value={options.referenceUrl}
                                     onChange={(event) =>
@@ -1291,6 +1330,7 @@ function PostComposerForm({
                       !hasRequiredContent ||
                       selectedAccountIds.size === 0 ||
                       overLimit ||
+                      invalidReferenceUrl ||
                       scheduleError !== null
                     }
                     aria-describedby="publish-requirements"

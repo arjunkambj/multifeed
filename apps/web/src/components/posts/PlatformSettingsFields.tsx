@@ -132,6 +132,7 @@ export function PlatformSettingsFields({
             <Label htmlFor={`platform-title-${accountId}`}>Video title</Label>
             <Input
               id={`platform-title-${accountId}`}
+              maxLength={100}
               value={value.title ?? ""}
               onChange={(event) => onChange({ title: event.target.value })}
             />
@@ -144,6 +145,7 @@ export function PlatformSettingsFields({
             <Textarea
               id={`alt-text-${accountId}`}
               rows={2}
+              maxLength={platform === "x" ? 1000 : 2000}
               placeholder="Describe the image for accessibility"
               value={value.altText ?? ""}
               onChange={(event) => onChange({ altText: event.target.value })}
