@@ -214,7 +214,7 @@ export function PostCalendar() {
             : "grid"
         }
       >
-        <div className="flex min-w-0 flex-col gap-3 overflow-hidden">
+        <div className="flex min-w-0 flex-col gap-5 overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 flex-wrap items-center gap-3">
               <ButtonGroup
@@ -305,11 +305,11 @@ export function PostCalendar() {
               headerToolbar={false}
               height={640}
               events={events}
+              eventDisplay="block"
               editable
               selectable
               selectMirror
               expandRows
-              dayMaxEvents={3}
               nowIndicator
               weekends
               fixedWeekCount={false}
@@ -326,7 +326,7 @@ export function PostCalendar() {
                 )
               }
               views={{
-                dayGridMonth: { dayMaxEventRows: 3 },
+                dayGridMonth: { dayMaxEventRows: true, displayEventTime: false },
                 timeGridWeek: {
                   slotMinTime: "06:00:00",
                   slotMaxTime: "24:00:00",
