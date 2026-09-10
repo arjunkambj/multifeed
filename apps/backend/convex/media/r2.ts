@@ -11,6 +11,7 @@ import {
 import { fail } from "../errors";
 import { requireUser } from "../hexclave/auth";
 import schema from "../schema";
+import { serializeScope } from "../writeGuards";
 
 const r2 = new R2(components.r2);
 
@@ -68,24 +69,6 @@ export function toPublicMediaAsset(doc: MediaAssetDoc) {
   return publicAsset as Omit<MediaAssetDoc, "r2Key" | "storageId">;
 }
 
-/**
- * Serialize ownership stamping for a single R2 key so concurrent syncMetadata
- * calls cannot both insert a mediaAssets row for it (by_r2_key is not unique).
- */
-async function serializeMediaKeyWrites(ctx: MutationCtx, key: string) {
-  const scope = `media:r2:${key}`;
-  const guard = await ctx.db
-    .query("writeGuards")
-    .withIndex("by_scope", (q) => q.eq("scope", scope))
-    .unique();
-  const now = Date.now();
-  if (guard) {
-    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
-  } else {
-    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
-  }
-}
-
 async function requireOwnedMediaKey(ctx: QueryCtx | MutationCtx, key: string) {
   const user = await requireUser(ctx);
   const asset = await ctx.db
@@ -113,9 +96,11 @@ export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
   },
   onUpload: async (ctx, _bucket, key) => {
     // Stamp team ownership as soon as the client registers the upload so
-    // confirmMediaUpload cannot claim another team's object key.
+    // confirmMediaUpload cannot claim another team's object key. The scope
+    // serializes concurrent syncMetadata calls for the same key (by_r2_key
+    // is not unique).
     const user = await requireUser(ctx);
-    await serializeMediaKeyWrites(ctx, key);
+    await serializeScope(ctx, `media:r2:${key}`);
     const existing = await ctx.db
       .query("mediaAssets")
       .withIndex("by_r2_key", (q) => q.eq("r2Key", key))

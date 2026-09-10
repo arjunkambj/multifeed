@@ -19,6 +19,7 @@ import {
 import { encryptSecret } from "./crypto";
 import { accountLimitUsage } from "./limits";
 import { requireOAuthServer } from "./server";
+import { serializeScope } from "../writeGuards";
 
 const MAX_ACCOUNTS_PER_CONNECTION = 100;
 const MAX_ACCOUNTS_PER_TEAM = 100;
@@ -29,20 +30,6 @@ const DISCONNECTABLE_TARGET_STATUSES = [
   "publishing",
   "failed",
 ] as const;
-
-async function serializeTeamAccountWrites(ctx: MutationCtx, teamId: string) {
-  const scope = `oauth:accounts:${teamId}`;
-  const guard = await ctx.db
-    .query("writeGuards")
-    .withIndex("by_scope", (q) => q.eq("scope", scope))
-    .unique();
-  const now = Date.now();
-  if (guard) {
-    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
-  } else {
-    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
-  }
-}
 
 export const publicAccountValidator = v.object({
   _id: v.id("connectedAccounts"),
@@ -246,7 +233,7 @@ export const saveMany = mutation({
   handler: async (ctx, args) => {
     requireOAuthServer(args.serverSecret);
     const user = await requireUser(ctx);
-    await serializeTeamAccountWrites(ctx, user.selectedTeamId);
+    await serializeScope(ctx, `oauth:accounts:${user.selectedTeamId}`);
 
     if (
       args.accounts.length === 0 ||
@@ -359,7 +346,7 @@ export const disconnect = mutation({
   returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    await serializeTeamAccountWrites(ctx, user.selectedTeamId);
+    await serializeScope(ctx, `oauth:accounts:${user.selectedTeamId}`);
     const account = await ctx.db.get("connectedAccounts", args.accountId);
     if (!account || account.teamId !== user.selectedTeamId) {
       fail("NOT_FOUND", "Account not found");

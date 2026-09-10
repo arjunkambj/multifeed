@@ -15,6 +15,7 @@ import {
   billingStatus,
   planKey as planKeyValidator,
 } from "./schema";
+import { serializeScope } from "./writeGuards";
 
 /** Subscription statuses that grant product access. */
 export const ACTIVE_BILLING = new Set([
@@ -92,7 +93,7 @@ const subscriptionSnapshotValidator = v.union(
   v.null(),
 );
 
-function str(...values: unknown[]) {
+function firstNonEmptyString(...values: unknown[]) {
   for (const value of values) {
     if (typeof value === "string" && value.length > 0) return value;
   }
@@ -134,7 +135,7 @@ function webhookStatus(
   if (SYNC_EVENTS.has(eventType)) {
     // Only generic sync events consult the payload status, and only when it is
     // a status we actually model.
-    const rawStatus = str(event.status);
+    const rawStatus = firstNonEmptyString(event.status);
     if (rawStatus && (STATUSES as readonly string[]).includes(rawStatus)) {
       return rawStatus as BillingStatus;
     }
@@ -260,24 +261,6 @@ export const getSubscription = query({
 });
 
 /**
- * Serialize all checkout-intent writes for a team so concurrent checkouts
- * cannot both pass the "no pending checkout" check.
- */
-async function serializeTeamCheckoutWrites(ctx: MutationCtx, teamId: string) {
-  const scope = `billing-checkout:${teamId}`;
-  const guard = await ctx.db
-    .query("writeGuards")
-    .withIndex("by_scope", (q) => q.eq("scope", scope))
-    .unique();
-  const now = Date.now();
-  if (guard) {
-    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
-  } else {
-    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
-  }
-}
-
-/**
  * Latest local checkout intent (status `pending`) for a team. These rows are
  * never subscription truth — `latestForTeam` ignores them — they only record
  * that a checkout was initiated so webhooks can be tied back to it.
@@ -324,7 +307,7 @@ export const beginCheckout = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const now = Date.now();
-    await serializeTeamCheckoutWrites(ctx, user.selectedTeamId);
+    await serializeScope(ctx, `billing-checkout:${user.selectedTeamId}`);
 
     const sub = await latestForTeam(ctx, user.selectedTeamId, now);
     if (sub && !canStartCheckout(sub, now)) {
@@ -387,7 +370,7 @@ export const completeCheckout = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const now = Date.now();
-    await serializeTeamCheckoutWrites(ctx, user.selectedTeamId);
+    await serializeScope(ctx, `billing-checkout:${user.selectedTeamId}`);
 
     const pending = await latestPendingCheckout(ctx, user.selectedTeamId);
     if (!pending || now - pending.updatedAt >= PENDING_CHECKOUT_TTL_MS) {
@@ -410,7 +393,7 @@ export const abandonCheckout = mutation({
   handler: async (ctx) => {
     const user = await requireUser(ctx);
     const now = Date.now();
-    await serializeTeamCheckoutWrites(ctx, user.selectedTeamId);
+    await serializeScope(ctx, `billing-checkout:${user.selectedTeamId}`);
 
     const pending = await latestPendingCheckout(ctx, user.selectedTeamId);
     if (pending) {
@@ -434,7 +417,7 @@ export const handleWebhook = internalMutation({
   },
   returns: v.object({ duplicate: v.boolean() }),
   handler: async (ctx, args) => {
-    await serializeWebhookWrites(ctx);
+    await serializeScope(ctx, "billing:webhooks");
     const seen = await ctx.db
       .query("dodoWebhookEvents")
       .withIndex("by_webhook_id", (q) => q.eq("webhookId", args.webhookId))
@@ -444,7 +427,7 @@ export const handleWebhook = internalMutation({
 
     const event = args.data as Record<string, unknown>;
     const status = webhookStatus(args.eventType, event);
-    const subscriptionId = str(event.subscription_id, event.subscriptionId);
+    const subscriptionId = firstNonEmptyString(event.subscription_id, event.subscriptionId);
 
     if (status) {
       await upsertSubscription(ctx, status, event, args.eventTimestamp);
@@ -457,7 +440,7 @@ export const handleWebhook = internalMutation({
       eventType: args.eventType,
       processedAt: Date.now(),
       eventTimestamp: args.eventTimestamp,
-      teamId: str(metadata.teamId),
+      teamId: firstNonEmptyString(metadata.teamId),
       subscriptionId,
       rawEvent: args.rawEvent,
     });
@@ -466,35 +449,21 @@ export const handleWebhook = internalMutation({
   },
 });
 
-async function serializeWebhookWrites(ctx: MutationCtx) {
-  const scope = "billing:webhooks";
-  const guard = await ctx.db
-    .query("writeGuards")
-    .withIndex("by_scope", (q) => q.eq("scope", scope))
-    .unique();
-  const now = Date.now();
-  if (guard) {
-    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
-  } else {
-    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
-  }
-}
-
 async function upsertSubscription(
   ctx: MutationCtx,
   status: BillingStatus,
   event: Record<string, unknown>,
   rawEventTimestamp: number | undefined,
 ) {
-  const dodoSubscriptionId = str(event.subscription_id, event.subscriptionId);
+  const dodoSubscriptionId = firstNonEmptyString(event.subscription_id, event.subscriptionId);
   const metadata = (event.metadata ?? {}) as Record<string, unknown>;
   const customer = (event.customer ?? {}) as Record<string, unknown>;
-  const metaTeamId = str(metadata.teamId);
-  const metaUserId = str(metadata.userId);
+  const metaTeamId = firstNonEmptyString(metadata.teamId);
+  const metaUserId = firstNonEmptyString(metadata.userId);
   const metaPlan = asPlan(metadata.planKey);
   const metaInterval = asInterval(metadata.interval);
-  const eventProductId = str(event.product_id, event.productId);
-  const eventCustomerId = str(
+  const eventProductId = firstNonEmptyString(event.product_id, event.productId);
+  const eventCustomerId = firstNonEmptyString(
     event.customer_id,
     event.customerId,
     customer.customer_id,

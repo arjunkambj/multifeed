@@ -34,6 +34,7 @@ import type * as publishing_tiktok from "../publishing/tiktok.js";
 import type * as publishing_tokenRefresh from "../publishing/tokenRefresh.js";
 import type * as publishing_x from "../publishing/x.js";
 import type * as publishing_youtube from "../publishing/youtube.js";
+import type * as writeGuards from "../writeGuards.js";
 
 import type {
   ApiFromModules,
@@ -68,6 +69,7 @@ declare const fullApi: ApiFromModules<{
   "publishing/tokenRefresh": typeof publishing_tokenRefresh;
   "publishing/x": typeof publishing_x;
   "publishing/youtube": typeof publishing_youtube;
+  writeGuards: typeof writeGuards;
 }>;
 
 /**
