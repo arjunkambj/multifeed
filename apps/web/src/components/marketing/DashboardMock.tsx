@@ -1,8 +1,5 @@
 "use client";
 
-import type { EventInput } from "@fullcalendar/core";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import FullCalendar from "@fullcalendar/react";
 import {
   SearchIcon,
   SidebarLeftIcon,
@@ -30,86 +27,120 @@ import {
   sidebarFooterItems,
   sidebarMainItems,
 } from "@/constants/sidebar-menu";
-import { platformBrand } from "@/lib/platform-meta";
+import { platformBrand, platformForeground } from "@/lib/platform-meta";
 import { cn } from "@/lib/utils";
 import { MOCK_FRAME } from "./rhythm";
 
-const MOCK_NOW = "2026-03-11";
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const views = [
   { id: "dayGridMonth", label: "Month", icon: "hugeicons:calendar-03" },
   { id: "timeGridWeek", label: "Week", icon: "hugeicons:calendar-02" },
-  { id: "timeGridDay", label: "Day", icon: "hugeicons:calendar-01" },
-  { id: "listWeek", label: "List", icon: "hugeicons:menu-01" },
 ] as const;
 
-const events: EventInput[] = [
-  {
-    title: "X note",
-    start: "2026-03-03T12:30:00",
-    backgroundColor: platformBrand("x"),
-  },
-  {
-    title: "Reel cut",
-    start: "2026-03-06T16:00:00",
-    backgroundColor: platformBrand("instagram"),
-  },
-  {
-    title: "One sharp line",
-    start: "2026-03-10T12:30:00",
-    backgroundColor: platformBrand("x"),
-  },
-  {
-    title: "Launch post",
-    start: "2026-03-11T09:00:00",
-    backgroundColor: platformBrand("instagram"),
-  },
-  {
-    title: "Studio clip",
-    start: "2026-03-11T18:00:00",
-    backgroundColor: platformBrand("tiktok"),
-  },
-  {
-    title: "LinkedIn take",
-    start: "2026-03-12T08:00:00",
-    backgroundColor: platformBrand("linkedin"),
-  },
-  {
-    title: "Studio stills",
-    start: "2026-03-13T11:00:00",
-    backgroundColor: platformBrand("instagram"),
-  },
-  {
-    title: "Friday recap",
-    start: "2026-03-13T17:00:00",
-    backgroundColor: platformBrand("facebook"),
-  },
-  {
-    title: "Shorts",
-    start: "2026-03-14T16:00:00",
-    backgroundColor: platformBrand("youtube"),
-  },
-  {
-    title: "Q&A clip",
-    start: "2026-03-18T10:00:00",
-    backgroundColor: platformBrand("tiktok"),
-  },
-  {
-    title: "Behind the scenes",
-    start: "2026-03-20T14:00:00",
-    backgroundColor: platformBrand("instagram"),
-  },
-  {
-    title: "Weekly roundup",
-    start: "2026-03-25T09:00:00",
-    backgroundColor: platformBrand("linkedin"),
-  },
-].map((event) => ({
-  ...event,
-  display: "block",
-  borderColor: "transparent",
-  textColor: "#fff",
-}));
+const MOCK_EVENTS = [
+  { date: "2026-12-03", title: "X note", platform: "x" },
+  { date: "2026-12-06", title: "Reel cut", platform: "instagram" },
+  { date: "2026-12-10", title: "One sharp line", platform: "x" },
+  { date: "2026-12-11", title: "Launch post", platform: "instagram" },
+  { date: "2026-12-11", title: "Studio clip", platform: "tiktok" },
+  { date: "2026-12-12", title: "LinkedIn take", platform: "linkedin" },
+  { date: "2026-12-13", title: "Studio stills", platform: "instagram" },
+  { date: "2026-12-13", title: "Friday recap", platform: "facebook" },
+  { date: "2026-12-14", title: "Shorts", platform: "youtube" },
+  { date: "2026-12-18", title: "Q&A clip", platform: "tiktok" },
+  { date: "2026-12-20", title: "Behind the scenes", platform: "instagram" },
+  { date: "2026-12-25", title: "Weekly roundup", platform: "linkedin" },
+] as const;
+
+const MOCK_DAYS = [
+  { date: "2026-11-29", day: 29, other: true, today: false },
+  { date: "2026-11-30", day: 30, other: true, today: false },
+  ...Array.from({ length: 31 }, (_, index) => ({
+    date: `2026-12-${String(index + 1).padStart(2, "0")}`,
+    day: index + 1,
+    other: false,
+    today: index + 1 === 11,
+  })),
+  ...Array.from({ length: 9 }, (_, index) => ({
+    date: `2027-01-${String(index + 1).padStart(2, "0")}`,
+    day: index + 1,
+    other: true,
+    today: false,
+  })),
+];
+
+function MockMonthGrid() {
+  return (
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border-4 border-card bg-background">
+      <div className="grid shrink-0 grid-cols-7 bg-card">
+        {WEEKDAYS.map((weekday) => (
+          <div
+            className="relative py-2 text-center text-xs font-semibold tracking-[0.04em] text-muted-foreground uppercase after:absolute after:inset-y-1.5 after:right-0 after:w-px after:bg-border last:after:hidden"
+            key={weekday}
+          >
+            {weekday}
+          </div>
+        ))}
+      </div>
+      <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-6">
+        {MOCK_DAYS.map((cell, index) => {
+          const events = MOCK_EVENTS.filter((event) => event.date === cell.date);
+          const lastCol = index % 7 === 6;
+          const lastRow = index >= 35;
+          return (
+            <div
+              className={cn(
+                "relative flex min-h-0 flex-col overflow-hidden px-1.5 pt-1.5 pb-1",
+                !lastCol && "border-r border-border",
+                !lastRow && "border-b border-border",
+                cell.today && "bg-primary/8",
+              )}
+              key={cell.date}
+            >
+              {cell.other ? (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent_0_6px,var(--border)_6px_7px)]"
+                />
+              ) : null}
+              {cell.today ? (
+                <span className="relative inline-flex size-[1.6rem] items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                  {cell.day}
+                </span>
+              ) : (
+                <span
+                  className={cn(
+                    "relative px-1 text-xs font-semibold",
+                    cell.other
+                      ? "font-medium text-muted-foreground"
+                      : "text-foreground",
+                  )}
+                >
+                  {cell.day}
+                </span>
+              )}
+              <div className="relative mt-1 flex min-h-0 flex-col gap-px">
+                {events.map((event) => (
+                  <span
+                    className="truncate rounded-lg px-1.5 py-0.5 text-[0.7rem] font-semibold"
+                    key={event.title}
+                    style={{
+                      backgroundColor: platformBrand(event.platform),
+                      color: platformForeground(event.platform),
+                    }}
+                  >
+                    {event.title}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function MockNavItem({
   item,
@@ -164,7 +195,6 @@ const STAGE_HEIGHT = 800;
  */
 export function DashboardMock() {
   const frameRef = useRef<HTMLDivElement>(null);
-  const calendarRef = useRef<FullCalendar>(null);
   const [scale, setScale] = useState<number | null>(null);
 
   useLayoutEffect(() => {
@@ -182,15 +212,6 @@ export function DashboardMock() {
     observer.observe(frame);
     return () => observer.disconnect();
   }, []);
-
-  useLayoutEffect(() => {
-    if (scale == null) return;
-    try {
-      calendarRef.current?.getApi().updateSize();
-    } catch {
-      /* FullCalendar isn't mounted yet */
-    }
-  }, [scale]);
 
   return (
     <div
@@ -252,24 +273,23 @@ export function DashboardMock() {
             </aside>
 
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-              <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-6">
+              <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
                 <Button size="icon-sm" tabIndex={-1} variant="ghost">
                   <HugeiconsIcon icon={SidebarLeftIcon} strokeWidth={2} />
                 </Button>
                 <div className="ml-auto">
                   <Avatar className="size-8">
-                    <AvatarImage alt="" src={landingPeople.maya.src} />
+                    <AvatarImage alt="" src={landingPeople.elena.src} />
                     <AvatarFallback className="text-xs font-medium">
-                      {landingPeople.maya.initials}
+                      {landingPeople.elena.initials}
                     </AvatarFallback>
                   </Avatar>
                 </div>
               </header>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-6 py-3">
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-4 py-3">
                 <DashboardPageTitle
                   title="Calendar"
-                  description="Month, week, day, and list. Drag a post to move it."
                   actions={
                     <Button tabIndex={-1}>
                       <Icon icon="hugeicons:add-01" width={16} />
@@ -295,7 +315,7 @@ export function DashboardMock() {
                       </Button>
                     </ButtonGroup>
                     <h2 className="text-base font-semibold tracking-tight">
-                      March 2026
+                      December 2026
                     </h2>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
@@ -320,26 +340,7 @@ export function DashboardMock() {
                   </div>
                 </div>
 
-                <div className="multifeed-calendar marketing-calendar min-h-0 flex-1 overflow-hidden rounded-2xl border border-card bg-background">
-                  <FullCalendar
-                    ref={calendarRef}
-                    plugins={[dayGridPlugin]}
-                    initialView="dayGridMonth"
-                    initialDate={MOCK_NOW}
-                    now={MOCK_NOW}
-                    headerToolbar={false}
-                    height="100%"
-                    expandRows
-                    events={events}
-                    editable={false}
-                    selectable={false}
-                    weekends
-                    fixedWeekCount
-                    dayMaxEvents={3}
-                    displayEventTime={false}
-                    eventClassNames="multifeed-cal-event"
-                  />
-                </div>
+                <MockMonthGrid />
               </div>
             </div>
           </div>

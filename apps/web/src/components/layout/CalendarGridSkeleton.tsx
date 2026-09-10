@@ -16,7 +16,7 @@ export function CalendarGridSkeleton() {
           </div>
         ))}
       </div>
-      <div className="grid flex-1 grid-cols-7 border-t border-border">
+      <div className="grid flex-1 grid-cols-7">
         {Array.from({ length: 35 }, (_, index) => (
           <div
             className={cn(

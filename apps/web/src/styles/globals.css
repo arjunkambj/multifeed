@@ -147,7 +147,7 @@
   border-color: var(--border);
 }
 
-.multifeed-calendar .fc-scrollgrid {
+.multifeed-calendar .fc-theme-standard .fc-scrollgrid {
   border: none;
   overflow: hidden;
 }
@@ -158,8 +158,18 @@
 
 .multifeed-calendar .fc-scrollgrid-section-header > th {
   border: none;
-  border-bottom: 1px solid var(--border);
   background: var(--card);
+}
+
+/* Wrapper already draws the chrome — don't stack a second edge. */
+.multifeed-calendar .fc-theme-standard .fc-scrollgrid-section-body > td,
+.multifeed-calendar .fc-theme-standard .fc-scrollgrid-section-footer > td,
+.multifeed-calendar .fc-theme-standard .fc-scrollgrid-section-liquid > td {
+  border: none;
+}
+
+.multifeed-calendar .fc-daygrid .fc-scrollgrid-section-liquid > td {
+  overflow: hidden;
 }
 
 .multifeed-calendar .fc-col-header-cell {
@@ -206,8 +216,13 @@
   border-right: none;
 }
 
-.multifeed-calendar .fc-daygrid-body tr:last-child .fc-daygrid-day {
+.multifeed-calendar .fc-daygrid-body tr:last-child .fc-daygrid-day,
+.multifeed-calendar .fc-scrollgrid-sync-table > tbody > tr:last-child > td {
   border-bottom: none;
+}
+
+.multifeed-calendar .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
+  min-height: 0;
 }
 
 .multifeed-calendar .fc-daygrid-day-frame {
@@ -228,8 +243,25 @@
   text-decoration: none;
 }
 
+.multifeed-calendar .fc .fc-day-other .fc-daygrid-day-top {
+  opacity: 1;
+}
+
 .multifeed-calendar .fc-day-other {
-  background: color-mix(in oklch, var(--card) 55%, transparent);
+  position: relative;
+  background-color: transparent;
+}
+
+.multifeed-calendar .fc-day-other::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 6px,
+    var(--border) 6px 7px
+  );
 }
 
 .multifeed-calendar .fc-day-other .fc-daygrid-day-number {
@@ -253,7 +285,7 @@
   cursor: pointer;
 }
 
-.multifeed-calendar .fc-daygrid-day:hover {
+.multifeed-calendar .fc-daygrid-day:hover:not(.fc-day-other) {
   background-color: color-mix(in oklch, var(--muted) 70%, transparent);
 }
 
@@ -315,6 +347,11 @@
   border-color: var(--border);
 }
 
+.multifeed-calendar .fc-timegrid-cols table tr > td:last-child,
+.multifeed-calendar .fc-timegrid-body .fc-timegrid-col:last-child {
+  border-right: none;
+}
+
 .multifeed-cal-event {
   overflow: hidden !important;
   border: none !important;
@@ -332,7 +369,7 @@
     0 0 0 4px var(--primary);
 }
 
-.multifeed-calendar .fc-list {
+.multifeed-calendar .fc-theme-standard .fc-list {
   border: none;
 }
 
@@ -342,65 +379,6 @@
 
 .multifeed-calendar .fc-list-event:hover td {
   background: var(--muted);
-}
-
-.marketing-calendar {
-  display: flex;
-  flex-direction: column;
-}
-
-.marketing-calendar .fc {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.marketing-calendar .fc-view-harness,
-.marketing-calendar .fc-daygrid,
-.marketing-calendar .fc-scrollgrid,
-.marketing-calendar .fc-scroller,
-.marketing-calendar .fc-scroller-liquid-absolute,
-.marketing-calendar .fc-daygrid-body,
-.marketing-calendar .fc-col-header,
-.marketing-calendar .fc-scrollgrid-sync-table {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.marketing-calendar .fc-scrollgrid,
-.marketing-calendar .fc-col-header,
-.marketing-calendar .fc-scrollgrid-sync-table {
-  table-layout: fixed;
-}
-
-.marketing-calendar .fc-scrollgrid-section-liquid,
-.marketing-calendar .fc-scrollgrid-section-body,
-.marketing-calendar .fc-scrollgrid-section-body > td {
-  height: 100%;
-}
-
-.marketing-calendar .fc-scroller {
-  overflow: hidden !important;
-}
-
-.marketing-calendar .fc-scrollgrid-sync-table tbody tr {
-  height: calc(100% / 6);
-}
-
-.marketing-calendar .fc-col-header-cell,
-.marketing-calendar .fc-daygrid-day {
-  width: calc(100% / 7);
-}
-
-.marketing-calendar .fc-daygrid-day-frame {
-  height: 100%;
-  min-height: 0;
-}
-
-.marketing-calendar .fc-daygrid-day {
-  cursor: default;
 }
 
 @theme inline {

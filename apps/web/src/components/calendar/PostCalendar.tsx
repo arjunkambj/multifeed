@@ -11,7 +11,6 @@ import type {
 } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Icon } from "@iconify/react";
@@ -47,21 +46,16 @@ import { defaultCalendarRangeMs } from "@/lib/date-ranges";
 import {
   PLATFORM_META,
   platformBrand,
+  platformForeground,
   platformLabel,
 } from "@/lib/platform-meta";
 import { cn } from "@/lib/utils";
 
-type CalendarView =
-  | "dayGridMonth"
-  | "timeGridWeek"
-  | "timeGridDay"
-  | "listWeek";
+type CalendarView = "dayGridMonth" | "timeGridWeek";
 
 const VIEWS: { id: CalendarView; label: string; icon: string }[] = [
   { id: "dayGridMonth", label: "Month", icon: "hugeicons:calendar-03" },
   { id: "timeGridWeek", label: "Week", icon: "hugeicons:calendar-02" },
-  { id: "timeGridDay", label: "Day", icon: "hugeicons:calendar-01" },
-  { id: "listWeek", label: "List", icon: "hugeicons:menu-01" },
 ];
 
 const STATUS_STYLE: Record<string, string> = {
@@ -112,24 +106,28 @@ export function PostCalendar() {
         platformFilter === "all" ||
         post.targets.some((target) => target.platform === platformFilter),
     )
-    .map((post) => ({
-      id: post._id,
-      title:
-        post.title?.trim() || post.body.trim().slice(0, 48) || "Untitled post",
-      start: post.scheduledFor,
-      backgroundColor:
-        post.calendarColor ?? platformBrand(post.targets[0]?.platform ?? "x"),
-      borderColor: "transparent",
-      textColor: "#fff",
-      editable: post.status === "scheduled" || post.status === "failed",
-      extendedProps: {
-        status: post.status,
-        platforms: [
-          ...new Set(post.targets.map((target) => target.platform)),
-        ].join(", "),
-        body: post.body,
-      },
-    }));
+    .map((post) => {
+      const platform = post.targets[0]?.platform ?? "x";
+      return {
+        id: post._id,
+        title:
+          post.title?.trim() || post.body.trim().slice(0, 48) || "Untitled post",
+        start: post.scheduledFor,
+        backgroundColor: post.calendarColor ?? platformBrand(platform),
+        borderColor: "transparent",
+        textColor: post.calendarColor
+          ? "#fff"
+          : platformForeground(platform),
+        editable: post.status === "scheduled" || post.status === "failed",
+        extendedProps: {
+          status: post.status,
+          platforms: [
+            ...new Set(post.targets.map((target) => target.platform)),
+          ].join(", "),
+          body: post.body,
+        },
+      };
+    });
 
   const onDatesSet = (arg: DatesSetArg) => {
     const startMs = arg.start.getTime();
@@ -200,7 +198,7 @@ export function PostCalendar() {
     <div className="flex flex-col gap-4">
       <DashboardPageTitle
         title="Calendar"
-        description="Month, week, day, and list — drag to reschedule."
+        description="Month and week — drag to reschedule."
         actions={
           <Button onClick={() => router.push("/posts/new")}>
             <Icon icon="hugeicons:add-01" width={16} />
@@ -294,7 +292,7 @@ export function PostCalendar() {
             </div>
           </div>
 
-          <div className="multifeed-calendar relative min-h-[640px] overflow-hidden rounded-2xl border border-card bg-background">
+          <div className="multifeed-calendar relative min-h-[640px] overflow-hidden rounded-2xl border-4 border-card bg-background">
             {posts === undefined && (
               <div className="absolute inset-0 z-10 bg-background">
                 <CalendarGridSkeleton />
@@ -302,12 +300,7 @@ export function PostCalendar() {
             )}
             <FullCalendar
               ref={calendarRef}
-              plugins={[
-                dayGridPlugin,
-                timeGridPlugin,
-                listPlugin,
-                interactionPlugin,
-              ]}
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
               headerToolbar={false}
               height={640}
@@ -315,6 +308,7 @@ export function PostCalendar() {
               editable
               selectable
               selectMirror
+              expandRows
               dayMaxEvents={3}
               nowIndicator
               weekends
@@ -336,17 +330,6 @@ export function PostCalendar() {
                 timeGridWeek: {
                   slotMinTime: "06:00:00",
                   slotMaxTime: "24:00:00",
-                },
-                timeGridDay: {
-                  slotMinTime: "06:00:00",
-                  slotMaxTime: "24:00:00",
-                },
-                listWeek: {
-                  listDayFormat: {
-                    weekday: "long",
-                    month: "short",
-                    day: "numeric",
-                  },
                 },
               }}
             />
@@ -457,9 +440,10 @@ function PostDetailsCard({
                     className="flex items-center gap-2 rounded-xl bg-muted px-2.5 py-2"
                   >
                     <span
-                      className="flex size-7 items-center justify-center rounded-full text-white"
+                      className="flex size-7 items-center justify-center rounded-full"
                       style={{
                         backgroundColor: platformBrand(t.platform),
+                        color: platformForeground(t.platform),
                       }}
                     >
                       <Icon

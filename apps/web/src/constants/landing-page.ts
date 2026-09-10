@@ -94,7 +94,7 @@ export const faqItems = [
   },
   {
     content:
-      "Yes. Month, week, day, and list views. Drag a post to a new time and it moves, in your timezone.",
+      "Yes. Month and week views. Drag a post to a new time and it moves, in your timezone.",
     title: "Can I move a post after I schedule it?",
   },
 ] as const;
@@ -112,7 +112,7 @@ export const featureItems = [
     ctaPrimary: "See the calendar",
     mock: "calendar",
     description:
-      "Month, week, day, and list. Drag a post to a new time and it moves everywhere, in your timezone.",
+      "Month and week. Drag a post to a new time and it moves everywhere, in your timezone.",
     eyebrow: "Calendar",
     heading: "See the week. Drag a post to move it.",
   },
