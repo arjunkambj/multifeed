@@ -24,7 +24,7 @@ import Section from "./Section";
  * customers — so the row reads as one post fanning out, with the platform
  * badge carrying the "where".
  */
-const poster = landingPeople.tom;
+const poster = landingPeople.elena;
 
 const accounts = [
   "Instagram",
@@ -72,7 +72,7 @@ export function ReadyCTA() {
             )}
           >
             <Image
-              src="/hero-main.png"
+              src="/hero-main.webp"
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, 50vw"

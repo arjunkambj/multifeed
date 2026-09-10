@@ -100,7 +100,7 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
           {
             time: "9:00 AM",
             caption: "Launch post is ready",
-            people: [landingPeople.priya, landingPeople.marcus],
+            people: [landingPeople.elena, landingPeople.marcus],
           },
           {
             time: "6:00 PM",
@@ -232,7 +232,7 @@ export function WhyMultiFeed() {
               {step.mediaFirst ? (
                 <div className="relative min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
                   <Image
-                    src="/hero-main.png"
+                    src="/hero-main.webp"
                     alt=""
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
@@ -257,7 +257,7 @@ export function WhyMultiFeed() {
               {step.mediaFirst ? null : (
                 <div className="relative mt-auto min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
                   <Image
-                    src="/hero-main.png"
+                    src="/hero-main.webp"
                     alt=""
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"

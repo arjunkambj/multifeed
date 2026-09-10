@@ -1,70 +1,70 @@
 import { PLANS, type PlanKey } from "@multifeed/plans";
 
 export const landingPeople = {
-  priya: {
-    name: "Priya Sharma",
-    handle: "@priyabuilds",
-    initials: "PS",
-    src: "/avatars/priya.jpg",
+  elena: {
+    name: "Elena Brooks",
+    handle: "@elenabuilds",
+    initials: "EB",
+    src: "/avatars/elena.webp",
   },
   marcus: {
     name: "Marcus Lee",
     handle: "@marcuslee",
     initials: "ML",
-    src: "/avatars/marcus.jpg",
+    src: "/avatars/marcus.webp",
   },
   ana: {
     name: "Ana Rodrigues",
     handle: "@anarod",
     initials: "AR",
-    src: "/avatars/ana.jpg",
+    src: "/avatars/ana.webp",
   },
   tom: {
     name: "Tom Becker",
     handle: "@tbecker",
     initials: "TB",
-    src: "/avatars/tom.jpg",
+    src: "/avatars/tom.webp",
   },
   jess: {
     name: "Jess Nguyen",
     handle: "@jesswrites",
     initials: "JN",
-    src: "/avatars/jess.jpg",
+    src: "/avatars/jess.webp",
   },
   david: {
     name: "David Okafor",
     handle: "@dokafor",
     initials: "DO",
-    src: "/avatars/david.jpg",
+    src: "/avatars/david.webp",
   },
   sofia: {
     name: "Sofia Marino",
     handle: "@sofiamarino",
     initials: "SM",
-    src: "/avatars/sofia.jpg",
+    src: "/avatars/sofia.webp",
   },
   ryan: {
     name: "Ryan Whitfield",
     handle: "@ryanwhit",
     initials: "RW",
-    src: "/avatars/ryan.jpg",
+    src: "/avatars/ryan.webp",
   },
   amara: {
     name: "Amara Diallo",
     handle: "@amaracreates",
     initials: "AD",
-    src: "/avatars/amara.jpg",
+    src: "/avatars/amara.webp",
   },
   maya: {
     name: "Maya Chen",
     handle: "@maya.studio",
     initials: "MC",
-    src: "/avatars/maya.jpg",
+    src: "/avatars/maya.webp",
   },
 } as const;
 
 export const socialProofPeople = [
-  landingPeople.priya,
+  landingPeople.elena,
   landingPeople.marcus,
   landingPeople.ana,
   landingPeople.tom,

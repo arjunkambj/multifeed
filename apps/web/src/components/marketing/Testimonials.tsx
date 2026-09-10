@@ -8,7 +8,7 @@ import SectionHeader from "./SectionHeader";
 
 const testimonials = [
   {
-    person: landingPeople.priya,
+    person: landingPeople.elena,
     text: "I used to bounce between five apps to schedule a week. Now I sit down once, plan it, and close the laptop.",
     highlight: "sit down once, plan it, and close the laptop",
   },
@@ -138,8 +138,15 @@ export function Testimonials() {
             "columns-1 space-y-3 md:columns-2 md:space-y-4 lg:columns-3",
           )}
         >
-          {testimonials.map((t) => (
-            <div className="break-inside-avoid" key={t.person.name}>
+          {testimonials.map((t, i) => (
+            <div
+              className={cn(
+                "break-inside-avoid",
+                // Middle column on the 3-col layout (items 4–6).
+                i >= 3 && i < 6 && "lg:translate-y-10",
+              )}
+              key={t.person.name}
+            >
               <Card t={t} />
             </div>
           ))}

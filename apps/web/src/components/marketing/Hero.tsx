@@ -140,7 +140,7 @@ export function Hero() {
           role="img"
         >
           <Image
-            src="/hero-main.png"
+            src="/hero-main.webp"
             alt=""
             fill
             priority
