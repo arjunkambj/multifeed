@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 import { hexclaveServerApp } from "@/hexclave/server";
 
 export const config = {
-  matcher: ["/sign-in", "/sign-up"],
+  matcher: ["/sign-in"],
 };
 
 export async function proxy(request: NextRequest) {
