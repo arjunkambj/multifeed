@@ -42,6 +42,7 @@ import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import {
   PLATFORM_META,
   platformBrand,
+  platformForeground,
   platformInk,
   platformLabel,
 } from "@/lib/platform-meta";
@@ -950,11 +951,12 @@ function PostComposerForm({
                           >
                             <div className="mb-3 flex items-center gap-2">
                               <span
-                                className="flex size-7 items-center justify-center rounded-full text-white"
+                                className="flex size-7 items-center justify-center rounded-full"
                                 style={{
                                   backgroundColor: platformBrand(
                                     account.platform,
                                   ),
+                                  color: platformForeground(account.platform),
                                 }}
                               >
                                 <Icon

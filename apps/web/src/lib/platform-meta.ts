@@ -37,6 +37,7 @@ export const PLATFORM_META: Record<OAuthPlatform, PlatformMeta> &
     icon: "fa6-brands:threads",
     brand: "var(--platform-threads)",
     ink: "var(--platform-threads-ink)",
+    foreground: "var(--platform-threads-fg)",
     description: "Text and media on Threads",
     maxChars: 500,
   },
@@ -59,6 +60,7 @@ export const PLATFORM_META: Record<OAuthPlatform, PlatformMeta> &
     icon: "fa6-brands:x-twitter",
     brand: "var(--platform-x)",
     ink: "var(--platform-x-ink)",
+    foreground: "var(--platform-x-fg)",
     description: "Posts and media on X",
     maxChars: 280,
   },
@@ -67,6 +69,7 @@ export const PLATFORM_META: Record<OAuthPlatform, PlatformMeta> &
     icon: "fa6-brands:tiktok",
     brand: "var(--platform-tiktok)",
     ink: "var(--platform-tiktok-ink)",
+    foreground: "var(--platform-tiktok-fg)",
     description: "Videos and photos on TikTok",
     maxChars: 2200,
   },
@@ -79,9 +82,13 @@ export function platformLabel(platform: string) {
 }
 
 export function platformBrand(platform: string) {
-  return PLATFORM_META[platform]?.brand ?? "#E85D04";
+  return PLATFORM_META[platform]?.brand ?? "#18181b";
 }
 
 export function platformInk(platform: string) {
   return PLATFORM_META[platform]?.ink ?? platformBrand(platform);
+}
+
+export function platformForeground(platform: string) {
+  return PLATFORM_META[platform]?.foreground ?? "#fff";
 }

@@ -5,6 +5,7 @@ import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
   PLATFORM_META,
   platformBrand,
+  platformForeground,
   platformInk,
   platformLabel,
 } from "@/lib/platform-meta";
@@ -58,11 +59,12 @@ function AccountAvatar({
 
   return (
     <span
-      className="flex shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+      className="flex shrink-0 items-center justify-center rounded-full text-sm font-semibold"
       style={{
         width: size,
         height: size,
         backgroundColor: platformBrand(account.platform),
+        color: platformForeground(account.platform),
       }}
       aria-hidden
     >

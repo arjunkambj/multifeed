@@ -108,14 +108,14 @@ const editablePostStatus = v.union(
 );
 
 const CALENDAR_COLORS = [
-  "#E85D04",
   "#1877F2",
-  "#E4405F",
-  "#0A66C2",
-  "#2C2C2C",
-  "#FF4500",
+  "#C13584",
+  "#0077B5",
+  "#B91C1C",
+  "#27272A",
+  "#18181B",
   "#7C3AED",
-  "#059669",
+  "#D97706",
 ];
 const MAX_TARGETS_PER_POST = 100;
 const MAX_MEDIA_ASSETS_PER_POST = 10;

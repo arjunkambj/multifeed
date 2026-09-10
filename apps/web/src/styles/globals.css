@@ -488,23 +488,25 @@
   --sidebar-border: oklch(0.92 0.004 286.32); /* zinc-200 */
   --sidebar-ring: oklch(0.54 0.13 153.45);
 
-  /* Platform brands. Black networks are lifted off #000 so badges and
-     calendar chips don't punch a hole in the page; TikTok uses Shocking
-     Pink because charcoal is still invisible on a dark calendar. */
+  /* Official platform fills. Black networks invert in dark mode so
+     marks stay readable. */
   --platform-facebook: #1877f2;
+  --platform-linkedin: #0077b5;
   --platform-instagram: #e4405f;
-  --platform-linkedin: #0a66c2;
-  --platform-youtube: #ff0000;
-  --platform-x: #2c2c2c;
-  --platform-threads: #2c2c2c;
-  --platform-tiktok: #fe2c55;
-  --platform-facebook-ink: var(--platform-facebook);
-  --platform-instagram-ink: var(--platform-instagram);
-  --platform-linkedin-ink: var(--platform-linkedin);
-  --platform-youtube-ink: var(--platform-youtube);
-  --platform-x-ink: #2c2c2c;
-  --platform-threads-ink: #2c2c2c;
-  --platform-tiktok-ink: #fe2c55;
+  --platform-tiktok: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --platform-tiktok-fg: oklch(0.985 0.001 286.375); /* zinc-50 */
+  --platform-youtube: #b91c1c;
+  --platform-x: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --platform-x-fg: oklch(0.985 0.001 286.375); /* zinc-50 */
+  --platform-threads: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --platform-threads-fg: oklch(0.985 0.001 286.375); /* zinc-50 */
+  --platform-facebook-ink: #1877f2;
+  --platform-linkedin-ink: #0a66c2;
+  --platform-instagram-ink: #e4405f;
+  --platform-tiktok-ink: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --platform-youtube-ink: #ff0000;
+  --platform-x-ink: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --platform-threads-ink: oklch(0.21 0.006 285.885); /* zinc-900 */
 }
 
 .dark {
@@ -540,12 +542,15 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.54 0.13 153.45);
 
-  --platform-x: #5c5c64;
-  --platform-threads: #5c5c64;
-  --platform-tiktok: #fe2c55;
-  --platform-x-ink: #e8e8ed;
-  --platform-threads-ink: #e8e8ed;
-  --platform-tiktok-ink: #fe2c55;
+  --platform-x: oklch(0.967 0.001 286.375); /* zinc-100 */
+  --platform-x-fg: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --platform-threads: oklch(0.967 0.001 286.375); /* zinc-100 */
+  --platform-threads-fg: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --platform-tiktok: oklch(0.967 0.001 286.375); /* zinc-100 */
+  --platform-tiktok-fg: oklch(0.21 0.006 285.885); /* zinc-900 */
+  --platform-x-ink: oklch(0.967 0.001 286.375); /* zinc-100 */
+  --platform-threads-ink: oklch(0.967 0.001 286.375); /* zinc-100 */
+  --platform-tiktok-ink: oklch(0.967 0.001 286.375); /* zinc-100 */
 }
 
 @layer base {
