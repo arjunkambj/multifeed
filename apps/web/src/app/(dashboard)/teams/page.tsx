@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TeamSection } from "@/components/team";
+import { TeamSection } from "@/components/team/TeamSection";
 
 export const metadata: Metadata = {
   title: "Team",

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
-import { SettingsLayout } from "@/components/settings";
+import { SettingsLayout } from "@/components/settings/SettingsLayout";
 
 export const metadata: Metadata = {
   title: "Settings",
