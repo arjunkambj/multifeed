@@ -39,17 +39,7 @@ const socials = [
   {
     label: "X (Twitter)",
     icon: "fa6-brands:x-twitter",
-    href: "https://x.com/themultifeed",
-  },
-  {
-    label: "Instagram",
-    icon: "fa6-brands:instagram",
-    href: "https://instagram.com/themultifeed",
-  },
-  {
-    label: "Telegram",
-    icon: "fa6-brands:telegram",
-    href: "https://t.me/themultifeed",
+    href: "https://x.com/smridhx",
   },
 ];
 
