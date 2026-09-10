@@ -216,7 +216,7 @@ export function DashboardMock() {
                 <span className="flex items-center px-1 py-1">
                   <Logo markOnly markClassName="size-7" />
                 </span>
-                <InputGroup className="h-8 w-full min-w-0 rounded-lg">
+                <InputGroup className="h-8 w-full min-w-0">
                   <InputGroupAddon>
                     <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
                   </InputGroupAddon>
@@ -270,7 +270,7 @@ export function DashboardMock() {
                   title="Calendar"
                   description="Month, week, day, and list. Drag a post to move it."
                   actions={
-                    <Button size="sm" tabIndex={-1}>
+                    <Button tabIndex={-1}>
                       <Icon icon="hugeicons:add-01" width={16} />
                       New post
                     </Button>
@@ -279,13 +279,13 @@ export function DashboardMock() {
 
                 <div className="flex shrink-0 items-center justify-between gap-3">
                   <div className="flex items-center gap-1">
-                    <Button size="sm" tabIndex={-1} variant="outline">
+                    <Button tabIndex={-1} variant="outline">
                       <Icon icon="hugeicons:arrow-left-01" width={16} />
                     </Button>
-                    <Button size="sm" tabIndex={-1} variant="outline">
+                    <Button tabIndex={-1} variant="outline">
                       Today
                     </Button>
-                    <Button size="sm" tabIndex={-1} variant="outline">
+                    <Button tabIndex={-1} variant="outline">
                       <Icon icon="hugeicons:arrow-right-01" width={16} />
                     </Button>
                     <h2 className="ml-2 text-base font-semibold tracking-tight">
@@ -314,7 +314,7 @@ export function DashboardMock() {
                   </div>
                 </div>
 
-                <div className="multifeed-calendar marketing-calendar min-h-0 flex-1 overflow-hidden rounded-[min(var(--radius-4xl),24px)] border border-border">
+                <div className="multifeed-calendar marketing-calendar min-h-0 flex-1 overflow-hidden rounded-2xl border border-card bg-background">
                   <FullCalendar
                     ref={calendarRef}
                     plugins={[dayGridPlugin]}

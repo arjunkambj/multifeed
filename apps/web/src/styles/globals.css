@@ -120,7 +120,7 @@
   }
 }
 
-/* FullCalendar — MultiFeed theme */
+/* FullCalendar — MultiFeed theme (matches TeamMembersTable chrome) */
 .multifeed-calendar {
   --fc-border-color: var(--border);
   --fc-page-bg-color: transparent;
@@ -147,58 +147,201 @@
   border-color: var(--border);
 }
 
-.multifeed-calendar .fc-col-header-cell {
-  padding: 0.5rem 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted-foreground);
-  background: var(--muted);
+.multifeed-calendar .fc-scrollgrid {
+  border: none;
+  overflow: hidden;
 }
 
-.multifeed-calendar .fc-daygrid-day-number,
+.multifeed-calendar .fc-col-header {
+  background: var(--card);
+}
+
+.multifeed-calendar .fc-scrollgrid-section-header > th {
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.multifeed-calendar .fc-col-header-cell {
+  position: relative;
+  border: none !important;
+  padding: 0.7rem 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  background: var(--card);
+}
+
+.multifeed-calendar .fc-col-header-cell:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  right: 0;
+  bottom: 0.5rem;
+  width: 1px;
+  background: var(--border);
+}
+
+.multifeed-calendar .fc-col-header-cell-cushion {
+  padding: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.multifeed-calendar .fc-timegrid-axis {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+.multifeed-calendar .fc-daygrid-body td.fc-daygrid-day {
+  border-top: none;
+  border-left: none;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.multifeed-calendar .fc-daygrid-body tr .fc-daygrid-day:last-child {
+  border-right: none;
+}
+
+.multifeed-calendar .fc-daygrid-body tr:last-child .fc-daygrid-day {
+  border-bottom: none;
+}
+
+.multifeed-calendar .fc-daygrid-day-frame {
+  min-height: 0;
+  padding: 0.35rem 0.4rem 0.45rem;
+}
+
+.multifeed-calendar .fc-daygrid-day-top {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.multifeed-calendar .fc-daygrid-day-number {
+  color: var(--foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.35rem;
+  text-decoration: none;
+}
+
+.multifeed-calendar .fc-day-other {
+  background: color-mix(in oklch, var(--card) 55%, transparent);
+}
+
+.multifeed-calendar .fc-day-other .fc-daygrid-day-number {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.multifeed-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  display: inline-flex;
+  width: 1.6rem;
+  height: 1.6rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.multifeed-calendar .fc-daygrid-day {
+  cursor: pointer;
+}
+
+.multifeed-calendar .fc-daygrid-day:hover {
+  background-color: color-mix(in oklch, var(--muted) 70%, transparent);
+}
+
+.multifeed-calendar .fc-daygrid-day.fc-day-today:hover {
+  background-color: var(--fc-today-bg-color);
+}
+
+.multifeed-calendar .fc-daygrid-day-events {
+  min-height: 0;
+  margin-top: 0.15rem;
+}
+
+.multifeed-calendar .fc-daygrid-event {
+  margin: 1px 0;
+}
+
+.multifeed-calendar .fc-daygrid-more-link {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  padding: 0 0.35rem;
+}
+
+.multifeed-calendar .fc-daygrid-more-link:hover {
+  background: transparent;
+  color: var(--foreground);
+}
+
+.multifeed-calendar .fc-more-popover {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px color-mix(in oklch, var(--foreground) 12%, transparent);
+}
+
+.multifeed-calendar .fc-popover-header {
+  background: var(--card);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.multifeed-calendar .fc-popover-body {
+  padding: 0.35rem;
+}
+
 .multifeed-calendar .fc-timegrid-slot-label {
   color: var(--muted-foreground);
   font-size: 0.75rem;
   padding: 0.35rem 0.5rem;
 }
 
-.multifeed-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-  background: var(--primary);
-  color: var(--primary-foreground);
-  border-radius: 999px;
-  width: 1.6rem;
-  height: 1.6rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-.multifeed-cal-event {
-  border-radius: 0.4rem !important;
-  padding: 1px 4px !important;
-  font-size: 0.7rem !important;
-  font-weight: 600 !important;
-  border: none !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  cursor: pointer;
-}
-
-.multifeed-calendar .fc-list-event:hover td {
-  background: var(--muted);
-}
-
 .multifeed-calendar .fc-timegrid-now-indicator-line {
   border-color: var(--primary);
 }
 
-.multifeed-calendar .fc-scrollgrid {
+.multifeed-calendar .fc-timegrid-slot {
+  height: 2.5rem;
+  border-color: var(--border);
+}
+
+.multifeed-cal-event {
+  overflow: hidden !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  padding: 2px 6px !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  text-overflow: ellipsis !important;
+  cursor: pointer;
+}
+
+.multifeed-cal-event-selected {
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 4px var(--primary);
+}
+
+.multifeed-calendar .fc-list {
   border: none;
-  border-radius: min(var(--radius-4xl), 24px);
-  overflow: hidden;
+}
+
+.multifeed-calendar .fc-list-day-cushion {
+  background: var(--card);
+}
+
+.multifeed-calendar .fc-list-event:hover td {
+  background: var(--muted);
 }
 
 .marketing-calendar {
@@ -254,6 +397,10 @@
 .marketing-calendar .fc-daygrid-day-frame {
   height: 100%;
   min-height: 0;
+}
+
+.marketing-calendar .fc-daygrid-day {
+  cursor: default;
 }
 
 @theme inline {

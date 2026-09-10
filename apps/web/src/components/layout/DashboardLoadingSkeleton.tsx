@@ -145,7 +145,9 @@ export function DashboardLoadingSkeleton({
               <Skeleton className="h-8 w-72 rounded-lg" />
             </div>
           </div>
-          <CalendarGridSkeleton />
+          <div className="overflow-hidden rounded-2xl border border-card bg-background">
+            <CalendarGridSkeleton />
+          </div>
         </>
       );
       break;
@@ -154,7 +156,7 @@ export function DashboardLoadingSkeleton({
       content = (
         <>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Skeleton className="h-9 w-72 rounded-lg" />
+            <Skeleton className="h-9 w-72 rounded-2xl" />
             <Skeleton className="h-9 w-64 rounded-lg" />
           </div>
           <PostsListSkeleton />

@@ -48,6 +48,7 @@ import {
   platformBrand,
   platformLabel,
 } from "@/lib/platform-meta";
+import { cn } from "@/lib/utils";
 
 type CalendarView =
   | "dayGridMonth"
@@ -200,7 +201,7 @@ export function PostCalendar() {
         title="Calendar"
         description="Month, week, day, and list — drag to reschedule."
         actions={
-          <Button size="sm" onClick={() => router.push("/posts/new")}>
+          <Button onClick={() => router.push("/posts/new")}>
             <Icon icon="hugeicons:add-01" width={16} />
             New post
           </Button>
@@ -225,7 +226,7 @@ export function PostCalendar() {
               >
                 <Icon icon="hugeicons:arrow-left-01" width={16} />
               </Button>
-              <Button size="sm" variant="outline" onClick={goToday}>
+              <Button variant="outline" onClick={goToday}>
                 Today
               </Button>
               <Button
@@ -287,9 +288,9 @@ export function PostCalendar() {
             </div>
           </div>
 
-          <div className="multifeed-calendar relative min-h-[640px] overflow-hidden rounded-[min(var(--radius-4xl),24px)] border border-border">
+          <div className="multifeed-calendar relative min-h-[640px] overflow-hidden rounded-2xl border border-card bg-background">
             {posts === undefined && (
-              <div className="absolute inset-0 z-10 bg-card">
+              <div className="absolute inset-0 z-10 bg-background">
                 <CalendarGridSkeleton />
               </div>
             )}
@@ -311,11 +312,19 @@ export function PostCalendar() {
               dayMaxEvents={3}
               nowIndicator
               weekends
+              fixedWeekCount={false}
+              dayHeaderFormat={{ weekday: "short" }}
               datesSet={onDatesSet}
               eventClick={onEventClick}
               select={onSelect}
               eventDrop={(info) => void onEventDrop(info)}
-              eventClassNames="multifeed-cal-event"
+              eventClassNames={(arg) =>
+                cn(
+                  "multifeed-cal-event",
+                  arg.event.id === selectedPostId &&
+                    "multifeed-cal-event-selected",
+                )
+              }
               views={{
                 dayGridMonth: { dayMaxEventRows: 3 },
                 timeGridWeek: {
@@ -495,7 +504,6 @@ function PostDetailsCard({
                   (target) => target.status === "failed",
                 ) && (
                   <Button
-                    size="sm"
                     disabled={retrying}
                     onClick={() => void onRetry()}
                   >
@@ -506,7 +514,6 @@ function PostDetailsCard({
                 selectedPost.status,
               ) && (
                 <Button
-                  size="sm"
                   variant="outline"
                   onClick={() =>
                     router.push(`/posts/new?edit=${selectedPost._id}`)
@@ -516,7 +523,6 @@ function PostDetailsCard({
                 </Button>
               )}
               <Button
-                size="sm"
                 variant="outline"
                 onClick={() =>
                   router.push(`/posts/new?from=${selectedPost._id}`)
@@ -524,12 +530,11 @@ function PostDetailsCard({
               >
                 Duplicate
               </Button>
-              <Button size="sm" variant="outline" onClick={onClose}>
+              <Button variant="outline" onClick={onClose}>
                 Close
               </Button>
               {selectedPost.status !== "publishing" && (
                 <Button
-                  size="sm"
                   variant="destructive"
                   onClick={() => void onDelete()}
                 >
