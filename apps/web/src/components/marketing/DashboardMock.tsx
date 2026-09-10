@@ -62,7 +62,7 @@ const MOCK_DAYS = [
     other: false,
     today: index + 1 === 11,
   })),
-  ...Array.from({ length: 9 }, (_, index) => ({
+  ...Array.from({ length: 2 }, (_, index) => ({
     date: `2027-01-${String(index + 1).padStart(2, "0")}`,
     day: index + 1,
     other: true,
@@ -72,8 +72,8 @@ const MOCK_DAYS = [
 
 function MockMonthGrid() {
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border-4 border-card bg-background">
-      <div className="grid shrink-0 grid-cols-7 bg-card">
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      <div className="grid shrink-0 grid-cols-7 rounded-t-2xl border-4 border-b-0 border-card bg-card">
         {WEEKDAYS.map((weekday) => (
           <div
             className="relative py-2 text-center text-xs font-semibold tracking-[0.04em] text-muted-foreground uppercase after:absolute after:inset-y-1.5 after:right-0 after:w-px after:bg-border last:after:hidden"
@@ -83,60 +83,63 @@ function MockMonthGrid() {
           </div>
         ))}
       </div>
-      <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-6">
-        {MOCK_DAYS.map((cell, index) => {
-          const events = MOCK_EVENTS.filter((event) => event.date === cell.date);
-          const lastCol = index % 7 === 6;
-          const lastRow = index >= 35;
-          return (
-            <div
-              className={cn(
-                "relative flex min-h-0 flex-col overflow-hidden px-1.5 pt-1.5 pb-1",
-                !lastCol && "border-r border-border",
-                !lastRow && "border-b border-border",
-                cell.today && "bg-primary/8",
-              )}
-              key={cell.date}
-            >
-              {cell.other ? (
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent_0_6px,var(--border)_6px_7px)]"
-                />
-              ) : null}
-              {cell.today ? (
-                <span className="relative inline-flex size-[1.6rem] items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                  {cell.day}
-                </span>
-              ) : (
-                <span
-                  className={cn(
-                    "relative px-1 text-xs font-semibold",
-                    cell.other
-                      ? "font-medium text-muted-foreground"
-                      : "text-foreground",
-                  )}
-                >
-                  {cell.day}
-                </span>
-              )}
-              <div className="relative mt-1 flex min-h-0 flex-col gap-px">
-                {events.map((event) => (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="grid min-h-0 flex-[5] grid-cols-7 grid-rows-5 overflow-hidden rounded-b-2xl border-4 border-t-0 border-card bg-background">
+          {MOCK_DAYS.map((cell, index) => {
+            const events = MOCK_EVENTS.filter((event) => event.date === cell.date);
+            const lastCol = index % 7 === 6;
+            const lastRow = index >= MOCK_DAYS.length - 7;
+            return (
+              <div
+                className={cn(
+                  "relative flex min-h-0 flex-col overflow-hidden px-1.5 pt-1.5 pb-1",
+                  !lastCol && "border-r border-border",
+                  !lastRow && "border-b border-border",
+                  cell.today && "bg-primary/8",
+                )}
+                key={cell.date}
+              >
+                {cell.other ? (
                   <span
-                    className="truncate rounded-lg px-1.5 py-0.5 text-[0.7rem] font-semibold"
-                    key={event.title}
-                    style={{
-                      backgroundColor: platformBrand(event.platform),
-                      color: platformForeground(event.platform),
-                    }}
-                  >
-                    {event.title}
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent_0_6px,var(--border)_6px_7px)]"
+                  />
+                ) : null}
+                {cell.today ? (
+                  <span className="relative inline-flex size-[1.6rem] items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                    {cell.day}
                   </span>
-                ))}
+                ) : (
+                  <span
+                    className={cn(
+                      "relative px-1 text-xs font-semibold",
+                      cell.other
+                        ? "font-medium text-muted-foreground"
+                        : "text-foreground",
+                    )}
+                  >
+                    {cell.day}
+                  </span>
+                )}
+                <div className="relative mt-1 flex min-h-0 flex-col gap-px">
+                  {events.map((event) => (
+                    <span
+                      className="truncate rounded-lg px-1.5 py-0.5 text-[0.7rem] font-semibold"
+                      key={event.title}
+                      style={{
+                        backgroundColor: platformBrand(event.platform),
+                        color: platformForeground(event.platform),
+                      }}
+                    >
+                      {event.title}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        <div aria-hidden className="flex-1" />
       </div>
     </div>
   );
@@ -298,7 +301,7 @@ export function DashboardMock() {
                   }
                 />
 
-                <div className="flex shrink-0 items-center justify-between gap-3">
+                <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <ButtonGroup
                       aria-hidden
