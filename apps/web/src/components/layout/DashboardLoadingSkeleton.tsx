@@ -1,10 +1,58 @@
 import { TeamTableSkeleton } from "@/components/team/TeamTableSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuSkeleton,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
 import { CalendarGridSkeleton } from "./CalendarGridSkeleton";
 import { ComposerFormSkeleton } from "./ComposerFormSkeleton";
 import { ConnectionsRowsSkeleton } from "./ConnectionsRowsSkeleton";
 import { PageHeaderSkeleton } from "./PageHeaderSkeleton";
 import { PostsListSkeleton } from "./PostsListSkeleton";
+
+export function DashboardShellSkeleton() {
+  return (
+    <SidebarProvider className="bg-background">
+      <Sidebar collapsible="icon">
+        <SidebarHeader className="h-14 justify-center">
+          <Skeleton className="size-7 rounded-md" />
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {Array.from({ length: 7 }, (_, index) => (
+                  <SidebarMenuItem key={index}>
+                    <SidebarMenuSkeleton showIcon />
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+      <SidebarInset className="overflow-hidden">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 sm:px-6">
+          <Skeleton className="size-8 rounded-lg" />
+          <div className="ml-auto flex items-center justify-end">
+            <Skeleton className="size-8 rounded-full" />
+          </div>
+        </header>
+        <div className="flex min-w-0 flex-1 flex-col px-4 py-3 sm:px-6 sm:py-3">
+          <DashboardLoadingSkeleton variant="overview" />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
 
 type DashboardLoadingVariant =
   | "overview"

@@ -6,7 +6,6 @@ import { hexclaveClientApp } from "./client";
 
 export const hexclaveServerApp = new HexclaveServerApp({
   inheritsFrom: hexclaveClientApp,
-  secretServerKey: process.env.HEXCLAVE_SECRET_SERVER_KEY!,
 });
 
 export const getHexclaveConvexServerToken = async (request?: NextRequest) => {

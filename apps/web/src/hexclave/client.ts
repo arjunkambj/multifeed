@@ -5,6 +5,10 @@ export const hexclaveClientApp = new HexclaveClientApp({
   tokenStore: "nextjs-cookie",
   projectId: clientEnv.NEXT_PUBLIC_HEXCLAVE_PROJECT_ID,
   publishableClientKey: clientEnv.NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY,
+  analytics: {
+    enabled: false,
+    replays: { enabled: false },
+  },
   urls: {
     handler: "/handler",
     signIn: "/sign-in",

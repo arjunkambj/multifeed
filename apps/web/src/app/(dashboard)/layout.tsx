@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { AuthProviders } from "@/components/AuthProviders";
-import { DashboardProviders } from "@/components/DashboardProviders";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { DashboardShellSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardShell } from "@/components/layout/DashboardShell";
+import { hexclaveServerApp } from "@/hexclave/server";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -13,10 +15,36 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProviders>
-      <DashboardShell>
-        <DashboardProviders>{children}</DashboardProviders>
-      </DashboardShell>
-    </AuthProviders>
+    <Suspense fallback={<DashboardShellSkeleton />}>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </Suspense>
+  );
+}
+
+async function DashboardLayoutContent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const user = await hexclaveServerApp.getUser();
+
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  if (!user.selectedTeam) {
+    redirect("/created-org");
+  }
+
+  return (
+    <DashboardShell
+      user={{
+        displayName: user.displayName,
+        primaryEmail: user.primaryEmail,
+        profileImageUrl: user.profileImageUrl,
+      }}
+    >
+      {children}
+    </DashboardShell>
   );
 }

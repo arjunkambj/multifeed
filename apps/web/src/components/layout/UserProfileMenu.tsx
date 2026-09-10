@@ -16,6 +16,12 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { hexclaveClientApp } from "@/hexclave/client";
 
+export type ProfileUser = {
+  displayName: string | null;
+  primaryEmail: string | null;
+  profileImageUrl: string | null;
+};
+
 const getInitials = (value: string | null) =>
   value
     ?.split(/\s|@/)
@@ -24,8 +30,7 @@ const getInitials = (value: string | null) =>
     .map((part) => part[0]?.toUpperCase())
     .join("");
 
-export function UserProfileMenu() {
-  const user = hexclaveClientApp.useUser({ or: "redirect" });
+export function UserProfileMenu({ user }: { user: ProfileUser }) {
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
   const initials =
