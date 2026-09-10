@@ -236,7 +236,7 @@ export function DashboardMock() {
               transformOrigin: "top left",
             }}
           >
-            <aside className="flex w-60 shrink-0 flex-col border-r bg-sidebar">
+            <aside className="flex w-57 shrink-0 flex-col border-r bg-sidebar">
               <div className="flex flex-col gap-2 px-2 pt-2 pb-1">
                 <span className="flex items-center px-1 py-1">
                   <Logo markOnly markClassName="size-7" />
