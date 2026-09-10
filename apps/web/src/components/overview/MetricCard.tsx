@@ -22,7 +22,7 @@ export function MetricCard({ title, value, icon, change }: MetricCardProps) {
         : "text-destructive";
 
   return (
-    <Card size="sm" className="min-w-0 gap-2">
+    <Card size="sm" className="min-w-0 gap-2 rounded-3xl">
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <CardTitle>{title}</CardTitle>

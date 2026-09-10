@@ -150,7 +150,7 @@ export default function SignInPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="h-10 text-base pl-10"
+              className="h-9 rounded-2xl pl-10 text-base"
             />
           </div>
 
@@ -158,7 +158,7 @@ export default function SignInPage() {
             type="submit"
             disabled={isEmailLoading}
             size="lg"
-            className="w-full font-normal"
+            className="h-9 w-full rounded-2xl"
           >
             {isEmailLoading ? <Spinner className="size-4" /> : null}
             Continue with Email
@@ -231,7 +231,7 @@ export default function SignInPage() {
         variant="secondary"
         disabled={isGoogleLoading}
         size="lg"
-        className="w-full font-normal"
+        className="h-10 w-full rounded-2xl"
         onClick={handleGoogleSignIn}
       >
         {isGoogleLoading ? (

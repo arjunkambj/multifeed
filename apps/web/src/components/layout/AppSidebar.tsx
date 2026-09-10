@@ -116,7 +116,7 @@ export function AppSidebar() {
           variant="secondary"
           aria-haspopup="dialog"
           aria-expanded={searchOpen}
-          className="w-full min-w-0 justify-start group-data-[collapsible=icon]:hidden"
+          className="w-full min-w-0 justify-start rounded-full group-data-[collapsible=icon]:hidden"
           onClick={() => setSearchOpen(true)}
         >
           <HugeiconsIcon

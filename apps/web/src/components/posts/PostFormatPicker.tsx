@@ -11,6 +11,14 @@ import {
   type PostKind,
 } from "./post-composer-config";
 
+export function PostFormatPickerSkeleton() {
+  return (
+    <div inert>
+      <PostFormatPicker onChange={() => {}} />
+    </div>
+  );
+}
+
 export function PostFormatPicker({
   accounts,
   onChange,
@@ -42,7 +50,7 @@ export function PostFormatPicker({
               aria-label={`${format.label}. ${format.description}. Supported on ${platformNames}`}
               aria-describedby={`format-accounts-${format.id}`}
               onClick={() => onChange(format.id)}
-              className="group flex h-full min-h-52 w-full flex-col items-center rounded-2xl bg-muted px-5 py-5 text-center outline-none transition-colors hover:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_2%)] focus-visible:ring-3 focus-visible:ring-ring/30"
+              className="group flex h-full min-h-52 w-full flex-col items-center rounded-3xl bg-card px-5 py-5 text-center outline-none transition-colors hover:bg-zinc-150 dark:hover:bg-zinc-850 focus-visible:ring-3 focus-visible:ring-ring/30"
             >
               <span className="flex size-11 items-center justify-center rounded-xl bg-background text-muted-foreground transition-colors group-hover:text-foreground">
                 <Icon icon={format.icon} width={22} />

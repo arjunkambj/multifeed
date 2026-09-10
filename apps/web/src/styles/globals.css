@@ -381,6 +381,11 @@
   background: var(--muted);
 }
 
+@theme {
+  --color-zinc-150: oklch(94.35% 0.0025 286.348);
+  --color-zinc-850: oklch(24.2% 0.006 285.959);
+}
+
 @theme inline {
   --font-heading: var(--font-figtree);
   --font-display: var(--font-bricolage);

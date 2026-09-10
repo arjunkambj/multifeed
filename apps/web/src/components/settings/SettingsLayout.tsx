@@ -79,7 +79,7 @@ export function SettingsLayout() {
                     scroll={false}
                     aria-current={selectedTab === tab.id ? "page" : undefined}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm outline-none transition-colors duration-200 motion-reduce:transition-none focus-visible:ring-3 focus-visible:ring-ring/30",
+                      "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm outline-none transition-colors duration-200 motion-reduce:transition-none focus-visible:ring-3 focus-visible:ring-ring/30",
                       selectedTab === tab.id
                         ? "bg-muted font-medium text-foreground"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
