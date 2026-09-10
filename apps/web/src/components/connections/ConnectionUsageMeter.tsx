@@ -3,9 +3,27 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Progress, ProgressLabel } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const SLOT_LIMIT = 12;
+
+export function ConnectionUsageMeterSkeleton() {
+  return (
+    <div className="w-full min-w-0 shrink-0 rounded-2xl bg-muted px-4 py-3 lg:w-72">
+      <div className="flex w-full flex-col gap-2.5">
+        <div className="flex w-full items-baseline justify-between gap-3">
+          <p className="text-sm font-normal text-muted-foreground">
+            Connected accounts
+          </p>
+          <Skeleton className="h-5 w-12" />
+        </div>
+        <span className="h-2 w-full rounded-full bg-background" />
+      </div>
+      <Skeleton className="mt-2 h-3 w-36" />
+    </div>
+  );
+}
 
 export function ConnectionUsageMeter({
   used,

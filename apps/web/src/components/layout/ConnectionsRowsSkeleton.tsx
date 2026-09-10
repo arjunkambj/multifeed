@@ -1,23 +1,52 @@
+"use client";
+
+import { Icon } from "@iconify/react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CONNECTABLE_PLATFORMS, PLATFORM_META } from "@/lib/platform-meta";
 
 export function ConnectionsRowsSkeleton() {
   return (
-    <section className="flex flex-col gap-4">
-      {Array.from({ length: 7 }, (_, index) => (
-        <div
-          className="flex items-center justify-between gap-3 rounded-2xl bg-card p-4"
-          key={index}
-        >
-          <div className="flex items-center gap-2.5">
-            <Skeleton className="size-8 shrink-0 rounded-lg" />
-            <div className="flex min-w-0 flex-col gap-2">
-              <Skeleton className="h-5 w-28" />
-              <Skeleton className="h-4 w-32 max-w-full" />
-            </div>
-          </div>
-          <Skeleton className="h-8 w-20 shrink-0" />
-        </div>
-      ))}
+    <section
+      aria-label="Social platforms"
+      className="flex min-w-0 flex-1 flex-col gap-4 lg:order-first"
+    >
+      {CONNECTABLE_PLATFORMS.map((platform) => {
+        const meta = PLATFORM_META[platform] ?? {
+          label: platform,
+          icon: "hugeicons:link-01",
+          brand: "var(--primary)",
+        };
+        return (
+          <Card
+            className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-2 rounded-xl px-3 py-2.5"
+            key={platform}
+            size="sm"
+          >
+            <CardHeader className="contents">
+              <div className="contents">
+                <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-2 sm:min-w-32">
+                  <span
+                    className="flex size-7 shrink-0 items-center justify-center rounded-lg"
+                    style={{
+                      backgroundColor: meta.brand,
+                      color: meta.foreground ?? "#FFFFFF",
+                    }}
+                  >
+                    <Icon icon={meta.icon} width={14} aria-hidden />
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <CardTitle className="text-sm">
+                      <h2>{meta.label}</h2>
+                    </CardTitle>
+                  </div>
+                </div>
+                <Skeleton className="col-start-3 row-start-1 h-8 w-20 rounded-xl" />
+              </div>
+            </CardHeader>
+          </Card>
+        );
+      })}
     </section>
   );
 }

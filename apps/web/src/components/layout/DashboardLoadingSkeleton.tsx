@@ -1,4 +1,6 @@
-import { TeamTableSkeleton } from "@/components/team/TeamTableSkeleton";
+import { ConnectionUsageMeterSkeleton } from "@/components/connections/ConnectionUsageMeter";
+import { PostFormatPickerSkeleton } from "@/components/posts/PostFormatPicker";
+import { TeamPageSkeleton } from "@/components/team/TeamPageSkeleton";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarGridSkeleton } from "./CalendarGridSkeleton";
 import { ComposerFormSkeleton } from "./ComposerFormSkeleton";
 import { ConnectionsRowsSkeleton } from "./ConnectionsRowsSkeleton";
+import { DashboardPageTitle } from "./DashboardPageTitle";
 import { PageHeaderSkeleton } from "./PageHeaderSkeleton";
 import { PostsListSkeleton } from "./PostsListSkeleton";
 
@@ -60,6 +63,7 @@ type DashboardLoadingVariant =
   | "calendar"
   | "inbox"
   | "posts"
+  | "new-post"
   | "composer"
   | "settings"
   | "teams"
@@ -70,6 +74,53 @@ export function DashboardLoadingSkeleton({
 }: {
   variant?: DashboardLoadingVariant;
 }) {
+  if (variant === "teams") {
+    return <TeamPageSkeleton />;
+  }
+
+  if (variant === "new-post") {
+    return (
+      <div className="flex flex-col gap-6" aria-busy="true" role="status">
+        <span className="sr-only">Loading page</span>
+        <DashboardPageTitle
+          title="New post"
+          description="Choose the format first. You'll add accounts, content, and platform settings next."
+        />
+        <PostFormatPickerSkeleton />
+      </div>
+    );
+  }
+
+  if (variant === "connections") {
+    return (
+      <div className="flex flex-col gap-6" aria-busy="true" role="status">
+        <span className="sr-only">Loading page</span>
+        <DashboardPageTitle
+          title="Connections"
+          description="Connect your accounts, check their status, and renew access when needed."
+        />
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+          <ConnectionUsageMeterSkeleton />
+          <ConnectionsRowsSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "composer") {
+    return (
+      <div
+        className="flex w-full min-w-0 max-w-6xl flex-col gap-5 pb-4"
+        aria-busy="true"
+        role="status"
+      >
+        <span className="sr-only">Loading page</span>
+        <PageHeaderSkeleton actions={1} />
+        <ComposerFormSkeleton />
+      </div>
+    );
+  }
+
   if (variant === "settings") {
     return (
       <div
@@ -89,8 +140,8 @@ export function DashboardLoadingSkeleton({
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Skeleton className="h-10 w-full rounded-lg" />
-              <Skeleton className="h-10 w-full rounded-lg" />
+              <Skeleton className="h-10 w-full rounded-xl" />
+              <Skeleton className="h-10 w-full rounded-xl" />
             </div>
           </aside>
           <div className="flex min-w-0 flex-1 flex-col gap-5">
@@ -114,19 +165,8 @@ export function DashboardLoadingSkeleton({
       content = (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
           {Array.from({ length: 5 }, (_, index) => (
-            <Skeleton className="h-28" key={index} />
+            <Skeleton className="h-28 rounded-3xl" key={index} />
           ))}
-        </div>
-      );
-      break;
-    case "connections":
-      actions = 0;
-      content = (
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-          <Skeleton className="h-[4.75rem] w-full rounded-2xl lg:w-72" />
-          <div className="min-w-0 flex-1 lg:order-first">
-            <ConnectionsRowsSkeleton />
-          </div>
         </div>
       );
       break;
@@ -139,11 +179,11 @@ export function DashboardLoadingSkeleton({
               <Skeleton className="h-5 w-40 rounded-lg" />
             </div>
             <div className="flex gap-2">
-              <Skeleton className="h-8 w-40 rounded-lg" />
-              <Skeleton className="h-8 w-72 rounded-lg" />
+              <Skeleton className="h-8 w-40 rounded-xl" />
+              <Skeleton className="h-8 w-72 rounded-xl" />
             </div>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-card bg-background">
+          <div className="overflow-hidden rounded-2xl border-4 border-card bg-background">
             <CalendarGridSkeleton />
           </div>
         </div>
@@ -154,25 +194,10 @@ export function DashboardLoadingSkeleton({
       content = (
         <>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Skeleton className="h-9 w-72 rounded-2xl" />
-            <Skeleton className="h-9 w-64 rounded-lg" />
+            <Skeleton className="h-9 w-72 rounded-xl" />
+            <Skeleton className="h-9 w-64 rounded-xl" />
           </div>
           <PostsListSkeleton />
-        </>
-      );
-      break;
-    case "composer":
-      content = <ComposerFormSkeleton />;
-      break;
-    case "teams":
-      content = (
-        <>
-          <div className="grid gap-4 md:grid-cols-3">
-            {Array.from({ length: 3 }, (_, index) => (
-              <Skeleton className="h-20" key={index} />
-            ))}
-          </div>
-          <TeamTableSkeleton />
         </>
       );
       break;

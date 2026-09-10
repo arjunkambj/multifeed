@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function NewPostPage() {
   return (
-    <Suspense fallback={<DashboardLoadingSkeleton variant="composer" />}>
+    <Suspense fallback={<DashboardLoadingSkeleton variant="new-post" />}>
       <CreatePostComposer />
     </Suspense>
   );
