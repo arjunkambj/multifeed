@@ -17,4 +17,11 @@ crons.interval(
   internal.publishing.publishDuePosts,
 );
 
+/** Delete media uploads that were never confirmed (orphaned R2 objects). */
+crons.interval(
+  "purge stale media uploads",
+  { hours: 1 },
+  internal.media.r2.purgeStaleUploads,
+);
+
 export default crons;

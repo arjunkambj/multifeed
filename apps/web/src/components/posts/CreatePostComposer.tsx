@@ -302,6 +302,7 @@ function PostComposerForm({
   const sourcePost = composerData?.sourcePost;
   const createPost = useMutation(api.posts.create);
   const updatePost = useMutation(api.posts.update);
+  const deleteMedia = useMutation(api.media.r2.deleteMedia);
   const prefilledFrom = useRef<string | null>(null);
   const [confirmFormatChange, setConfirmFormatChange] = useState(false);
   const [previewAccountId, setPreviewAccountId] = useState<string | null>(null);
@@ -526,9 +527,12 @@ function PostComposerForm({
   };
 
   const discardAndChangeFormat = () => {
-    media.forEach((asset) => {
+    for (const asset of media) {
       if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
-    });
+      // Best-effort cleanup: media uploaded this session isn't attached to a
+      // post yet, so delete it rather than leaving orphaned R2 objects.
+      void deleteMedia({ mediaAssetId: asset._id }).catch(() => {});
+    }
     onChooseDifferentFormat?.();
   };
 

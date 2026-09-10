@@ -281,6 +281,9 @@ export function PostMediaUploader({
           ...details,
         });
       }
+      // Commit only when every file in the batch finished uploading — a
+      // partial attach after a failure toast would surprise the user.
+      if (uploaded.length > 0) onChange([...media, ...uploaded]);
       toast.success(
         `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded.`,
       );
@@ -288,8 +291,12 @@ export function PostMediaUploader({
       toast.error(
         caught instanceof Error ? caught.message : "Media upload failed",
       );
+      // Best-effort cleanup of files that did finish, so a failed batch
+      // doesn't leave orphaned objects in storage.
+      for (const asset of uploaded) {
+        void deleteMedia({ mediaAssetId: asset._id }).catch(() => {});
+      }
     } finally {
-      if (uploaded.length > 0) onChange([...media, ...uploaded]);
       setPendingMedia([]);
       setUploading(false);
       onUploadingChange?.(false);

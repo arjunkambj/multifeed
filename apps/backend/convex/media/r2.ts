@@ -2,7 +2,12 @@ import { R2 } from "@convex-dev/r2";
 import { v } from "convex/values";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
-import { mutation } from "../_generated/server";
+import {
+  internalMutation,
+  mutation,
+  type MutationCtx,
+  type QueryCtx,
+} from "../_generated/server";
 import { fail } from "../errors";
 import { requireUser } from "../hexclave/auth";
 import schema from "../schema";
@@ -10,21 +15,107 @@ import schema from "../schema";
 const r2 = new R2(components.r2);
 
 const MAX_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 MB
+const STALE_UPLOAD_TTL_MS = 60 * 60 * 1000; // 1 hour
+const PURGE_BATCH_SIZE = 100;
 
+/**
+ * Internal keys (r2Key/storageId) stay in the shared validator because
+ * publishing reads them from full docs — use publicMediaAssetValidator plus
+ * toPublicMediaAsset for client-facing return shapes instead.
+ */
 export const mediaAssetOutputValidator = v.object({
   ...schema.tables.mediaAssets.validator.fields,
   _id: v.id("mediaAssets"),
   _creationTime: v.number(),
 });
 
+/**
+ * Client-facing media shape — storage internals (r2Key/storageId) are never
+ * exposed. Mirrors mediaAssets minus those fields; keep in sync with schema.
+ */
+export const publicMediaAssetValidator = v.object({
+  teamId: v.string(),
+  publicUrl: v.optional(v.string()),
+  externalUrl: v.optional(v.string()),
+  kind: v.union(
+    v.literal("image"),
+    v.literal("video"),
+    v.literal("document"),
+  ),
+  filename: v.string(),
+  mimeType: v.string(),
+  sizeBytes: v.number(),
+  width: v.optional(v.number()),
+  height: v.optional(v.number()),
+  durationMs: v.optional(v.number()),
+  status: v.union(
+    v.literal("uploading"),
+    v.literal("ready"),
+    v.literal("failed"),
+  ),
+  createdByUserId: v.string(),
+  createdAt: v.number(),
+  _id: v.id("mediaAssets"),
+  _creationTime: v.number(),
+});
+
+type MediaAssetDoc = DataModel["mediaAssets"]["document"];
+
+export function toPublicMediaAsset(doc: MediaAssetDoc) {
+  const publicAsset = { ...doc };
+  delete publicAsset.r2Key;
+  delete publicAsset.storageId;
+  return publicAsset as Omit<MediaAssetDoc, "r2Key" | "storageId">;
+}
+
+/**
+ * Serialize ownership stamping for a single R2 key so concurrent syncMetadata
+ * calls cannot both insert a mediaAssets row for it (by_r2_key is not unique).
+ */
+async function serializeMediaKeyWrites(ctx: MutationCtx, key: string) {
+  const scope = `media:r2:${key}`;
+  const guard = await ctx.db
+    .query("writeGuards")
+    .withIndex("by_scope", (q) => q.eq("scope", scope))
+    .unique();
+  const now = Date.now();
+  if (guard) {
+    await ctx.db.patch("writeGuards", guard._id, { updatedAt: now });
+  } else {
+    await ctx.db.insert("writeGuards", { scope, updatedAt: now });
+  }
+}
+
+async function requireOwnedMediaKey(ctx: QueryCtx | MutationCtx, key: string) {
+  const user = await requireUser(ctx);
+  const asset = await ctx.db
+    .query("mediaAssets")
+    .withIndex("by_r2_key", (q) => q.eq("r2Key", key))
+    .first();
+  if (!asset || asset.teamId !== user.selectedTeamId) {
+    fail("NOT_FOUND", "Media not found");
+  }
+}
+
 export const { generateUploadUrl, syncMetadata } = r2.clientApi<DataModel>({
   checkUpload: async (ctx) => {
     await requireUser(ctx);
+  },
+  // Guard the read/delete endpoints in case they are ever exported.
+  checkReadKey: async (ctx, _bucket, key) => {
+    await requireOwnedMediaKey(ctx, key);
+  },
+  checkReadBucket: async () => {
+    fail("FORBIDDEN", "Bucket listing is not allowed");
+  },
+  checkDelete: async (ctx, _bucket, key) => {
+    await requireOwnedMediaKey(ctx, key);
   },
   onUpload: async (ctx, _bucket, key) => {
     // Stamp team ownership as soon as the client registers the upload so
     // confirmMediaUpload cannot claim another team's object key.
     const user = await requireUser(ctx);
+    await serializeMediaKeyWrites(ctx, key);
     const existing = await ctx.db
       .query("mediaAssets")
       .withIndex("by_r2_key", (q) => q.eq("r2Key", key))
@@ -101,7 +192,13 @@ export const confirmMediaUpload = mutation({
       return null;
     }
 
-    if (meta.size != null && meta.size > MAX_UPLOAD_BYTES) {
+    // Size is only trustworthy from R2 metadata (HeadObject always returns
+    // Content-Length). A missing size means metadata has not synced yet — let
+    // the client retry rather than trusting a client-supplied sizeBytes.
+    if (meta.size == null) {
+      return null;
+    }
+    if (meta.size > MAX_UPLOAD_BYTES) {
       fail("INVALID_INPUT", "File exceeds maximum size");
     }
 
@@ -115,13 +212,16 @@ export const confirmMediaUpload = mutation({
       return null;
     }
 
-    if (owned.teamId !== user.selectedTeamId) {
+    if (
+      owned.teamId !== user.selectedTeamId ||
+      owned.createdByUserId !== user.id
+    ) {
       fail("NOT_FOUND", "Upload not found");
     }
 
     // Prefer server-side URL from R2; never trust an arbitrary client URL.
     const publicUrl = meta.url || meta.link || undefined;
-    const sizeBytes = meta.size ?? args.sizeBytes;
+    const sizeBytes = meta.size;
     const mimeType = meta.contentType ?? args.mimeType;
 
     await ctx.db.patch("mediaAssets", owned._id, {
@@ -168,5 +268,35 @@ export const deleteMedia = mutation({
     await r2.deleteObject(ctx, asset.r2Key);
     await ctx.db.delete("mediaAssets", asset._id);
     return null;
+  },
+});
+
+/**
+ * Remove mediaAssets left in `uploading` past the TTL — i.e. the client never
+ * finished confirmMediaUpload — along with their R2 objects.
+ * Intended to be scheduled from crons.ts (hourly is plenty).
+ */
+export const purgeStaleUploads = internalMutation({
+  args: {},
+  returns: v.object({ deleted: v.number() }),
+  handler: async (ctx) => {
+    const staleBefore = Date.now() - STALE_UPLOAD_TTL_MS;
+    const stale = await ctx.db
+      .query("mediaAssets")
+      .withIndex("by_status_created", (q) =>
+        q.eq("status", "uploading").lt("createdAt", staleBefore),
+      )
+      .take(PURGE_BATCH_SIZE);
+
+    await Promise.all(
+      stale.map(async (asset) => {
+        if (asset.r2Key) {
+          await r2.deleteObject(ctx, asset.r2Key);
+        }
+        await ctx.db.delete("mediaAssets", asset._id);
+      }),
+    );
+
+    return { deleted: stale.length };
   },
 });

@@ -283,6 +283,7 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_team_status_kind", ["teamId", "status", "kind"])
+    .index("by_status_created", ["status", "createdAt"])
     .index("by_r2_key", ["r2Key"]),
 
   posts: defineTable({

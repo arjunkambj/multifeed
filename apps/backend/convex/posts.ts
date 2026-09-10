@@ -18,7 +18,10 @@ import {
   postStatus,
 } from "./schema";
 import { publicAccountValidator } from "./oauth/accounts";
-import { mediaAssetOutputValidator } from "./media/r2";
+import {
+  publicMediaAssetValidator,
+  toPublicMediaAsset,
+} from "./media/r2";
 import { missingPublishScopes } from "./publishing/helpers";
 
 const targetInput = v.object({
@@ -99,7 +102,7 @@ const enrichedPostValidator = v.object({
   createdAt: v.number(),
   updatedAt: v.number(),
   targets: v.array(targetOutputValidator),
-  mediaAssets: v.array(mediaAssetOutputValidator),
+  mediaAssets: v.array(publicMediaAssetValidator),
 });
 
 const editablePostStatus = v.union(
@@ -490,7 +493,7 @@ async function enrichPosts(ctx: QueryCtx, posts: Doc<"posts">[]) {
     }),
     mediaAssets: (mediaIdsByPost[index] ?? []).flatMap((id) => {
       const asset = mediaById.get(id);
-      return asset ? [asset] : [];
+      return asset ? [toPublicMediaAsset(asset)] : [];
     }),
   }));
 }
