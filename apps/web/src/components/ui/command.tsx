@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
+import { SearchIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Command as CommandPrimitive } from "cmdk";
-
-import { cn } from "@/lib/utils";
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { SearchIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { cn } from "@/lib/utils";
 
 function Command({
   className,
@@ -133,19 +132,6 @@ function CommandGroup({
   );
 }
 
-function CommandSeparator({
-  className,
-  ...props
-}: React.ComponentProps<typeof CommandPrimitive.Separator>) {
-  return (
-    <CommandPrimitive.Separator
-      data-slot="command-separator"
-      className={cn("my-1 h-px bg-border/50", className)}
-      {...props}
-    />
-  );
-}
-
 function CommandItem({
   className,
   children,
@@ -164,36 +150,18 @@ function CommandItem({
       <HugeiconsIcon
         icon={Tick02Icon}
         strokeWidth={2}
-        className="ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100"
+        className="ml-auto opacity-0 group-data-[checked=true]/command-item:opacity-100"
       />
     </CommandPrimitive.Item>
-  );
-}
-
-function CommandShortcut({
-  className,
-  ...props
-}: React.ComponentProps<"span">) {
-  return (
-    <span
-      data-slot="command-shortcut"
-      className={cn(
-        "ml-auto text-xs tracking-widest text-muted-foreground group-data-selected/command-item:text-foreground",
-        className,
-      )}
-      {...props}
-    />
   );
 }
 
 export {
   Command,
   CommandDialog,
-  CommandInput,
-  CommandList,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
-  CommandShortcut,
-  CommandSeparator,
+  CommandList,
 };

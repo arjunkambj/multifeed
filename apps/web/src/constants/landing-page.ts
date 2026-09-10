@@ -63,8 +63,6 @@ export const landingPeople = {
   },
 } as const;
 
-export type LandingPerson = (typeof landingPeople)[keyof typeof landingPeople];
-
 export const socialProofPeople = [
   landingPeople.priya,
   landingPeople.marcus,

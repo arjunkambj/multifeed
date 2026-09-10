@@ -68,19 +68,6 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
-  return (
-    <p
-      data-slot="empty-description"
-      className={cn(
-        "text-sm/relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
 function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -94,11 +81,4 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-export {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-  EmptyContent,
-  EmptyMedia,
-};
+export { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle };

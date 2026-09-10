@@ -1,14 +1,14 @@
+import { linkedinConnector } from "./linkedin";
 import { facebookConnector } from "./meta/facebook";
 import { instagramConnector } from "./meta/instagram";
 import { threadsConnector } from "./meta/threads";
-import { linkedinConnector } from "./linkedin";
+import { tiktokConnector } from "./tiktok";
 import {
   isOAuthPlatform,
   type OAuthPlatform,
   type SocialConnector,
 } from "./types";
 import { xConnector } from "./x";
-import { tiktokConnector } from "./tiktok";
 import { youtubeConnector } from "./youtube";
 
 const REGISTRY: Record<OAuthPlatform, SocialConnector> = {
@@ -28,4 +28,4 @@ export function getConnector(platform: string): SocialConnector {
   return REGISTRY[platform];
 }
 
-export { isOAuthPlatform, type OAuthPlatform, type SocialConnector };
+export { isOAuthPlatform };

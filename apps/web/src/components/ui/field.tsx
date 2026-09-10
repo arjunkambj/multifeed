@@ -36,14 +36,4 @@ function FieldLabel({ className, ...props }: ComponentProps<typeof Label>) {
   );
 }
 
-function FieldDescription({ className, ...props }: ComponentProps<"p">) {
-  return (
-    <p
-      data-slot="field-description"
-      className={cn("text-xs leading-relaxed text-muted-foreground", className)}
-      {...props}
-    />
-  );
-}
-
-export { Field, FieldDescription, FieldGroup, FieldLabel };
+export { Field, FieldGroup, FieldLabel };

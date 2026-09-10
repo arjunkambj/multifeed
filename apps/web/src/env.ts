@@ -29,7 +29,3 @@ export const clientEnv = {
     "NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY",
   ),
 };
-
-export const serverEnv = {
-  ...clientEnv,
-};

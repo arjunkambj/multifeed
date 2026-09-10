@@ -110,7 +110,5 @@ const PLAN_BY_KEY: Record<PlanKey, Plan> = {
 
 export const PLANS = PLAN_KEYS.map((key) => PLAN_BY_KEY[key]);
 
-export const getPlan = (key: PlanKey) => PLAN_BY_KEY[key];
-
 export const getPlanLimits = (key: PlanKey | null): PlanLimits =>
   key === null ? NO_PLAN_LIMITS : PLAN_BY_KEY[key].limits;
