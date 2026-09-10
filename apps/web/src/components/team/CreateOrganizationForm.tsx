@@ -72,12 +72,7 @@ export function CreateOrganizationForm() {
             onChange={(event) => setOrganizationName(event.target.value)}
           />
         </div>
-        <Button
-          className="font-normal"
-          disabled={isCreating}
-          size="lg"
-          type="submit"
-        >
+        <Button disabled={isCreating} size="lg" type="submit">
           {isCreating ? <Spinner className="size-4" /> : null}
           {isCreating ? "Creating..." : "Create organization"}
         </Button>

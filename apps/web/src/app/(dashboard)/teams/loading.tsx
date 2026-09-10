@@ -1,5 +1,5 @@
-import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
+import { TeamPageSkeleton } from "@/components/team/TeamPageSkeleton";
 
 export default function Loading() {
-  return <DashboardLoadingSkeleton variant="teams" />;
+  return <TeamPageSkeleton />;
 }
