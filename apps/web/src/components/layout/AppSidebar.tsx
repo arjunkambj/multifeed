@@ -94,7 +94,7 @@ export function AppSidebar() {
           render={<Link href={item.href} />}
           tooltip={item.name}
         >
-          <item.icon strokeWidth={2} />
+          <item.icon />
           <span>{item.name}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -118,7 +118,7 @@ export function AppSidebar() {
           className="w-full min-w-0 justify-start rounded-full group-data-[collapsible=icon]:hidden"
           onClick={() => setSearchOpen(true)}
         >
-          <Search strokeWidth={2} data-icon="inline-start" />
+          <Search data-icon="inline-start" />
           Search
           <span className="ml-auto">
             <MetaKbd shortcut={SEARCH_SHORTCUT} />
@@ -136,7 +136,7 @@ export function AppSidebar() {
               />
             }
           >
-            <Search strokeWidth={2} />
+            <Search />
           </TooltipTrigger>
           <TooltipContent side="right">
             Search
@@ -166,7 +166,7 @@ export function AppSidebar() {
                     value={`${item.name} ${group.heading ?? ""}`}
                     onSelect={() => goTo(item.href)}
                   >
-                    <item.icon strokeWidth={2} />
+                    <item.icon />
                     {item.name}
                   </CommandItem>
                 ))}

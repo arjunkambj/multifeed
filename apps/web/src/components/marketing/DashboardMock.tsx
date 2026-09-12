@@ -181,7 +181,7 @@ function MockNavItem({
             : "text-sidebar-foreground",
         )}
       >
-        <item.icon className="size-4" strokeWidth={2} />
+        <item.icon className="size-4" />
         <span className="truncate">{item.name}</span>
       </span>
     </li>
@@ -262,7 +262,7 @@ export function DashboardMock() {
                 </span>
                 <InputGroup className="h-8 w-full min-w-0">
                   <InputGroupAddon>
-                    <Search strokeWidth={2} />
+                    <Search />
                   </InputGroupAddon>
                   <InputGroupInput
                     readOnly
@@ -297,7 +297,7 @@ export function DashboardMock() {
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
               <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
                 <Button size="icon-sm" tabIndex={-1} variant="ghost">
-                  <SidebarLeft strokeWidth={2} />
+                  <SidebarLeft />
                 </Button>
                 <div className="ml-auto">
                   <Avatar className="size-8">
@@ -345,7 +345,6 @@ export function DashboardMock() {
                       All platforms
                       <UnfoldMore
                         className="size-4 text-muted-foreground"
-                        strokeWidth={2}
                       />
                     </span>
                     <Tabs defaultValue="dayGridMonth">

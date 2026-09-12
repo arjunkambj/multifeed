@@ -271,7 +271,7 @@ function SidebarTrigger({
           />
         }
       >
-        <SidebarLeft strokeWidth={2} />
+        <SidebarLeft />
         <span className="sr-only">Toggle sidebar</span>
       </TooltipTrigger>
       <TooltipContent side="bottom" align="start">

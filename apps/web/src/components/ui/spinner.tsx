@@ -7,7 +7,6 @@ function Spinner({
 }: Omit<React.ComponentProps<"svg">, "strokeWidth">) {
   return (
     <SpinnerIcon
-      strokeWidth={2}
       data-slot="spinner"
       role="status"
       aria-label="Loading"

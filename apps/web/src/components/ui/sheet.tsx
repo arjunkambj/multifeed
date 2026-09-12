@@ -70,7 +70,7 @@ function SheetContent({
               />
             }
           >
-            <Close strokeWidth={2} />
+            <Close />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         )}

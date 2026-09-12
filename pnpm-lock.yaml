@@ -98,8 +98,8 @@ importers:
         specifier: ^1.0.71
         version: 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.0)(zod@3.25.76)
       '@honeyicons/react':
-        specifier: ^0.0.2
-        version: 0.0.2(react@19.2.8)
+        specifier: ^0.0.3
+        version: 0.0.3(react@19.2.8)
       '@internationalized/date':
         specifier: ^3.12.2
         version: 3.12.2
@@ -951,8 +951,8 @@ packages:
       yup:
         optional: true
 
-  '@honeyicons/react@0.0.2':
-    resolution: {integrity: sha512-d8NSCqqhD45FP4tjyQ9f45VAWdD/CCL2BthikwztOWk+LO0ofB3GIziZutKMIkEjoxHqoY433mLUkpx0ONIv1g==}
+  '@honeyicons/react@0.0.3':
+    resolution: {integrity: sha512-VtUoE1c3PgtrzHaPWW0cQDXtFibNrwQ9q5jCUJ19DpG56nm5l20vQPWJ9KyNt4KItQ9jFkh+zUAMn/1pVa/mLA==}
     peerDependencies:
       react: '>=18'
 
@@ -5517,7 +5517,7 @@ snapshots:
       - buffer
       - supports-color
 
-  '@honeyicons/react@0.0.2(react@19.2.8)':
+  '@honeyicons/react@0.0.3(react@19.2.8)':
     dependencies:
       react: 19.2.8
 

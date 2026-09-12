@@ -160,7 +160,6 @@ function Calendar({
           if (orientation === "left") {
             return (
               <ChevronLeft
-                strokeWidth={2}
                 className={cn("size-4", className)}
                 {...props}
               />
@@ -170,7 +169,6 @@ function Calendar({
           if (orientation === "right") {
             return (
               <ChevronRight
-                strokeWidth={2}
                 className={cn("size-4", className)}
                 {...props}
               />
@@ -179,7 +177,6 @@ function Calendar({
 
           return (
             <ChevronDown
-              strokeWidth={2}
               className={cn("size-4", className)}
               {...props}
             />

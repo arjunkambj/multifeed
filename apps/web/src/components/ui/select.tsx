@@ -55,7 +55,6 @@ function SelectTrigger({
       <SelectPrimitive.Icon
         render={
           <UnfoldMore
-            strokeWidth={2}
             className="pointer-events-none size-4 text-muted-foreground"
           />
         }
@@ -141,7 +140,7 @@ function SelectItem({
           <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center" />
         }
       >
-        <Check strokeWidth={2} className="pointer-events-none" />
+        <Check className="pointer-events-none" />
       </SelectPrimitive.ItemIndicator>
     </SelectPrimitive.Item>
   );
@@ -173,7 +172,7 @@ function SelectScrollUpButton({
       )}
       {...props}
     >
-      <ChevronUp strokeWidth={2} />
+      <ChevronUp />
     </SelectPrimitive.ScrollUpArrow>
   );
 }
@@ -191,7 +190,7 @@ function SelectScrollDownButton({
       )}
       {...props}
     >
-      <ChevronDown strokeWidth={2} />
+      <ChevronDown />
     </SelectPrimitive.ScrollDownArrow>
   );
 }

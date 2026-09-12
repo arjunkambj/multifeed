@@ -65,7 +65,7 @@ function DialogContent({
               />
             }
           >
-            <Close strokeWidth={2} />
+            <Close />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

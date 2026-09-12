@@ -76,7 +76,6 @@ function CommandInput({
         />
         <InputGroupAddon>
           <Search
-            strokeWidth={2}
             className="size-4 shrink-0 opacity-50"
           />
         </InputGroupAddon>
@@ -146,7 +145,6 @@ function CommandItem({
     >
       {children}
       <Check
-        strokeWidth={2}
         className="ml-auto opacity-0 group-data-[checked=true]/command-item:opacity-100"
       />
     </CommandPrimitive.Item>
