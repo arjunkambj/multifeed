@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowDown01Icon, Calendar03Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Calendar, ChevronDown } from "@honeyicons/react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -79,9 +78,9 @@ export function OverviewDateRangePicker({ value, preset, onChange }: Props) {
           <Button variant="secondary" className="min-w-36 justify-between" />
         }
       >
-        <HugeiconsIcon icon={Calendar03Icon} size={16} />
+        <Calendar size={16} />
         <span className="text-sm font-medium">{label}</span>
-        <HugeiconsIcon icon={ArrowDown01Icon} size={14} />
+        <ChevronDown size={14} />
       </PopoverTrigger>
       <PopoverContent
         align="end"

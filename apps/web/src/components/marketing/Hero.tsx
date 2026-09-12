@@ -1,8 +1,6 @@
 "use client";
 
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Icon } from "@iconify/react";
+import { ChevronRight } from "@honeyicons/react";
 import {
   motion,
   useReducedMotion,
@@ -93,11 +91,7 @@ export function Hero() {
               title={p.label}
               className="inline-flex items-center justify-center opacity-90 transition-all duration-200 hover:scale-110 hover:opacity-100"
             >
-              <Icon
-                icon={p.icon}
-                className={PLATFORM_ICON}
-                style={{ color: p.color }}
-              />
+              <p.icon className={PLATFORM_ICON} style={{ color: p.color }} />
             </span>
           ))}
         </div>
@@ -131,7 +125,7 @@ export function Hero() {
             className={`${buttonVariants({ size: "lg" })} w-full px-8 has-[svg]:gap-2 sm:w-auto [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:translate-x-0.5`}
           >
             Try it for free
-            <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
+            <ChevronRight data-icon="inline-end" />
           </Link>
 
           <div className="flex items-center justify-center">

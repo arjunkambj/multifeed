@@ -1,14 +1,12 @@
 import { cn } from "@/lib/utils";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading03Icon } from "@hugeicons/core-free-icons";
+import { Spinner as SpinnerIcon } from "@honeyicons/react";
 
 function Spinner({
   className,
   ...props
 }: Omit<React.ComponentProps<"svg">, "strokeWidth">) {
   return (
-    <HugeiconsIcon
-      icon={Loading03Icon}
+    <SpinnerIcon
       strokeWidth={2}
       data-slot="spinner"
       role="status"

@@ -2,7 +2,7 @@
 
 import { useHexclaveApp } from "@hexclave/next";
 import { useEffect, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Email, Google } from "@honeyicons/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -139,9 +139,8 @@ export default function SignInPage() {
           }}
         >
           <div className="relative">
-            <Icon
-              icon="solar:letter-linear"
-              width={20}
+            <Email
+              size={20}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <Input
@@ -237,7 +236,7 @@ export default function SignInPage() {
         {isGoogleLoading ? (
           <Spinner className="size-4" />
         ) : (
-          <Icon icon="logos:google-icon" width={18} />
+          <Google size={18} />
         )}
         Continue with Google
       </Button>

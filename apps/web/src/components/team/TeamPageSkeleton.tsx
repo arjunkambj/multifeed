@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { UserAdd } from "@honeyicons/react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { TeamStatsSkeleton } from "@/components/team/TeamStats";
 import { TeamTableSkeleton } from "@/components/team/TeamTableSkeleton";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 export function InviteMemberFallback() {
   return (
     <Button tabIndex={-1} className="pointer-events-none" aria-hidden>
-      <Icon icon="hugeicons:user-add-02" width={16} />
+      <UserAdd size={16} />
       Invite member
     </Button>
   );

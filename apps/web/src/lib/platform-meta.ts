@@ -1,4 +1,15 @@
 import {
+  Facebook,
+  Instagram,
+  Integration,
+  Linkedin,
+  Threads,
+  Tiktok,
+  X,
+  Youtube,
+  type HoneyIcon,
+} from "@honeyicons/react";
+import {
   OAUTH_PLATFORMS,
   type OAuthPlatform,
 } from "@/lib/oauth/connectors/types";
@@ -7,7 +18,7 @@ export type { OAuthPlatform } from "@/lib/oauth/connectors/types";
 
 export type PlatformMeta = {
   label: string;
-  icon: string;
+  icon: HoneyIcon;
   brand: string;
   ink?: string;
   foreground?: string;
@@ -20,21 +31,21 @@ export const PLATFORM_META: Record<OAuthPlatform, PlatformMeta> &
   facebook: {
     label: "Facebook",
     // Single-glyph brand mark reads cleaner in small badges than the wordmark.
-    icon: "fa6-brands:facebook-f",
+    icon: Facebook,
     brand: "var(--platform-facebook)",
     description: "Pages for posts, photos, and video",
     maxChars: 63206,
   },
   instagram: {
     label: "Instagram",
-    icon: "fa6-brands:instagram",
+    icon: Instagram,
     brand: "var(--platform-instagram)",
     description: "Professional accounts via Meta",
     maxChars: 2200,
   },
   threads: {
     label: "Threads",
-    icon: "fa6-brands:threads",
+    icon: Threads,
     brand: "var(--platform-threads)",
     ink: "var(--platform-threads-ink)",
     foreground: "var(--platform-threads-fg)",
@@ -43,21 +54,21 @@ export const PLATFORM_META: Record<OAuthPlatform, PlatformMeta> &
   },
   linkedin: {
     label: "LinkedIn",
-    icon: "fa6-brands:linkedin-in",
+    icon: Linkedin,
     brand: "var(--platform-linkedin)",
     description: "Personal profile posting",
     maxChars: 3000,
   },
   youtube: {
     label: "YouTube",
-    icon: "fa6-brands:youtube",
+    icon: Youtube,
     brand: "var(--platform-youtube)",
     description: "Videos and Shorts on your channel",
     maxChars: 5000,
   },
   x: {
     label: "X",
-    icon: "fa6-brands:x-twitter",
+    icon: X,
     brand: "var(--platform-x)",
     ink: "var(--platform-x-ink)",
     foreground: "var(--platform-x-fg)",
@@ -66,7 +77,7 @@ export const PLATFORM_META: Record<OAuthPlatform, PlatformMeta> &
   },
   tiktok: {
     label: "TikTok",
-    icon: "fa6-brands:tiktok",
+    icon: Tiktok,
     brand: "var(--platform-tiktok)",
     ink: "var(--platform-tiktok-ink)",
     foreground: "var(--platform-tiktok-fg)",
@@ -91,4 +102,8 @@ export function platformInk(platform: string) {
 
 export function platformForeground(platform: string) {
   return PLATFORM_META[platform]?.foreground ?? "#fff";
+}
+
+export function platformIcon(platform: string): HoneyIcon {
+  return PLATFORM_META[platform]?.icon ?? Integration;
 }

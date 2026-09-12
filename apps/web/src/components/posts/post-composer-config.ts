@@ -1,5 +1,6 @@
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { POST_KIND_PLATFORMS } from "@convex/postConfig";
+import { Image, Smartphone, SquarePen, VideoCamera } from "@honeyicons/react";
 export { POST_KIND_PLATFORMS } from "@convex/postConfig";
 
 export type PostKind = Doc<"posts">["kind"];
@@ -27,25 +28,25 @@ export const POST_FORMATS = [
     id: "text",
     label: "Text post",
     description: "Caption or link update",
-    icon: "hugeicons:text-font",
+    icon: SquarePen,
   },
   {
     id: "image",
     label: "Image post",
     description: "Single image or carousel",
-    icon: "hugeicons:image-02",
+    icon: Image,
   },
   {
     id: "video",
     label: "Video / reel",
     description: "Feed video, Reel, or Short",
-    icon: "hugeicons:video-01",
+    icon: VideoCamera,
   },
   {
     id: "story",
     label: "Story post",
     description: "Vertical image or video",
-    icon: "hugeicons:camera-01",
+    icon: Smartphone,
   },
 ] as const;
 

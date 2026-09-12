@@ -1,6 +1,8 @@
+import { Headphones, User } from "@honeyicons/react";
+
 export const settingsTabs = [
-  { id: "account", label: "Account", icon: "hugeicons:user-02" },
-  { id: "support", label: "Support", icon: "hugeicons:headphones" },
+  { id: "account", label: "Account", icon: User },
+  { id: "support", label: "Support", icon: Headphones },
 ] as const;
 
 export type SettingsTab = (typeof settingsTabs)[number]["id"];

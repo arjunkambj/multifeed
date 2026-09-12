@@ -1,7 +1,6 @@
 "use client";
 
-import { SearchIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Search } from "@honeyicons/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -95,7 +94,7 @@ export function AppSidebar() {
           render={<Link href={item.href} />}
           tooltip={item.name}
         >
-          <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+          <item.icon strokeWidth={2} />
           <span>{item.name}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -119,11 +118,7 @@ export function AppSidebar() {
           className="w-full min-w-0 justify-start rounded-full group-data-[collapsible=icon]:hidden"
           onClick={() => setSearchOpen(true)}
         >
-          <HugeiconsIcon
-            icon={SearchIcon}
-            strokeWidth={2}
-            data-icon="inline-start"
-          />
+          <Search strokeWidth={2} data-icon="inline-start" />
           Search
           <span className="ml-auto">
             <MetaKbd shortcut={SEARCH_SHORTCUT} />
@@ -141,7 +136,7 @@ export function AppSidebar() {
               />
             }
           >
-            <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
+            <Search strokeWidth={2} />
           </TooltipTrigger>
           <TooltipContent side="right">
             Search
@@ -171,7 +166,7 @@ export function AppSidebar() {
                     value={`${item.name} ${group.heading ?? ""}`}
                     onSelect={() => goTo(item.href)}
                   >
-                    <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                    <item.icon strokeWidth={2} />
                     {item.name}
                   </CommandItem>
                 ))}

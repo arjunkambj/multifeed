@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { UserGroup } from "@honeyicons/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -41,7 +41,7 @@ export function CreateOrganizationForm() {
     <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
       <div className="flex flex-col items-center text-center">
         <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <Icon icon="solar:buildings-2-linear" width={24} />
+          <UserGroup size={24} />
         </div>
         <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
           Create your organization

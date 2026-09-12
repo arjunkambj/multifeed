@@ -1,8 +1,6 @@
 "use client";
 
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Icon } from "@iconify/react";
+import { ChevronRight } from "@honeyicons/react";
 import { easeOut } from "motion";
 import {
   motion,
@@ -54,8 +52,7 @@ function OverridesMock() {
             key={override.platform.label}
           >
             <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background">
-              <Icon
-                icon={override.platform.icon}
+              <override.platform.icon
                 className="size-3.5"
                 style={{ color: override.platform.color }}
               />
@@ -108,8 +105,7 @@ function CalendarMock() {
                     key={post.time}
                   >
                     <p className="flex items-center gap-1.5 text-xs leading-4 whitespace-nowrap text-muted-foreground">
-                      <Icon
-                        icon={post.platform.icon}
+                      <post.platform.icon
                         className="size-3 shrink-0"
                         style={{ color: post.platform.color }}
                       />
@@ -154,8 +150,7 @@ function FormatsMock() {
             key={format.format}
           >
             <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background">
-              <Icon
-                icon={format.platform.icon}
+              <format.platform.icon
                 className="size-4"
                 style={{ color: format.platform.color }}
               />
@@ -252,7 +247,7 @@ function StickyFeatureCard({
               )}
             >
               {item.ctaPrimary}
-              <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
+              <ChevronRight data-icon="inline-end" />
             </Link>
           </div>
         </div>

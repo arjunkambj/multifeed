@@ -6,7 +6,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
-import { Icon } from "@iconify/react";
+import {
+  Image as ImageIcon,
+  ImageAdd,
+  Trash,
+  VideoCamera,
+} from "@honeyicons/react";
 import { useUploadFile } from "@convex-dev/r2/react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -128,12 +133,11 @@ function MediaPreviewCard({
           />
         ) : (
           <div className="flex size-full items-center justify-center text-muted-foreground">
-            <Icon
-              icon={
-                kind === "video" ? "hugeicons:video-01" : "hugeicons:image-02"
-              }
-              width={24}
-            />
+            {kind === "video" ? (
+              <VideoCamera size={24} />
+            ) : (
+              <ImageIcon size={24} />
+            )}
           </div>
         )}
 
@@ -157,7 +161,7 @@ function MediaPreviewCard({
             className="absolute right-1.5 top-1.5"
             onClick={onRemove}
           >
-            <Icon icon="hugeicons:delete-02" width={14} />
+            <Trash size={14} />
           </Button>
         )}
       </div>
@@ -372,13 +376,7 @@ export function PostMediaUploader({
             className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background"
             aria-hidden
           >
-            <Icon
-              icon={
-                kind === "video"
-                  ? "hugeicons:video-01"
-                  : "hugeicons:image-add-02"
-              }
-            />
+            {kind === "video" ? <VideoCamera /> : <ImageAdd />}
           </span>
           <span className="flex flex-col items-start gap-1.5 text-left">
             <span>

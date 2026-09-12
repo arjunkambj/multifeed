@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { ChevronLeft, ChevronRight } from "@honeyicons/react";
 import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
@@ -167,7 +167,7 @@ export function OverviewDateRangeContent({
             aria-label="Previous months"
             onClick={() => setVisibleMonth((current) => addMonths(current, -1))}
           >
-            <Icon icon="hugeicons:arrow-left-01" />
+            <ChevronLeft />
           </Button>
           <p className="text-sm font-medium">
             {formatMonthRange(visibleMonth)}
@@ -180,7 +180,7 @@ export function OverviewDateRangeContent({
             disabled={!canGoNext}
             onClick={() => setVisibleMonth((current) => addMonths(current, 1))}
           >
-            <Icon icon="hugeicons:arrow-right-01" />
+            <ChevronRight />
           </Button>
         </div>
 

@@ -1,12 +1,14 @@
 "use client";
 
 import {
-  SearchIcon,
-  SidebarLeftIcon,
-  UnfoldMoreIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Icon } from "@iconify/react";
+  Add,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  SidebarLeft,
+  UnfoldMore,
+} from "@honeyicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
@@ -35,8 +37,8 @@ import { MOCK_FRAME } from "./rhythm";
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const views = [
-  { id: "dayGridMonth", label: "Month", icon: "hugeicons:calendar-03" },
-  { id: "timeGridWeek", label: "Week", icon: "hugeicons:calendar-02" },
+  { id: "dayGridMonth", label: "Month", icon: Calendar },
+  { id: "timeGridWeek", label: "Week", icon: Calendar },
 ] as const;
 
 const MOCK_EVENTS = [
@@ -179,7 +181,7 @@ function MockNavItem({
             : "text-sidebar-foreground",
         )}
       >
-        <HugeiconsIcon className="size-4" icon={item.icon} strokeWidth={2} />
+        <item.icon className="size-4" strokeWidth={2} />
         <span className="truncate">{item.name}</span>
       </span>
     </li>
@@ -260,7 +262,7 @@ export function DashboardMock() {
                 </span>
                 <InputGroup className="h-8 w-full min-w-0">
                   <InputGroupAddon>
-                    <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
+                    <Search strokeWidth={2} />
                   </InputGroupAddon>
                   <InputGroupInput
                     readOnly
@@ -295,7 +297,7 @@ export function DashboardMock() {
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
               <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
                 <Button size="icon-sm" tabIndex={-1} variant="ghost">
-                  <HugeiconsIcon icon={SidebarLeftIcon} strokeWidth={2} />
+                  <SidebarLeft strokeWidth={2} />
                 </Button>
                 <div className="ml-auto">
                   <Avatar className="size-8">
@@ -312,7 +314,7 @@ export function DashboardMock() {
                   title="Calendar"
                   actions={
                     <Button tabIndex={-1}>
-                      <Icon icon="hugeicons:add-01" width={16} />
+                      <Add size={16} />
                       New post
                     </Button>
                   }
@@ -325,13 +327,13 @@ export function DashboardMock() {
                       className="rounded-xl bg-secondary"
                     >
                       <Button size="icon" tabIndex={-1} variant="outline">
-                        <Icon icon="hugeicons:arrow-left-01" width={16} />
+                        <ChevronLeft size={16} />
                       </Button>
                       <Button tabIndex={-1} variant="outline">
                         Today
                       </Button>
                       <Button size="icon" tabIndex={-1} variant="outline">
-                        <Icon icon="hugeicons:arrow-right-01" width={16} />
+                        <ChevronRight size={16} />
                       </Button>
                     </ButtonGroup>
                     <h2 className="text-base font-semibold tracking-tight">
@@ -341,9 +343,8 @@ export function DashboardMock() {
                   <div className="flex shrink-0 items-center gap-2">
                     <span className="flex h-8 w-40 items-center justify-between gap-1.5 rounded-2xl bg-input px-3 text-sm">
                       All platforms
-                      <HugeiconsIcon
+                      <UnfoldMore
                         className="size-4 text-muted-foreground"
-                        icon={UnfoldMoreIcon}
                         strokeWidth={2}
                       />
                     </span>
@@ -351,7 +352,7 @@ export function DashboardMock() {
                       <TabsList aria-hidden>
                         {views.map((item) => (
                           <TabsTrigger key={item.id} value={item.id}>
-                            <Icon icon={item.icon} width={14} />
+                            <item.icon size={14} />
                             {item.label}
                           </TabsTrigger>
                         ))}

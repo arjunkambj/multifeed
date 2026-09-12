@@ -6,6 +6,15 @@
  * component — if a decision only applies once, it stays inline at the call site.
  */
 
+import {
+  Facebook,
+  Instagram,
+  Linkedin,
+  Tiktok,
+  X,
+  Youtube,
+} from "@honeyicons/react";
+
 /** Gap between a `SectionHeader` and the body it introduces. */
 export const HEADER_GAP = "mt-10 md:mt-12";
 
@@ -52,32 +61,32 @@ export const MOCK_FRAME =
 export const platforms = [
   {
     label: "Twitter/X",
-    icon: "simple-icons:x",
+    icon: X,
     color: "var(--platform-x-ink)",
   },
   {
     label: "Instagram",
-    icon: "simple-icons:instagram",
+    icon: Instagram,
     color: "var(--platform-instagram-ink)",
   },
   {
     label: "LinkedIn",
-    icon: "simple-icons:linkedin",
+    icon: Linkedin,
     color: "var(--platform-linkedin-ink)",
   },
   {
     label: "Facebook",
-    icon: "simple-icons:facebook",
+    icon: Facebook,
     color: "var(--platform-facebook-ink)",
   },
   {
     label: "TikTok",
-    icon: "simple-icons:tiktok",
+    icon: Tiktok,
     color: "var(--platform-tiktok-ink)",
   },
   {
     label: "YouTube",
-    icon: "simple-icons:youtube",
+    icon: Youtube,
     color: "var(--platform-youtube-ink)",
   },
 ] as const;

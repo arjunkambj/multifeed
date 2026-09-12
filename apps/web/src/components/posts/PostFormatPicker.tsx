@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Integration } from "@honeyicons/react";
 import { Badge } from "@/components/ui/badge";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import { PLATFORM_META, platformInk, platformLabel } from "@/lib/platform-meta";
@@ -53,7 +53,7 @@ export function PostFormatPicker({
               className="group flex h-full min-h-52 w-full flex-col items-center rounded-3xl bg-card px-5 py-5 text-center outline-none transition-colors hover:bg-zinc-150 dark:hover:bg-zinc-850 focus-visible:ring-3 focus-visible:ring-ring/30"
             >
               <span className="flex size-11 items-center justify-center rounded-xl bg-background text-muted-foreground transition-colors group-hover:text-foreground">
-                <Icon icon={format.icon} width={22} />
+                <format.icon size={22} />
               </span>
 
               <span className="mt-4 flex w-full flex-col items-center gap-1">
@@ -68,17 +68,16 @@ export function PostFormatPicker({
               <span className="mt-auto flex flex-wrap items-center justify-center gap-1.5 pt-5">
                 {platforms.map((platform) => {
                   const meta = PLATFORM_META[platform];
+                  const MetaIcon = meta?.icon ?? Integration;
                   return (
                     <span
                       key={platform}
                       title={meta?.label ?? platform}
                       className="flex size-7 items-center justify-center rounded-full bg-background"
                     >
-                      <Icon
-                        icon={meta?.icon ?? "hugeicons:link-01"}
-                        width={13}
+                      <MetaIcon
+                        size={16}
                         style={{ color: platformInk(platform) }}
-                        aria-hidden
                       />
                     </span>
                   );

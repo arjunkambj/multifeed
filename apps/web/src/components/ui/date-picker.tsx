@@ -1,7 +1,6 @@
 "use client";
 
-import { Calendar03Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Calendar as CalendarIcon } from "@honeyicons/react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -76,7 +75,7 @@ export function DatePicker({
         <span className={cn("truncate", !value && "text-muted-foreground")}>
           {value ? dateFormatter.format(value) : placeholder}
         </span>
-        <HugeiconsIcon icon={Calendar03Icon} data-icon="inline-end" />
+        <CalendarIcon data-icon="inline-end" />
       </PopoverTrigger>
       <PopoverContent
         data-slot="date-picker-content"

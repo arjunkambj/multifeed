@@ -1,26 +1,26 @@
 import {
-  Calendar03Icon,
-  ConnectIcon,
-  CreditCardIcon,
-  DashboardSquareSettingIcon,
-  FileAddIcon,
-  Home03Icon,
-  Layers01Icon,
-  Settings02Icon,
-  UserGroup03Icon,
-} from "@hugeicons/core-free-icons";
-import type { IconSvgElement } from "@hugeicons/react";
+  Calendar,
+  Card,
+  FileAdd,
+  Home,
+  Integration,
+  Layers,
+  Settings,
+  UserGroup,
+  Widget,
+  type HoneyIcon,
+} from "@honeyicons/react";
 import type { Route } from "next";
 
 export interface MenuItem {
   name: string;
   href: Route;
-  icon: IconSvgElement;
+  icon: HoneyIcon;
 }
 
 export interface MenuCategory {
   name: string;
-  icon: IconSvgElement;
+  icon: HoneyIcon;
   items: MenuItem[];
 }
 
@@ -28,45 +28,45 @@ export const sidebarMainItems: MenuItem[] = [
   {
     name: "Overview",
     href: "/overview",
-    icon: Home03Icon,
+    icon: Home,
   },
 ];
 
 export const sidebarCategories: MenuCategory[] = [
   {
     name: "Social",
-    icon: Calendar03Icon,
+    icon: Calendar,
     items: [
       {
         name: "New Post",
         href: "/posts/new",
-        icon: FileAddIcon,
+        icon: FileAdd,
       },
       {
         name: "Calendar",
         href: "/calendar",
-        icon: Calendar03Icon,
+        icon: Calendar,
       },
       {
         name: "All Posts",
         href: "/posts",
-        icon: Layers01Icon,
+        icon: Layers,
       },
     ],
   },
   {
     name: "Manager",
-    icon: DashboardSquareSettingIcon,
+    icon: Widget,
     items: [
       {
         name: "Connections",
         href: "/connections",
-        icon: ConnectIcon,
+        icon: Integration,
       },
       {
         name: "Team",
         href: "/teams",
-        icon: UserGroup03Icon,
+        icon: UserGroup,
       },
     ],
   },
@@ -76,11 +76,11 @@ export const sidebarFooterItems: MenuItem[] = [
   {
     name: "Billing",
     href: "/billing",
-    icon: CreditCardIcon,
+    icon: Card,
   },
   {
     name: "Settings",
     href: "/settings",
-    icon: Settings02Icon,
+    icon: Settings,
   },
 ];

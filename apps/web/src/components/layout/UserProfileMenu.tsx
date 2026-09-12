@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Logout, Moon, Settings, Sun } from "@honeyicons/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -86,7 +86,7 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
         <DropdownMenuSeparator />
         <div className="flex items-center gap-2 px-2 py-1">
           <span className="flex items-center gap-2 text-sm">
-            <Icon icon="hugeicons:sun-03" width={16} />
+            <Sun size={16} />
             Theme
           </span>
           <Tabs
@@ -101,7 +101,7 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
                 title="Light mode"
                 value="light"
               >
-                <Icon icon="hugeicons:sun-03" className="size-3" />
+                <Sun className="size-3" />
               </TabsTrigger>
               <TabsTrigger
                 aria-label="Dark mode"
@@ -109,21 +109,21 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
                 title="Dark mode"
                 value="dark"
               >
-                <Icon icon="hugeicons:moon-02" className="size-3" />
+                <Moon className="size-3" />
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => router.push("/settings")}>
-            <Icon icon="hugeicons:settings-02" width={16} />
+            <Settings size={16} />
             Settings
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onClick={() => void hexclaveClientApp.signOut()}
           >
-            <Icon icon="hugeicons:logout-03" width={16} />
+            <Logout size={16} />
             Logout
           </DropdownMenuItem>
         </DropdownMenuGroup>

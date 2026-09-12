@@ -3,7 +3,7 @@
 import Logo from "@/components/layout/Logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Icon } from "@iconify/react";
+import { Close, Menu } from "@honeyicons/react";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -132,7 +132,7 @@ export function Navbar() {
             onClick={() => setIsMenuOpen((open) => !open)}
             type="button"
           >
-            <Icon icon={isMenuOpen ? "ph:x" : "ph:list"} width={18} />
+            {isMenuOpen ? <Close size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </nav>

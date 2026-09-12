@@ -1,7 +1,7 @@
 "use client";
 
 import type { Team } from "@hexclave/next";
-import { Icon } from "@iconify/react";
+import { Email, UserAdd } from "@honeyicons/react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -87,7 +87,7 @@ export function InviteModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button />}>
-        <Icon icon="hugeicons:user-add-02" width={16} />
+        <UserAdd size={16} />
         Invite member
       </DialogTrigger>
       <DialogContent>
@@ -135,7 +135,7 @@ export function InviteModal({
               {isSending ? (
                 <Spinner className="size-4" />
               ) : (
-                <Icon icon="hugeicons:mail-send-02" width={16} />
+                <Email size={16} />
               )}
               Send invite
             </Button>

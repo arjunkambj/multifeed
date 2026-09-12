@@ -1,5 +1,5 @@
 import type { Doc, Id } from "@convex/_generated/dataModel";
-import { Icon } from "@iconify/react";
+import { AlertTriangle, Integration, Trash } from "@honeyicons/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,7 @@ export function PlatformConnectionCard({
 }: PlatformConnectionCardProps) {
   const meta: PlatformMeta = PLATFORM_META[platform] ?? {
     label: platform,
-    icon: "hugeicons:link-01",
+    icon: Integration,
     brand: "var(--primary)",
   };
   const isConnecting = connecting === platform;
@@ -75,7 +75,7 @@ export function PlatformConnectionCard({
                 color: meta.foreground ?? "#FFFFFF",
               }}
             >
-              <Icon icon={meta.icon} width={14} aria-hidden />
+              <meta.icon size={18} />
             </span>
             <div className="flex min-w-0 flex-col gap-1">
               <CardTitle className="text-sm">
@@ -135,14 +135,14 @@ export function PlatformConnectionCard({
                         }}
                         aria-hidden
                       >
-                        <Icon icon={meta.icon} width={10} />
+                        <meta.icon size={12} />
                       </span>
                       {needsReconnect && (
                         <span
                           className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground ring-2 ring-card"
                           aria-hidden
                         >
-                          <Icon icon="hugeicons:alert-circle" width={12} />
+                          <AlertTriangle size={12} />
                         </span>
                       )}
                     </PopoverTrigger>
@@ -175,7 +175,7 @@ export function PlatformConnectionCard({
                           {disconnecting === account._id ? (
                             <Spinner />
                           ) : (
-                            <Icon icon="hugeicons:delete-02" />
+                            <Trash />
                           )}
                         </Button>
                       </div>

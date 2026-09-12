@@ -13,7 +13,15 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { Icon } from "@iconify/react";
+import {
+  Add,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Close,
+  Integration,
+  type HoneyIcon,
+} from "@honeyicons/react";
 import { useMutation } from "convex/react";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { format } from "date-fns";
@@ -53,9 +61,9 @@ import { cn } from "@/lib/utils";
 
 type CalendarView = "dayGridMonth" | "timeGridWeek";
 
-const VIEWS: { id: CalendarView; label: string; icon: string }[] = [
-  { id: "dayGridMonth", label: "Month", icon: "hugeicons:calendar-03" },
-  { id: "timeGridWeek", label: "Week", icon: "hugeicons:calendar-02" },
+const VIEWS: { id: CalendarView; label: string; icon: HoneyIcon }[] = [
+  { id: "dayGridMonth", label: "Month", icon: Calendar },
+  { id: "timeGridWeek", label: "Week", icon: Calendar },
 ];
 
 const STATUS_STYLE: Record<string, string> = {
@@ -242,7 +250,7 @@ export function PostCalendar() {
         description="Month and week — drag to reschedule."
         actions={
           <Button onClick={() => router.push("/posts/new")}>
-            <Icon icon="hugeicons:add-01" width={16} />
+            <Add size={16} />
             New post
           </Button>
         }
@@ -269,7 +277,7 @@ export function PostCalendar() {
                   variant="outline"
                   onClick={goPrev}
                 >
-                  <Icon icon="hugeicons:arrow-left-01" width={16} />
+                  <ChevronLeft size={16} />
                 </Button>
                 <Button variant="outline" onClick={goToday}>
                   Today
@@ -280,7 +288,7 @@ export function PostCalendar() {
                   variant="outline"
                   onClick={goNext}
                 >
-                  <Icon icon="hugeicons:arrow-right-01" width={16} />
+                  <ChevronRight size={16} />
                 </Button>
               </ButtonGroup>
               <h2 className="text-base font-semibold tracking-tight">
@@ -333,7 +341,7 @@ export function PostCalendar() {
                 <TabsList aria-label="Calendar view">
                   {VIEWS.map((item) => (
                     <TabsTrigger key={item.id} value={item.id}>
-                      <Icon icon={item.icon} width={14} />
+                      <item.icon size={14} />
                       {item.label}
                     </TabsTrigger>
                   ))}
@@ -457,7 +465,7 @@ function PostDetailsCard({
           onClick={onClose}
           className="col-start-2 row-span-2 row-start-1 -mt-1 -mr-1 self-start justify-self-end"
         >
-          <Icon icon="hugeicons:cancel-01" width={14} />
+          <Close size={14} />
         </Button>
       </CardHeader>
       <CardContent>
@@ -508,7 +516,10 @@ function PostDetailsCard({
               {selectedPost.targets.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No targets</p>
               ) : (
-                selectedPost.targets.map((t) => (
+                selectedPost.targets.map((t) => {
+                  const TargetIcon =
+                    PLATFORM_META[t.platform]?.icon ?? Integration;
+                  return (
                   <div
                     key={t.targetId}
                     className="flex items-center gap-2 rounded-xl bg-muted px-2.5 py-2"
@@ -520,12 +531,7 @@ function PostDetailsCard({
                         color: platformForeground(t.platform),
                       }}
                     >
-                      <Icon
-                        icon={
-                          PLATFORM_META[t.platform]?.icon ?? "hugeicons:link-01"
-                        }
-                        width={12}
-                      />
+                      <TargetIcon size={16} />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-medium">
@@ -557,7 +563,8 @@ function PostDetailsCard({
                       {t.status}
                     </Badge>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
 

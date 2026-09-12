@@ -1,5 +1,5 @@
 import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion";
-import { Icon } from "@iconify/react";
+import { Add, ChevronDown, ChevronUp, Minus } from "@honeyicons/react";
 
 import { cn } from "@/lib/utils";
 
@@ -32,10 +32,8 @@ function AccordionTrigger({
   indicator = "plus",
   ...props
 }: AccordionPrimitive.Trigger.Props & { indicator?: "chevron" | "plus" }) {
-  const [closedIcon, openIcon] =
-    indicator === "plus"
-      ? ["lucide:plus", "lucide:minus"]
-      : ["lucide:chevron-down", "lucide:chevron-up"];
+  const [ClosedIcon, OpenIcon] =
+    indicator === "plus" ? [Add, Minus] : [ChevronDown, ChevronUp];
 
   const closedIconClasses =
     indicator === "plus"
@@ -54,17 +52,13 @@ function AccordionTrigger({
       >
         {children}
         <span className="relative ml-auto size-4 shrink-0">
-          <Icon
-            icon={closedIcon}
-            width={16}
-            height={16}
+          <ClosedIcon
+            size={16}
             data-slot="accordion-trigger-icon"
             className={closedIconClasses}
           />
-          <Icon
-            icon={openIcon}
-            width={16}
-            height={16}
+          <OpenIcon
+            size={16}
             data-slot="accordion-trigger-icon"
             className="pointer-events-none absolute inset-0 size-4 text-muted-foreground opacity-0 scale-75 transition-all duration-200 group-aria-expanded/accordion-trigger:opacity-100 group-aria-expanded/accordion-trigger:scale-100 group-aria-expanded/accordion-trigger:rotate-0"
           />

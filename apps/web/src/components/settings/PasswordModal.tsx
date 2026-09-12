@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Key } from "@honeyicons/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -72,7 +72,7 @@ export function PasswordModal() {
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button type="button" variant="outline" />}>
-        <Icon icon="solar:key-linear" width={16} />
+        <Key size={16} />
         {actionLabel}
       </DialogTrigger>
       <DialogContent>

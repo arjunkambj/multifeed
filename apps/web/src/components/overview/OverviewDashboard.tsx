@@ -2,12 +2,12 @@
 
 import { api } from "@convex/_generated/api";
 import {
-  Calendar03Icon,
-  CheckmarkBadge01Icon,
-  FavouriteIcon,
-  SentIcon,
-  Share08Icon,
-} from "@hugeicons/core-free-icons";
+  Calendar,
+  Like,
+  PaperPlane,
+  Share,
+  VerifiedCheck,
+} from "@honeyicons/react";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
@@ -83,7 +83,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Scheduled posts"
               value={numberFormatter.format(metrics.scheduledPosts)}
-              icon={Calendar03Icon}
+              icon={Calendar}
               change={percentageChange(
                 metrics.scheduledPosts,
                 metrics.previousScheduledPosts,
@@ -92,7 +92,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Published posts"
               value={numberFormatter.format(metrics.publishedPosts)}
-              icon={SentIcon}
+              icon={PaperPlane}
               change={percentageChange(
                 metrics.publishedPosts,
                 metrics.previousPublishedPosts,
@@ -101,7 +101,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Publishing success"
               value={`${metrics.publishingSuccessRate.toFixed(1)}%`}
-              icon={CheckmarkBadge01Icon}
+              icon={VerifiedCheck}
               change={
                 metrics.publishingSuccessRate -
                 metrics.previousPublishingSuccessRate
@@ -110,7 +110,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Engagements"
               value={numberFormatter.format(metrics.engagement)}
-              icon={FavouriteIcon}
+              icon={Like}
               change={percentageChange(
                 metrics.engagement,
                 metrics.previousEngagement,
@@ -119,7 +119,7 @@ export function OverviewDashboard() {
             <MetricCard
               title="Active channels"
               value={numberFormatter.format(metrics.activeChannels)}
-              icon={Share08Icon}
+              icon={Share}
             />
           </section>
         </>

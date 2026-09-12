@@ -4,7 +4,7 @@ import Reveal from "@/components/motion/Reveal";
 import { buttonVariants } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Icon } from "@iconify/react";
+import { Check } from "@honeyicons/react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -108,8 +108,7 @@ export function Pricing() {
                 className="flex items-center justify-center transition-transform duration-200 hover:scale-[1.12]"
                 style={{ color: platform.color }}
               >
-                <Icon
-                  icon={platform.icon}
+                <platform.icon
                   className={`block shrink-0 ${PLATFORM_ICON}`}
                 />
               </span>
@@ -175,10 +174,8 @@ function PriceCard({
               key={feature}
               className="flex items-start gap-2.5 text-[0.9375rem] leading-6"
             >
-              <Icon
-                icon="lucide:check"
-                width={16}
-                height={16}
+              <Check
+                size={16}
                 className="mt-[5px] shrink-0 text-primary"
               />
               <span className="text-foreground">{feature}</span>

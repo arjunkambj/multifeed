@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Check } from "@honeyicons/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PasswordModal } from "@/components/settings/PasswordModal";
@@ -66,7 +66,7 @@ export function GeneralSettingsForm() {
           {isSaving ? (
             <Spinner data-icon="inline-start" />
           ) : (
-            <Icon icon="solar:diskette-linear" data-icon="inline-start" />
+            <Check data-icon="inline-start" />
           )}
           Save changes
         </Button>

@@ -2,7 +2,19 @@
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Icon } from "@iconify/react";
+import {
+  ArrowUpRight,
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronUp,
+  Clock,
+  Image,
+  Integration,
+  Layers,
+  PaperPlane,
+} from "@honeyicons/react";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { useQuery } from "convex-helpers/react/cache/hooks";
@@ -665,7 +677,7 @@ function PostComposerForm({
               disabled={uploadingMedia || saving !== null}
               onClick={chooseDifferentFormat}
             >
-              <Icon icon="hugeicons:arrow-left-01" width={15} />
+              <ChevronLeft size={15} />
               Change format
             </Button>
           ) : undefined
@@ -761,6 +773,8 @@ function PostComposerForm({
                     const label =
                       account.displayName?.trim() || `@${account.username}`;
                     const platformName = platformLabel(account.platform);
+                    const PlatformIcon =
+                      PLATFORM_META[account.platform]?.icon ?? Integration;
                     return (
                       <ToggleGroupItem
                         key={account._id}
@@ -784,12 +798,8 @@ function PostComposerForm({
                             className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center"
                             aria-hidden
                           >
-                            <Icon
-                              icon={
-                                PLATFORM_META[account.platform]?.icon ??
-                                "hugeicons:link-01"
-                              }
-                              width={12}
+                            <PlatformIcon
+                              size={14}
                               style={{ color: platformInk(account.platform) }}
                               className="shrink-0 drop-shadow-[0_0_1px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_0_1px_rgba(0,0,0,0.8)]"
                             />
@@ -799,11 +809,7 @@ function PostComposerForm({
                           @{account.username}
                         </span>
                         {isOn && (
-                          <Icon
-                            icon="hugeicons:tick-02"
-                            width={14}
-                            className="shrink-0 text-primary"
-                          />
+                          <Check size={14} className="shrink-0 text-primary" />
                         )}
                       </ToggleGroupItem>
                     );
@@ -917,7 +923,7 @@ function PostComposerForm({
                       })
                     }
                   >
-                    <Icon icon="hugeicons:layers-01" width={15} />
+                    <Layers size={15} />
                     Account settings
                   </Button>
                   <Button
@@ -931,7 +937,7 @@ function PostComposerForm({
                       })
                     }
                   >
-                    <Icon icon="hugeicons:clock-01" width={15} />
+                    <Clock size={15} />
                     Past captions
                   </Button>
                   <Button
@@ -940,8 +946,7 @@ function PostComposerForm({
                     aria-controls="composer-notes"
                     onClick={() => dispatch({ type: "notesVisibilityToggled" })}
                   >
-                    <Icon
-                      icon="hugeicons:arrow-down-01"
+                    <ChevronDown
                       data-icon="inline-start"
                       className={cn(
                         "transition-transform duration-200 ease-in-out motion-reduce:transition-none",
@@ -976,6 +981,8 @@ function PostComposerForm({
                         const effectiveLength = (
                           options.bodyOverride.trim() || body
                         ).length;
+                        const PlatformIcon =
+                          PLATFORM_META[account.platform]?.icon ?? Integration;
                         const trimmedReferenceUrl = options.referenceUrl.trim();
                         const referenceUrlInvalid =
                           trimmedReferenceUrl.length > 0 &&
@@ -995,13 +1002,7 @@ function PostComposerForm({
                                   color: platformForeground(account.platform),
                                 }}
                               >
-                                <Icon
-                                  icon={
-                                    PLATFORM_META[account.platform]?.icon ??
-                                    "hugeicons:link-01"
-                                  }
-                                  width={12}
-                                />
+                                <PlatformIcon size={16} />
                               </span>
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-sm font-medium">
@@ -1198,7 +1199,7 @@ function PostComposerForm({
                   value="now"
                   className="gap-2 px-4 duration-200 motion-reduce:transition-none"
                 >
-                  <Icon icon="hugeicons:sent" data-icon="inline-start" />
+                  <PaperPlane data-icon="inline-start" />
                   Now
                 </ToggleGroupItem>
                 <ToggleGroupItem
@@ -1206,7 +1207,7 @@ function PostComposerForm({
                   aria-controls="composer-schedule"
                   className="gap-2 px-4 duration-200 motion-reduce:transition-none"
                 >
-                  <Icon icon="hugeicons:calendar-03" data-icon="inline-start" />
+                  <Calendar data-icon="inline-start" />
                   Schedule
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -1339,14 +1340,11 @@ function PostComposerForm({
                     {saving === scheduleMode ? (
                       <Spinner className="size-4" />
                     ) : (
-                      <Icon
-                        icon={
-                          scheduleMode === "schedule"
-                            ? "hugeicons:calendar-check-in-01"
-                            : "hugeicons:sent"
-                        }
-                        width={16}
-                      />
+                      scheduleMode === "schedule" ? (
+                        <Calendar size={16} />
+                      ) : (
+                        <PaperPlane size={16} />
+                      )
                     )}
                     {saving === scheduleMode
                       ? scheduleMode === "schedule"
@@ -1386,14 +1384,11 @@ function PostComposerForm({
                 onClick={() => setShowPreview((visible) => !visible)}
               >
                 {showPreview ? "Hide" : "Show"}
-                <Icon
-                  icon={
-                    showPreview
-                      ? "hugeicons:arrow-up-01"
-                      : "hugeicons:arrow-down-01"
-                  }
-                  data-icon="inline-end"
-                />
+                {showPreview ? (
+                  <ChevronUp data-icon="inline-end" />
+                ) : (
+                  <ChevronDown data-icon="inline-end" />
+                )}
               </Button>
             </div>
             <div
@@ -1412,23 +1407,22 @@ function PostComposerForm({
                     if (value) setPreviewAccountId(value);
                   }}
                 >
-                  {selectedAccounts.map((account) => (
+                  {selectedAccounts.map((account) => {
+                    const PlatformIcon =
+                      PLATFORM_META[account.platform]?.icon ?? Integration;
+                    return (
                     <ToggleGroupItem
                       key={account._id}
                       value={account._id}
                       aria-label={`Preview @${account.username} on ${platformLabel(account.platform)}`}
                     >
-                      <Icon
-                        icon={
-                          PLATFORM_META[account.platform]?.icon ??
-                          "hugeicons:link-01"
-                        }
-                      />
+                      <PlatformIcon />
                       <span className="max-w-32 truncate">
                         @{account.username}
                       </span>
                     </ToggleGroupItem>
-                  ))}
+                    );
+                  })}
                 </ToggleGroup>
               )}
               {previewAccount ? (
@@ -1466,7 +1460,7 @@ function PostComposerForm({
                       <div className="relative mb-3 flex h-28 w-24 -rotate-6 flex-col gap-2 rounded-xl border border-border bg-background p-3 shadow-sm">
                         <div className="absolute inset-0 -z-10 translate-x-2 rotate-12 rounded-xl border border-border bg-background" />
                         <div className="flex flex-1 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                          <Icon icon="hugeicons:image-02" width={24} />
+                          <Image size={24} />
                         </div>
                         <div className="h-1.5 w-12 rounded-full bg-muted" />
                         <div className="h-1.5 w-8 rounded-full bg-muted" />
@@ -1490,10 +1484,7 @@ function PostComposerForm({
                       {compatibleAccounts.length > 0
                         ? "Choose an account"
                         : "Connect an account"}
-                      <Icon
-                        icon="hugeicons:arrow-up-right-01"
-                        data-icon="inline-end"
-                      />
+                      <ArrowUpRight data-icon="inline-end" />
                     </Button>
                   </EmptyContent>
                 </Empty>

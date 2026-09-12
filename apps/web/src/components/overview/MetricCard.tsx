@@ -1,6 +1,4 @@
-import { ArrowDown02Icon, ArrowUp02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import type { ComponentProps } from "react";
+import { ArrowDown, ArrowUp, type HoneyIcon } from "@honeyicons/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -8,11 +6,16 @@ import { cn } from "@/lib/utils";
 type MetricCardProps = {
   title: string;
   value: string;
-  icon: ComponentProps<typeof HugeiconsIcon>["icon"];
+  icon: HoneyIcon;
   change?: number;
 };
 
-export function MetricCard({ title, value, icon, change }: MetricCardProps) {
+export function MetricCard({
+  title,
+  value,
+  icon: Icon,
+  change,
+}: MetricCardProps) {
   const trend = change == null ? null : Math.round(change * 10) / 10;
   const trendColor =
     trend == null || trend === 0
@@ -26,11 +29,7 @@ export function MetricCard({ title, value, icon, change }: MetricCardProps) {
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <CardTitle>{title}</CardTitle>
-          <HugeiconsIcon
-            icon={icon}
-            size={18}
-            className="shrink-0 text-muted-foreground"
-          />
+          <Icon size={18} className="shrink-0 text-muted-foreground" />
         </div>
       </CardHeader>
       <CardContent className="mt-auto flex flex-col gap-2">
@@ -52,10 +51,11 @@ export function MetricCard({ title, value, icon, change }: MetricCardProps) {
                 )}
               >
                 {trend !== 0 ? (
-                  <HugeiconsIcon
-                    icon={trend < 0 ? ArrowDown02Icon : ArrowUp02Icon}
-                    size={13}
-                  />
+                  trend < 0 ? (
+                    <ArrowDown size={13} />
+                  ) : (
+                    <ArrowUp size={13} />
+                  )
                 ) : null}
                 {trend > 0 ? "+" : ""}
                 {trend}%

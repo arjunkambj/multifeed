@@ -1,6 +1,4 @@
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Icon } from "@iconify/react";
+import { ChevronRight } from "@honeyicons/react";
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/motion/Reveal";
@@ -61,7 +59,7 @@ export function ReadyCTA() {
               )}
             >
               Start free
-              <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
+              <ChevronRight data-icon="inline-end" />
             </Link>
           </div>
 
@@ -110,8 +108,7 @@ export function ReadyCTA() {
                         aria-hidden
                         className="absolute -right-1 -bottom-1 grid size-[15px] place-items-center rounded-full bg-background ring-2 ring-background sm:size-4"
                       >
-                        <Icon
-                          icon={account.icon}
+                        <account.icon
                           className="size-2 sm:size-[9px]"
                           style={{ color: account.color }}
                         />

@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import { Icon } from "@iconify/react";
+import { Card, Check } from "@honeyicons/react";
 import type { BillingInterval, PlanKey } from "@multifeed/plans";
 import { PLANS } from "@multifeed/plans";
 import { useQuery } from "convex-helpers/react/cache/hooks";
@@ -142,11 +142,7 @@ export function BillingPage() {
       <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-muted p-5">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-card">
-            <Icon
-              icon="hugeicons:credit-card"
-              width={18}
-              className="text-muted-foreground"
-            />
+            <Card size={18} className="text-muted-foreground" />
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="truncate text-sm font-semibold text-foreground">
@@ -250,10 +246,9 @@ export function BillingPage() {
                   className="flex items-start gap-2.5 text-sm leading-snug text-foreground/90"
                   key={feature}
                 >
-                  <Icon
+                  <Check
                     className="mt-0.5 shrink-0 text-primary"
-                    icon="ph:check"
-                    width={16}
+                    size={16}
                   />
                   {feature}
                 </li>
@@ -317,10 +312,9 @@ export function BillingPage() {
                       className="flex items-start gap-2.5 text-sm leading-snug text-foreground/90"
                       key={feature}
                     >
-                      <Icon
+                      <Check
                         className="mt-0.5 shrink-0 text-primary"
-                        icon="ph:check"
-                        width={16}
+                        size={16}
                       />
                       {feature}
                     </li>

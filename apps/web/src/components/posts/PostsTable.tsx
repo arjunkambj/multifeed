@@ -1,7 +1,17 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import { Icon } from "@iconify/react";
+import {
+  ArrowUpRight,
+  Calendar,
+  Copy,
+  Edit,
+  File,
+  Integration,
+  MoreHorizontal,
+  Repeat,
+  Trash,
+} from "@honeyicons/react";
 import type { FunctionReturnType } from "convex/server";
 import { format } from "date-fns";
 import type { ReactNode } from "react";
@@ -159,6 +169,8 @@ function PostTableRow({
     post.status === "failed" ||
     post.targets.some((target) => target.status === "failed");
   const permalinks = post.targets.filter((target) => target.platformPermalink);
+  const FormatIcon =
+    POST_FORMATS.find((format) => format.id === post.kind)?.icon ?? File;
 
   return (
     <TableRow className="border-border">
@@ -168,13 +180,7 @@ function PostTableRow({
             aria-hidden
             className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"
           >
-            <Icon
-              icon={
-                POST_FORMATS.find((format) => format.id === post.kind)?.icon ??
-                "hugeicons:note-01"
-              }
-              width={18}
-            />
+            <FormatIcon size={18} />
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-foreground">
@@ -193,7 +199,10 @@ function PostTableRow({
           </span>
         ) : (
           <div className="flex flex-col gap-2">
-            {post.targets.map((target) => (
+            {post.targets.map((target) => {
+              const PlatformIcon =
+                PLATFORM_META[target.platform]?.icon ?? Integration;
+              return (
               <span
                 className="flex max-w-full flex-col gap-1"
                 key={target.targetId}
@@ -206,14 +215,7 @@ function PostTableRow({
                       color: platformForeground(target.platform),
                     }}
                   >
-                    <Icon
-                      aria-hidden
-                      icon={
-                        PLATFORM_META[target.platform]?.icon ??
-                        "hugeicons:link-01"
-                      }
-                      width={11}
-                    />
+                    <PlatformIcon size={13} />
                   </span>
                   <span className="sr-only">
                     {platformLabel(target.platform)}{" "}
@@ -224,11 +226,7 @@ function PostTableRow({
                       : platformLabel(target.platform)}
                   </span>
                   {target.hasCustomCaption && (
-                    <Icon
-                      aria-label="Custom caption"
-                      icon="hugeicons:edit-02"
-                      width={11}
-                    />
+                    <Edit aria-label="Custom caption" size={11} />
                   )}
                 </span>
                 {target.failureMessage && (
@@ -237,7 +235,8 @@ function PostTableRow({
                   </span>
                 )}
               </span>
-            ))}
+              );
+            })}
           </div>
         )}
       </TableCell>
@@ -279,31 +278,28 @@ function PostTableRow({
               />
             }
           >
-            <Icon icon="hugeicons:more-horizontal" width={18} />
+            <MoreHorizontal size={18} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
             <DropdownMenuGroup>
               {post.scheduledFor && post.status !== "draft" && (
                 <DropdownMenuItem onClick={onViewCalendar}>
-                  <Icon icon="hugeicons:calendar-03" width={15} />
+                  <Calendar size={15} />
                   View in calendar
                 </DropdownMenuItem>
               )}
               {canRetry && (
                 <DropdownMenuItem disabled={retrying} onClick={onRetry}>
-                  <Icon icon="hugeicons:refresh" width={15} />
+                  <Repeat size={15} />
                   {retrying ? "Retrying…" : "Retry delivery"}
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={onEdit}>
-                <Icon
-                  icon={
-                    post.status === "draft"
-                      ? "hugeicons:edit-02"
-                      : "hugeicons:copy-01"
-                  }
-                  width={15}
-                />
+                {post.status === "draft" ? (
+                  <Edit size={15} />
+                ) : (
+                  <Copy size={15} />
+                )}
                 {post.status === "draft" ? "Continue" : "Duplicate"}
               </DropdownMenuItem>
               {post.status !== "publishing" && (
@@ -312,7 +308,7 @@ function PostTableRow({
                   onClick={onDelete}
                   variant="destructive"
                 >
-                  <Icon icon="hugeicons:delete-02" width={15} />
+                  <Trash size={15} />
                   {deleting ? "Deleting…" : "Delete post"}
                 </DropdownMenuItem>
               )}
@@ -343,7 +339,7 @@ function OpenPostButton({
         variant="outline"
       >
         Open
-        <Icon data-icon="inline-end" icon="hugeicons:arrow-up-right-01" />
+        <ArrowUpRight data-icon="inline-end" />
       </Button>
     );
   }
@@ -352,7 +348,7 @@ function OpenPostButton({
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button size="xs" variant="outline" />}>
         Open
-        <Icon data-icon="inline-end" icon="hugeicons:arrow-up-right-01" />
+        <ArrowUpRight data-icon="inline-end" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-44">
         <DropdownMenuGroup>

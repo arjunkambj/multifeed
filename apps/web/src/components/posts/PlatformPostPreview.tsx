@@ -1,11 +1,28 @@
-import { Icon } from "@iconify/react";
+import {
+  Bookmark,
+  Dislike,
+  Email,
+  Image as ImageIcon,
+  ImageAdd,
+  Integration,
+  Like,
+  MoreHorizontal,
+  MoreVertical,
+  PaperPlane,
+  Play,
+  Repeat,
+  Search,
+  Share,
+  Soundwave,
+  type HoneyIcon,
+} from "@honeyicons/react";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
 import {
-  PLATFORM_META,
   platformBrand,
   platformForeground,
+  platformIcon,
   platformInk,
   platformLabel,
 } from "@/lib/platform-meta";
@@ -80,7 +97,7 @@ function RawMedia({ media }: { media: ComposerMedia[] }) {
   if (!asset || !src) {
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#e9ebee] text-[#65676b]">
-        <Icon icon="hugeicons:image-02" width={28} />
+        <ImageIcon size={28} />
         <span className="text-xs font-medium">Add media to see it here</span>
       </div>
     );
@@ -135,7 +152,7 @@ function MediaFrame({
             <RawMedia media={[asset]} />
             {asset.kind === "video" ? (
               <span className="absolute inset-0 flex items-center justify-center bg-black/10 text-white">
-                <Glyph icon="mdi:play" size={32} />
+                <Glyph icon={Play} size={32} />
               </span>
             ) : null}
             {index === 3 && media.length > 4 ? (
@@ -162,7 +179,7 @@ function MediaFrame({
           aria-hidden
         >
           <span className="flex size-12 items-center justify-center rounded-full bg-black/65 text-white backdrop-blur-sm">
-            <Icon icon="mdi:play" width={28} />
+            <Play size={28} />
           </span>
         </span>
       ) : null}
@@ -175,16 +192,8 @@ function MediaFrame({
   );
 }
 
-function Glyph({ icon, size = 21 }: { icon: string; size?: number }) {
-  return (
-    <Icon
-      aria-hidden
-      className="shrink-0"
-      icon={icon}
-      width={size}
-      height={size}
-    />
-  );
+function Glyph({ icon: Icon, size = 21 }: { icon: HoneyIcon; size?: number }) {
+  return <Icon aria-hidden className="shrink-0" size={size} />;
 }
 
 function LinkPreview({ url, dark = false }: { url: string; dark?: boolean }) {
@@ -218,11 +227,11 @@ function PreviewHeading({
   account: PreviewAccount;
   placement?: string;
 }) {
+  const MetaIcon = platformIcon(account.platform);
   return (
     <figcaption className="mb-2 flex items-center gap-2 px-0.5 text-xs font-medium text-muted-foreground">
-      <Icon
-        icon={PLATFORM_META[account.platform]?.icon ?? "hugeicons:link-01"}
-        width={14}
+      <MetaIcon
+        size={14}
         style={{ color: platformInk(account.platform) }}
       />
       <span>{platformLabel(account.platform)}</span>
@@ -249,10 +258,10 @@ function FacebookPreview(props: PlatformPreviewProps) {
             {displayName}
           </p>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-[#65676b]">
-            Just now <span>·</span> <Glyph icon="mdi:earth" size={13} />
+            Just now <span>·</span> <Glyph icon={Integration} size={13} />
           </p>
         </div>
-        <Glyph icon="mdi:dots-horizontal" size={22} />
+        <Glyph icon={MoreHorizontal} size={22} />
       </header>
       <div className="px-4 pb-3">
         <p className="whitespace-pre-wrap break-words text-[15px] leading-5">
@@ -267,9 +276,9 @@ function FacebookPreview(props: PlatformPreviewProps) {
         <div className="grid grid-cols-3 border-t border-[#ced0d4] pt-1 text-[#65676b]">
           {(
             [
-              ["mdi:thumb-up-outline", "Like"],
-              ["mdi:comment-outline", "Comment"],
-              ["mdi:share-outline", "Share"],
+              [Like, "Like"],
+              [Email, "Comment"],
+              [Share, "Share"],
             ] as const
           ).map(([icon, label]) => (
             <span
@@ -304,7 +313,7 @@ function InstagramPreview(props: PlatformPreviewProps) {
         <p className="min-w-0 flex-1 truncate text-[14px] font-semibold">
           {account.username}
         </p>
-        <Glyph icon="mdi:dots-horizontal" size={21} />
+        <Glyph icon={MoreHorizontal} size={21} />
       </header>
       <MediaFrame
         media={media}
@@ -325,11 +334,11 @@ function InstagramPreview(props: PlatformPreviewProps) {
               ))}
             </span>
           ) : null}
-          <Glyph icon="lucide:heart" size={25} />
-          <Glyph icon="lucide:message-circle" size={24} />
-          <Glyph icon="lucide:send" size={23} />
+          <Glyph icon={Like} size={25} />
+          <Glyph icon={Email} size={24} />
+          <Glyph icon={PaperPlane} size={23} />
           <span className="ml-auto">
-            <Glyph icon="lucide:bookmark" size={24} />
+            <Glyph icon={Bookmark} size={24} />
           </span>
         </div>
         <p className="mt-1 whitespace-pre-wrap break-words text-[14px] leading-[18px]">
@@ -373,7 +382,7 @@ function ThreadsPreview(props: PlatformPreviewProps) {
               {account.username}
             </span>
             <span className="text-xs text-[#777]">now</span>
-            <Glyph icon="mdi:dots-horizontal" size={20} />
+            <Glyph icon={MoreHorizontal} size={20} />
           </div>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-5">
             {body || <span className="text-[#777]">Your caption…</span>}
@@ -385,10 +394,10 @@ function ThreadsPreview(props: PlatformPreviewProps) {
           ) : null}
           {referenceUrl ? <LinkPreview url={referenceUrl} /> : null}
           <div className="mt-3 flex items-center gap-4 text-[#1f1f1f]">
-            <Glyph icon="mdi:heart-outline" size={21} />
-            <Glyph icon="mdi:comment-outline" size={20} />
-            <Glyph icon="mdi:repeat-variant" size={21} />
-            <Glyph icon="mdi:send-outline" size={20} />
+            <Glyph icon={Like} size={21} />
+            <Glyph icon={Email} size={20} />
+            <Glyph icon={Repeat} size={21} />
+            <Glyph icon={PaperPlane} size={20} />
           </div>
         </div>
         {firstComment ? (
@@ -430,10 +439,10 @@ function LinkedInPreview(props: PlatformPreviewProps) {
             @{account.username}
           </p>
           <p className="flex items-center gap-1 text-[11px] text-[#666]">
-            Now · <Glyph icon="mdi:earth" size={12} />
+            Now · <Glyph icon={Integration} size={12} />
           </p>
         </div>
-        <Glyph icon="mdi:dots-horizontal" size={22} />
+        <Glyph icon={MoreHorizontal} size={22} />
       </header>
       <div className="px-3 pb-3">
         <p className="whitespace-pre-wrap break-words text-sm leading-5">
@@ -448,10 +457,10 @@ function LinkedInPreview(props: PlatformPreviewProps) {
         <div className="grid grid-cols-4 border-t border-[#e5e5e5] py-1 text-[#404040]">
           {(
             [
-              ["mdi:thumb-up-outline", "Like"],
-              ["mdi:comment-outline", "Comment"],
-              ["mdi:repeat-variant", "Repost"],
-              ["mdi:send-outline", "Send"],
+              [Like, "Like"],
+              [Email, "Comment"],
+              [Repeat, "Repost"],
+              [PaperPlane, "Send"],
             ] as const
           ).map(([icon, label]) => (
             <span
@@ -499,7 +508,7 @@ function XPreview(props: PlatformPreviewProps) {
               <span className="shrink-0 text-[#536471]">· now</span>
             </div>
             <span className="ml-auto shrink-0 text-[#536471]">
-              <Glyph icon="mdi:dots-horizontal" size={20} />
+              <Glyph icon={MoreHorizontal} size={20} />
             </span>
           </div>
           <p className="mt-0.5 whitespace-pre-wrap break-words text-[15px] leading-5">
@@ -515,15 +524,15 @@ function XPreview(props: PlatformPreviewProps) {
           {referenceUrl ? <LinkPreview url={referenceUrl} /> : null}
           <div className="mt-3 flex items-center justify-between gap-2 text-[#536471]">
             <span className="flex items-center gap-1 text-[11px]">
-              <Glyph icon="lucide:message-circle" size={18} />
+              <Glyph icon={Email} size={18} />
               {firstComment ? "1" : ""}
             </span>
-            <Glyph icon="lucide:repeat-2" size={19} />
-            <Glyph icon="lucide:heart" size={19} />
-            <Glyph icon="lucide:chart-no-axes-column" size={19} />
+            <Glyph icon={Repeat} size={19} />
+            <Glyph icon={Like} size={19} />
+            <Glyph icon={Soundwave} size={19} />
             <span className="flex shrink-0 items-center gap-3">
-              <Glyph icon="lucide:bookmark" size={18} />
-              <Glyph icon="lucide:upload" size={18} />
+              <Glyph icon={Bookmark} size={18} />
+              <Glyph icon={Share} size={18} />
             </span>
           </div>
           {firstComment ? (
@@ -563,7 +572,7 @@ function YouTubePreview(props: PlatformPreviewProps) {
           <p className="mt-1 truncate text-xs text-[#606060]">{displayName}</p>
           <p className="text-xs text-[#606060]">No views · just now</p>
         </div>
-        <Glyph icon="mdi:dots-vertical" size={21} />
+        <Glyph icon={MoreVertical} size={21} />
       </div>
     </article>
   );
@@ -575,7 +584,7 @@ const VERTICAL_CONFIG: Record<
   VerticalVariant,
   {
     accent: string;
-    actionIcons: string[];
+    actionIcons: HoneyIcon[];
     actionLabels: string[];
     primaryAction?: string;
   }
@@ -583,35 +592,35 @@ const VERTICAL_CONFIG: Record<
   facebook: {
     accent: "#1877f2",
     actionIcons: [
-      "mdi:thumb-up-outline",
-      "mdi:comment-outline",
-      "mdi:share-outline",
+      Like,
+      Email,
+      Share,
     ],
     actionLabels: ["Like", "Comment", "Share"],
   },
   instagram: {
     accent: "#ffffff",
     actionIcons: [
-      "mdi:heart-outline",
-      "mdi:comment-outline",
-      "mdi:send-outline",
-      "mdi:dots-horizontal",
+      Like,
+      Email,
+      PaperPlane,
+      MoreHorizontal,
     ],
     actionLabels: ["Like", "Comment", "Share", "More"],
   },
   tiktok: {
     accent: "#fe2c55",
-    actionIcons: ["mdi:heart", "mdi:comment", "mdi:bookmark", "mdi:share"],
+    actionIcons: [Like, Email, Bookmark, Share],
     actionLabels: ["Like", "Comment", "Save", "Share"],
     primaryAction: "Follow",
   },
   youtube: {
     accent: "#ff0033",
     actionIcons: [
-      "mdi:thumb-up-outline",
-      "mdi:thumb-down-outline",
-      "mdi:comment-outline",
-      "mdi:share-outline",
+      Like,
+      Dislike,
+      Email,
+      Share,
     ],
     actionLabels: ["Like", "Dislike", "Comment", "Share"],
     primaryAction: "Subscribe",
@@ -644,15 +653,15 @@ function VerticalPreview(
                   {account.username}
                 </span>
                 <span className="font-normal text-white/75">now</span>
-                <Glyph icon="mdi:dots-horizontal" size={20} />
+                <Glyph icon={MoreHorizontal} size={20} />
               </div>
             </div>
             <div className="absolute inset-x-3 bottom-4 flex items-center gap-2">
               <span className="flex-1 rounded-full border border-white/80 px-4 py-2.5 text-xs text-white/90">
                 Send message
               </span>
-              <Glyph icon="mdi:heart-outline" size={25} />
-              <Glyph icon="mdi:send-outline" size={24} />
+              <Glyph icon={Like} size={25} />
+              <Glyph icon={PaperPlane} size={24} />
             </div>
           </>
         ) : (
@@ -666,7 +675,7 @@ function VerticalPreview(
                     : "Reels"}
               </span>
               <Glyph
-                icon={variant === "tiktok" ? "lucide:search" : "lucide:camera"}
+                icon={variant === "tiktok" ? Search : ImageAdd}
                 size={23}
               />
             </div>
@@ -684,15 +693,15 @@ function VerticalPreview(
                   ) : null}
                 </div>
               ) : null}
-              {config.actionIcons.map((icon, index) => (
+              {config.actionIcons.map((ActionIcon, index) => (
                 <span
-                  key={icon}
+                  key={config.actionLabels[index] ?? index}
                   className="flex flex-col items-center gap-0.5 text-[9px] font-medium drop-shadow"
                 >
                   <span
                     className={`flex size-9 items-center justify-center ${variant === "youtube" ? "rounded-full bg-black/40" : ""}`}
                   >
-                    <Glyph icon={icon} size={24} />
+                    <Glyph icon={ActionIcon} size={24} />
                   </span>
                   {config.actionLabels[index]}
                 </span>
@@ -724,7 +733,7 @@ function VerticalPreview(
                 </p>
               ) : null}
               <p className="mt-2 flex items-center gap-1 text-[10px] font-medium">
-                <Glyph icon="mdi:music-note" size={14} /> Original audio ·{" "}
+                <Glyph icon={Soundwave} size={14} /> Original audio ·{" "}
                 {displayName}
               </p>
             </div>

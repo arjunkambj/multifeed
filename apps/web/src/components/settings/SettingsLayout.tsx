@@ -1,6 +1,5 @@
 "use client";
 
-import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
@@ -88,7 +87,7 @@ export function SettingsLayout() {
                     <span className="w-6 text-[11px] tabular-nums">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <Icon icon={tab.icon} width={16} />
+                    <tab.icon size={16} />
                     {tab.label}
                   </Link>
                 </li>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from "@iconify/react";
+import { Integration } from "@honeyicons/react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CONNECTABLE_PLATFORMS, PLATFORM_META } from "@/lib/platform-meta";
@@ -14,7 +14,7 @@ export function ConnectionsRowsSkeleton() {
       {CONNECTABLE_PLATFORMS.map((platform) => {
         const meta = PLATFORM_META[platform] ?? {
           label: platform,
-          icon: "hugeicons:link-01",
+          icon: Integration,
           brand: "var(--primary)",
         };
         return (
@@ -33,7 +33,7 @@ export function ConnectionsRowsSkeleton() {
                       color: meta.foreground ?? "#FFFFFF",
                     }}
                   >
-                    <Icon icon={meta.icon} width={14} aria-hidden />
+                    <meta.icon size={18} />
                   </span>
                   <div className="flex min-w-0 flex-col gap-1">
                     <CardTitle className="text-sm">

@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Icon } from "@iconify/react";
+import { Add } from "@honeyicons/react";
 import Link from "next/link";
 import { PlatformConnectionCard } from "@/components/connections/PlatformConnectionCard";
 import { useMutation } from "convex/react";
@@ -164,7 +164,7 @@ function ConnectionsPageInner() {
           actions={
             accounts.some((account) => !accountNeedsReconnect(account)) ? (
               <Button nativeButton={false} render={<Link href="/posts/new" />}>
-                <Icon icon="hugeicons:add-01" data-icon="inline-start" />
+                <Add data-icon="inline-start" />
                 New post
               </Button>
             ) : undefined

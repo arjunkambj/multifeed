@@ -1,8 +1,7 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { Cancel01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Close } from "@honeyicons/react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -66,7 +65,7 @@ function DialogContent({
               />
             }
           >
-            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+            <Close strokeWidth={2} />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

@@ -13,8 +13,7 @@ import { BODY, GRID_GAP } from "./rhythm";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { ChevronRight } from "@honeyicons/react";
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -41,7 +40,7 @@ export function FAQ() {
             )}
           >
             Email us
-            <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
+            <ChevronRight data-icon="inline-end" />
           </Link>
         </div>
 

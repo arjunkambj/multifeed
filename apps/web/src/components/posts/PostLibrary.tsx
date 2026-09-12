@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Icon } from "@iconify/react";
+import { Add, Calendar, Close, Search } from "@honeyicons/react";
 import { useMutation } from "convex/react";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -117,11 +117,11 @@ export function PostLibrary() {
         actions={
           <>
             <Button variant="outline" onClick={() => router.push("/calendar")}>
-              <Icon icon="hugeicons:calendar-03" width={16} />
+              <Calendar size={16} />
               Calendar
             </Button>
             <Button variant="default" onClick={() => router.push("/posts/new")}>
-              <Icon icon="hugeicons:add-01" width={16} />
+              <Add size={16} />
               New post
             </Button>
           </>
@@ -150,11 +150,10 @@ export function PostLibrary() {
             ))}
           </TabsList>
           <div className="relative w-full sm:w-64">
-            <Icon
+            <Search
               aria-hidden
               className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
-              icon="hugeicons:search-01"
-              width={16}
+              size={16}
             />
             <Input
               aria-label="Search posts"
@@ -171,7 +170,7 @@ export function PostLibrary() {
                 size="icon-xs"
                 variant="ghost"
               >
-                <Icon icon="hugeicons:cancel-01" width={14} />
+                <Close size={14} />
               </Button>
             )}
           </div>

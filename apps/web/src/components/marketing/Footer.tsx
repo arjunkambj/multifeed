@@ -1,4 +1,4 @@
-import { Icon } from "@iconify/react";
+import { X } from "@honeyicons/react";
 import Logo from "@/components/layout/Logo";
 import { policyLinks } from "@/components/marketing/policies/policy-links";
 import Reveal from "@/components/motion/Reveal";
@@ -38,7 +38,7 @@ const sections: { title: string; links: FooterLink[] }[] = [
 const socials = [
   {
     label: "X (Twitter)",
-    icon: "fa6-brands:x-twitter",
+    icon: X,
     href: "https://x.com/smridhx",
   },
 ];
@@ -70,7 +70,7 @@ export function Footer() {
                       aria-label={social.label}
                       className="inline-flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                     >
-                      <Icon icon={social.icon} width="18" height="18" />
+                      <social.icon size={18} />
                     </a>
                   </li>
                 ))}
