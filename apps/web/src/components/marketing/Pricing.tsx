@@ -128,12 +128,7 @@ function PriceCard({
   isYearly: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "flex h-full flex-col rounded-card border border-transparent bg-card px-6 py-7 md:px-7 md:py-8",
-        "transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-md",
-      )}
-    >
+    <div className="flex h-full flex-col rounded-card border border-transparent bg-card px-6 py-7 md:px-7 md:py-8">
       <header>
         <div className="flex items-center justify-between gap-3">
           <h3 className="font-heading text-[1.0625rem] leading-6 font-medium tracking-[-0.02em] text-foreground">

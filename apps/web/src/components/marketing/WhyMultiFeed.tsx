@@ -225,7 +225,7 @@ export function WhyMultiFeed() {
       >
         {steps.map((step, index) => (
           <Reveal key={step.title} delay={index * 0.12} className="flex">
-            <article className="flex h-full w-full flex-col overflow-hidden rounded-panel bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-md">
+            <article className="flex h-full w-full flex-col overflow-hidden rounded-panel bg-card">
               {step.mediaFirst ? (
                 <div className="relative min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
                   <Image

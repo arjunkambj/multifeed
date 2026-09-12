@@ -81,7 +81,7 @@ function Quote({ text, highlight }: { text: string; highlight?: string }) {
 
 function Card({ t }: { t: (typeof testimonials)[number] }) {
   return (
-    <div className="flex break-inside-avoid flex-col overflow-hidden rounded-card border-0 bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-md">
+    <div className="flex break-inside-avoid flex-col overflow-hidden rounded-card border-0 bg-card">
       <div className="flex flex-1 flex-col px-5 py-4">
         <span
           aria-hidden
