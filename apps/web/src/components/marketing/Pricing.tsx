@@ -10,13 +10,7 @@ import { useState } from "react";
 
 import { pricingPlans } from "@/constants/landing-page";
 
-import {
-  GRID_GAP,
-  HEADER_GAP,
-  OVERLINE,
-  PLATFORM_ICON,
-  platforms,
-} from "./rhythm";
+import { GRID_GAP, HEADER_GAP, OVERLINE, platforms } from "./rhythm";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
@@ -108,9 +102,7 @@ export function Pricing() {
                 className="flex items-center justify-center transition-transform duration-200 hover:scale-[1.12]"
                 style={{ color: platform.color }}
               >
-                <platform.icon
-                  className={`block shrink-0 ${PLATFORM_ICON}`}
-                />
+                <platform.icon className="block size-[22px] shrink-0 md:size-6" />
               </span>
             </li>
           ))}

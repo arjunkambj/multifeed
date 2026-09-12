@@ -91,5 +91,3 @@ export const platforms = [
   },
 ] as const;
 
-/** Icon size for the flat platform strips in Hero and Pricing. */
-export const PLATFORM_ICON = "size-[22px] md:size-6";
