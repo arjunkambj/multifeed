@@ -25,8 +25,8 @@ import { toast } from "sonner";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
-import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
+import { Button } from "@multifeed/ui/components/button";
+import { DatePicker } from "@multifeed/ui/components/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -34,22 +34,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@multifeed/ui/components/dialog";
 import {
   Empty,
   EmptyContent,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
-import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+} from "@multifeed/ui/components/empty";
+import { Field, FieldGroup, FieldLabel } from "@multifeed/ui/components/field";
+import { Input } from "@multifeed/ui/components/input";
+import { Label } from "@multifeed/ui/components/label";
+import { Separator } from "@multifeed/ui/components/separator";
+import { Skeleton } from "@multifeed/ui/components/skeleton";
+import { Spinner } from "@multifeed/ui/components/spinner";
+import { Textarea } from "@multifeed/ui/components/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@multifeed/ui/components/toggle-group";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import {
   PLATFORM_META,
@@ -58,7 +58,7 @@ import {
   platformInk,
   platformLabel,
 } from "@/lib/platform-meta";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 import { ComposerPanel } from "./ComposerPanel";
 import { PlatformPostPreview } from "./PlatformPostPreview";
 import { PlatformSettingsFields } from "./PlatformSettingsFields";

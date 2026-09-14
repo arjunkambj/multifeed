@@ -3,9 +3,9 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@multifeed/ui/components/button";
+import { cn } from "@multifeed/ui/lib/utils";
+import { Spinner } from "@multifeed/ui/components/spinner";
 import {
   Image as ImageIcon,
   ImageAdd,

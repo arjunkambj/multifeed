@@ -4,10 +4,10 @@ import { Check } from "@honeyicons/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PasswordModal } from "@/components/settings/PasswordModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@multifeed/ui/components/button";
+import { Input } from "@multifeed/ui/components/input";
+import { Field, FieldGroup, FieldLabel } from "@multifeed/ui/components/field";
+import { Spinner } from "@multifeed/ui/components/spinner";
 import { hexclaveClientApp } from "@/hexclave/client";
 
 export function GeneralSettingsForm() {

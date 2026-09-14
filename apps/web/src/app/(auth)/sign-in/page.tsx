@@ -4,15 +4,15 @@ import { useHexclaveApp } from "@hexclave/next";
 import { useEffect, useRef, useState } from "react";
 import { Email, Google } from "@honeyicons/react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@multifeed/ui/components/button";
+import { Input } from "@multifeed/ui/components/input";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { Spinner } from "@/components/ui/spinner";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@multifeed/ui/components/input-otp";
+import { Spinner } from "@multifeed/ui/components/spinner";
+import { Skeleton } from "@multifeed/ui/components/skeleton";
 
 export default function SignInPage() {
   const app = useHexclaveApp();

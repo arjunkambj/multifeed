@@ -17,8 +17,8 @@ import {
   AvatarFallback,
   AvatarGroup,
   AvatarImage,
-} from "@/components/ui/avatar";
-import { buttonVariants } from "@/components/ui/button";
+} from "@multifeed/ui/components/avatar";
+import { buttonVariants } from "@multifeed/ui/components/button";
 import { socialProofPeople } from "@/constants/landing-page";
 
 import { MOCK_FRAME, platforms } from "./rhythm";

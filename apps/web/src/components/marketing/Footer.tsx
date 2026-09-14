@@ -2,7 +2,7 @@ import { X } from "@honeyicons/react";
 import Logo from "@/components/layout/Logo";
 import { policyLinks } from "@/components/marketing/policies/policy-links";
 import Reveal from "@/components/motion/Reveal";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 import { BODY } from "./rhythm";
 
 type FooterLink = { label: string; href: string };

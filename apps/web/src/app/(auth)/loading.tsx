@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@multifeed/ui/components/skeleton";
 
 export default function AuthLoading() {
   return (

@@ -1,8 +1,8 @@
 "use client";
 
 import { Integration } from "@honeyicons/react";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardHeader, CardTitle } from "@multifeed/ui/components/card";
+import { Skeleton } from "@multifeed/ui/components/skeleton";
 import { CONNECTABLE_PLATFORMS, PLATFORM_META } from "@/lib/platform-meta";
 
 export function ConnectionsRowsSkeleton() {

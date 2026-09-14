@@ -1,8 +1,8 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@multifeed/ui/components/skeleton";
 import { countUsedTeamSeats } from "@/lib/team-seats";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 
 function KpiCard({ label, value }: { label: string; value: string | number }) {
   return (

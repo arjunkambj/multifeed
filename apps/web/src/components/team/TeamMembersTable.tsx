@@ -2,7 +2,7 @@
 
 import type { TeamTableRow } from "@/components/team/TeamMembersContent";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
 import {
   Table,
   TableBody,
@@ -10,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@multifeed/ui/components/table";
 
 const getInitials = (value: string | null) =>
   value

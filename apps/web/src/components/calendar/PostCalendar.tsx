@@ -30,16 +30,16 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CalendarGridSkeleton } from "@/components/layout/CalendarGridSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { Badge } from "@multifeed/ui/components/badge";
+import { Button } from "@multifeed/ui/components/button";
+import { ButtonGroup } from "@multifeed/ui/components/button-group";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@multifeed/ui/components/card";
 import {
   Select,
   SelectContent,
@@ -47,9 +47,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@multifeed/ui/components/select";
+import { Skeleton } from "@multifeed/ui/components/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@multifeed/ui/components/tabs";
 import { defaultCalendarRangeMs } from "@/lib/date-ranges";
 import {
   PLATFORM_META,
@@ -57,7 +57,7 @@ import {
   platformForeground,
   platformLabel,
 } from "@/lib/platform-meta";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 
 type CalendarView = "dayGridMonth" | "timeGridWeek";
 

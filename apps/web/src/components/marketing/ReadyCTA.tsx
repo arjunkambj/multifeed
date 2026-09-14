@@ -2,10 +2,10 @@ import { ChevronRight } from "@honeyicons/react";
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/motion/Reveal";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { buttonVariants } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
+import { buttonVariants } from "@multifeed/ui/components/button";
 import { landingPeople } from "@/constants/landing-page";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 import {
   BODY,
   MOCK_CARD,

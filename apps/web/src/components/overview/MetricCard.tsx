@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, type HoneyIcon } from "@honeyicons/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@multifeed/ui/components/card";
+import { Separator } from "@multifeed/ui/components/separator";
+import { cn } from "@multifeed/ui/lib/utils";
 
 type MetricCardProps = {
   title: string;

@@ -13,16 +13,16 @@ import { motion, useReducedMotion } from "motion/react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import Logo from "@/components/layout/Logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
+import { Button } from "@multifeed/ui/components/button";
+import { ButtonGroup } from "@multifeed/ui/components/button-group";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@/components/ui/input-group";
-import { Kbd } from "@/components/ui/kbd";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@multifeed/ui/components/input-group";
+import { Kbd } from "@multifeed/ui/components/kbd";
+import { Tabs, TabsList, TabsTrigger } from "@multifeed/ui/components/tabs";
 import { landingPeople } from "@/constants/landing-page";
 import {
   type MenuItem,
@@ -31,7 +31,7 @@ import {
   sidebarMainItems,
 } from "@/constants/sidebar-menu";
 import { platformBrand, platformForeground } from "@/lib/platform-meta";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 import { MOCK_FRAME } from "./rhythm";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

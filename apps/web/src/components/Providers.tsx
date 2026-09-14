@@ -6,7 +6,7 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { ThemeProvider } from "next-themes";
 import { useState } from "react";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@multifeed/ui/components/sonner";
 import { clientEnv } from "@/env";
 import { hexclaveClientApp } from "@/hexclave/client";
 

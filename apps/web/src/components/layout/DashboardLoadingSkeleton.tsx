@@ -12,8 +12,8 @@ import {
   SidebarMenuItem,
   SidebarMenuSkeleton,
   SidebarProvider,
-} from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@multifeed/ui/components/sidebar";
+import { Skeleton } from "@multifeed/ui/components/skeleton";
 import { CalendarGridSkeleton } from "./CalendarGridSkeleton";
 import { ComposerFormSkeleton } from "./ComposerFormSkeleton";
 import { ConnectionsRowsSkeleton } from "./ConnectionsRowsSkeleton";

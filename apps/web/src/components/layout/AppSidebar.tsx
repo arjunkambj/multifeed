@@ -4,7 +4,7 @@ import { Search } from "@honeyicons/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@multifeed/ui/components/button";
 import {
   Command,
   CommandDialog,
@@ -13,8 +13,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { MetaKbd } from "@/components/ui/kbd";
+} from "@multifeed/ui/components/command";
+import { MetaKbd } from "@multifeed/ui/components/kbd";
 import {
   Sidebar,
   SidebarContent,
@@ -27,12 +27,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@multifeed/ui/components/sidebar";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@multifeed/ui/components/tooltip";
 import type { MenuItem } from "@/constants/sidebar-menu";
 import {
   sidebarCategories,

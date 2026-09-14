@@ -4,7 +4,7 @@ import {
   UserProfileMenu,
   type ProfileUser,
 } from "@/components/layout/UserProfileMenu";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@multifeed/ui/components/sidebar";
 
 export function DashboardHeader({ user }: { user: ProfileUser }) {
   return (

@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { ConnectionUsageMeter } from "@/components/connections/ConnectionUsageMeter";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { Button } from "@/components/ui/button";
+import { Button } from "@multifeed/ui/components/button";
 import {
   Dialog,
   DialogContent,
@@ -21,8 +21,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
+} from "@multifeed/ui/components/dialog";
+import { Spinner } from "@multifeed/ui/components/spinner";
 import { oauthErrorMessage } from "@/lib/oauth/env";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import {

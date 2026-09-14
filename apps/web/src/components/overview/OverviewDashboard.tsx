@@ -13,7 +13,7 @@ import { useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { MetricCard } from "@/components/overview/MetricCard";
 import { OverviewDateRangePicker } from "@/components/overview/OverviewDateRangePicker";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@multifeed/ui/components/skeleton";
 import {
   type CalendarDateRange,
   calendarDateRangeToMilliseconds,

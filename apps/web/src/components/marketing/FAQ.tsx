@@ -4,8 +4,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { cn } from "@/lib/utils";
+} from "@multifeed/ui/components/accordion";
+import { cn } from "@multifeed/ui/lib/utils";
 
 import { SUPPORT_EMAIL } from "./policies/policy-links";
 
@@ -16,7 +16,7 @@ import SectionHeader from "./SectionHeader";
 import { ChevronRight } from "@honeyicons/react";
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@multifeed/ui/components/button";
 
 import { faqItems } from "@/constants/landing-page";
 

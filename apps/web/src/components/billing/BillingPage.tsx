@@ -9,9 +9,9 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@multifeed/ui/components/button";
+import { Spinner } from "@multifeed/ui/components/spinner";
+import { Switch } from "@multifeed/ui/components/switch";
 import { currentTimeBucket } from "@/lib/time-bucket";
 
 const intervalLabels = {

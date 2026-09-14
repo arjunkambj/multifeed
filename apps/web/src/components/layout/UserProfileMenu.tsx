@@ -3,8 +3,8 @@
 import { Logout, Moon, Settings, Sun } from "@honeyicons/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
+import { Button } from "@multifeed/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +12,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@multifeed/ui/components/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger } from "@multifeed/ui/components/tabs";
 import { hexclaveClientApp } from "@/hexclave/client";
 
 export type ProfileUser = {

@@ -1,8 +1,8 @@
 "use client";
 
 import Logo from "@/components/layout/Logo";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { buttonVariants } from "@multifeed/ui/components/button";
+import { cn } from "@multifeed/ui/lib/utils";
 import { Close, Menu } from "@honeyicons/react";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";

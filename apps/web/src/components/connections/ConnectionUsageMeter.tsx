@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Progress, ProgressLabel } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { Button } from "@multifeed/ui/components/button";
+import { Progress, ProgressLabel } from "@multifeed/ui/components/progress";
+import { Skeleton } from "@multifeed/ui/components/skeleton";
+import { cn } from "@multifeed/ui/lib/utils";
 
 const SLOT_LIMIT = 12;
 

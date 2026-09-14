@@ -1,5 +1,5 @@
 import Reveal from "@/components/motion/Reveal";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 import { BODY, EYEBROW } from "./rhythm";
 
 type SectionHeaderProps = {

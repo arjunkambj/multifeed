@@ -16,15 +16,15 @@ import type { FunctionReturnType } from "convex/server";
 import { format } from "date-fns";
 import type { ReactNode } from "react";
 import { POST_FORMATS } from "@/components/posts/post-composer-config";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@multifeed/ui/components/badge";
+import { Button } from "@multifeed/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@multifeed/ui/components/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -32,14 +32,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@multifeed/ui/components/table";
 import {
   PLATFORM_META,
   platformBrand,
   platformForeground,
   platformLabel,
 } from "@/lib/platform-meta";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 
 export type PostListItem = FunctionReturnType<typeof api.posts.list>[number];
 

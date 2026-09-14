@@ -1,9 +1,9 @@
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { AlertTriangle, Integration, Trash } from "@honeyicons/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
+import { Badge } from "@multifeed/ui/components/badge";
+import { Button } from "@multifeed/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@multifeed/ui/components/card";
 import {
   Popover,
   PopoverContent,
@@ -11,8 +11,8 @@ import {
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Spinner } from "@/components/ui/spinner";
+} from "@multifeed/ui/components/popover";
+import { Spinner } from "@multifeed/ui/components/spinner";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import {
   type OAuthPlatform,

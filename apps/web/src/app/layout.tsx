@@ -4,7 +4,7 @@ import "../styles/globals.css";
 import { Bricolage_Grotesque, Figtree, Inter } from "next/font/google";
 import Providers from "@/components/Providers";
 import { clientEnv } from "@/env";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 
 const figtreeHeading = Figtree({
   subsets: ["latin"],

@@ -4,7 +4,7 @@ import { UserAdd } from "@honeyicons/react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { TeamStatsSkeleton } from "@/components/team/TeamStats";
 import { TeamTableSkeleton } from "@/components/team/TeamTableSkeleton";
-import { Button } from "@/components/ui/button";
+import { Button } from "@multifeed/ui/components/button";
 
 export function InviteMemberFallback() {
   return (

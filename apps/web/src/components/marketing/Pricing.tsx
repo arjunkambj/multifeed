@@ -1,9 +1,9 @@
 "use client";
 
 import Reveal from "@/components/motion/Reveal";
-import { buttonVariants } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
+import { buttonVariants } from "@multifeed/ui/components/button";
+import { Switch } from "@multifeed/ui/components/switch";
+import { cn } from "@multifeed/ui/lib/utils";
 import { Check } from "@honeyicons/react";
 import Link from "next/link";
 import { useState } from "react";

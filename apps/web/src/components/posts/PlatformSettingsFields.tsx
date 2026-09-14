@@ -7,11 +7,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+} from "@multifeed/ui/components/select";
+import { Input } from "@multifeed/ui/components/input";
+import { Label } from "@multifeed/ui/components/label";
+import { Switch } from "@multifeed/ui/components/switch";
+import { Textarea } from "@multifeed/ui/components/textarea";
 import {
   placementOptions,
   type PlatformSettings,

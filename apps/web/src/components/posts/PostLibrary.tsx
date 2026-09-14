@@ -11,9 +11,9 @@ import { toast } from "sonner";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { PostsListSkeleton } from "@/components/layout/PostsListSkeleton";
 import { PostsTable } from "@/components/posts/PostsTable";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@multifeed/ui/components/button";
+import { Input } from "@multifeed/ui/components/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@multifeed/ui/components/tabs";
 import { platformLabel } from "@/lib/platform-meta";
 import {
   isPostLibraryFilter,

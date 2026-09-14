@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 
 export function ComposerPanel({
   children,

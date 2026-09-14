@@ -1,7 +1,7 @@
 "use client";
 
 import { Integration } from "@honeyicons/react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@multifeed/ui/components/badge";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import { PLATFORM_META, platformInk, platformLabel } from "@/lib/platform-meta";
 import {

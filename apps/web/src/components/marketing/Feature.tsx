@@ -11,9 +11,9 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@multifeed/ui/components/button";
 import { featureItems } from "@/constants/landing-page";
-import { cn } from "@/lib/utils";
+import { cn } from "@multifeed/ui/lib/utils";
 import {
   BODY,
   HEADER_GAP,
