@@ -103,9 +103,7 @@ export function Footer() {
 
           <div className="mt-14 flex flex-col gap-2 border-t pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>© {new Date().getFullYear()} MultiFeed. All rights reserved.</p>
-            <p>
-              One calendar for every account.
-            </p>
+            <p>One calendar for every account.</p>
           </div>
         </Reveal>
       </div>

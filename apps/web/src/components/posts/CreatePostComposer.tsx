@@ -740,9 +740,7 @@ function PostComposerForm({
                     a matching network or pick a different type.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      onClick={() => router.push("/connections")}
-                    >
+                    <Button onClick={() => router.push("/connections")}>
                       Manage connections
                     </Button>
                     {onChooseDifferentFormat ? (
@@ -1339,12 +1337,10 @@ function PostComposerForm({
                   >
                     {saving === scheduleMode ? (
                       <Spinner className="size-4" />
+                    ) : scheduleMode === "schedule" ? (
+                      <Calendar size={16} />
                     ) : (
-                      scheduleMode === "schedule" ? (
-                        <Calendar size={16} />
-                      ) : (
-                        <PaperPlane size={16} />
-                      )
+                      <PaperPlane size={16} />
                     )}
                     {saving === scheduleMode
                       ? scheduleMode === "schedule"
@@ -1411,16 +1407,16 @@ function PostComposerForm({
                     const PlatformIcon =
                       PLATFORM_META[account.platform]?.icon ?? Integration;
                     return (
-                    <ToggleGroupItem
-                      key={account._id}
-                      value={account._id}
-                      aria-label={`Preview @${account.username} on ${platformLabel(account.platform)}`}
-                    >
-                      <PlatformIcon />
-                      <span className="max-w-32 truncate">
-                        @{account.username}
-                      </span>
-                    </ToggleGroupItem>
+                      <ToggleGroupItem
+                        key={account._id}
+                        value={account._id}
+                        aria-label={`Preview @${account.username} on ${platformLabel(account.platform)}`}
+                      >
+                        <PlatformIcon />
+                        <span className="max-w-32 truncate">
+                          @{account.username}
+                        </span>
+                      </ToggleGroupItem>
                     );
                   })}
                 </ToggleGroup>

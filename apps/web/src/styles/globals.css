@@ -334,7 +334,8 @@
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 1rem;
-  box-shadow: 0 10px 30px color-mix(in oklch, var(--foreground) 12%, transparent);
+  box-shadow: 0 10px 30px
+    color-mix(in oklch, var(--foreground) 12%, transparent);
 }
 
 .multifeed-calendar .fc-popover-header {

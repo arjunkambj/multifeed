@@ -22,10 +22,7 @@ import {
   postStatus,
 } from "./schema";
 import { publicAccountValidator } from "./oauth/accounts";
-import {
-  publicMediaAssetValidator,
-  toPublicMediaAsset,
-} from "./media/r2";
+import { publicMediaAssetValidator, toPublicMediaAsset } from "./media/r2";
 import { missingPublishScopes } from "./publishing/helpers";
 
 const targetInput = v.object({

@@ -1,0 +1,93 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "react", "nextjs"],
+  "jsPlugins": ["@shadcn/lint", "@trestleinc/convex-oxlint"],
+  "categories": {
+    "correctness": "error"
+  },
+  "settings": {
+    "next": {
+      "rootDir": "apps/web"
+    }
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/.turbo/**",
+    "**/dist/**",
+    "**/convex/_generated/**",
+    "**/*.d.ts",
+    "next-env.d.ts",
+    "ref-app/**"
+  ],
+  "rules": {
+    "no-extra-boolean-cast": "off",
+    "no-shadow-restricted-names": "off",
+    "typescript/no-non-null-assertion": "off",
+    "typescript/consistent-type-imports": "off",
+    "react/no-array-index-key": "off",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/purity": "off",
+    "react/set-state-in-effect": "off",
+    "react/static-components": "off",
+    "convex/no-old-registered-function-syntax": "error",
+    "convex/require-args-validator": "error",
+    "convex/explicit-table-ids": "error",
+    "convex/import-wrong-runtime": "error",
+    "shadcn/no-restyle": [
+      "error",
+      {
+        "allow": ["layout"],
+        "deny": [
+          "h",
+          "min-h",
+          "max-h",
+          "size",
+          "block-size",
+          "min-block-size",
+          "max-block-size"
+        ],
+        "message": {
+          "spacing": "Padding and gap are not allowed on {{component}}. Use a size ({{sizes|none defined}}) or margin here / gap on the parent.",
+          "color": "Do not change colors on {{component}}. Use a variant: {{variants|none defined}}.",
+          "shape": "Do not change border radius or shape on {{component}}. Use a variant: {{variants|none defined}}.",
+          "layout": "Do not change height on {{component}}. Width and placement are allowed.",
+          "default": "Do not restyle {{component}}. Use a variant: {{variants|none defined}}."
+        }
+      }
+    ],
+    "shadcn/no-raw-colors": "error",
+    "shadcn/no-arbitrary-values": [
+      "error",
+      {
+        "allow": ["layout"],
+        "deny": [
+          "h",
+          "min-h",
+          "max-h",
+          "size",
+          "block-size",
+          "min-block-size",
+          "max-block-size"
+        ]
+      }
+    ],
+    "shadcn/no-inline-styles": "error",
+    "shadcn/no-unknown-classes": "error",
+    "shadcn/require-static-classes": "error"
+  },
+  "overrides": [
+    {
+      "files": ["apps/backend/**"],
+      "plugins": ["typescript", "unicorn", "oxc", "import"]
+    },
+    {
+      "files": ["apps/web/src/components/ui/**"],
+      "rules": {
+        "shadcn/no-restyle": "off",
+        "shadcn/no-arbitrary-values": "off",
+        "shadcn/require-static-classes": "off"
+      }
+    }
+  ]
+}

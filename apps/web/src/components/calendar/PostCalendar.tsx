@@ -126,13 +126,13 @@ export function PostCalendar() {
       return {
         id: post._id,
         title:
-          post.title?.trim() || post.body.trim().slice(0, 48) || "Untitled post",
+          post.title?.trim() ||
+          post.body.trim().slice(0, 48) ||
+          "Untitled post",
         start: post.scheduledFor,
         backgroundColor: post.calendarColor ?? platformBrand(platform),
         borderColor: "transparent",
-        textColor: post.calendarColor
-          ? "#fff"
-          : platformForeground(platform),
+        textColor: post.calendarColor ? "#fff" : platformForeground(platform),
         editable: post.status === "scheduled" || post.status === "failed",
         extendedProps: {
           status: post.status,
@@ -384,7 +384,10 @@ export function PostCalendar() {
                 )
               }
               views={{
-                dayGridMonth: { dayMaxEventRows: true, displayEventTime: false },
+                dayGridMonth: {
+                  dayMaxEventRows: true,
+                  displayEventTime: false,
+                },
                 timeGridWeek: {
                   slotMinTime: "06:00:00",
                   slotMaxTime: "24:00:00",
@@ -520,49 +523,49 @@ function PostDetailsCard({
                   const TargetIcon =
                     PLATFORM_META[t.platform]?.icon ?? Integration;
                   return (
-                  <div
-                    key={t.targetId}
-                    className="flex items-center gap-2 rounded-xl bg-muted px-2.5 py-2"
-                  >
-                    <span
-                      className="flex size-7 items-center justify-center rounded-full"
-                      style={{
-                        backgroundColor: platformBrand(t.platform),
-                        color: platformForeground(t.platform),
-                      }}
+                    <div
+                      key={t.targetId}
+                      className="flex items-center gap-2 rounded-xl bg-muted px-2.5 py-2"
                     >
-                      <TargetIcon size={16} />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-medium">
-                        @{t.username ?? "account"}
-                      </p>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        {platformLabel(t.platform)}
-                      </p>
-                      {t.failureMessage && (
-                        <p
-                          className="mt-1 break-words text-xs text-destructive"
-                          role="status"
-                        >
-                          {t.failureMessage}
+                      <span
+                        className="flex size-7 items-center justify-center rounded-full"
+                        style={{
+                          backgroundColor: platformBrand(t.platform),
+                          color: platformForeground(t.platform),
+                        }}
+                      >
+                        <TargetIcon size={16} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-medium">
+                          @{t.username ?? "account"}
                         </p>
-                      )}
-                      {t.platformPermalink && (
-                        <a
-                          href={t.platformPermalink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-1 inline-block text-xs text-primary underline"
-                        >
-                          View published post
-                        </a>
-                      )}
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          {platformLabel(t.platform)}
+                        </p>
+                        {t.failureMessage && (
+                          <p
+                            className="mt-1 break-words text-xs text-destructive"
+                            role="status"
+                          >
+                            {t.failureMessage}
+                          </p>
+                        )}
+                        {t.platformPermalink && (
+                          <a
+                            href={t.platformPermalink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 inline-block text-xs text-primary underline"
+                          >
+                            View published post
+                          </a>
+                        )}
+                      </div>
+                      <Badge variant="secondary" className="capitalize">
+                        {t.status}
+                      </Badge>
                     </div>
-                    <Badge variant="secondary" className="capitalize">
-                      {t.status}
-                    </Badge>
-                  </div>
                   );
                 })
               )}

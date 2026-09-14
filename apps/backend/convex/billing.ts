@@ -427,7 +427,10 @@ export const handleWebhook = internalMutation({
 
     const event = args.data as Record<string, unknown>;
     const status = webhookStatus(args.eventType, event);
-    const subscriptionId = firstNonEmptyString(event.subscription_id, event.subscriptionId);
+    const subscriptionId = firstNonEmptyString(
+      event.subscription_id,
+      event.subscriptionId,
+    );
 
     if (status) {
       await upsertSubscription(ctx, status, event, args.eventTimestamp);
@@ -455,7 +458,10 @@ async function upsertSubscription(
   event: Record<string, unknown>,
   rawEventTimestamp: number | undefined,
 ) {
-  const dodoSubscriptionId = firstNonEmptyString(event.subscription_id, event.subscriptionId);
+  const dodoSubscriptionId = firstNonEmptyString(
+    event.subscription_id,
+    event.subscriptionId,
+  );
   const metadata = (event.metadata ?? {}) as Record<string, unknown>;
   const customer = (event.customer ?? {}) as Record<string, unknown>;
   const metaTeamId = firstNonEmptyString(metadata.teamId);
@@ -515,8 +521,7 @@ async function upsertSubscription(
       pending.planKey === metaPlan &&
       (metaInterval === undefined || metaInterval === pending.interval) &&
       (metaUserId === undefined || metaUserId === pending.userId) &&
-      (eventProductId === undefined ||
-        eventProductId === pending.dodoProductId)
+      (eventProductId === undefined || eventProductId === pending.dodoProductId)
     ) {
       existing = pending;
     }

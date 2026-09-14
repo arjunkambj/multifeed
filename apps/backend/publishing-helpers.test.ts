@@ -111,23 +111,34 @@ test("tiktok status interpretation never treats inbox as published", () => {
 test("publishedFromAttempt only resumes a real network create", () => {
   assert.equal(publishedFromAttempt(undefined), null);
   assert.equal(publishedFromAttempt({ kind: "x", mediaIds: ["1"] }), null);
-  assert.deepEqual(publishedFromAttempt({
-    platformPostId: "123",
-    permalink: "https://x.com/i/web/status/123",
-  }), {
-    platformPostId: "123",
-    permalink: "https://x.com/i/web/status/123",
-  });
+  assert.deepEqual(
+    publishedFromAttempt({
+      platformPostId: "123",
+      permalink: "https://x.com/i/web/status/123",
+    }),
+    {
+      platformPostId: "123",
+      permalink: "https://x.com/i/web/status/123",
+    },
+  );
 });
 
 test("resumable publish errors stay in progress instead of failed", () => {
-  assert.equal(isResumablePublishError(new ResumablePublishError("still processing")), true);
+  assert.equal(
+    isResumablePublishError(new ResumablePublishError("still processing")),
+    true,
+  );
   assert.equal(isResumablePublishError(new Error("publish failed")), false);
 });
 
 test("old X and TikTok tokens are treated as missing publish scopes", () => {
   assert.deepEqual(missingPublishScopes("x", ["tweet.write"]), ["media.write"]);
-  assert.deepEqual(missingPublishScopes("tiktok", ["video.publish"]), ["video.upload"]);
-  assert.deepEqual(missingPublishScopes("x", []), ["tweet.write", "media.write"]);
+  assert.deepEqual(missingPublishScopes("tiktok", ["video.publish"]), [
+    "video.upload",
+  ]);
+  assert.deepEqual(missingPublishScopes("x", []), [
+    "tweet.write",
+    "media.write",
+  ]);
   assert.deepEqual(missingPublishScopes("facebook", []), []);
 });

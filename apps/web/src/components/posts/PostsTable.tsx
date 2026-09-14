@@ -203,38 +203,38 @@ function PostTableRow({
               const PlatformIcon =
                 PLATFORM_META[target.platform]?.icon ?? Integration;
               return (
-              <span
-                className="flex max-w-full flex-col gap-1"
-                key={target.targetId}
-              >
-                <span className="inline-flex min-w-0 items-center gap-2 text-sm">
-                  <span
-                    className="flex size-5 shrink-0 items-center justify-center rounded-md"
-                    style={{
-                      backgroundColor: platformBrand(target.platform),
-                      color: platformForeground(target.platform),
-                    }}
-                  >
-                    <PlatformIcon size={13} />
+                <span
+                  className="flex max-w-full flex-col gap-1"
+                  key={target.targetId}
+                >
+                  <span className="inline-flex min-w-0 items-center gap-2 text-sm">
+                    <span
+                      className="flex size-5 shrink-0 items-center justify-center rounded-md"
+                      style={{
+                        backgroundColor: platformBrand(target.platform),
+                        color: platformForeground(target.platform),
+                      }}
+                    >
+                      <PlatformIcon size={13} />
+                    </span>
+                    <span className="sr-only">
+                      {platformLabel(target.platform)}{" "}
+                    </span>
+                    <span className="truncate">
+                      {target.username
+                        ? `@${target.username}`
+                        : platformLabel(target.platform)}
+                    </span>
+                    {target.hasCustomCaption && (
+                      <Edit aria-label="Custom caption" size={11} />
+                    )}
                   </span>
-                  <span className="sr-only">
-                    {platformLabel(target.platform)}{" "}
-                  </span>
-                  <span className="truncate">
-                    {target.username
-                      ? `@${target.username}`
-                      : platformLabel(target.platform)}
-                  </span>
-                  {target.hasCustomCaption && (
-                    <Edit aria-label="Custom caption" size={11} />
+                  {target.failureMessage && (
+                    <span className="break-words text-xs text-destructive">
+                      {target.failureMessage}
+                    </span>
                   )}
                 </span>
-                {target.failureMessage && (
-                  <span className="break-words text-xs text-destructive">
-                    {target.failureMessage}
-                  </span>
-                )}
-              </span>
               );
             })}
           </div>

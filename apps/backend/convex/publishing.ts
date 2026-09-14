@@ -9,10 +9,7 @@ import { internal } from "./_generated/api";
 import { encryptSecret } from "./oauth/crypto";
 import schema, { publishAttempt, targetClaimStatus } from "./schema";
 import { mediaAssetOutputValidator } from "./media/r2";
-import {
-  MAX_MEDIA_ASSETS_PER_POST,
-  MAX_TARGETS_PER_POST,
-} from "./postConfig";
+import { MAX_MEDIA_ASSETS_PER_POST, MAX_TARGETS_PER_POST } from "./postConfig";
 import { serializeScope } from "./writeGuards";
 
 const postValidator = v.object({
@@ -83,8 +80,7 @@ async function scheduleTargets(
   for (const target of targets) {
     if (target.status === "published" || target.status === "skipped") continue;
     if (target.status === "failed") continue;
-    const resumeDue =
-      target.resumeAt != null && target.resumeAt <= now;
+    const resumeDue = target.resumeAt != null && target.resumeAt <= now;
     if (
       target.status === "publishing" &&
       target.attempts > 0 &&

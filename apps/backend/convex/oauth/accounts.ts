@@ -109,10 +109,7 @@ function validateAccountInput(account: AccountInput) {
   if (account.capabilities.length > MAX_CAPABILITIES) {
     fail("INVALID_INPUT", "Invalid account capabilities");
   }
-  for (const value of [
-    account.tokenExpiresAt,
-    account.refreshTokenExpiresAt,
-  ]) {
+  for (const value of [account.tokenExpiresAt, account.refreshTokenExpiresAt]) {
     if (value !== undefined && (!Number.isFinite(value) || value < 0)) {
       fail("INVALID_INPUT", "Invalid token expiry");
     }

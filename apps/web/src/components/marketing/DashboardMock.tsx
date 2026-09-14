@@ -91,7 +91,9 @@ function MockMonthGrid() {
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="grid min-h-0 flex-[5] grid-cols-7 grid-rows-5 overflow-hidden rounded-b-2xl border-4 border-t-0 border-card bg-background">
           {MOCK_DAYS.map((cell, index) => {
-            const events = MOCK_EVENTS.filter((event) => event.date === cell.date);
+            const events = MOCK_EVENTS.filter(
+              (event) => event.date === cell.date,
+            );
             const lastCol = index % 7 === 6;
             const lastRow = index >= MOCK_DAYS.length - 7;
             return (
@@ -343,9 +345,7 @@ export function DashboardMock() {
                   <div className="flex shrink-0 items-center gap-2">
                     <span className="flex h-8 w-40 items-center justify-between gap-1.5 rounded-2xl bg-input px-3 text-sm">
                       All platforms
-                      <UnfoldMore
-                        className="size-4 text-muted-foreground"
-                      />
+                      <UnfoldMore className="size-4 text-muted-foreground" />
                     </span>
                     <Tabs defaultValue="dayGridMonth">
                       <TabsList aria-hidden>

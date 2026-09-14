@@ -29,8 +29,7 @@ export function oauthServerSecret(): string {
   return value;
 }
 
-const DEFAULT_OAUTH_ERROR =
-  "Could not complete connection. Please try again.";
+const DEFAULT_OAUTH_ERROR = "Could not complete connection. Please try again.";
 
 /** Stable user-facing OAuth error codes (never raw provider messages). */
 export const OAUTH_ERROR_MESSAGES: Record<string, string> = {

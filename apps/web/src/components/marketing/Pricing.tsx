@@ -161,10 +161,7 @@ function PriceCard({
               key={feature}
               className="flex items-start gap-2.5 text-[0.9375rem] leading-6"
             >
-              <Check
-                size={16}
-                className="mt-[5px] shrink-0 text-primary"
-              />
+              <Check size={16} className="mt-[5px] shrink-0 text-primary" />
               <span className="text-foreground">{feature}</span>
             </li>
           ))}

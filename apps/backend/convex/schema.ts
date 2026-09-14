@@ -388,6 +388,5 @@ export default defineSchema({
     status: v.union(v.literal("open"), v.literal("done"), v.literal("ignored")),
     receivedAt: v.number(),
     updatedAt: v.number(),
-  })
-    .index("by_account_external", ["connectedAccountId", "externalId"]),
+  }).index("by_account_external", ["connectedAccountId", "externalId"]),
 });

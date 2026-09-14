@@ -90,4 +90,3 @@ export const platforms = [
     color: "var(--platform-youtube-ink)",
   },
 ] as const;
-

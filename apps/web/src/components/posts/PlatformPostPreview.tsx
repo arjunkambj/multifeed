@@ -230,10 +230,7 @@ function PreviewHeading({
   const MetaIcon = platformIcon(account.platform);
   return (
     <figcaption className="mb-2 flex items-center gap-2 px-0.5 text-xs font-medium text-muted-foreground">
-      <MetaIcon
-        size={14}
-        style={{ color: platformInk(account.platform) }}
-      />
+      <MetaIcon size={14} style={{ color: platformInk(account.platform) }} />
       <span>{platformLabel(account.platform)}</span>
       <span aria-hidden>·</span>
       <span className="capitalize">{placement ?? "feed"} preview</span>
@@ -591,21 +588,12 @@ const VERTICAL_CONFIG: Record<
 > = {
   facebook: {
     accent: "#1877f2",
-    actionIcons: [
-      Like,
-      Email,
-      Share,
-    ],
+    actionIcons: [Like, Email, Share],
     actionLabels: ["Like", "Comment", "Share"],
   },
   instagram: {
     accent: "#ffffff",
-    actionIcons: [
-      Like,
-      Email,
-      PaperPlane,
-      MoreHorizontal,
-    ],
+    actionIcons: [Like, Email, PaperPlane, MoreHorizontal],
     actionLabels: ["Like", "Comment", "Share", "More"],
   },
   tiktok: {
@@ -616,12 +604,7 @@ const VERTICAL_CONFIG: Record<
   },
   youtube: {
     accent: "#ff0033",
-    actionIcons: [
-      Like,
-      Dislike,
-      Email,
-      Share,
-    ],
+    actionIcons: [Like, Dislike, Email, Share],
     actionLabels: ["Like", "Dislike", "Comment", "Share"],
     primaryAction: "Subscribe",
   },

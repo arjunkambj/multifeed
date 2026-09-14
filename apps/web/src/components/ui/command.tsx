@@ -75,9 +75,7 @@ function CommandInput({
           {...props}
         />
         <InputGroupAddon>
-          <Search
-            className="size-4 shrink-0 opacity-50"
-          />
+          <Search className="size-4 shrink-0 opacity-50" />
         </InputGroupAddon>
       </InputGroup>
     </div>
@@ -144,9 +142,7 @@ function CommandItem({
       {...props}
     >
       {children}
-      <Check
-        className="ml-auto opacity-0 group-data-[checked=true]/command-item:opacity-100"
-      />
+      <Check className="ml-auto opacity-0 group-data-[checked=true]/command-item:opacity-100" />
     </CommandPrimitive.Item>
   );
 }

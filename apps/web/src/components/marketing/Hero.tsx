@@ -91,10 +91,7 @@ export function Hero() {
               title={p.label}
               className="inline-flex items-center justify-center opacity-90 transition-all duration-200 hover:scale-110 hover:opacity-100"
             >
-              <p.icon
-                className="size-7 md:size-8"
-                style={{ color: p.color }}
-              />
+              <p.icon className="size-7 md:size-8" style={{ color: p.color }} />
             </span>
           ))}
         </div>

@@ -132,11 +132,7 @@ export function InviteModal({
               disabled={!email.trim() || isSending || isAtLimit}
               type="submit"
             >
-              {isSending ? (
-                <Spinner className="size-4" />
-              ) : (
-                <Email size={16} />
-              )}
+              {isSending ? <Spinner className="size-4" /> : <Email size={16} />}
               Send invite
             </Button>
           </DialogFooter>

@@ -159,28 +159,17 @@ function Calendar({
         }) => {
           if (orientation === "left") {
             return (
-              <ChevronLeft
-                className={cn("size-4", className)}
-                {...props}
-              />
+              <ChevronLeft className={cn("size-4", className)} {...props} />
             );
           }
 
           if (orientation === "right") {
             return (
-              <ChevronRight
-                className={cn("size-4", className)}
-                {...props}
-              />
+              <ChevronRight className={cn("size-4", className)} {...props} />
             );
           }
 
-          return (
-            <ChevronDown
-              className={cn("size-4", className)}
-              {...props}
-            />
-          );
+          return <ChevronDown className={cn("size-4", className)} {...props} />;
         },
         DayButton: ({ ...props }) => (
           <CalendarDayButton locale={locale} {...props} />

@@ -46,7 +46,10 @@ export function FAQ() {
 
         <Reveal>
           <Accordion
-            className={cn(GRID_GAP, "flex flex-col overflow-visible rounded-none border-0")}
+            className={cn(
+              GRID_GAP,
+              "flex flex-col overflow-visible rounded-none border-0",
+            )}
           >
             {faqItems.map((item) => (
               <AccordionItem

@@ -107,7 +107,10 @@ function throwIfRejected(
 }
 
 async function fetchJson(url: string, init: RequestInit = {}) {
-  const res = await fetch(url, { ...init, signal: AbortSignal.timeout(15_000) });
+  const res = await fetch(url, {
+    ...init,
+    signal: AbortSignal.timeout(15_000),
+  });
   const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   return { ok: res.ok, json };
 }
@@ -119,7 +122,8 @@ async function refreshMetaPageToken(
 ): Promise<RefreshedToken | null> {
   const appId = process.env.META_APP_ID;
   const appSecret = process.env.META_APP_SECRET;
-  if (!appId || !appSecret) throw new Error("Convex is missing META_APP_ID or META_APP_SECRET");
+  if (!appId || !appSecret)
+    throw new Error("Convex is missing META_APP_ID or META_APP_SECRET");
 
   const exchanged = await fetchJson(
     `${META_GRAPH}/oauth/access_token?grant_type=fb_exchange_token&client_id=${encodeURIComponent(appId)}&client_secret=${encodeURIComponent(appSecret)}&fb_exchange_token=${encodeURIComponent(userToken)}`,
@@ -145,12 +149,17 @@ async function refreshMetaPageToken(
   }
   if (!Array.isArray(pages.json.data)) return null;
 
-  const page = (pages.json.data as Array<Record<string, unknown>>).find((entry) => {
-    if (platform === "facebook") return entry.id === providerAccountId;
-    const ig = entry.instagram_business_account as { id?: string } | undefined;
-    return ig?.id === providerAccountId;
-  });
-  const pageToken = page && typeof page.access_token === "string" ? page.access_token : null;
+  const page = (pages.json.data as Array<Record<string, unknown>>).find(
+    (entry) => {
+      if (platform === "facebook") return entry.id === providerAccountId;
+      const ig = entry.instagram_business_account as
+        | { id?: string }
+        | undefined;
+      return ig?.id === providerAccountId;
+    },
+  );
+  const pageToken =
+    page && typeof page.access_token === "string" ? page.access_token : null;
   if (!pageToken) return null;
 
   return {
@@ -188,7 +197,9 @@ export async function refreshAccessTokenForPlatform(
     return {
       accessToken: json.access_token,
       refreshToken:
-        typeof json.refresh_token === "string" ? json.refresh_token : refreshToken,
+        typeof json.refresh_token === "string"
+          ? json.refresh_token
+          : refreshToken,
       expiresAt:
         typeof json.expires_in === "number"
           ? Date.now() + json.expires_in * 1000
@@ -199,7 +210,10 @@ export async function refreshAccessTokenForPlatform(
   if (account.platform === "linkedin") {
     const id = process.env.LINKEDIN_CLIENT_ID;
     const secret = process.env.LINKEDIN_CLIENT_SECRET;
-    if (!id || !secret) throw new Error("Convex is missing LINKEDIN_CLIENT_ID or LINKEDIN_CLIENT_SECRET");
+    if (!id || !secret)
+      throw new Error(
+        "Convex is missing LINKEDIN_CLIENT_ID or LINKEDIN_CLIENT_SECRET",
+      );
     const body = new URLSearchParams({
       grant_type: "refresh_token",
       refresh_token: refreshToken,
@@ -219,7 +233,9 @@ export async function refreshAccessTokenForPlatform(
     return {
       accessToken: json.access_token,
       refreshToken:
-        typeof json.refresh_token === "string" ? json.refresh_token : refreshToken,
+        typeof json.refresh_token === "string"
+          ? json.refresh_token
+          : refreshToken,
       expiresAt:
         typeof json.expires_in === "number"
           ? Date.now() + json.expires_in * 1000
@@ -234,18 +250,24 @@ export async function refreshAccessTokenForPlatform(
   if (account.platform === "youtube") {
     const id = process.env.GOOGLE_CLIENT_ID;
     const secret = process.env.GOOGLE_CLIENT_SECRET;
-    if (!id || !secret) throw new Error("Convex is missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET");
+    if (!id || !secret)
+      throw new Error(
+        "Convex is missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET",
+      );
     const body = new URLSearchParams({
       client_id: id,
       client_secret: secret,
       refresh_token: refreshToken,
       grant_type: "refresh_token",
     });
-    const { ok, json } = await fetchJson("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
-    });
+    const { ok, json } = await fetchJson(
+      "https://oauth2.googleapis.com/token",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+      },
+    );
     if (!ok) throwIfRejected(json, "Google rejected this account's token");
     if (typeof json.access_token !== "string") return null;
     return {
@@ -261,7 +283,10 @@ export async function refreshAccessTokenForPlatform(
   if (account.platform === "tiktok") {
     const key = process.env.TIKTOK_CLIENT_KEY;
     const secret = process.env.TIKTOK_CLIENT_SECRET;
-    if (!key || !secret) throw new Error("Convex is missing TIKTOK_CLIENT_KEY or TIKTOK_CLIENT_SECRET");
+    if (!key || !secret)
+      throw new Error(
+        "Convex is missing TIKTOK_CLIENT_KEY or TIKTOK_CLIENT_SECRET",
+      );
     const body = new URLSearchParams({
       client_key: key,
       client_secret: secret,
@@ -281,7 +306,9 @@ export async function refreshAccessTokenForPlatform(
     return {
       accessToken: json.access_token,
       refreshToken:
-        typeof json.refresh_token === "string" ? json.refresh_token : refreshToken,
+        typeof json.refresh_token === "string"
+          ? json.refresh_token
+          : refreshToken,
       expiresAt:
         typeof json.expires_in === "number"
           ? Date.now() + json.expires_in * 1000
@@ -312,9 +339,12 @@ export async function refreshAccessTokenForPlatform(
   }
 
   if (account.platform === "facebook" || account.platform === "instagram") {
-    return refreshMetaPageToken(account.platform, refreshToken, account.providerAccountId);
+    return refreshMetaPageToken(
+      account.platform,
+      refreshToken,
+      account.providerAccountId,
+    );
   }
 
   return null;
 }
-

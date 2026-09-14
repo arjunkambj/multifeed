@@ -246,10 +246,7 @@ export function BillingPage() {
                   className="flex items-start gap-2.5 text-sm leading-snug text-foreground/90"
                   key={feature}
                 >
-                  <Check
-                    className="mt-0.5 shrink-0 text-primary"
-                    size={16}
-                  />
+                  <Check className="mt-0.5 shrink-0 text-primary" size={16} />
                   {feature}
                 </li>
               ))}

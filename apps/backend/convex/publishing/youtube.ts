@@ -27,9 +27,7 @@ function dropBytes(stream: ReadableStream<Uint8Array>, count: number) {
           remaining -= value.byteLength;
           continue;
         }
-        controller.enqueue(
-          remaining > 0 ? value.subarray(remaining) : value,
-        );
+        controller.enqueue(remaining > 0 ? value.subarray(remaining) : value);
         remaining = 0;
         return;
       }
@@ -122,7 +120,10 @@ async function resumeYoutubeUpload(
   const dl = await fetch(sourceUrl, {
     headers:
       received > 0
-        ? { Range: `bytes=${received}-${size - 1}`, "accept-encoding": "identity" }
+        ? {
+            Range: `bytes=${received}-${size - 1}`,
+            "accept-encoding": "identity",
+          }
         : { "accept-encoding": "identity" },
     signal: AbortSignal.timeout(TIMEOUT),
   });

@@ -121,10 +121,7 @@ function Card({ t }: { t: (typeof testimonials)[number] }) {
 export function Testimonials() {
   return (
     <Section id="reviews" className="relative">
-      <SectionHeader
-        eyebrow="Testimonials"
-        title="What people say."
-      />
+      <SectionHeader eyebrow="Testimonials" title="What people say." />
 
       <div
         className={cn(

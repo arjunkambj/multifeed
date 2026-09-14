@@ -112,9 +112,7 @@ export class ResumablePublishError extends Error {
 export function isResumablePublishError(error: unknown) {
   return (
     error instanceof ResumablePublishError ||
-    (error instanceof Error &&
-      "resumable" in error &&
-      error.resumable === true)
+    (error instanceof Error && "resumable" in error && error.resumable === true)
   );
 }
 

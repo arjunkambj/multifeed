@@ -38,11 +38,7 @@ export const publicMediaAssetValidator = v.object({
   teamId: v.string(),
   publicUrl: v.optional(v.string()),
   externalUrl: v.optional(v.string()),
-  kind: v.union(
-    v.literal("image"),
-    v.literal("video"),
-    v.literal("document"),
-  ),
+  kind: v.union(v.literal("image"), v.literal("video"), v.literal("document")),
   filename: v.string(),
   mimeType: v.string(),
   sizeBytes: v.number(),

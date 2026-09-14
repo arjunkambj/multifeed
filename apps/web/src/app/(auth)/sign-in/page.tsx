@@ -177,10 +177,7 @@ export default function SignInPage() {
           >
             <InputOTPGroup className="gap-2">
               {[0, 1, 2, 3, 4, 5].map((index) => (
-                <InputOTPSlot
-                  key={index}
-                  index={index}
-                />
+                <InputOTPSlot key={index} index={index} />
               ))}
             </InputOTPGroup>
           </InputOTP>
