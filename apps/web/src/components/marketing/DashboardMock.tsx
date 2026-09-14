@@ -9,8 +9,8 @@ import {
   SidebarLeft,
   UnfoldMore,
 } from "@honeyicons/react";
-import { motion, useReducedMotion } from "motion/react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
+import { type CSSProperties, useLayoutEffect, useRef, useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import Logo from "@/components/layout/Logo";
 import {
@@ -78,15 +78,14 @@ const MOCK_DAYS = [
 ];
 
 function MockMonthGrid() {
-  const reduceMotion = useReducedMotion();
-
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
       <div className="grid shrink-0 grid-cols-7 rounded-t-2xl border-4 border-b-0 border-card bg-card">
         {WEEKDAYS.map((weekday) => (
           <div
-            className="relative py-2 text-center text-xs font-semibold tracking-[0.04em] text-muted-foreground uppercase after:absolute after:inset-y-1.5 after:right-0 after:w-px after:bg-border last:after:hidden"
+            className="relative py-2 text-center text-xs font-semibold tracking-(--weekday-ls) text-muted-foreground uppercase after:absolute after:inset-y-1.5 after:right-0 after:w-px after:bg-border last:after:hidden"
             key={weekday}
+            style={{ "--weekday-ls": "0.04em" } as CSSProperties}
           >
             {weekday}
           </div>
@@ -113,23 +112,27 @@ function MockMonthGrid() {
                 {cell.other ? (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent_0_6px,var(--border)_6px_7px)]"
+                    className="pointer-events-none absolute inset-0 bg-(image:--hatch)"
+                    style={
+                      {
+                        "--hatch":
+                          "repeating-linear-gradient(-45deg, transparent 0 6px, var(--border) 6px 7px)",
+                      } as CSSProperties
+                    }
                   />
                 ) : null}
                 {cell.today ? (
-                  <span className="relative inline-flex size-[1.6rem] items-center justify-center">
-                    {reduceMotion ? null : (
-                      <motion.span
-                        aria-hidden
-                        animate={{ opacity: [0.4, 0], scale: [1, 1.9] }}
-                        className="absolute inset-0 rounded-full bg-primary"
-                        transition={{
-                          duration: 2.4,
-                          ease: "easeOut",
-                          repeat: Infinity,
-                        }}
-                      />
-                    )}
+                  <span className="relative inline-flex size-6 items-center justify-center">
+                    <motion.span
+                      aria-hidden
+                      animate={{ opacity: [0.4, 0], scale: [1, 1.9] }}
+                      className="absolute inset-0 rounded-full bg-primary"
+                      transition={{
+                        duration: 2.4,
+                        ease: "easeOut",
+                        repeat: Infinity,
+                      }}
+                    />
                     <span className="relative inline-flex size-full items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                       {cell.day}
                     </span>
@@ -149,12 +152,15 @@ function MockMonthGrid() {
                 <div className="relative mt-1 flex min-h-0 flex-col gap-px">
                   {events.map((event) => (
                     <span
-                      className="truncate rounded-lg px-1.5 py-0.5 text-[0.7rem] font-semibold"
+                      className="truncate rounded-lg bg-(--ev-bg) px-1.5 py-0.5 text-(length:--ev-fs) font-semibold text-(--ev-fg)"
                       key={event.title}
-                      style={{
-                        backgroundColor: platformBrand(event.platform),
-                        color: platformForeground(event.platform),
-                      }}
+                      style={
+                        {
+                          "--ev-bg": platformBrand(event.platform),
+                          "--ev-fg": platformForeground(event.platform),
+                          "--ev-fs": "0.7rem",
+                        } as CSSProperties
+                      }
                     >
                       {event.title}
                     </span>
@@ -215,7 +221,6 @@ function MockNavList({
 }
 
 const STAGE_WIDTH = 1280;
-const STAGE_HEIGHT = 800;
 
 /**
  * Desktop calendar chrome for the marketing page. Drawn at 1280×800 and
@@ -247,26 +252,18 @@ export function DashboardMock() {
       className={cn(MOCK_FRAME, "w-full overflow-hidden")}
       inert
     >
-      <div
-        className="relative w-full"
-        style={{ aspectRatio: `${STAGE_WIDTH} / ${STAGE_HEIGHT}` }}
-      >
+      <div className="relative aspect-8/5 w-full">
         {scale != null ? (
           <div
-            className="absolute top-0 left-0 flex bg-background"
-            style={{
-              width: STAGE_WIDTH,
-              height: STAGE_HEIGHT,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
-            }}
+            className="absolute top-0 left-0 flex h-200 w-320 origin-top-left scale-(--stage-scale) bg-background"
+            style={{ "--stage-scale": scale } as CSSProperties}
           >
             <aside className="flex w-57 shrink-0 flex-col border-r bg-sidebar">
               <div className="flex flex-col gap-2 px-2 pt-2 pb-1">
                 <span className="flex items-center px-1 py-1">
                   <Logo markOnly markClassName="size-7" />
                 </span>
-                <InputGroup className="h-8 w-full min-w-0">
+                <InputGroup>
                   <InputGroupAddon>
                     <Search />
                   </InputGroupAddon>
@@ -308,7 +305,7 @@ export function DashboardMock() {
                 <div className="ml-auto">
                   <Avatar className="size-8">
                     <AvatarImage alt="" src={landingPeople.elena.src} />
-                    <AvatarFallback className="text-xs font-medium">
+                    <AvatarFallback>
                       {landingPeople.elena.initials}
                     </AvatarFallback>
                   </Avatar>
@@ -328,20 +325,19 @@ export function DashboardMock() {
 
                 <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <ButtonGroup
-                      aria-hidden
-                      className="rounded-xl bg-secondary"
-                    >
-                      <Button size="icon" tabIndex={-1} variant="outline">
-                        <ChevronLeft size={16} />
-                      </Button>
-                      <Button tabIndex={-1} variant="outline">
-                        Today
-                      </Button>
-                      <Button size="icon" tabIndex={-1} variant="outline">
-                        <ChevronRight size={16} />
-                      </Button>
-                    </ButtonGroup>
+                    <div className="w-fit rounded-xl bg-secondary">
+                      <ButtonGroup aria-hidden>
+                        <Button size="icon" tabIndex={-1} variant="outline">
+                          <ChevronLeft size={16} />
+                        </Button>
+                        <Button tabIndex={-1} variant="outline">
+                          Today
+                        </Button>
+                        <Button size="icon" tabIndex={-1} variant="outline">
+                          <ChevronRight size={16} />
+                        </Button>
+                      </ButtonGroup>
+                    </div>
                     <h2 className="text-base font-semibold tracking-tight">
                       December 2026
                     </h2>

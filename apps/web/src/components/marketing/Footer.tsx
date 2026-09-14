@@ -1,4 +1,5 @@
 import { X } from "@honeyicons/react";
+import type { CSSProperties } from "react";
 import Logo from "@/components/layout/Logo";
 import { policyLinks } from "@/components/marketing/policies/policy-links";
 import Reveal from "@/components/motion/Reveal";
@@ -79,7 +80,10 @@ export function Footer() {
 
             {sections.map((section) => (
               <div key={section.title} className="lg:justify-self-end">
-                <h3 className="text-[0.9375rem] font-semibold tracking-tight text-foreground">
+                <h3
+                  className="text-(length:--col-title-fs) font-semibold tracking-tight text-foreground"
+                  style={{ "--col-title-fs": "0.9375rem" } as CSSProperties}
+                >
                   {section.title}
                 </h3>
                 <ul className={cn("mt-5 space-y-3", BODY)}>

@@ -1,6 +1,6 @@
 import Reveal from "@/components/motion/Reveal";
 import { cn } from "@multifeed/ui/lib/utils";
-import { BODY, EYEBROW } from "./rhythm";
+import { BODY, EYEBROW, SECTION_HEADING } from "./rhythm";
 
 type SectionHeaderProps = {
   /** Small label above the heading, preceded by a brand rule. */
@@ -40,11 +40,11 @@ export default function SectionHeader({
           centered && "justify-center",
         )}
       >
-        <span className="h-[5px] w-2.5 shrink-0 rounded-full bg-muted-foreground" />
+        <span className="h-1.25 w-2.5 shrink-0 rounded-full bg-muted-foreground" />
         {eyebrow}
       </p>
 
-      <h2 className="font-heading mt-4 w-full text-[1.875rem] leading-[1.08] font-medium tracking-[-0.032em] text-balance sm:text-[2.25rem] md:text-[2.5rem] md:leading-[1.06] lg:text-[2.75rem]">
+      <h2 className={cn(SECTION_HEADING, "mt-4 w-full")}>
         {title}
         {titleMuted && (
           <span className="block font-normal text-muted-foreground">

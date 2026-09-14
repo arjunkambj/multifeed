@@ -9,7 +9,6 @@ import { cn } from "@multifeed/ui/lib/utils";
 
 import { SUPPORT_EMAIL } from "./policies/policy-links";
 
-import { BODY, GRID_GAP } from "./rhythm";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
@@ -45,27 +44,13 @@ export function FAQ() {
         </div>
 
         <Reveal>
-          <Accordion
-            className={cn(
-              GRID_GAP,
-              "flex flex-col overflow-visible rounded-none border-0",
-            )}
-          >
+          <Accordion variant="card">
             {faqItems.map((item) => (
-              <AccordionItem
-                key={item.title}
-                value={item.title}
-                className="rounded-card border-0 bg-card shadow-none ring-0 outline-none transition-colors not-last:border-0"
-              >
-                <AccordionTrigger
-                  indicator="plus"
-                  className="cursor-pointer items-start p-6 text-left text-[0.9375rem] leading-6 font-medium text-foreground hover:no-underline [&_svg]:mt-[1px]"
-                >
+              <AccordionItem key={item.title} value={item.title} variant="card">
+                <AccordionTrigger indicator="plus" variant="card">
                   {item.title}
                 </AccordionTrigger>
-                <AccordionContent
-                  className={`max-w-[62ch] px-2 pb-6 text-muted-foreground ${BODY}`}
-                >
+                <AccordionContent variant="card">
                   {item.content}
                 </AccordionContent>
               </AccordionItem>

@@ -33,6 +33,10 @@ export const PANEL_MEDIA =
 export const PANEL_HEADING =
   "font-heading text-[1.375rem] leading-[1.2] font-medium tracking-[-0.025em] text-balance md:text-[1.625rem]";
 
+/** The page's h2 scale — `SectionHeader` and `ReadyCTA` share it exactly. */
+export const SECTION_HEADING =
+  "font-heading text-[1.875rem] leading-[1.08] font-medium tracking-[-0.032em] text-balance sm:text-[2.25rem] md:text-[2.5rem] md:leading-[1.06] lg:text-[2.75rem]";
+
 /** Quiet label above a heading. Matches `SectionHeader`'s eyebrow exactly. */
 export const EYEBROW = "text-sm leading-5 text-muted-foreground";
 

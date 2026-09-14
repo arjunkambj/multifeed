@@ -6,7 +6,7 @@ import { cn } from "@multifeed/ui/lib/utils";
 import { Close, Menu } from "@honeyicons/react";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 
 const navLinks = [
   { href: "#features", name: "Features" },
@@ -86,8 +86,13 @@ export function Navbar() {
 
   return (
     <header
+      style={
+        {
+          "--nav-props": "width, background-color, transform",
+        } as CSSProperties
+      }
       className={cn(
-        "marketing-nav-enter sticky z-50 mx-auto rounded-2xl backdrop-blur-lg transition-[width,background-color,transform] duration-300",
+        "marketing-nav-enter sticky z-50 mx-auto rounded-2xl backdrop-blur-lg transition-(--nav-props) duration-300",
         isScrolled
           ? "top-1.5 mt-1.5 w-[min(42rem,calc(100%-0.75rem))] translate-y-1 bg-card/95 sm:top-2 sm:mt-2 sm:w-[min(42rem,calc(100%-2rem))] dark:bg-card/80"
           : "top-1.5 mt-1.5 w-[min(80rem,calc(100%-0.75rem))] bg-background/95 sm:top-3 sm:mt-3 sm:w-[min(80rem,calc(100%-2rem))]",

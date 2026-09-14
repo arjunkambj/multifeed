@@ -6,7 +6,7 @@ import { Switch } from "@multifeed/ui/components/switch";
 import { cn } from "@multifeed/ui/lib/utils";
 import { Check } from "@honeyicons/react";
 import Link from "next/link";
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 
 import { pricingPlans } from "@/constants/landing-page";
 
@@ -63,7 +63,10 @@ export function Pricing() {
               )}
             >
               Yearly
-              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.6875rem] leading-4 font-semibold text-primary">
+              <span
+                className="rounded-full bg-primary/10 px-1.5 py-0.5 text-(length:--chip-fs) leading-4 font-semibold text-primary"
+                style={{ "--chip-fs": "0.6875rem" } as CSSProperties}
+              >
                 Save 20%
               </span>
             </button>
@@ -99,10 +102,10 @@ export function Pricing() {
                 role="img"
                 title={platform.label}
                 aria-label={platform.label}
-                className="flex items-center justify-center transition-transform duration-200 hover:scale-[1.12]"
-                style={{ color: platform.color }}
+                className="flex items-center justify-center text-(--platform-ink) transition-transform duration-200 hover:scale-[1.12]"
+                style={{ "--platform-ink": platform.color } as CSSProperties}
               >
-                <platform.icon className="block size-[22px] shrink-0 md:size-6" />
+                <platform.icon className="block size-5.5 shrink-0 md:size-6" />
               </span>
             </li>
           ))}
@@ -123,23 +126,41 @@ function PriceCard({
     <div className="flex h-full flex-col rounded-card border border-transparent bg-card px-6 py-7 md:px-7 md:py-8">
       <header>
         <div className="flex items-center justify-between gap-3">
-          <h3 className="font-heading text-[1.0625rem] leading-6 font-medium tracking-[-0.02em] text-foreground">
+          <h3
+            className="font-heading text-(length:--plan-fs) leading-6 font-medium tracking-(--plan-ls) text-foreground"
+            style={
+              {
+                "--plan-fs": "1.0625rem",
+                "--plan-ls": "-0.02em",
+              } as CSSProperties
+            }
+          >
             {plan.name}
           </h3>
           <span
             className={cn(
-              "shrink-0 rounded-full px-2.5 py-1 text-[0.6875rem] leading-4 font-medium",
+              "shrink-0 rounded-full px-2.5 py-1 text-(length:--badge-fs) leading-4 font-medium",
               plan.preferred
                 ? "bg-primary text-primary-foreground"
                 : "bg-background text-muted-foreground",
             )}
+            style={{ "--badge-fs": "0.6875rem" } as CSSProperties}
           >
             {plan.badge}
           </span>
         </div>
 
         <div className="mt-3 flex items-baseline gap-1.5">
-          <span className="font-heading text-[2.5rem] leading-none font-medium tracking-[-0.045em] text-foreground md:text-[2.75rem]">
+          <span
+            className="font-heading text-(length:--price-fs) leading-none font-medium tracking-(--price-ls) text-foreground md:text-(length:--price-fs-md)"
+            style={
+              {
+                "--price-fs": "2.5rem",
+                "--price-fs-md": "2.75rem",
+                "--price-ls": "-0.045em",
+              } as CSSProperties
+            }
+          >
             {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
           </span>
           <span className="text-sm leading-5 text-muted-foreground">
@@ -159,7 +180,8 @@ function PriceCard({
           {plan.features.map((feature) => (
             <li
               key={feature}
-              className="flex items-start gap-2.5 text-[0.9375rem] leading-6"
+              className="flex items-start gap-2.5 text-(length:--feature-fs) leading-6"
+              style={{ "--feature-fs": "0.9375rem" } as CSSProperties}
             >
               <Check size={16} className="mt-[5px] shrink-0 text-primary" />
               <span className="text-foreground">{feature}</span>

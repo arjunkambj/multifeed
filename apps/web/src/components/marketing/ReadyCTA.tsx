@@ -1,6 +1,7 @@
 import { ChevronRight } from "@honeyicons/react";
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import Reveal from "@/components/motion/Reveal";
 import {
   Avatar,
@@ -16,6 +17,7 @@ import {
   PANEL_MEDIA,
   PANEL_PADDING,
   platforms,
+  SECTION_HEADING,
   SOFT_CHIP,
 } from "./rhythm";
 import Section from "./Section";
@@ -46,7 +48,7 @@ export function ReadyCTA() {
       <Reveal>
         <div className="grid items-center overflow-hidden rounded-panel bg-card md:grid-cols-2">
           <div className={cn("flex flex-col", PANEL_PADDING)}>
-            <h2 className="font-heading text-[1.875rem] leading-[1.08] font-medium tracking-[-0.032em] text-balance sm:text-[2.25rem] md:text-[2.5rem] md:leading-[1.06] lg:text-[2.75rem]">
+            <h2 className={SECTION_HEADING}>
               Plan the week.
               <span className="block font-normal text-muted-foreground">
                 Then stop thinking about it.
@@ -102,19 +104,19 @@ export function ReadyCTA() {
                       className="relative shrink-0"
                       title={`Posting to ${account.label}`}
                     >
-                      <Avatar className="size-7 sm:size-8">
+                      <Avatar className="size-7 sm:size-8" size="sm">
                         <AvatarImage alt="" src={poster.src} />
-                        <AvatarFallback className="text-[0.625rem] font-medium">
-                          {poster.initials}
-                        </AvatarFallback>
+                        <AvatarFallback>{poster.initials}</AvatarFallback>
                       </Avatar>
                       <span
                         aria-hidden
-                        className="absolute -right-1 -bottom-1 grid size-[15px] place-items-center rounded-full bg-background ring-2 ring-background sm:size-4"
+                        className="absolute -right-1 -bottom-1 grid size-3.75 place-items-center rounded-full bg-background ring-2 ring-background sm:size-4"
                       >
                         <account.icon
-                          className="size-2 sm:size-[9px]"
-                          style={{ color: account.color }}
+                          className="size-2 text-(--account-ink) sm:size-2.25"
+                          style={
+                            { "--account-ink": account.color } as CSSProperties
+                          }
                         />
                       </span>
                     </li>

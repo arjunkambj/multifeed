@@ -1,16 +1,6 @@
-"use client";
-
 import { ChevronRight } from "@honeyicons/react";
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from "motion/react";
-import dynamic from "next/dynamic";
-import Image from "next/image";
 import Link from "next/link";
-import { Component, type ReactNode, useRef } from "react";
+import type { CSSProperties } from "react";
 
 import {
   Avatar,
@@ -21,58 +11,11 @@ import {
 import { buttonVariants } from "@multifeed/ui/components/button";
 import { socialProofPeople } from "@/constants/landing-page";
 
-import { MOCK_FRAME, platforms } from "./rhythm";
+import { HeroMock } from "./HeroMock";
+import { platforms } from "./rhythm";
 import Section from "./Section";
 
-function DashboardMockPlaceholder() {
-  return (
-    <div
-      className={`${MOCK_FRAME} w-full`}
-      style={{ aspectRatio: "1280 / 800" }}
-    />
-  );
-}
-
-const DashboardMock = dynamic(
-  () =>
-    import("./DashboardMock").then((mod) => ({ default: mod.DashboardMock })),
-  { ssr: false, loading: () => <DashboardMockPlaceholder /> },
-);
-
-class DashboardMockBoundary extends Component<
-  { children: ReactNode },
-  { failed: boolean }
-> {
-  state = { failed: false };
-
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-
-  render() {
-    if (this.state.failed) return <DashboardMockPlaceholder />;
-    return this.props.children;
-  }
-}
-
 export function Hero() {
-  const mockRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: mockRef,
-    offset: ["start start", "end start"],
-  });
-  const mockY = useTransform(
-    scrollYProgress,
-    [0, 1],
-    reduceMotion ? [0, 0] : [0, 48],
-  );
-  const mockScale = useTransform(
-    scrollYProgress,
-    [0, 1],
-    reduceMotion ? [1, 1] : [1, 0.97],
-  );
-
   return (
     <Section
       id="hero"
@@ -82,7 +25,7 @@ export function Hero() {
       <div className="relative mx-auto w-full min-w-0 max-w-5xl text-center">
         <div
           className="marketing-hero-rise flex flex-wrap items-center justify-center gap-3.5 md:gap-4"
-          style={{ animationDelay: "80ms" }}
+          style={{ "--hero-rise-delay": "80ms" } as CSSProperties}
         >
           {platforms.map((p) => (
             <span
@@ -91,14 +34,27 @@ export function Hero() {
               title={p.label}
               className="inline-flex items-center justify-center opacity-90 transition-all duration-200 hover:scale-110 hover:opacity-100"
             >
-              <p.icon className="size-7 md:size-8" style={{ color: p.color }} />
+              <p.icon
+                className="size-7 text-(--platform-ink) md:size-8"
+                style={{ "--platform-ink": p.color } as CSSProperties}
+              />
             </span>
           ))}
         </div>
 
         <h1
-          className="marketing-hero-rise font-heading mx-auto mt-6 w-full min-w-0 max-w-4xl text-[2.375rem] leading-[1.04] font-semibold tracking-[-0.035em] text-pretty text-foreground sm:text-[3rem] sm:text-balance md:mt-7 md:max-w-none md:text-[3.5rem] md:leading-[1.02] lg:text-6xl xl:text-[4.375rem]"
-          style={{ animationDelay: "180ms" }}
+          className="marketing-hero-rise font-heading mx-auto mt-6 w-full min-w-0 max-w-4xl text-(length:--h1-fs) leading-(--h1-lh) font-semibold tracking-(--h1-ls) text-pretty text-foreground sm:text-5xl sm:text-balance md:mt-7 md:max-w-none md:text-(length:--h1-fs-md) md:leading-(--h1-lh-md) lg:text-6xl xl:text-(length:--h1-fs-xl)"
+          style={
+            {
+              "--hero-rise-delay": "180ms",
+              "--h1-fs": "2.375rem",
+              "--h1-lh": "1.04",
+              "--h1-ls": "-0.035em",
+              "--h1-fs-md": "3.5rem",
+              "--h1-lh-md": "1.02",
+              "--h1-fs-xl": "4.375rem",
+            } as CSSProperties
+          }
         >
           Post to all your social
           <span className="block sm:whitespace-nowrap">
@@ -109,8 +65,13 @@ export function Hero() {
         </h1>
 
         <p
-          className="marketing-hero-rise mx-auto mt-3 max-w-xl text-[1.0625rem] leading-8 text-pretty text-muted-foreground md:mt-4 md:text-[1.125rem]"
-          style={{ animationDelay: "280ms" }}
+          className="marketing-hero-rise mx-auto mt-3 max-w-xl text-(length:--lede-fs) leading-8 text-pretty text-muted-foreground md:mt-4 md:text-lg"
+          style={
+            {
+              "--hero-rise-delay": "280ms",
+              "--lede-fs": "1.0625rem",
+            } as CSSProperties
+          }
         >
           Write the post once. Change the caption if a platform needs it. Drop
           it on the calendar.
@@ -118,7 +79,7 @@ export function Hero() {
 
         <div
           className="marketing-hero-rise mt-7 flex flex-col items-center gap-4 md:mt-8 md:gap-5"
-          style={{ animationDelay: "380ms" }}
+          style={{ "--hero-rise-delay": "380ms" } as CSSProperties}
         >
           <Link
             href="/sign-in"
@@ -129,13 +90,11 @@ export function Hero() {
           </Link>
 
           <div className="flex items-center justify-center">
-            <AvatarGroup className="-space-x-2.5">
+            <AvatarGroup>
               {socialProofPeople.map((person) => (
                 <Avatar className="size-7" key={person.initials} size="sm">
                   <AvatarImage alt="" src={person.src} />
-                  <AvatarFallback className="text-[0.625rem] font-medium">
-                    {person.initials}
-                  </AvatarFallback>
+                  <AvatarFallback>{person.initials}</AvatarFallback>
                 </Avatar>
               ))}
             </AvatarGroup>
@@ -148,34 +107,10 @@ export function Hero() {
       </div>
 
       <div
-        ref={mockRef}
         id="hero-mock"
         className="marketing-hero-mock relative mx-auto mt-9 w-full md:mt-10 lg:mt-12 xl:mt-14"
       >
-        <motion.div
-          className="origin-top transform-gpu will-change-transform"
-          style={{ scale: mockScale, y: mockY }}
-        >
-          <div
-            aria-label="MultiFeed calendar"
-            className="relative w-full overflow-hidden rounded-panel"
-            role="img"
-          >
-            <Image
-              src="/hero-main.webp"
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 1280px) 100vw, 1200px"
-              className="object-cover object-center"
-            />
-            <div className="relative p-[6%]">
-              <DashboardMockBoundary>
-                <DashboardMock />
-              </DashboardMockBoundary>
-            </div>
-          </div>
-        </motion.div>
+        <HeroMock />
       </div>
     </Section>
   );

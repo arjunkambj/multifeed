@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Reveal from "@/components/motion/Reveal";
 import {
   Avatar,
@@ -59,10 +60,19 @@ const testimonials = [
 ] as const;
 
 function Mark({ children }: { children: React.ReactNode }) {
+  // em-scaled so the highlight hugs text at any size; `box-decoration-clone`
+  // already emits both box-decoration-break declarations.
   return (
     <mark
-      className="rounded-[0.28em] bg-primary/14 px-[0.24em] py-[0.05em] leading-[1.45] font-medium text-foreground decoration-clone dark:bg-primary/22"
-      style={{ boxDecorationBreak: "clone", WebkitBoxDecorationBreak: "clone" }}
+      className="rounded-(--mark-radius) bg-primary/14 px-(--mark-px) py-(--mark-py) leading-(--mark-leading) font-medium text-foreground box-decoration-clone dark:bg-primary/22"
+      style={
+        {
+          "--mark-radius": "0.28em",
+          "--mark-px": "0.24em",
+          "--mark-py": "0.05em",
+          "--mark-leading": "1.45",
+        } as CSSProperties
+      }
     >
       {children}
     </mark>
@@ -89,7 +99,13 @@ function Card({ t }: { t: (typeof testimonials)[number] }) {
       <div className="flex flex-1 flex-col px-5 py-4">
         <span
           aria-hidden
-          className="select-none font-heading text-[32px] font-bold leading-none tracking-[-0.04em] text-primary"
+          className="select-none font-heading text-(length:--quote-fs) font-bold leading-none tracking-(--quote-ls) text-primary"
+          style={
+            {
+              "--quote-fs": "32px",
+              "--quote-ls": "-0.04em",
+            } as CSSProperties
+          }
         >
           &ldquo;
         </span>
@@ -103,9 +119,7 @@ function Card({ t }: { t: (typeof testimonials)[number] }) {
           <div className="flex items-center gap-3 pt-3">
             <Avatar className="size-10" size="lg">
               <AvatarImage alt="" src={t.person.src} />
-              <AvatarFallback className="bg-card text-xs font-semibold text-foreground">
-                {t.person.initials}
-              </AvatarFallback>
+              <AvatarFallback>{t.person.initials}</AvatarFallback>
             </Avatar>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm leading-5 font-semibold text-foreground">

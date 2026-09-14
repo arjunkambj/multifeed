@@ -1,8 +1,10 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 import Reveal from "@/components/motion/Reveal";
 import {
   Avatar,
   AvatarFallback,
+  AvatarGroup,
   AvatarImage,
 } from "@multifeed/ui/components/avatar";
 import { landingPeople } from "@/constants/landing-page";
@@ -43,8 +45,12 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
             >
               <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background">
                 <account.platform.icon
-                  className="size-4"
-                  style={{ color: account.platform.color }}
+                  className="size-4 text-(--platform-ink)"
+                  style={
+                    {
+                      "--platform-ink": account.platform.color,
+                    } as CSSProperties
+                  }
                 />
               </span>
               <div className="min-w-0 flex-1">
@@ -79,7 +85,7 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
           {["LinkedIn · longer", "X · shorter", "TikTok · comment"].map(
             (override) => (
               <span
-                className="inline-flex items-center rounded-full border border-border/60 px-2.5 py-1 text-[0.75rem] leading-4 font-medium text-muted-foreground"
+                className="inline-flex items-center rounded-full border border-border/60 px-2.5 py-1 text-xs leading-4 font-medium text-muted-foreground"
                 key={override}
               >
                 {override}
@@ -122,19 +128,18 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
                 {post.caption}
               </p>
             </div>
-            <div className="flex -space-x-2">
+            <AvatarGroup>
               {post.people.map((person) => (
                 <Avatar
-                  className="size-7 border-2 border-background sm:size-8"
+                  className="size-7 sm:size-8"
                   key={person.initials}
+                  size="sm"
                 >
                   <AvatarImage alt="" src={person.src} />
-                  <AvatarFallback className="text-[0.625rem] font-medium">
-                    {person.initials}
-                  </AvatarFallback>
+                  <AvatarFallback>{person.initials}</AvatarFallback>
                 </Avatar>
               ))}
-            </div>
+            </AvatarGroup>
           </li>
         ))}
       </ul>
@@ -157,11 +162,12 @@ function PlatformMarqueeSet({ hidden = false }: { hidden?: boolean }) {
           <li
             key={`${copy}-${platform.label}`}
             aria-hidden={hidden || copy > 0 || undefined}
-            className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-card px-4.5 py-2 text-[0.9375rem] font-medium text-foreground md:px-5 dark:text-zinc-100"
+            className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-card px-4.5 py-2 text-(length:--marquee-fs) font-medium text-foreground md:px-5 dark:text-(--platform-x-ink)"
+            style={{ "--marquee-fs": "0.9375rem" } as CSSProperties}
           >
             <platform.icon
-              className="size-4 shrink-0"
-              style={{ color: platform.color }}
+              className="size-4 shrink-0 text-(--platform-ink)"
+              style={{ "--platform-ink": platform.color } as CSSProperties}
             />
             <span className="whitespace-nowrap">{platform.label}</span>
           </li>
@@ -214,7 +220,7 @@ export function WhyMultiFeed() {
         y={0}
         className="relative mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]"
       >
-        <div className="marketing-marquee-track flex w-max hover:[animation-play-state:paused]">
+        <div className="marketing-marquee-track flex w-max">
           <PlatformMarqueeSet />
           <PlatformMarqueeSet hidden />
         </div>
@@ -231,7 +237,7 @@ export function WhyMultiFeed() {
           <Reveal key={step.title} delay={index * 0.12} className="flex">
             <article className="flex h-full w-full flex-col overflow-hidden rounded-panel bg-card">
               {step.mediaFirst ? (
-                <div className="relative min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
+                <div className="relative min-h-65 overflow-hidden bg-muted sm:min-h-75">
                   <Image
                     src="/hero-main.webp"
                     alt=""
@@ -256,7 +262,7 @@ export function WhyMultiFeed() {
               </div>
 
               {step.mediaFirst ? null : (
-                <div className="relative mt-auto min-h-[260px] overflow-hidden bg-muted sm:min-h-[300px]">
+                <div className="relative mt-auto min-h-65 overflow-hidden bg-muted sm:min-h-75">
                   <Image
                     src="/hero-main.webp"
                     alt=""

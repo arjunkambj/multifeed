@@ -2,15 +2,10 @@
 
 import { ChevronRight } from "@honeyicons/react";
 import { easeOut } from "motion";
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { type CSSProperties, useRef } from "react";
 import { buttonVariants } from "@multifeed/ui/components/button";
 import { featureItems } from "@/constants/landing-page";
 import { cn } from "@multifeed/ui/lib/utils";
@@ -53,8 +48,10 @@ function OverridesMock() {
           >
             <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background">
               <override.platform.icon
-                className="size-3.5"
-                style={{ color: override.platform.color }}
+                className="size-3.5 text-(--platform-ink)"
+                style={
+                  { "--platform-ink": override.platform.color } as CSSProperties
+                }
               />
             </span>
             <div className="min-w-0">
@@ -106,8 +103,12 @@ function CalendarMock() {
                   >
                     <p className="flex items-center gap-1.5 text-xs leading-4 whitespace-nowrap text-muted-foreground">
                       <post.platform.icon
-                        className="size-3 shrink-0"
-                        style={{ color: post.platform.color }}
+                        className="size-3 shrink-0 text-(--platform-ink)"
+                        style={
+                          {
+                            "--platform-ink": post.platform.color,
+                          } as CSSProperties
+                        }
                       />
                       {post.time}
                     </p>
@@ -117,7 +118,7 @@ function CalendarMock() {
                   </div>
                 ))
               ) : (
-                <div className="flex min-h-[3.25rem] items-center justify-center rounded-xl border border-dashed border-border/60 px-2.5 py-2">
+                <div className="flex min-h-13 items-center justify-center rounded-xl border border-dashed border-border/60 px-2.5 py-2">
                   <p className="text-xs leading-4 text-muted-foreground">
                     Drop
                   </p>
@@ -151,8 +152,10 @@ function FormatsMock() {
           >
             <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background">
               <format.platform.icon
-                className="size-4"
-                style={{ color: format.platform.color }}
+                className="size-4 text-(--platform-ink)"
+                style={
+                  { "--platform-ink": format.platform.color } as CSSProperties
+                }
               />
             </span>
             <p className="min-w-0 flex-1 truncate text-sm leading-5 font-medium">
@@ -188,38 +191,33 @@ function StickyFeatureCard({
   total: number;
 }) {
   const ref = useRef<HTMLElement>(null);
-  const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
 
-  const scale = useTransform(
-    scrollYProgress,
-    [0, 1],
-    reduceMotion ? [1, 1] : [1, 0.96],
-    { ease: easeOut },
-  );
-  const overlay = useTransform(
-    scrollYProgress,
-    [0, 1],
-    reduceMotion ? [0, 0] : [0, 0.18],
-    { ease: easeOut },
-  );
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.96], {
+    ease: easeOut,
+  });
+  const overlay = useTransform(scrollYProgress, [0, 1], [0, 0.18], {
+    ease: easeOut,
+  });
 
   return (
     <article
       ref={ref}
-      className="sticky"
-      style={{
-        top: `calc(5.75rem + ${index * 1}rem)`,
-        zIndex: index + 1,
-      }}
+      className="sticky top-(--stick-top) z-(--stick-z)"
+      style={
+        {
+          "--stick-top": `calc(5.75rem + ${index * 1}rem)`,
+          "--stick-z": index + 1,
+        } as CSSProperties
+      }
     >
       <motion.div
-        style={{ scale, transformOrigin: "top center" }}
+        style={{ scale }}
         className={cn(
-          "relative grid transform-gpu items-center overflow-hidden rounded-panel bg-card will-change-transform md:grid-cols-2",
+          "relative grid origin-top transform-gpu items-center overflow-hidden rounded-panel bg-card will-change-transform md:grid-cols-2",
           index < total - 1 && "mb-6 md:mb-8 lg:mb-10",
         )}
       >
@@ -231,7 +229,18 @@ function StickyFeatureCard({
           )}
         >
           <p className={`text-muted-foreground ${OVERLINE}`}>{item.eyebrow}</p>
-          <h3 className="font-heading mt-3 text-[1.75rem] leading-[1.12] font-medium tracking-[-0.03em] text-balance md:text-[2rem] md:leading-[1.1]">
+          <h3
+            className="font-heading mt-3 text-(length:--feat-fs) leading-(--feat-lh) font-medium tracking-(--feat-ls) text-balance md:text-(length:--feat-fs-md) md:leading-(--feat-lh-md)"
+            style={
+              {
+                "--feat-fs": "1.75rem",
+                "--feat-lh": "1.12",
+                "--feat-ls": "-0.03em",
+                "--feat-fs-md": "2rem",
+                "--feat-lh-md": "1.1",
+              } as CSSProperties
+            }
+          >
             {item.heading}
           </h3>
           <p className={`mt-4 max-w-[54ch] text-muted-foreground ${BODY}`}>
