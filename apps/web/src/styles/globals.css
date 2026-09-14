@@ -3,6 +3,34 @@
 
 @source "../../../../packages/ui/src";
 
+@theme {
+  --color-preview-ink: #0f1419;
+  --color-preview-muted: #65676b;
+  --color-preview-line: #e5e5e5;
+  --color-preview-fill: #e9ebee;
+  --color-ig-gold: #feda75;
+  --color-ig-pink: #d62976;
+  --color-ig-violet: #4f5bd5;
+  --color-ig-link: #00376b;
+  --color-ig-blue: #0095f6;
+  --color-preview-facebook: #1877f2;
+  --color-preview-tiktok: #fe2c55;
+  --color-preview-youtube: #ff0033;
+  --font-preview: Arial, Helvetica, sans-serif;
+}
+
+@utility icon-halo {
+  filter: drop-shadow(0 0 1px rgb(255 255 255 / 0.9));
+
+  @variant dark {
+    filter: drop-shadow(0 0 1px rgb(0 0 0 / 0.8));
+  }
+}
+
+@utility transition-collapse {
+  transition-property: grid-template-rows, opacity;
+}
+
 @keyframes marquee {
   from {
     transform: translate3d(0, 0, 0);
@@ -12,13 +40,15 @@
   }
 }
 
-.marketing-marquee-track {
+@utility marketing-marquee-track {
   animation: marquee 60s linear infinite;
   will-change: transform;
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .marketing-marquee-track {
+  &:hover {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
     animation: none;
     will-change: auto;
   }
@@ -35,12 +65,21 @@
   }
 }
 
-.marketing-hero-rise {
-  animation: marketing-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+@utility marketing-hero-rise {
+  animation: marketing-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1)
+    var(--hero-rise-delay, 0ms) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
-.marketing-hero-mock {
+@utility marketing-hero-mock {
   animation: marketing-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
 @keyframes marketing-drop {
@@ -54,14 +93,10 @@
   }
 }
 
-.marketing-nav-enter {
+@utility marketing-nav-enter {
   animation: marketing-drop 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .marketing-hero-rise,
-  .marketing-hero-mock,
-  .marketing-nav-enter {
+  @media (prefers-reduced-motion: reduce) {
     animation: none;
   }
 }
