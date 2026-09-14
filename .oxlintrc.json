@@ -47,6 +47,18 @@
           "min-block-size",
           "max-block-size"
         ],
+        "contracts": [
+          {
+            "pattern": "^Skeleton$",
+            "allow": ["layout", "shape"],
+            "deny": []
+          },
+          {
+            "pattern": "^Spinner$",
+            "allow": ["layout"],
+            "deny": []
+          }
+        ],
         "message": {
           "spacing": "Padding and gap are not allowed on {{component}}. Use a size ({{sizes|none defined}}) or margin here / gap on the parent.",
           "color": "Do not change colors on {{component}}. Use a variant: {{variants|none defined}}.",
