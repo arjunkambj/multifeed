@@ -2,7 +2,12 @@
 
 import { ChevronRight } from "@honeyicons/react";
 import { easeOut } from "motion";
-import { motion, useScroll, useTransform } from "motion/react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { type CSSProperties, useRef } from "react";
@@ -191,17 +196,24 @@ function StickyFeatureCard({
   total: number;
 }) {
   const ref = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
 
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.96], {
-    ease: easeOut,
-  });
-  const overlay = useTransform(scrollYProgress, [0, 1], [0, 0.18], {
-    ease: easeOut,
-  });
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 1],
+    reduceMotion ? [1, 1] : [1, 0.96],
+    { ease: easeOut },
+  );
+  const overlay = useTransform(
+    scrollYProgress,
+    [0, 1],
+    reduceMotion ? [0, 0] : [0, 0.18],
+    { ease: easeOut },
+  );
 
   return (
     <article

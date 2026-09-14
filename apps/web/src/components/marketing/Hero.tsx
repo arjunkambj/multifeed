@@ -92,7 +92,7 @@ export function Hero() {
           <div className="flex items-center justify-center">
             <AvatarGroup>
               {socialProofPeople.map((person) => (
-                <Avatar className="size-7" key={person.initials} size="sm">
+                <Avatar className="size-7" key={person.initials}>
                   <AvatarImage alt="" src={person.src} />
                   <AvatarFallback>{person.initials}</AvatarFallback>
                 </Avatar>

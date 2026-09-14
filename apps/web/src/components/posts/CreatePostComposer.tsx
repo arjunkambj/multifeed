@@ -754,16 +754,15 @@ function PostComposerForm({
                       Manage connections
                     </Button>
                     {onChooseDifferentFormat ? (
-                      <Button
-                        variant="secondary"
-                        onClick={chooseDifferentFormat}
-                        disabled={uploadingMedia || saving !== null}
-                        render={
-                          <button className="bg-background" type="button" />
-                        }
-                      >
-                        Change format
-                      </Button>
+                      <div className="[&>button]:bg-background">
+                        <Button
+                          variant="secondary"
+                          onClick={chooseDifferentFormat}
+                          disabled={uploadingMedia || saving !== null}
+                        >
+                          Change format
+                        </Button>
+                      </div>
                     ) : null}
                   </div>
                 </div>
@@ -1465,7 +1464,7 @@ function PostComposerForm({
                   />
                 </div>
               ) : (
-                <Empty className="min-h-72">
+                <Empty className="min-h-72" size="sm">
                   <EmptyHeader>
                     <EmptyMedia aria-hidden>
                       <div className="relative mb-3 flex h-28 w-24 -rotate-6 flex-col gap-2 rounded-xl border border-border bg-background p-3 shadow-sm">

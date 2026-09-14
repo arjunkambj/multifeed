@@ -130,11 +130,7 @@ function StepMock({ step }: { step: (typeof steps)[number] }) {
             </div>
             <AvatarGroup>
               {post.people.map((person) => (
-                <Avatar
-                  className="size-7 sm:size-8"
-                  key={person.initials}
-                  size="sm"
-                >
+                <Avatar className="size-7 sm:size-8" key={person.initials}>
                   <AvatarImage alt="" src={person.src} />
                   <AvatarFallback>{person.initials}</AvatarFallback>
                 </Avatar>

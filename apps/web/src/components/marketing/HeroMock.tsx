@@ -1,6 +1,11 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "motion/react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "motion/react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Component, type CSSProperties, type ReactNode, useRef } from "react";
@@ -35,12 +40,21 @@ class DashboardMockBoundary extends Component<
 
 export function HeroMock() {
   const mockRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: mockRef,
     offset: ["start start", "end start"],
   });
-  const mockY = useTransform(scrollYProgress, [0, 1], ["0px", "48px"]);
-  const mockScale = useTransform(scrollYProgress, [0, 1], [1, 0.97]);
+  const mockY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    reduceMotion ? ["0px", "0px"] : ["0px", "48px"],
+  );
+  const mockScale = useTransform(
+    scrollYProgress,
+    [0, 1],
+    reduceMotion ? [1, 1] : [1, 0.97],
+  );
 
   return (
     <div ref={mockRef}>

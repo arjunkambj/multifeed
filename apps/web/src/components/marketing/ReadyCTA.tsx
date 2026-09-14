@@ -104,7 +104,7 @@ export function ReadyCTA() {
                       className="relative shrink-0"
                       title={`Posting to ${account.label}`}
                     >
-                      <Avatar className="size-7 sm:size-8" size="sm">
+                      <Avatar className="size-7 sm:size-8">
                         <AvatarImage alt="" src={poster.src} />
                         <AvatarFallback>{poster.initials}</AvatarFallback>
                       </Avatar>

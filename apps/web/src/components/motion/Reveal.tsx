@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 
 const EASE = "easeOut" as const;
@@ -18,11 +18,13 @@ export default function Reveal({
   delay = 0,
   y = 12,
 }: RevealProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y }}
+      whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15, margin: "0px 0px -32px 0px" }}
       transition={{ duration: 0.45, delay, ease: EASE }}
     >

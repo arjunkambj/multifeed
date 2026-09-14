@@ -44,7 +44,7 @@ export function TeamMembersTable({ rows }: { rows: TeamTableRow[] }) {
         <TeamMembersTableHead />
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
+            <TableRow data-static>
               <TableCell colSpan={4}>
                 <div className="py-8 text-center text-muted-foreground">
                   No team members yet.

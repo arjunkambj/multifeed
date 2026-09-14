@@ -9,7 +9,7 @@ import {
   SidebarLeft,
   UnfoldMore,
 } from "@honeyicons/react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { type CSSProperties, useLayoutEffect, useRef, useState } from "react";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import Logo from "@/components/layout/Logo";
@@ -78,6 +78,8 @@ const MOCK_DAYS = [
 ];
 
 function MockMonthGrid() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
       <div className="grid shrink-0 grid-cols-7 rounded-t-2xl border-4 border-b-0 border-card bg-card">
@@ -123,16 +125,18 @@ function MockMonthGrid() {
                 ) : null}
                 {cell.today ? (
                   <span className="relative inline-flex size-6 items-center justify-center">
-                    <motion.span
-                      aria-hidden
-                      animate={{ opacity: [0.4, 0], scale: [1, 1.9] }}
-                      className="absolute inset-0 rounded-full bg-primary"
-                      transition={{
-                        duration: 2.4,
-                        ease: "easeOut",
-                        repeat: Infinity,
-                      }}
-                    />
+                    {reduceMotion ? null : (
+                      <motion.span
+                        aria-hidden
+                        animate={{ opacity: [0.4, 0], scale: [1, 1.9] }}
+                        className="absolute inset-0 rounded-full bg-primary"
+                        transition={{
+                          duration: 2.4,
+                          ease: "easeOut",
+                          repeat: Infinity,
+                        }}
+                      />
+                    )}
                     <span className="relative inline-flex size-full items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                       {cell.day}
                     </span>
@@ -221,6 +225,7 @@ function MockNavList({
 }
 
 const STAGE_WIDTH = 1280;
+const STAGE_HEIGHT = 800;
 
 /**
  * Desktop calendar chrome for the marketing page. Drawn at 1280×800 and
@@ -255,8 +260,14 @@ export function DashboardMock() {
       <div className="relative aspect-8/5 w-full">
         {scale != null ? (
           <div
-            className="absolute top-0 left-0 flex h-200 w-320 origin-top-left scale-(--stage-scale) bg-background"
-            style={{ "--stage-scale": scale } as CSSProperties}
+            className="absolute top-0 left-0 flex h-(--stage-h) w-(--stage-w) origin-top-left scale-(--stage-scale) bg-background"
+            style={
+              {
+                "--stage-h": `${STAGE_HEIGHT}px`,
+                "--stage-w": `${STAGE_WIDTH}px`,
+                "--stage-scale": scale,
+              } as CSSProperties
+            }
           >
             <aside className="flex w-57 shrink-0 flex-col border-r bg-sidebar">
               <div className="flex flex-col gap-2 px-2 pt-2 pb-1">

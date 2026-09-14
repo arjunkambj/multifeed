@@ -3,11 +3,7 @@ import { Add, ChevronDown, ChevronUp, Minus } from "@honeyicons/react";
 
 import { cn } from "@multifeed/ui/lib/utils";
 
-/**
- * `default` — one boxed list with dividers between items.
- * `card` — a stack of free-standing cards (marketing FAQ), so the root loses
- * its frame and every item carries its own surface, padding and type.
- */
+/** Pass the same variant to Accordion, Item, Trigger, and Content. */
 type AccordionVariant = "default" | "card";
 
 function Accordion({
@@ -39,8 +35,7 @@ function AccordionItem({
     <AccordionPrimitive.Item
       data-slot="accordion-item"
       className={cn(
-        "data-open:bg-muted/50",
-        variant === "default" && "not-last:border-b",
+        variant === "default" && "not-last:border-b data-open:bg-muted/50",
         variant === "card" &&
           "rounded-card border-0 bg-card shadow-none ring-0 outline-none transition-colors not-last:border-0",
         className,

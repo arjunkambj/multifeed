@@ -111,24 +111,20 @@ export function AppSidebar() {
         >
           <Logo markOnly markClassName="size-7" />
         </Link>
-        <Button
-          variant="secondary"
-          aria-haspopup="dialog"
-          aria-expanded={searchOpen}
-          render={
-            <button
-              className="w-full min-w-0 justify-start rounded-full group-data-[collapsible=icon]:hidden"
-              type="button"
-            />
-          }
-          onClick={() => setSearchOpen(true)}
-        >
-          <Search data-icon="inline-start" />
-          Search
-          <span className="ml-auto">
-            <MetaKbd shortcut={SEARCH_SHORTCUT} />
-          </span>
-        </Button>
+        <div className="w-full min-w-0 group-data-[collapsible=icon]:hidden [&>button]:w-full [&>button]:min-w-0 [&>button]:justify-start [&>button]:rounded-full">
+          <Button
+            variant="secondary"
+            aria-haspopup="dialog"
+            aria-expanded={searchOpen}
+            onClick={() => setSearchOpen(true)}
+          >
+            <Search data-icon="inline-start" />
+            Search
+            <span className="ml-auto">
+              <MetaKbd shortcut={SEARCH_SHORTCUT} />
+            </span>
+          </Button>
+        </div>
         <Tooltip>
           <TooltipTrigger
             render={

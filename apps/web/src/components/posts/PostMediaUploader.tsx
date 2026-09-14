@@ -340,75 +340,75 @@ export function PostMediaUploader({
       />
 
       {media.length + pendingMedia.length < maxFiles && (
-        <Button
-          variant="ghost"
-          disabled={uploading || deletingMediaId !== null}
-          onClick={() => inputRef.current?.click()}
-          aria-label={
-            media.length === 0 && pendingMedia.length === 0
-              ? "Add media"
-              : "Add another media file"
-          }
-          onDragOver={(event) => {
-            event.preventDefault();
-            if (!uploading && deletingMediaId === null) setIsDragging(true);
-          }}
-          onDragLeave={(event) => {
-            if (
-              !event.currentTarget.contains(event.relatedTarget as Node | null)
-            ) {
-              setIsDragging(false);
-            }
-          }}
-          onDrop={(event) => {
-            event.preventDefault();
-            setIsDragging(false);
-            void uploadFiles(Array.from(event.dataTransfer.files));
-          }}
-          render={
-            <button
-              className={cn(
-                "h-auto min-h-28 w-full gap-4 whitespace-normal border border-dashed px-4 py-4",
-                isDragging
-                  ? "border-primary bg-primary/5"
-                  : "border-border bg-muted/20",
-              )}
-              type="button"
-            />
-          }
+        <div
+          className={cn(
+            "[&>button]:h-auto [&>button]:min-h-28 [&>button]:w-full [&>button]:gap-4 [&>button]:whitespace-normal [&>button]:border [&>button]:border-dashed [&>button]:px-4 [&>button]:py-4",
+            isDragging
+              ? "[&>button]:border-primary [&>button]:bg-primary/5"
+              : "[&>button]:border-border [&>button]:bg-muted/20",
+          )}
         >
-          <span
-            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background"
-            aria-hidden
+          <Button
+            variant="ghost"
+            disabled={uploading || deletingMediaId !== null}
+            onClick={() => inputRef.current?.click()}
+            aria-label={
+              media.length === 0 && pendingMedia.length === 0
+                ? "Add media"
+                : "Add another media file"
+            }
+            onDragOver={(event) => {
+              event.preventDefault();
+              if (!uploading && deletingMediaId === null) setIsDragging(true);
+            }}
+            onDragLeave={(event) => {
+              if (
+                !event.currentTarget.contains(
+                  event.relatedTarget as Node | null,
+                )
+              ) {
+                setIsDragging(false);
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              setIsDragging(false);
+              void uploadFiles(Array.from(event.dataTransfer.files));
+            }}
           >
-            {kind === "video" ? <VideoCamera /> : <ImageAdd />}
-          </span>
-          <span className="flex flex-col items-start gap-1.5 text-left">
-            <span>
-              {isDragging
-                ? "Drop to upload"
-                : media.length === 0 && pendingMedia.length === 0
-                  ? kind === "video"
-                    ? "Add a video"
-                    : "Add media"
-                  : "Add another file"}
+            <span
+              className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background"
+              aria-hidden
+            >
+              {kind === "video" ? <VideoCamera /> : <ImageAdd />}
             </span>
-            <span className="text-xs font-normal text-muted-foreground">
-              Drag and drop or{" "}
-              <span className="text-primary underline underline-offset-2">
-                browse files
+            <span className="flex flex-col items-start gap-1.5 text-left">
+              <span>
+                {isDragging
+                  ? "Drop to upload"
+                  : media.length === 0 && pendingMedia.length === 0
+                    ? kind === "video"
+                      ? "Add a video"
+                      : "Add media"
+                    : "Add another file"}
+              </span>
+              <span className="text-xs font-normal text-muted-foreground">
+                Drag and drop or{" "}
+                <span className="text-primary underline underline-offset-2">
+                  browse files
+                </span>
+              </span>
+              <span className="text-xs font-normal text-muted-foreground">
+                {kind === "image"
+                  ? "Up to 10 images"
+                  : kind === "video"
+                    ? "One video"
+                    : "Image or video"}{" "}
+                · 100 MB per file
               </span>
             </span>
-            <span className="text-xs font-normal text-muted-foreground">
-              {kind === "image"
-                ? "Up to 10 images"
-                : kind === "video"
-                  ? "One video"
-                  : "Image or video"}{" "}
-              · 100 MB per file
-            </span>
-          </span>
-        </Button>
+          </Button>
+        </div>
       )}
 
       {(media.length > 0 || pendingMedia.length > 0) && (
