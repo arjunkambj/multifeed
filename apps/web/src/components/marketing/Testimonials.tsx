@@ -1,5 +1,9 @@
 import Reveal from "@/components/motion/Reveal";
-import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@multifeed/ui/components/avatar";
 import { landingPeople } from "@/constants/landing-page";
 import { cn } from "@multifeed/ui/lib/utils";
 import { BODY, GRID_GAP, HEADER_GAP } from "./rhythm";

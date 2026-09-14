@@ -49,7 +49,10 @@ import { Separator } from "@multifeed/ui/components/separator";
 import { Skeleton } from "@multifeed/ui/components/skeleton";
 import { Spinner } from "@multifeed/ui/components/spinner";
 import { Textarea } from "@multifeed/ui/components/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@multifeed/ui/components/toggle-group";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@multifeed/ui/components/toggle-group";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import {
   PLATFORM_META,

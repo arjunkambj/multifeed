@@ -5,7 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
 import { AccountSettingsPanel } from "@/components/settings/AccountSettingsPanel";
 import { SupportSettingsPanel } from "@/components/settings/SupportSettingsPanel";
-import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@multifeed/ui/components/avatar";
 import { isSettingsTab, settingsTabs } from "@/lib/settings-tabs";
 import { hexclaveClientApp } from "@/hexclave/client";
 import { cn } from "@multifeed/ui/lib/utils";

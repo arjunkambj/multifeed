@@ -94,7 +94,7 @@
       "plugins": ["typescript", "unicorn", "oxc", "import"]
     },
     {
-      "files": ["apps/web/src/components/ui/**"],
+      "files": ["packages/ui/src/components/**"],
       "rules": {
         "shadcn/no-restyle": "off",
         "shadcn/no-arbitrary-values": "off",

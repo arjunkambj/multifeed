@@ -3,7 +3,11 @@
 import { Logout, Moon, Settings, Sun } from "@honeyicons/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@multifeed/ui/components/avatar";
 import { Button } from "@multifeed/ui/components/button";
 import {
   DropdownMenu,

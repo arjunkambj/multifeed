@@ -10,7 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@multifeed/ui/components/dialog";
-import { InputGroup, InputGroupAddon } from "@multifeed/ui/components/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+} from "@multifeed/ui/components/input-group";
 import { cn } from "@multifeed/ui/lib/utils";
 
 function Command({

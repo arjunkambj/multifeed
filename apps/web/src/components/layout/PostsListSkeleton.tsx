@@ -2,7 +2,12 @@
 
 import { PostsTableHead } from "@/components/posts/PostsTable";
 import { Skeleton } from "@multifeed/ui/components/skeleton";
-import { Table, TableBody, TableCell, TableRow } from "@multifeed/ui/components/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "@multifeed/ui/components/table";
 
 export function PostsListSkeleton() {
   return (

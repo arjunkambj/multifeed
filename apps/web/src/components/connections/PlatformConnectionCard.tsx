@@ -1,9 +1,18 @@
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { AlertTriangle, Integration, Trash } from "@honeyicons/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@multifeed/ui/components/avatar";
 import { Badge } from "@multifeed/ui/components/badge";
 import { Button } from "@multifeed/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@multifeed/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@multifeed/ui/components/card";
 import {
   Popover,
   PopoverContent,

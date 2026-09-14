@@ -2,7 +2,12 @@
 
 import { TeamMembersTableHead } from "@/components/team/TeamMembersTable";
 import { Skeleton } from "@multifeed/ui/components/skeleton";
-import { Table, TableBody, TableCell, TableRow } from "@multifeed/ui/components/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "@multifeed/ui/components/table";
 
 export function TeamTableSkeleton() {
   return (

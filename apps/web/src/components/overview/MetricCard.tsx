@@ -1,5 +1,10 @@
 import { ArrowDown, ArrowUp, type HoneyIcon } from "@honeyicons/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@multifeed/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@multifeed/ui/components/card";
 import { Separator } from "@multifeed/ui/components/separator";
 import { cn } from "@multifeed/ui/lib/utils";
 

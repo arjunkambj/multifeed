@@ -2,7 +2,11 @@
 
 import type { TeamTableRow } from "@/components/team/TeamMembersContent";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@multifeed/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@multifeed/ui/components/avatar";
 import {
   Table,
   TableBody,

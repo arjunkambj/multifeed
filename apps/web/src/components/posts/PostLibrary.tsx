@@ -13,7 +13,12 @@ import { PostsListSkeleton } from "@/components/layout/PostsListSkeleton";
 import { PostsTable } from "@/components/posts/PostsTable";
 import { Button } from "@multifeed/ui/components/button";
 import { Input } from "@multifeed/ui/components/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@multifeed/ui/components/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@multifeed/ui/components/tabs";
 import { platformLabel } from "@/lib/platform-meta";
 import {
   isPostLibraryFilter,

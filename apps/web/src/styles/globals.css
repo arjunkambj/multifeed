@@ -1,7 +1,7 @@
 @import "@multifeed/ui/globals.css";
 @import "lenis/dist/lenis.css";
 
-@source "../../../packages/ui/src";
+@source "../../../../packages/ui/src";
 
 @keyframes marquee {
   from {

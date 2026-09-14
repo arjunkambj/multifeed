@@ -4,7 +4,10 @@ import { Suspense } from "react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import type { ProfileUser } from "@/components/layout/UserProfileMenu";
-import { SidebarInset, SidebarProvider } from "@multifeed/ui/components/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@multifeed/ui/components/sidebar";
 import { TooltipProvider } from "@multifeed/ui/components/tooltip";
 
 export function DashboardShell({
