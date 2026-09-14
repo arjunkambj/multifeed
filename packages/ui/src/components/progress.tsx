@@ -1,37 +1,75 @@
 "use client";
 
 import { Progress as ProgressPrimitive } from "@base-ui/react/progress";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@multifeed/ui/lib/utils";
+
+const progressVariants = cva("flex", {
+  variants: {
+    variant: {
+      default: "flex-wrap gap-3",
+      stack: "w-full flex-col gap-2.5",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 function Progress({
   className,
   children,
+  hideTrack = false,
+  trackVariant = "default",
   value,
+  variant = "default",
   ...props
-}: ProgressPrimitive.Root.Props) {
+}: ProgressPrimitive.Root.Props &
+  VariantProps<typeof progressVariants> & {
+    hideTrack?: boolean;
+    trackVariant?: VariantProps<typeof progressTrackVariants>["variant"];
+  }) {
   return (
     <ProgressPrimitive.Root
       value={value}
       data-slot="progress"
-      className={cn("flex flex-wrap gap-3", className)}
+      className={cn(progressVariants({ variant }), className)}
       {...props}
     >
       {children}
-      <ProgressTrack>
-        <ProgressIndicator />
-      </ProgressTrack>
+      {!hideTrack && (
+        <ProgressTrack variant={trackVariant}>
+          <ProgressIndicator />
+        </ProgressTrack>
+      )}
     </ProgressPrimitive.Root>
   );
 }
 
-function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
+const progressTrackVariants = cva(
+  "relative flex h-2 w-full items-center overflow-x-hidden rounded-2xl",
+  {
+    variants: {
+      variant: {
+        default: "bg-muted",
+        background: "bg-background",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
+function ProgressTrack({
+  className,
+  variant = "default",
+  ...props
+}: ProgressPrimitive.Track.Props & VariantProps<typeof progressTrackVariants>) {
   return (
     <ProgressPrimitive.Track
-      className={cn(
-        "relative flex h-2 w-full items-center overflow-x-hidden rounded-2xl bg-muted",
-        className,
-      )}
+      className={cn(progressTrackVariants({ variant }), className)}
       data-slot="progress-track"
       {...props}
     />
@@ -51,10 +89,26 @@ function ProgressIndicator({
   );
 }
 
-function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
+const progressLabelVariants = cva("text-sm", {
+  variants: {
+    variant: {
+      default: "font-medium",
+      muted: "font-normal text-muted-foreground",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+function ProgressLabel({
+  className,
+  variant = "default",
+  ...props
+}: ProgressPrimitive.Label.Props & VariantProps<typeof progressLabelVariants>) {
   return (
     <ProgressPrimitive.Label
-      className={cn("text-sm font-medium", className)}
+      className={cn(progressLabelVariants({ variant }), className)}
       data-slot="progress-label"
       {...props}
     />

@@ -18,6 +18,7 @@ const toggleVariants = cva(
           "h-8 min-w-8 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         sm: "h-7 min-w-7 px-2.5 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5",
         lg: "h-9 min-w-9 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+        chip: "h-11 min-w-11 gap-2 py-0 pr-3 pl-1.5",
       },
     },
     defaultVariants: {

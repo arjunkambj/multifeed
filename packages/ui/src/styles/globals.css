@@ -4,6 +4,19 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Class hooks for Sonner and input-otp so the theme graph knows them. */
+.toaster {
+  --toaster: initial;
+}
+
+.cn-input-otp {
+  --cn-input-otp: initial;
+}
+
+.cn-toast {
+  --cn-toast: initial;
+}
+
 [data-slot="tabs-indicator"] {
   left: 0;
   top: 0;
@@ -96,6 +109,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -142,6 +156,7 @@
   --accent: oklch(0.967 0.001 286.375); /* zinc-100 */
   --accent-foreground: oklch(0.21 0.006 285.885); /* zinc-900 */
   --destructive: oklch(0.577 0.245 27.325);
+  --warning: oklch(0.769 0.188 70.08); /* amber-500 */
   --border: oklch(0.92 0.004 286.32); /* zinc-200 */
   --input: oklch(0.967 0.001 286.375); /* zinc-100 */
   --ring: oklch(0.54 0.13 153.45);
@@ -177,6 +192,7 @@
   --accent: oklch(0.274 0.006 286.033); /* zinc-800 */
   --accent-foreground: oklch(0.985 0.001 286.375); /* zinc-50 */
   --destructive: oklch(0.704 0.191 22.216);
+  --warning: oklch(0.769 0.188 70.08); /* amber-500 */
   --border: oklch(1 0 0 / 10%);
   --input: oklch(0.21 0.006 285.885); /* zinc-900 */
   --ring: oklch(0.54 0.13 153.45);

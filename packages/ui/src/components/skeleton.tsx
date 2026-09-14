@@ -1,10 +1,28 @@
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@multifeed/ui/lib/utils";
 
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
+const skeletonVariants = cva("animate-pulse bg-muted", {
+  variants: {
+    shape: {
+      default: "rounded-2xl",
+      circle: "rounded-full",
+      line: "rounded-none",
+    },
+  },
+  defaultVariants: {
+    shape: "default",
+  },
+});
+
+function Skeleton({
+  className,
+  shape = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof skeletonVariants>) {
   return (
     <div
       data-slot="skeleton"
-      className={cn("animate-pulse rounded-2xl bg-muted", className)}
+      className={cn(skeletonVariants({ shape }), className)}
       {...props}
     />
   );
