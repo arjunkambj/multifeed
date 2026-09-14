@@ -20,7 +20,13 @@ import type { FunctionReturnType } from "convex/server";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useReducer, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
@@ -48,6 +54,7 @@ import { Label } from "@multifeed/ui/components/label";
 import { Separator } from "@multifeed/ui/components/separator";
 import { Skeleton } from "@multifeed/ui/components/skeleton";
 import { Spinner } from "@multifeed/ui/components/spinner";
+import { Tabs, TabsList, TabsTrigger } from "@multifeed/ui/components/tabs";
 import { Textarea } from "@multifeed/ui/components/textarea";
 import {
   ToggleGroup,
@@ -724,7 +731,7 @@ function PostComposerForm({
             </div>
             <div>
               {activeAccounts.length === 0 ? (
-                <div className="flex flex-col items-start gap-3 rounded-[min(var(--radius-4xl),24px)] bg-muted px-4 py-4">
+                <div className="flex flex-col items-start gap-3 rounded-4xl bg-muted px-4 py-4">
                   <p className="text-sm text-muted-foreground">
                     {(accounts ?? []).length > 0
                       ? "Connected accounts need a reconnect before they can publish."
@@ -737,7 +744,7 @@ function PostComposerForm({
                   </Button>
                 </div>
               ) : compatibleAccounts.length === 0 ? (
-                <div className="flex flex-col items-start gap-3 rounded-[min(var(--radius-4xl),24px)] bg-muted px-4 py-4">
+                <div className="flex flex-col items-start gap-3 rounded-4xl bg-muted px-4 py-4">
                   <p className="text-sm text-muted-foreground">
                     None of your connected accounts support this format. Connect
                     a matching network or pick a different type.
@@ -749,9 +756,11 @@ function PostComposerForm({
                     {onChooseDifferentFormat ? (
                       <Button
                         variant="secondary"
-                        className="bg-background"
                         onClick={chooseDifferentFormat}
                         disabled={uploadingMedia || saving !== null}
+                        render={
+                          <button className="bg-background" type="button" />
+                        }
                       >
                         Change format
                       </Button>
@@ -763,6 +772,7 @@ function PostComposerForm({
                   ref={accountPickerRef}
                   multiple
                   aria-label="Publish to accounts"
+                  size="chip"
                   value={[...selectedAccountIds]}
                   onValueChange={(value) =>
                     dispatch({ type: "selectedChanged", value: new Set(value) })
@@ -781,7 +791,6 @@ function PostComposerForm({
                         key={account._id}
                         value={account._id}
                         aria-label={`${label} on ${platformName} (@${account.username})`}
-                        className="h-11 gap-2 rounded-xl py-0 pl-1.5 pr-3"
                       >
                         <span className="relative size-8 shrink-0">
                           {account.avatarUrl ? (
@@ -801,8 +810,12 @@ function PostComposerForm({
                           >
                             <PlatformIcon
                               size={14}
-                              style={{ color: platformInk(account.platform) }}
-                              className="shrink-0 drop-shadow-[0_0_1px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_0_1px_rgba(0,0,0,0.8)]"
+                              style={
+                                {
+                                  "--ink": platformInk(account.platform),
+                                } as CSSProperties
+                              }
+                              className="icon-halo shrink-0 text-(--ink)"
                             />
                           </span>
                         </span>
@@ -995,13 +1008,15 @@ function PostComposerForm({
                           >
                             <div className="mb-3 flex items-center gap-2">
                               <span
-                                className="flex size-7 items-center justify-center rounded-full"
-                                style={{
-                                  backgroundColor: platformBrand(
-                                    account.platform,
-                                  ),
-                                  color: platformForeground(account.platform),
-                                }}
+                                className="flex size-7 items-center justify-center rounded-full bg-(--brand) text-(--brand-fg)"
+                                style={
+                                  {
+                                    "--brand": platformBrand(account.platform),
+                                    "--brand-fg": platformForeground(
+                                      account.platform,
+                                    ),
+                                  } as CSSProperties
+                                }
                               >
                                 <PlatformIcon size={16} />
                               </span>
@@ -1016,7 +1031,7 @@ function PostComposerForm({
                               <span
                                 className={
                                   limit != null && effectiveLength > limit
-                                    ? "text-xs font-medium text-red-600"
+                                    ? "text-xs font-medium text-destructive"
                                     : "text-xs text-muted-foreground"
                                 }
                               >
@@ -1130,16 +1145,16 @@ function PostComposerForm({
                     />
                     {recentCaptions === undefined ? (
                       <div className="flex flex-col gap-2 py-2">
-                        <Skeleton className="h-8 w-full rounded-lg" />
-                        <Skeleton className="h-8 w-4/5 rounded-lg" />
-                        <Skeleton className="h-8 w-3/5 rounded-lg" />
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-4/5" />
+                        <Skeleton className="h-8 w-3/5" />
                       </div>
                     ) : pastCaptions.length === 0 ? (
                       <p className="py-4 text-center text-sm text-muted-foreground">
                         No matching captions yet.
                       </p>
                     ) : (
-                      <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
+                      <div className="flex max-h-64 flex-col gap-2 overflow-y-auto [&>button]:h-auto [&>button]:w-full [&>button]:justify-start [&>button]:bg-muted [&>button]:px-3 [&>button]:py-2 [&>button]:text-left [&>button]:text-sm [&>button]:leading-relaxed">
                         {pastCaptions.map((caption) => (
                           <Button
                             key={caption}
@@ -1148,7 +1163,6 @@ function PostComposerForm({
                               dispatch({ type: "bodyChanged", value: caption });
                               dispatch({ type: "toolChanged", value: null });
                             }}
-                            className="h-auto w-full justify-start bg-muted px-3 py-2 text-left text-sm leading-relaxed"
                           >
                             <span className="line-clamp-2">{caption}</span>
                           </Button>
@@ -1183,12 +1197,9 @@ function PostComposerForm({
           <section className="flex min-w-0 flex-col">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-base font-semibold">When to publish</h2>
-              <ToggleGroup
-                aria-label="Publishing time"
-                variant="outline"
-                className="grid w-full grid-cols-2 rounded-xl bg-muted/50 p-1 sm:w-auto"
-                value={[scheduleMode]}
-                onValueChange={([value]) => {
+              <Tabs
+                value={scheduleMode}
+                onValueChange={(value) => {
                   if (value !== "now" && value !== "schedule") return;
                   dispatch({
                     type: "scheduleModeChanged",
@@ -1196,28 +1207,29 @@ function PostComposerForm({
                   });
                 }}
               >
-                <ToggleGroupItem
-                  value="now"
-                  className="gap-2 px-4 duration-200 motion-reduce:transition-none"
+                <TabsList
+                  aria-label="Publishing time"
+                  className="grid w-full grid-cols-2 sm:w-auto"
                 >
-                  <PaperPlane data-icon="inline-start" />
-                  Now
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="schedule"
-                  aria-controls="composer-schedule"
-                  className="gap-2 px-4 duration-200 motion-reduce:transition-none"
-                >
-                  <Calendar data-icon="inline-start" />
-                  Schedule
-                </ToggleGroupItem>
-              </ToggleGroup>
+                  <TabsTrigger value="now">
+                    <PaperPlane data-icon="inline-start" />
+                    Now
+                  </TabsTrigger>
+                  <TabsTrigger
+                    aria-controls="composer-schedule"
+                    value="schedule"
+                  >
+                    <Calendar data-icon="inline-start" />
+                    Schedule
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
             <ComposerPanel
               id="composer-schedule"
               open={scheduleMode === "schedule"}
             >
-              <FieldGroup className="grid max-w-md gap-3 sm:grid-cols-[minmax(0,1fr)_140px]">
+              <FieldGroup className="grid max-w-md sm:grid-cols-[minmax(0,1fr)_140px]">
                 <Field>
                   <FieldLabel htmlFor="schedule-date">Date</FieldLabel>
                   <DatePicker
@@ -1453,7 +1465,7 @@ function PostComposerForm({
                   />
                 </div>
               ) : (
-                <Empty className="min-h-72 px-4 py-8">
+                <Empty className="min-h-72">
                   <EmptyHeader>
                     <EmptyMedia aria-hidden>
                       <div className="relative mb-3 flex h-28 w-24 -rotate-6 flex-col gap-2 rounded-xl border border-border bg-background p-3 shadow-sm">

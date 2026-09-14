@@ -1,6 +1,7 @@
 "use client";
 
 import { Integration } from "@honeyicons/react";
+import type { CSSProperties } from "react";
 import { Badge } from "@multifeed/ui/components/badge";
 import { accountNeedsReconnect } from "@/lib/oauth/required-scopes";
 import { PLATFORM_META, platformInk, platformLabel } from "@/lib/platform-meta";
@@ -77,7 +78,10 @@ export function PostFormatPicker({
                     >
                       <MetaIcon
                         size={16}
-                        style={{ color: platformInk(platform) }}
+                        style={
+                          { "--ink": platformInk(platform) } as CSSProperties
+                        }
+                        className="text-(--ink)"
                       />
                     </span>
                   );

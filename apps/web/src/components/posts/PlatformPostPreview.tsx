@@ -17,8 +17,9 @@ import {
   type HoneyIcon,
 } from "@honeyicons/react";
 import Image from "next/image";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { RemoteAvatar } from "@/components/RemoteAvatar";
+import { cn } from "@multifeed/ui/lib/utils";
 import {
   platformBrand,
   platformForeground,
@@ -76,13 +77,14 @@ function AccountAvatar({
 
   return (
     <span
-      className="flex shrink-0 items-center justify-center rounded-full text-sm font-semibold"
-      style={{
-        width: size,
-        height: size,
-        backgroundColor: platformBrand(account.platform),
-        color: platformForeground(account.platform),
-      }}
+      className="flex size-(--preview-avatar-size) shrink-0 items-center justify-center rounded-full bg-(--preview-avatar-bg) text-sm font-semibold text-(--preview-avatar-fg)"
+      style={
+        {
+          "--preview-avatar-size": `${size}px`,
+          "--preview-avatar-bg": platformBrand(account.platform),
+          "--preview-avatar-fg": platformForeground(account.platform),
+        } as CSSProperties
+      }
       aria-hidden
     >
       {label.slice(0, 1).toUpperCase()}
@@ -96,7 +98,7 @@ function RawMedia({ media }: { media: ComposerMedia[] }) {
 
   if (!asset || !src) {
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#e9ebee] text-[#65676b]">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-preview-fill text-preview-muted">
         <ImageIcon size={28} />
         <span className="text-xs font-medium">Add media to see it here</span>
       </div>
@@ -142,7 +144,7 @@ function MediaFrame({
   if (mosaic && media.length > 1) {
     return (
       <div
-        className={`grid aspect-[4/3] grid-cols-2 gap-0.5 overflow-hidden bg-[#eff3f4] ${rounded ? "rounded-2xl border border-[#cfd9de]" : ""}`}
+        className={`grid aspect-[4/3] grid-cols-2 gap-0.5 overflow-hidden bg-preview-fill ${rounded ? "rounded-2xl border border-preview-line" : ""}`}
       >
         {media.slice(0, 4).map((asset, index) => (
           <div
@@ -170,7 +172,7 @@ function MediaFrame({
 
   return (
     <div
-      className={`relative overflow-hidden bg-[#e9ebee] ${ratio} ${rounded ? "rounded-xl" : ""}`}
+      className={`relative overflow-hidden bg-preview-fill ${ratio} ${rounded ? "rounded-xl" : ""}`}
     >
       <RawMedia media={media} />
       {isVideo ? (
@@ -184,7 +186,7 @@ function MediaFrame({
         </span>
       ) : null}
       {media.length > 1 ? (
-        <span className="absolute right-3 top-3 rounded-full bg-black/65 px-2 py-1 text-[11px] font-semibold text-white">
+        <span className="absolute right-3 top-3 rounded-full bg-black/65 px-2 py-1 text-xs font-semibold text-white">
           1/{media.length}
         </span>
       ) : null}
@@ -209,10 +211,10 @@ function LinkPreview({ url, dark = false }: { url: string; dark?: boolean }) {
       className={`mt-3 overflow-hidden rounded-xl border px-3 py-2.5 ${
         dark
           ? "border-white/25 bg-black/30 text-white"
-          : "border-[#cfd3d7] bg-[#f7f8f9] text-[#0f1419]"
+          : "border-preview-line bg-preview-fill text-preview-ink"
       }`}
     >
-      <p className={`text-[11px] ${dark ? "text-white/65" : "text-[#536471]"}`}>
+      <p className={`text-xs ${dark ? "text-white/65" : "text-preview-muted"}`}>
         Shared link
       </p>
       <p className="truncate text-xs font-medium">{host}</p>
@@ -230,7 +232,11 @@ function PreviewHeading({
   const MetaIcon = platformIcon(account.platform);
   return (
     <figcaption className="mb-2 flex items-center gap-2 px-0.5 text-xs font-medium text-muted-foreground">
-      <MetaIcon size={14} style={{ color: platformInk(account.platform) }} />
+      <MetaIcon
+        className="text-(--ink)"
+        size={14}
+        style={{ "--ink": platformInk(account.platform) } as CSSProperties}
+      />
       <span>{platformLabel(account.platform)}</span>
       <span aria-hidden>·</span>
       <span className="capitalize">{placement ?? "feed"} preview</span>
@@ -247,22 +253,22 @@ function FacebookPreview(props: PlatformPreviewProps) {
   }
 
   return (
-    <article className="overflow-hidden rounded-xl border border-[#d8dadf] bg-white text-[#050505]">
+    <article className="overflow-hidden rounded-xl border border-preview-line bg-white text-preview-ink">
       <header className="flex items-center gap-2.5 p-4 pb-2">
         <AccountAvatar account={account} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold leading-tight">
             {displayName}
           </p>
-          <p className="mt-0.5 flex items-center gap-1 text-xs text-[#65676b]">
+          <p className="mt-0.5 flex items-center gap-1 text-xs text-preview-muted">
             Just now <span>·</span> <Glyph icon={Integration} size={13} />
           </p>
         </div>
         <Glyph icon={MoreHorizontal} size={22} />
       </header>
       <div className="px-4 pb-3">
-        <p className="whitespace-pre-wrap break-words text-[15px] leading-5">
-          {body || <span className="text-[#65676b]">Your caption…</span>}
+        <p className="whitespace-pre-wrap break-words text-sm leading-5">
+          {body || <span className="text-preview-muted">Your caption…</span>}
         </p>
         {referenceUrl ? <LinkPreview url={referenceUrl} /> : null}
       </div>
@@ -270,7 +276,7 @@ function FacebookPreview(props: PlatformPreviewProps) {
         <MediaFrame media={media} ratio="aspect-[4/3]" mosaic />
       ) : null}
       <div className="px-4 pb-2 pt-3">
-        <div className="grid grid-cols-3 border-t border-[#ced0d4] pt-1 text-[#65676b]">
+        <div className="grid grid-cols-3 border-t border-preview-line pt-1 text-preview-muted">
           {(
             [
               [Like, "Like"],
@@ -300,14 +306,14 @@ function InstagramPreview(props: PlatformPreviewProps) {
   }
 
   return (
-    <article className="overflow-hidden rounded-sm border border-[#dbdbdb] bg-white text-[#0a0a0a]">
+    <article className="overflow-hidden rounded-sm border border-preview-line bg-white text-preview-ink">
       <header className="flex items-center gap-2.5 p-3">
-        <span className="rounded-full bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#4f5bd5] p-[2px]">
+        <span className="rounded-full bg-gradient-to-tr from-ig-gold via-ig-pink to-ig-violet p-0.5">
           <span className="block rounded-full border-2 border-white">
             <AccountAvatar account={account} size={30} />
           </span>
         </span>
-        <p className="min-w-0 flex-1 truncate text-[14px] font-semibold">
+        <p className="min-w-0 flex-1 truncate text-sm font-semibold">
           {account.username}
         </p>
         <Glyph icon={MoreHorizontal} size={21} />
@@ -326,7 +332,7 @@ function InstagramPreview(props: PlatformPreviewProps) {
               {media.slice(0, 5).map((asset, index) => (
                 <span
                   key={asset._id}
-                  className={`size-1.5 rounded-full ${index === 0 ? "bg-[#0095f6]" : "bg-[#dbdbdb]"}`}
+                  className={`size-1.5 rounded-full ${index === 0 ? "bg-ig-blue" : "bg-preview-line"}`}
                 />
               ))}
             </span>
@@ -338,22 +344,20 @@ function InstagramPreview(props: PlatformPreviewProps) {
             <Glyph icon={Bookmark} size={24} />
           </span>
         </div>
-        <p className="mt-1 whitespace-pre-wrap break-words text-[14px] leading-[18px]">
+        <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-5">
           <span className="mr-1 font-semibold">{account.username}</span>
-          {body || <span className="text-[#737373]">Your caption…</span>}
+          {body || <span className="text-preview-muted">Your caption…</span>}
         </p>
         {referenceUrl ? (
-          <p className="mt-1 truncate text-[14px] text-[#00376b]">
-            {referenceUrl}
-          </p>
+          <p className="mt-1 truncate text-sm text-ig-link">{referenceUrl}</p>
         ) : null}
         {firstComment ? (
-          <p className="mt-1 text-[14px] leading-[18px]">
+          <p className="mt-1 text-sm leading-5">
             <span className="mr-1 font-semibold">{account.username}</span>
             {firstComment}
           </p>
         ) : null}
-        <p className="mt-2 text-[10px] uppercase tracking-wide text-[#737373]">
+        <p className="mt-2 text-xs uppercase tracking-wide text-preview-muted">
           Just now
         </p>
       </div>
@@ -365,12 +369,12 @@ function ThreadsPreview(props: PlatformPreviewProps) {
   const { account, body, media, postKind, referenceUrl, firstComment } = props;
 
   return (
-    <article className="border-y border-[#e5e5e5] bg-white px-4 py-3 text-[#101010]">
+    <article className="border-y border-preview-line bg-white px-4 py-3 text-preview-ink">
       <div className="grid grid-cols-[38px_minmax(0,1fr)] gap-2.5">
         <div className="flex flex-col items-center">
           <AccountAvatar account={account} size={36} />
           <span
-            className={`mt-2 w-0.5 flex-1 rounded-full ${firstComment ? "bg-[#e5e5e5]" : "bg-transparent"}`}
+            className={`mt-2 w-0.5 flex-1 rounded-full ${firstComment ? "bg-preview-line" : "bg-transparent"}`}
           />
         </div>
         <div className="min-w-0">
@@ -378,11 +382,11 @@ function ThreadsPreview(props: PlatformPreviewProps) {
             <span className="min-w-0 flex-1 truncate font-semibold">
               {account.username}
             </span>
-            <span className="text-xs text-[#777]">now</span>
+            <span className="text-xs text-preview-muted">now</span>
             <Glyph icon={MoreHorizontal} size={20} />
           </div>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-5">
-            {body || <span className="text-[#777]">Your caption…</span>}
+            {body || <span className="text-preview-muted">Your caption…</span>}
           </p>
           {postKind !== "text" ? (
             <div className="mt-3">
@@ -390,7 +394,7 @@ function ThreadsPreview(props: PlatformPreviewProps) {
             </div>
           ) : null}
           {referenceUrl ? <LinkPreview url={referenceUrl} /> : null}
-          <div className="mt-3 flex items-center gap-4 text-[#1f1f1f]">
+          <div className="mt-3 flex items-center gap-4 text-preview-ink">
             <Glyph icon={Like} size={21} />
             <Glyph icon={Email} size={20} />
             <Glyph icon={Repeat} size={21} />
@@ -425,17 +429,17 @@ function LinkedInPreview(props: PlatformPreviewProps) {
   } = props;
 
   return (
-    <article className="overflow-hidden rounded-lg border border-[#d6d6d6] bg-white text-[#1f1f1f]">
+    <article className="overflow-hidden rounded-lg border border-preview-line bg-white text-preview-ink">
       <header className="flex items-start gap-2 p-3 pb-2">
         <AccountAvatar account={account} size={46} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold leading-5">
             {displayName}
           </p>
-          <p className="truncate text-[11px] leading-4 text-[#666]">
+          <p className="truncate text-xs leading-4 text-preview-muted">
             @{account.username}
           </p>
-          <p className="flex items-center gap-1 text-[11px] text-[#666]">
+          <p className="flex items-center gap-1 text-xs text-preview-muted">
             Now · <Glyph icon={Integration} size={12} />
           </p>
         </div>
@@ -443,7 +447,7 @@ function LinkedInPreview(props: PlatformPreviewProps) {
       </header>
       <div className="px-3 pb-3">
         <p className="whitespace-pre-wrap break-words text-sm leading-5">
-          {body || <span className="text-[#666]">Your caption…</span>}
+          {body || <span className="text-preview-muted">Your caption…</span>}
         </p>
         {referenceUrl ? <LinkPreview url={referenceUrl} /> : null}
       </div>
@@ -451,7 +455,7 @@ function LinkedInPreview(props: PlatformPreviewProps) {
         <MediaFrame media={media} ratio="aspect-[1.91/1]" />
       ) : null}
       <div className="px-3 pt-2">
-        <div className="grid grid-cols-4 border-t border-[#e5e5e5] py-1 text-[#404040]">
+        <div className="grid grid-cols-4 border-t border-preview-line py-1 text-preview-muted">
           {(
             [
               [Like, "Like"],
@@ -469,7 +473,7 @@ function LinkedInPreview(props: PlatformPreviewProps) {
           ))}
         </div>
         {firstComment ? (
-          <p className="border-t border-[#e5e5e5] py-2 text-xs">
+          <p className="border-t border-preview-line py-2 text-xs">
             <span className="font-semibold">{displayName}</span> {firstComment}
           </p>
         ) : null}
@@ -490,27 +494,27 @@ function XPreview(props: PlatformPreviewProps) {
   } = props;
 
   return (
-    <article className="border-y border-[#eff3f4] bg-white px-4 py-3 text-[#0f1419]">
+    <article className="border-y border-preview-line bg-white px-4 py-3 text-preview-ink">
       <div className="flex items-start gap-2.5">
         <AccountAvatar account={account} size={40} />
         <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-start gap-1 text-[15px] leading-5">
+          <div className="flex min-w-0 items-start gap-1 text-sm leading-5">
             <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-1">
               <span className="max-w-full truncate font-bold">
                 {displayName}
               </span>
-              <span className="min-w-0 truncate text-[#536471]">
+              <span className="min-w-0 truncate text-preview-muted">
                 @{account.username}
               </span>
-              <span className="shrink-0 text-[#536471]">· now</span>
+              <span className="shrink-0 text-preview-muted">· now</span>
             </div>
-            <span className="ml-auto shrink-0 text-[#536471]">
+            <span className="ml-auto shrink-0 text-preview-muted">
               <Glyph icon={MoreHorizontal} size={20} />
             </span>
           </div>
-          <p className="mt-0.5 whitespace-pre-wrap break-words text-[15px] leading-5">
+          <p className="mt-0.5 whitespace-pre-wrap break-words text-sm leading-5">
             {body || (
-              <span className="text-[#536471]">What&apos;s happening?</span>
+              <span className="text-preview-muted">What&apos;s happening?</span>
             )}
           </p>
           {postKind !== "text" ? (
@@ -519,8 +523,8 @@ function XPreview(props: PlatformPreviewProps) {
             </div>
           ) : null}
           {referenceUrl ? <LinkPreview url={referenceUrl} /> : null}
-          <div className="mt-3 flex items-center justify-between gap-2 text-[#536471]">
-            <span className="flex items-center gap-1 text-[11px]">
+          <div className="mt-3 flex items-center justify-between gap-2 text-preview-muted">
+            <span className="flex items-center gap-1 text-xs">
               <Glyph icon={Email} size={18} />
               {firstComment ? "1" : ""}
             </span>
@@ -533,7 +537,7 @@ function XPreview(props: PlatformPreviewProps) {
             </span>
           </div>
           {firstComment ? (
-            <p className="mt-3 border-t border-[#eff3f4] pt-3 text-xs">
+            <p className="mt-3 border-t border-preview-line pt-3 text-xs">
               <span className="font-bold">@{account.username}</span>{" "}
               {firstComment}
             </p>
@@ -558,7 +562,7 @@ function YouTubePreview(props: PlatformPreviewProps) {
     "Video title";
 
   return (
-    <article className="bg-white text-[#0f0f0f]">
+    <article className="bg-white text-preview-ink">
       <MediaFrame media={media} ratio="aspect-video" rounded />
       <div className="mt-3 flex items-start gap-2.5">
         <AccountAvatar account={account} size={36} />
@@ -566,8 +570,10 @@ function YouTubePreview(props: PlatformPreviewProps) {
           <p className="line-clamp-2 text-sm font-semibold leading-5">
             {videoTitle}
           </p>
-          <p className="mt-1 truncate text-xs text-[#606060]">{displayName}</p>
-          <p className="text-xs text-[#606060]">No views · just now</p>
+          <p className="mt-1 truncate text-xs text-preview-muted">
+            {displayName}
+          </p>
+          <p className="text-xs text-preview-muted">No views · just now</p>
         </div>
         <Glyph icon={MoreVertical} size={21} />
       </div>
@@ -580,30 +586,30 @@ type VerticalVariant = "facebook" | "instagram" | "tiktok" | "youtube";
 const VERTICAL_CONFIG: Record<
   VerticalVariant,
   {
-    accent: string;
+    accentClass: string;
     actionIcons: HoneyIcon[];
     actionLabels: string[];
     primaryAction?: string;
   }
 > = {
   facebook: {
-    accent: "#1877f2",
+    accentClass: "bg-preview-facebook",
     actionIcons: [Like, Email, Share],
     actionLabels: ["Like", "Comment", "Share"],
   },
   instagram: {
-    accent: "#ffffff",
+    accentClass: "bg-white",
     actionIcons: [Like, Email, PaperPlane, MoreHorizontal],
     actionLabels: ["Like", "Comment", "Share", "More"],
   },
   tiktok: {
-    accent: "#fe2c55",
+    accentClass: "bg-preview-tiktok",
     actionIcons: [Like, Email, Bookmark, Share],
     actionLabels: ["Like", "Comment", "Save", "Share"],
     primaryAction: "Follow",
   },
   youtube: {
-    accent: "#ff0033",
+    accentClass: "bg-preview-youtube",
     actionIcons: [Like, Dislike, Email, Share],
     actionLabels: ["Like", "Dislike", "Comment", "Share"],
     primaryAction: "Subscribe",
@@ -620,8 +626,8 @@ function VerticalPreview(
     props.platformSettings.placement === "story" || postKind === "story";
 
   return (
-    <div className="mx-auto w-full max-w-[22rem] overflow-hidden rounded-xl bg-[#e9ebee]">
-      <div className="relative aspect-[9/16] overflow-hidden bg-[#e9ebee] text-white">
+    <div className="mx-auto w-full max-w-[22rem] overflow-hidden rounded-xl bg-preview-fill">
+      <div className="relative aspect-[9/16] overflow-hidden bg-preview-fill text-white">
         <RawMedia media={media} />
         <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/45" />
         {isStory ? (
@@ -668,8 +674,10 @@ function VerticalPreview(
                   <AccountAvatar account={account} size={38} />
                   {config.primaryAction ? (
                     <span
-                      className="absolute -bottom-2 left-1/2 flex size-4 -translate-x-1/2 items-center justify-center rounded-full text-[13px] font-bold text-white"
-                      style={{ backgroundColor: config.accent }}
+                      className={cn(
+                        "absolute -bottom-2 left-1/2 flex size-4 -translate-x-1/2 items-center justify-center rounded-full text-xs font-bold text-white",
+                        config.accentClass,
+                      )}
                     >
                       +
                     </span>
@@ -679,10 +687,13 @@ function VerticalPreview(
               {config.actionIcons.map((ActionIcon, index) => (
                 <span
                   key={config.actionLabels[index] ?? index}
-                  className="flex flex-col items-center gap-0.5 text-[9px] font-medium drop-shadow"
+                  className="flex flex-col items-center gap-0.5 text-xs font-medium drop-shadow"
                 >
                   <span
-                    className={`flex size-9 items-center justify-center ${variant === "youtube" ? "rounded-full bg-black/40" : ""}`}
+                    className={cn(
+                      "flex size-9 items-center justify-center",
+                      variant === "youtube" && "rounded-full bg-black/40",
+                    )}
                   >
                     <Glyph icon={ActionIcon} size={24} />
                   </span>
@@ -700,8 +711,10 @@ function VerticalPreview(
                 </span>
                 {config.primaryAction ? (
                   <span
-                    className="rounded px-2 py-0.5 text-[10px] font-semibold"
-                    style={{ backgroundColor: config.accent }}
+                    className={cn(
+                      "rounded px-2 py-0.5 text-xs font-semibold",
+                      config.accentClass,
+                    )}
                   >
                     {config.primaryAction}
                   </span>
@@ -711,11 +724,11 @@ function VerticalPreview(
                 {body || <span className="text-white/70">Your caption…</span>}
               </p>
               {referenceUrl ? (
-                <p className="mt-1 truncate text-[10px] text-white/80">
+                <p className="mt-1 truncate text-xs text-white/80">
                   {referenceUrl}
                 </p>
               ) : null}
-              <p className="mt-2 flex items-center gap-1 text-[10px] font-medium">
+              <p className="mt-2 flex items-center gap-1 text-xs font-medium">
                 <Glyph icon={Soundwave} size={14} /> Original audio ·{" "}
                 {displayName}
               </p>
@@ -763,7 +776,7 @@ export function PlatformPostPreview(props: Props) {
   return (
     <figure
       aria-label={`${platformLabel(props.account.platform)} post preview`}
-      className="w-full min-w-0 shrink-0 [font-family:Arial,Helvetica,sans-serif] [&_p]:[overflow-wrap:anywhere]"
+      className="w-full min-w-0 shrink-0 font-preview wrap-anywhere"
     >
       <PreviewHeading account={props.account} placement={placement} />
       {preview}

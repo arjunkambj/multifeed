@@ -1,5 +1,6 @@
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { AlertTriangle, Integration, Trash } from "@honeyicons/react";
+import type { CSSProperties } from "react";
 import {
   Avatar,
   AvatarFallback,
@@ -7,12 +8,7 @@ import {
 } from "@multifeed/ui/components/avatar";
 import { Badge } from "@multifeed/ui/components/badge";
 import { Button } from "@multifeed/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@multifeed/ui/components/card";
+import { Card, CardHeader, CardTitle } from "@multifeed/ui/components/card";
 import {
   Popover,
   PopoverContent,
@@ -70,25 +66,24 @@ export function PlatformConnectionCard({
   const isConnecting = connecting === platform;
 
   return (
-    <Card
-      size="sm"
-      className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-2 rounded-xl px-3 py-2.5"
-    >
+    <Card variant="row">
       <CardHeader className="contents">
         <div className="contents">
           <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-2 sm:min-w-32">
             <span
-              className="flex size-7 shrink-0 items-center justify-center rounded-lg"
-              style={{
-                backgroundColor: meta.brand,
-                color: meta.foreground ?? "#FFFFFF",
-              }}
+              className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-(--brand) text-(--brand-fg)"
+              style={
+                {
+                  "--brand": meta.brand,
+                  "--brand-fg": meta.foreground ?? "var(--primary-foreground)",
+                } as CSSProperties
+              }
             >
               <meta.icon size={18} />
             </span>
             <div className="flex min-w-0 flex-col gap-1">
-              <CardTitle className="text-sm">
-                <h2>{meta.label}</h2>
+              <CardTitle>
+                <h2 className="text-sm">{meta.label}</h2>
               </CardTitle>
             </div>
           </div>
@@ -113,7 +108,7 @@ export function PlatformConnectionCard({
         </div>
       </CardHeader>
       {accounts.length > 0 && (
-        <CardContent className="col-span-3 row-start-2 min-w-0 px-0 sm:col-span-1 sm:col-start-2 sm:row-start-1">
+        <div className="col-span-3 row-start-2 min-w-0 sm:col-span-1 sm:col-start-2 sm:row-start-1">
           <ul
             className="flex flex-wrap items-center gap-3"
             aria-label={`${meta.label} accounts`}
@@ -124,9 +119,14 @@ export function PlatformConnectionCard({
                 <li key={account._id} className="shrink-0">
                   <Popover>
                     <PopoverTrigger
-                      className="relative flex size-8 cursor-pointer rounded-full outline-none transition-shadow hover:ring-1 hover:ring-foreground/10 focus-visible:ring-1 focus-visible:ring-ring/50 data-popup-open:ring-1 data-popup-open:ring-ring/50"
-                      aria-label={`Manage @${account.username} on ${meta.label}${needsReconnect ? ", reconnect needed" : ""}`}
-                      title={`@${account.username}${needsReconnect ? " · Reconnect needed" : ""}`}
+                      render={
+                        <button
+                          aria-label={`Manage @${account.username} on ${meta.label}${needsReconnect ? ", reconnect needed" : ""}`}
+                          className="relative flex size-8 cursor-pointer rounded-full outline-none transition-shadow hover:ring-1 hover:ring-foreground/10 focus-visible:ring-1 focus-visible:ring-ring/50 data-popup-open:ring-1 data-popup-open:ring-ring/50"
+                          title={`@${account.username}${needsReconnect ? " · Reconnect needed" : ""}`}
+                          type="button"
+                        />
+                      }
                     >
                       <Avatar className="size-8">
                         {account.avatarUrl && (
@@ -137,18 +137,21 @@ export function PlatformConnectionCard({
                         </AvatarFallback>
                       </Avatar>
                       <span
-                        className="absolute -right-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full ring-2 ring-card"
-                        style={{
-                          backgroundColor: meta.brand,
-                          color: meta.foreground ?? "#FFFFFF",
-                        }}
+                        className="absolute -right-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full bg-(--brand) text-(--brand-fg) ring-2 ring-card"
+                        style={
+                          {
+                            "--brand": meta.brand,
+                            "--brand-fg":
+                              meta.foreground ?? "var(--primary-foreground)",
+                          } as CSSProperties
+                        }
                         aria-hidden
                       >
                         <meta.icon size={12} />
                       </span>
                       {needsReconnect && (
                         <span
-                          className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground ring-2 ring-card"
+                          className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-destructive ring-2 ring-card"
                           aria-hidden
                         >
                           <AlertTriangle size={12} />
@@ -209,7 +212,7 @@ export function PlatformConnectionCard({
               );
             })}
           </ul>
-        </CardContent>
+        </div>
       )}
     </Card>
   );

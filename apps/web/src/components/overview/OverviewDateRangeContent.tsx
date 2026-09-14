@@ -133,11 +133,14 @@ export function OverviewDateRangeContent({
           {(Object.keys(DATE_RANGE_PRESETS) as DateRangePreset[]).map((key) => (
             <Button
               key={key}
+              className="justify-start"
+              size="sm"
               variant={preset === key ? "secondary" : "ghost"}
-              className="h-7 justify-start whitespace-nowrap px-3 py-0 text-xs"
               onClick={() => selectPreset(key)}
             >
-              {DATE_RANGE_PRESETS[key].label}
+              <span className="text-xs whitespace-nowrap">
+                {DATE_RANGE_PRESETS[key].label}
+              </span>
             </Button>
           ))}
         </div>
@@ -196,11 +199,10 @@ export function OverviewDateRangeContent({
           disabled={[{ after: maxJsDate }]}
           selected={picked}
           onSelect={selectRange}
-          className="w-full p-0 [--cell-size:--spacing(7)]"
+          className="-m-3 [--cell-size:--spacing(7)]"
           classNames={{
-            root: "w-full",
-            months: "relative flex flex-row gap-2",
-            month: "flex w-full min-w-0 flex-col gap-2",
+            months: "relative flex flex-row",
+            month: "flex w-full min-w-0 flex-col mr-2 last:mr-0",
             month_caption: "hidden",
             nav: "hidden",
           }}

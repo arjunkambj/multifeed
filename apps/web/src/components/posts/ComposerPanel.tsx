@@ -16,7 +16,7 @@ export function ComposerPanel({
       aria-hidden={!open}
       inert={!open}
       className={cn(
-        "-mx-1 grid transition-[grid-template-rows,opacity] duration-200 ease-in-out motion-reduce:transition-none",
+        "-mx-1 grid transition-collapse duration-200 ease-in-out motion-reduce:transition-none",
         open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
       )}
     >

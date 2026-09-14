@@ -101,7 +101,7 @@ export function AppSidebar() {
     ));
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar collapsible="icon">
       <SidebarHeader className="group-data-[collapsible=icon]:items-center">
         <Link
           aria-label="MultiFeed"
@@ -115,7 +115,12 @@ export function AppSidebar() {
           variant="secondary"
           aria-haspopup="dialog"
           aria-expanded={searchOpen}
-          className="w-full min-w-0 justify-start rounded-full group-data-[collapsible=icon]:hidden"
+          render={
+            <button
+              className="w-full min-w-0 justify-start rounded-full group-data-[collapsible=icon]:hidden"
+              type="button"
+            />
+          }
           onClick={() => setSearchOpen(true)}
         >
           <Search data-icon="inline-start" />

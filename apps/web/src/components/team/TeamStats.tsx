@@ -41,9 +41,9 @@ export function TeamStats({
 }
 
 const STAT_SKELETONS = [
-  { label: "Members", valueClassName: "w-8" },
-  { label: "Pending invites", valueClassName: "w-8" },
-  { label: "Plan seats used", valueClassName: "w-16" },
+  { label: "Members", wide: false },
+  { label: "Pending invites", wide: false },
+  { label: "Plan seats used", wide: true },
 ] as const;
 
 export function TeamStatsSkeleton() {
@@ -52,9 +52,7 @@ export function TeamStatsSkeleton() {
       {STAT_SKELETONS.map((stat) => (
         <div className="rounded-2xl bg-muted px-5 py-3.5" key={stat.label}>
           <p className="text-sm text-muted-foreground">{stat.label}</p>
-          <Skeleton
-            className={cn("mt-1 h-6 rounded-lg", stat.valueClassName)}
-          />
+          <Skeleton className={cn("mt-1 h-6", stat.wide ? "w-16" : "w-8")} />
         </div>
       ))}
     </section>

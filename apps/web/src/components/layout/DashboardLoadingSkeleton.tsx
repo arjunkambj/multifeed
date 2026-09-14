@@ -23,10 +23,12 @@ import { PostsListSkeleton } from "./PostsListSkeleton";
 
 export function DashboardShellSkeleton() {
   return (
-    <SidebarProvider className="bg-background">
+    <SidebarProvider>
       <Sidebar collapsible="icon">
-        <SidebarHeader className="h-14 justify-center">
-          <Skeleton className="size-7 rounded-md" />
+        <SidebarHeader className="justify-center">
+          <div className="flex h-11 items-center group-data-[collapsible=icon]:h-10">
+            <Skeleton className="size-7" />
+          </div>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
@@ -44,9 +46,9 @@ export function DashboardShellSkeleton() {
       </Sidebar>
       <SidebarInset className="overflow-hidden">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 sm:px-6">
-          <Skeleton className="size-8 rounded-lg" />
+          <Skeleton className="size-8" />
           <div className="ml-auto flex items-center justify-end">
-            <Skeleton className="size-8 rounded-full" />
+            <Skeleton shape="circle" className="size-8" />
           </div>
         </header>
         <div className="flex min-w-0 flex-1 flex-col px-4 py-3 sm:px-6 sm:py-3">
@@ -133,15 +135,15 @@ export function DashboardLoadingSkeleton({
         <div className="flex w-full max-w-4xl flex-col gap-6 lg:flex-row lg:gap-10">
           <aside className="flex w-full shrink-0 flex-col gap-6 lg:w-64">
             <div className="flex items-center gap-3">
-              <Skeleton className="size-12 shrink-0 rounded-full" />
+              <Skeleton shape="circle" className="size-12 shrink-0" />
               <div className="flex flex-col gap-2">
                 <Skeleton className="h-4 w-28" />
                 <Skeleton className="h-3 w-36" />
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
             </div>
           </aside>
           <div className="flex min-w-0 flex-1 flex-col gap-5">
@@ -157,15 +159,13 @@ export function DashboardLoadingSkeleton({
 
   let content: React.ReactNode;
   let actions = 1;
-  let actionClassName: string | undefined;
 
   switch (variant) {
     case "overview":
-      actionClassName = "h-8 w-56 rounded-lg";
       content = (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
           {Array.from({ length: 5 }, (_, index) => (
-            <Skeleton className="h-28 rounded-3xl" key={index} />
+            <Skeleton className="h-28" key={index} />
           ))}
         </div>
       );
@@ -175,12 +175,12 @@ export function DashboardLoadingSkeleton({
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <Skeleton className="h-8 w-32 rounded-xl" />
-              <Skeleton className="h-5 w-40 rounded-lg" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-5 w-40" />
             </div>
             <div className="flex gap-2">
-              <Skeleton className="h-8 w-40 rounded-xl" />
-              <Skeleton className="h-8 w-72 rounded-xl" />
+              <Skeleton className="h-8 w-40" />
+              <Skeleton className="h-8 w-72" />
             </div>
           </div>
           <div className="overflow-hidden rounded-2xl border-4 border-card bg-background">
@@ -194,8 +194,8 @@ export function DashboardLoadingSkeleton({
       content = (
         <>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Skeleton className="h-9 w-72 rounded-xl" />
-            <Skeleton className="h-9 w-64 rounded-xl" />
+            <Skeleton className="h-9 w-72" />
+            <Skeleton className="h-9 w-64" />
           </div>
           <PostsListSkeleton />
         </>
@@ -208,7 +208,7 @@ export function DashboardLoadingSkeleton({
           <Skeleton className="h-24 w-full" />
           <div className="flex items-center justify-between gap-3">
             <Skeleton className="h-5 w-28" />
-            <Skeleton className="h-8 w-40 rounded-lg" />
+            <Skeleton className="h-8 w-40" />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }, (_, index) => (
@@ -233,7 +233,10 @@ export function DashboardLoadingSkeleton({
   return (
     <div className="flex flex-col gap-6" aria-busy="true" role="status">
       <span className="sr-only">Loading page</span>
-      <PageHeaderSkeleton actionClassName={actionClassName} actions={actions} />
+      <PageHeaderSkeleton
+        actions={actions}
+        wideAction={variant === "overview"}
+      />
       {content}
     </div>
   );

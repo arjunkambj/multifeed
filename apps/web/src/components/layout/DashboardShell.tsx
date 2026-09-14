@@ -19,7 +19,7 @@ export function DashboardShell({
 }) {
   return (
     <TooltipProvider>
-      <SidebarProvider className="bg-background">
+      <SidebarProvider>
         <Suspense fallback={null}>
           <AppSidebar />
         </Suspense>

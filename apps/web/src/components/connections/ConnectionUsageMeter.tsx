@@ -43,15 +43,12 @@ export function ConnectionUsageMeter({
       <Progress
         value={Math.min(used, Math.max(limit, 1))}
         max={Math.max(limit, 1)}
-        className={cn(
-          "flex w-full flex-col gap-2.5 [&_[data-slot=progress-track]]:bg-background",
-          showSlots && "[&_[data-slot=progress-track]]:hidden",
-        )}
+        hideTrack={showSlots}
+        trackVariant="background"
+        variant="stack"
       >
         <div className="flex w-full items-baseline justify-between gap-3">
-          <ProgressLabel className="font-normal text-muted-foreground">
-            Connected accounts
-          </ProgressLabel>
+          <ProgressLabel variant="muted">Connected accounts</ProgressLabel>
           <p className="text-sm font-semibold tabular-nums text-foreground">
             {used}
             <span className="font-medium text-muted-foreground">

@@ -134,7 +134,6 @@ export function PostLibrary() {
       />
 
       <Tabs
-        className="gap-6"
         value={filter}
         onValueChange={(key) => {
           const next = key as PostLibraryFilter;
@@ -154,7 +153,7 @@ export function PostLibrary() {
               </TabsTrigger>
             ))}
           </TabsList>
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 [&>input]:border-0 [&>input]:bg-muted [&>input]:pr-9 [&>input]:pl-9 [&>input]:shadow-none">
             <Search
               aria-hidden
               className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
@@ -162,7 +161,6 @@ export function PostLibrary() {
             />
             <Input
               aria-label="Search posts"
-              className="border-0 bg-muted pr-9 pl-9 shadow-none"
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search posts or accounts"
               value={search}
@@ -181,7 +179,7 @@ export function PostLibrary() {
           </div>
         </div>
 
-        <TabsContent key={filter} value={filter}>
+        <TabsContent className="mt-4" key={filter} value={filter}>
           {posts === undefined ? (
             <PostsListSkeleton />
           ) : (

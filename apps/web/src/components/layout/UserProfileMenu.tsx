@@ -54,9 +54,7 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
               src={user.profileImageUrl}
             />
           )}
-          <AvatarFallback className="text-xs font-medium">
-            {initials}
-          </AvatarFallback>
+          <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
@@ -68,9 +66,7 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
                 src={user.profileImageUrl}
               />
             )}
-            <AvatarFallback className="text-sm font-semibold">
-              {initials}
-            </AvatarFallback>
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             {user.displayName && (
@@ -96,10 +92,11 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
             onValueChange={(value) => setTheme(value as "light" | "dark")}
             value={isDark ? "dark" : "light"}
           >
-            <TabsList aria-label="Theme" className="h-7 justify-between">
+            <TabsList aria-label="Theme" className="justify-between" size="sm">
               <TabsTrigger
                 aria-label="Light mode"
-                className="flex-none px-1.5"
+                className="flex-none"
+                size="sm"
                 title="Light mode"
                 value="light"
               >
@@ -107,7 +104,8 @@ export function UserProfileMenu({ user }: { user: ProfileUser }) {
               </TabsTrigger>
               <TabsTrigger
                 aria-label="Dark mode"
-                className="flex-none px-1.5"
+                className="flex-none"
+                size="sm"
                 title="Dark mode"
                 value="dark"
               >

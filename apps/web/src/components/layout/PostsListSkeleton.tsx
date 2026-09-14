@@ -20,36 +20,33 @@ export function PostsListSkeleton() {
         <PostsTableHead />
         <TableBody>
           {Array.from({ length: 4 }, (_, index) => (
-            <TableRow
-              className="border-border hover:bg-transparent"
-              key={index}
-            >
-              <TableCell className="px-4">
+            <TableRow data-static key={index}>
+              <TableCell>
                 <div className="flex items-center gap-3">
-                  <Skeleton className="size-9 shrink-0 rounded-lg" />
+                  <Skeleton className="size-9 shrink-0" />
                   <div className="flex flex-col gap-2">
-                    <Skeleton className="h-4 w-32 rounded-xl" />
-                    <Skeleton className="h-3 w-48 rounded-xl" />
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-48" />
                   </div>
                 </div>
               </TableCell>
-              <TableCell className="px-4">
-                <Skeleton className="h-4 w-28 rounded-xl" />
+              <TableCell>
+                <Skeleton className="h-4 w-28" />
               </TableCell>
-              <TableCell className="px-4">
-                <Skeleton className="h-6 w-16 rounded-xl" />
+              <TableCell>
+                <Skeleton className="h-6 w-16" />
               </TableCell>
-              <TableCell className="px-4">
-                <Skeleton className="h-4 w-16 rounded-xl" />
+              <TableCell>
+                <Skeleton className="h-4 w-16" />
               </TableCell>
-              <TableCell className="px-4">
+              <TableCell>
                 <div className="flex flex-col gap-2">
-                  <Skeleton className="h-4 w-24 rounded-xl" />
-                  <Skeleton className="h-3 w-14 rounded-xl" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-3 w-14" />
                 </div>
               </TableCell>
-              <TableCell className="px-4">
-                <Skeleton className="size-7 rounded-md" />
+              <TableCell>
+                <Skeleton className="size-7" />
               </TableCell>
             </TableRow>
           ))}

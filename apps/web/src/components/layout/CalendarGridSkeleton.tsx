@@ -5,7 +5,7 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function CalendarGridSkeleton() {
   return (
-    <div className="flex min-h-[640px] flex-col">
+    <div className="flex min-h-160 flex-col">
       <div className="grid grid-cols-7 bg-card">
         {WEEKDAYS.map((day) => (
           <div
@@ -26,7 +26,7 @@ export function CalendarGridSkeleton() {
             )}
             key={index}
           >
-            <Skeleton className="size-5 rounded-full" />
+            <Skeleton shape="circle" className="size-5" />
           </div>
         ))}
       </div>

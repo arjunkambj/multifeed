@@ -84,7 +84,8 @@ export function OverviewDateRangePicker({ value, preset, onChange }: Props) {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-auto max-w-[calc(100vw-2rem)] p-0"
+        className="w-auto max-w-[calc(100vw-2rem)]"
+        size="flush"
       >
         {isOpen && (
           <OverviewDateRangeContent

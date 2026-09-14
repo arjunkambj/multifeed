@@ -138,7 +138,7 @@ export default function SignInPage() {
             void handleSendMagicLink("initial");
           }}
         >
-          <div className="relative">
+          <div className="relative [&>input]:h-9 [&>input]:rounded-2xl [&>input]:pl-10">
             <Email
               size={20}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -149,19 +149,20 @@ export default function SignInPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="h-9 rounded-2xl pl-10 text-base"
             />
           </div>
 
-          <Button
-            type="submit"
-            disabled={isEmailLoading}
-            size="lg"
-            className="h-9 w-full rounded-2xl"
-          >
-            {isEmailLoading ? <Spinner className="size-4" /> : null}
-            Continue with Email
-          </Button>
+          <div className="[&>button]:rounded-2xl">
+            <Button
+              type="submit"
+              disabled={isEmailLoading}
+              size="lg"
+              className="w-full"
+            >
+              {isEmailLoading ? <Spinner className="size-4" /> : null}
+              Continue with Email
+            </Button>
+          </div>
         </form>
       ) : (
         <div className="flex flex-col items-center gap-5 pt-1">
@@ -173,11 +174,15 @@ export default function SignInPage() {
             value={otp}
             onChange={(value) => setOtp(value.toUpperCase())}
             disabled={isVerifying}
-            containerClassName="justify-center gap-2"
+            containerClassName="justify-center"
           >
-            <InputOTPGroup className="gap-2">
+            <InputOTPGroup>
               {[0, 1, 2, 3, 4, 5].map((index) => (
-                <InputOTPSlot key={index} index={index} />
+                <InputOTPSlot
+                  key={index}
+                  index={index}
+                  className="ml-2 first:ml-0"
+                />
               ))}
             </InputOTPGroup>
           </InputOTP>
@@ -223,20 +228,22 @@ export default function SignInPage() {
         <span className="h-px flex-1 bg-border" />
       </div>
 
-      <Button
-        variant="secondary"
-        disabled={isGoogleLoading}
-        size="lg"
-        className="h-10 w-full rounded-2xl"
-        onClick={handleGoogleSignIn}
-      >
-        {isGoogleLoading ? (
-          <Spinner className="size-4" />
-        ) : (
-          <Google size={18} />
-        )}
-        Continue with Google
-      </Button>
+      <div className="[&>button]:h-10 [&>button]:rounded-2xl">
+        <Button
+          variant="secondary"
+          disabled={isGoogleLoading}
+          size="lg"
+          className="w-full"
+          onClick={handleGoogleSignIn}
+        >
+          {isGoogleLoading ? (
+            <Spinner className="size-4" />
+          ) : (
+            <Google size={18} />
+          )}
+          Continue with Google
+        </Button>
+      </div>
 
       <p className="text-center text-xs text-muted-foreground">
         &copy; {new Date().getFullYear()} MultiFeed. All rights reserved.

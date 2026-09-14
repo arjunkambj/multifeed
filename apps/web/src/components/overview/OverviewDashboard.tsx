@@ -32,7 +32,7 @@ function MetricsSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
       {Array.from({ length: 5 }, (_, index) => (
-        <Skeleton key={index} className="h-28 rounded-3xl" />
+        <Skeleton key={index} className="h-28" />
       ))}
     </div>
   );
@@ -71,7 +71,7 @@ export function OverviewDashboard() {
       ) : (
         <>
           {metrics.truncated && (
-            <p className="mb-4 text-sm text-amber-500">
+            <p className="mb-4 text-sm text-warning">
               This range contains more data than the dashboard can summarize.
               Narrow the date range for complete metrics.
             </p>

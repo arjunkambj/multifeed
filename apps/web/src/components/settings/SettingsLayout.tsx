@@ -39,20 +39,18 @@ export function SettingsLayout() {
       <div className="flex w-full max-w-4xl flex-col gap-6 lg:flex-row lg:gap-10">
         <aside className="flex w-full shrink-0 flex-col gap-6 lg:w-64">
           <section className="flex flex-col gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Account
             </p>
             <div className="flex items-center gap-3">
-              <Avatar className="size-12 border border-border">
+              <Avatar className="size-12">
                 {user.profileImageUrl && (
                   <AvatarImage
                     alt={user.displayName ?? ""}
                     src={user.profileImageUrl}
                   />
                 )}
-                <AvatarFallback className="text-sm font-semibold">
-                  {initials}
-                </AvatarFallback>
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold">
@@ -66,7 +64,7 @@ export function SettingsLayout() {
           </section>
 
           <nav aria-label="Settings sections" className="flex flex-col gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Sections
             </p>
             <ul className="flex flex-col gap-1">
@@ -88,7 +86,7 @@ export function SettingsLayout() {
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     )}
                   >
-                    <span className="w-6 text-[11px] tabular-nums">
+                    <span className="w-6 text-xs tabular-nums">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <tab.icon size={16} />

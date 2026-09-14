@@ -26,7 +26,7 @@ import { useMutation } from "convex/react";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { format } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CalendarGridSkeleton } from "@/components/layout/CalendarGridSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
@@ -267,30 +267,29 @@ export function PostCalendar() {
         <div className="flex min-w-0 flex-col gap-5 overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 flex-wrap items-center gap-3">
-              <ButtonGroup
-                aria-label="Calendar period"
-                className="rounded-xl bg-secondary"
-              >
-                <Button
-                  aria-label="Previous period"
-                  size="icon"
-                  variant="outline"
-                  onClick={goPrev}
-                >
-                  <ChevronLeft size={16} />
-                </Button>
-                <Button variant="outline" onClick={goToday}>
-                  Today
-                </Button>
-                <Button
-                  aria-label="Next period"
-                  size="icon"
-                  variant="outline"
-                  onClick={goNext}
-                >
-                  <ChevronRight size={16} />
-                </Button>
-              </ButtonGroup>
+              <div className="w-fit rounded-xl bg-secondary">
+                <ButtonGroup aria-label="Calendar period">
+                  <Button
+                    aria-label="Previous period"
+                    size="icon"
+                    variant="outline"
+                    onClick={goPrev}
+                  >
+                    <ChevronLeft size={16} />
+                  </Button>
+                  <Button variant="outline" onClick={goToday}>
+                    Today
+                  </Button>
+                  <Button
+                    aria-label="Next period"
+                    size="icon"
+                    variant="outline"
+                    onClick={goNext}
+                  >
+                    <ChevronRight size={16} />
+                  </Button>
+                </ButtonGroup>
+              </div>
               <h2 className="text-base font-semibold tracking-tight">
                 {title || "…"}
               </h2>
@@ -350,7 +349,7 @@ export function PostCalendar() {
             </div>
           </div>
 
-          <div className="multifeed-calendar relative min-h-[640px] overflow-hidden rounded-2xl border-4 border-card bg-background">
+          <div className="multifeed-calendar relative min-h-160 overflow-hidden rounded-2xl border-4 border-card bg-background">
             {posts === undefined && (
               <div className="absolute inset-0 z-10 bg-background">
                 <CalendarGridSkeleton />
@@ -456,9 +455,9 @@ function PostDetailsCard({
   };
 
   return (
-    <Card className="bg-card shadow-none">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Post details</CardTitle>
+    <Card>
+      <CardHeader>
+        <CardTitle>Post details</CardTitle>
         <CardDescription>Review or jump into editing</CardDescription>
         <Button
           data-slot="card-action"
@@ -471,13 +470,13 @@ function PostDetailsCard({
           <Close size={14} />
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="mt-2">
         {selectedPost === undefined && (
           <div className="flex flex-col gap-4 py-2">
-            <Skeleton className="h-5 w-24 rounded-full" />
-            <Skeleton className="h-4 w-3/5 rounded-lg" />
-            <Skeleton className="h-4 w-full rounded-lg" />
-            <Skeleton className="h-10 w-full rounded-xl" />
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-4 w-3/5" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-10 w-full" />
           </div>
         )}
 
@@ -528,11 +527,13 @@ function PostDetailsCard({
                       className="flex items-center gap-2 rounded-xl bg-muted px-2.5 py-2"
                     >
                       <span
-                        className="flex size-7 items-center justify-center rounded-full"
-                        style={{
-                          backgroundColor: platformBrand(t.platform),
-                          color: platformForeground(t.platform),
-                        }}
+                        className="flex size-7 items-center justify-center rounded-full bg-(--brand) text-(--brand-fg)"
+                        style={
+                          {
+                            "--brand": platformBrand(t.platform),
+                            "--brand-fg": platformForeground(t.platform),
+                          } as CSSProperties
+                        }
                       >
                         <TargetIcon size={16} />
                       </span>
@@ -540,7 +541,7 @@ function PostDetailsCard({
                         <p className="truncate text-xs font-medium">
                           @{t.username ?? "account"}
                         </p>
-                        <p className="truncate text-[11px] text-muted-foreground">
+                        <p className="truncate text-xs text-muted-foreground">
                           {platformLabel(t.platform)}
                         </p>
                         {t.failureMessage && (
@@ -562,8 +563,8 @@ function PostDetailsCard({
                           </a>
                         )}
                       </div>
-                      <Badge variant="secondary" className="capitalize">
-                        {t.status}
+                      <Badge variant="secondary">
+                        <span className="capitalize">{t.status}</span>
                       </Badge>
                     </div>
                   );

@@ -5,7 +5,7 @@ import { Card, Check } from "@honeyicons/react";
 import type { BillingInterval, PlanKey } from "@multifeed/plans";
 import { PLANS } from "@multifeed/plans";
 import { useQuery } from "convex-helpers/react/cache/hooks";
-import { useRef, useState } from "react";
+import { type CSSProperties, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLoadingSkeleton } from "@/components/layout/DashboardLoadingSkeleton";
 import { DashboardPageTitle } from "@/components/layout/DashboardPageTitle";
@@ -167,7 +167,6 @@ export function BillingPage() {
           )}
           {subscription?.dodoCustomerId && (
             <Button
-              className="font-medium"
               disabled={openingPortal}
               onClick={openCustomerPortal}
               variant="secondary"
@@ -253,7 +252,7 @@ export function BillingPage() {
             </ul>
 
             <Button
-              className="mt-7 w-full font-medium"
+              className="mt-7 w-full"
               disabled
               size="lg"
               variant="secondary"
@@ -286,7 +285,10 @@ export function BillingPage() {
                     </p>
                   </div>
                   {preferred && (
-                    <span className="shrink-0 rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
+                    <span
+                      className="shrink-0 rounded-full bg-primary px-2.5 py-1 text-(length:--badge-fs) font-semibold text-primary-foreground"
+                      style={{ "--badge-fs": "11px" } as CSSProperties}
+                    >
                       Best value
                     </span>
                   )}
@@ -319,7 +321,7 @@ export function BillingPage() {
                 </ul>
 
                 <Button
-                  className="mt-7 w-full font-medium"
+                  className="mt-7 w-full"
                   disabled={
                     isCurrent || checkoutBlocked || checkingOut !== null
                   }

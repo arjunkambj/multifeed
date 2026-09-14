@@ -15,24 +15,24 @@ export function TeamTableSkeleton() {
       <Table className="min-w-[880px]">
         <TeamMembersTableHead />
         <TableBody>
-          <TableRow className="border-border hover:bg-transparent">
-            <TableCell className="px-4">
+          <TableRow data-static>
+            <TableCell>
               <div className="flex items-center gap-3">
-                <Skeleton className="size-9 shrink-0 rounded-full" />
+                <Skeleton shape="circle" className="size-9 shrink-0" />
                 <div className="flex flex-col gap-2">
-                  <Skeleton className="h-4 w-32 rounded-xl" />
-                  <Skeleton className="h-3 w-20 rounded-xl" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-20" />
                 </div>
               </div>
             </TableCell>
-            <TableCell className="px-4">
-              <Skeleton className="h-4 w-40 rounded-xl" />
+            <TableCell>
+              <Skeleton className="h-4 w-40" />
             </TableCell>
-            <TableCell className="px-4">
-              <Skeleton className="h-4 w-28 rounded-xl" />
+            <TableCell>
+              <Skeleton className="h-4 w-28" />
             </TableCell>
-            <TableCell className="px-4">
-              <Skeleton className="h-4 w-16 rounded-xl" />
+            <TableCell>
+              <Skeleton className="h-4 w-16" />
             </TableCell>
           </TableRow>
         </TableBody>

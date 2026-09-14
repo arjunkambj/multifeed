@@ -14,7 +14,7 @@ import {
 } from "@honeyicons/react";
 import type { FunctionReturnType } from "convex/server";
 import { format } from "date-fns";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { POST_FORMATS } from "@/components/posts/post-composer-config";
 import { Badge } from "@multifeed/ui/components/badge";
 import { Button } from "@multifeed/ui/components/button";
@@ -43,46 +43,27 @@ import { cn } from "@multifeed/ui/lib/utils";
 
 export type PostListItem = FunctionReturnType<typeof api.posts.list>[number];
 
-const tableHeadClassName =
-  "relative h-8 bg-card px-4 py-2 after:absolute after:inset-y-1 after:right-0 after:w-px after:bg-border";
-
 const STATUS_BADGE: Record<
   string,
-  {
-    variant: "default" | "secondary" | "destructive" | "outline";
-    className?: string;
-  }
+  "default" | "secondary" | "destructive" | "outline" | "success"
 > = {
-  draft: { variant: "secondary" },
-  scheduled: {
-    variant: "outline",
-    className: "border-0 bg-primary/10 text-primary",
-  },
-  publishing: { variant: "outline" },
-  published: { variant: "secondary" },
-  failed: { variant: "destructive" },
+  draft: "secondary",
+  scheduled: "success",
+  publishing: "outline",
+  published: "secondary",
+  failed: "destructive",
 };
 
 export function PostsTableHead() {
   return (
-    <TableHeader className="bg-card [&_tr]:border-b-0">
-      <TableRow className="border-b-0 hover:bg-card">
-        <TableHead className={cn(tableHeadClassName, "w-[36%]")}>
-          Post
-        </TableHead>
-        <TableHead className={cn(tableHeadClassName, "w-[20%]")}>
-          Accounts
-        </TableHead>
-        <TableHead className={cn(tableHeadClassName, "w-[12%]")}>
-          Open
-        </TableHead>
-        <TableHead className={cn(tableHeadClassName, "w-[12%]")}>
-          Status
-        </TableHead>
-        <TableHead className={cn(tableHeadClassName, "w-[14%]")}>
-          Date
-        </TableHead>
-        <TableHead className="h-8 w-14 bg-card px-4 py-2">
+    <TableHeader>
+      <TableRow>
+        <TableHead className="w-[36%]">Post</TableHead>
+        <TableHead className="w-[20%]">Accounts</TableHead>
+        <TableHead className="w-[12%]">Open</TableHead>
+        <TableHead className="w-[12%]">Status</TableHead>
+        <TableHead className="w-[14%]">Date</TableHead>
+        <TableHead className="w-14">
           <span className="sr-only">Actions</span>
         </TableHead>
       </TableRow>
@@ -117,12 +98,9 @@ export function PostsTable({
         <PostsTableHead />
         <TableBody>
           {posts.length === 0 ? (
-            <TableRow className="hover:bg-transparent">
-              <TableCell
-                className="px-4 py-10 text-center whitespace-normal text-muted-foreground"
-                colSpan={6}
-              >
-                <div className="flex flex-col items-center gap-3">
+            <TableRow data-static>
+              <TableCell colSpan={6}>
+                <div className="flex flex-col items-center gap-3 py-8 text-center whitespace-normal text-muted-foreground">
                   <p>{emptyMessage}</p>
                   {emptyAction}
                 </div>
@@ -173,8 +151,8 @@ function PostTableRow({
     POST_FORMATS.find((format) => format.id === post.kind)?.icon ?? File;
 
   return (
-    <TableRow className="border-border">
-      <TableCell className="px-4">
+    <TableRow>
+      <TableCell>
         <div className="flex min-w-0 items-center gap-3">
           <span
             aria-hidden
@@ -192,13 +170,13 @@ function PostTableRow({
           </div>
         </div>
       </TableCell>
-      <TableCell className="px-4 whitespace-normal">
+      <TableCell>
         {post.targets.length === 0 ? (
           <span className="text-sm text-muted-foreground">
             No accounts selected
           </span>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 whitespace-normal">
             {post.targets.map((target) => {
               const PlatformIcon =
                 PLATFORM_META[target.platform]?.icon ?? Integration;
@@ -209,11 +187,13 @@ function PostTableRow({
                 >
                   <span className="inline-flex min-w-0 items-center gap-2 text-sm">
                     <span
-                      className="flex size-5 shrink-0 items-center justify-center rounded-md"
-                      style={{
-                        backgroundColor: platformBrand(target.platform),
-                        color: platformForeground(target.platform),
-                      }}
+                      className="flex size-5 shrink-0 items-center justify-center rounded-md bg-(--brand) text-(--brand-fg)"
+                      style={
+                        {
+                          "--brand": platformBrand(target.platform),
+                          "--brand-fg": platformForeground(target.platform),
+                        } as CSSProperties
+                      }
                     >
                       <PlatformIcon size={13} />
                     </span>
@@ -240,24 +220,23 @@ function PostTableRow({
           </div>
         )}
       </TableCell>
-      <TableCell className="px-4">
+      <TableCell>
         <OpenPostButton permalinks={permalinks} />
       </TableCell>
-      <TableCell className="px-4">
-        <Badge
-          className={cn("capitalize", STATUS_BADGE[post.status]?.className)}
-          variant={STATUS_BADGE[post.status]?.variant ?? "secondary"}
-        >
+      <TableCell>
+        <Badge variant={STATUS_BADGE[post.status] ?? "secondary"}>
           <span
             className={cn(
               "size-1.5 rounded-full bg-current",
               post.status === "publishing" && "motion-safe:animate-pulse",
             )}
           />
-          {post.status === "published" ? "Posted" : post.status}
+          <span className="capitalize">
+            {post.status === "published" ? "Posted" : post.status}
+          </span>
         </Badge>
       </TableCell>
-      <TableCell className="px-4">
+      <TableCell>
         <p className="text-sm font-medium text-foreground">
           {format(new Date(post.scheduledFor ?? post.createdAt), "MMM d, yyyy")}
         </p>
@@ -267,7 +246,7 @@ function PostTableRow({
             : "Created"}
         </p>
       </TableCell>
-      <TableCell className="px-4">
+      <TableCell>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={

@@ -365,12 +365,17 @@ export function PostMediaUploader({
             setIsDragging(false);
             void uploadFiles(Array.from(event.dataTransfer.files));
           }}
-          className={cn(
-            "h-auto min-h-28 w-full gap-4 whitespace-normal border border-dashed px-4 py-4",
-            isDragging
-              ? "border-primary bg-primary/5"
-              : "border-border bg-muted/20",
-          )}
+          render={
+            <button
+              className={cn(
+                "h-auto min-h-28 w-full gap-4 whitespace-normal border border-dashed px-4 py-4",
+                isDragging
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-muted/20",
+              )}
+              type="button"
+            />
+          }
         >
           <span
             className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background"

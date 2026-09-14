@@ -1,10 +1,5 @@
 import { ArrowDown, ArrowUp, type HoneyIcon } from "@honeyicons/react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@multifeed/ui/components/card";
+import { CardTitle } from "@multifeed/ui/components/card";
 import { Separator } from "@multifeed/ui/components/separator";
 import { cn } from "@multifeed/ui/lib/utils";
 
@@ -30,14 +25,21 @@ export function MetricCard({
         : "text-destructive";
 
   return (
-    <Card size="sm" className="min-w-0 gap-2 rounded-3xl">
-      <CardHeader>
+    <div
+      className="group/card flex min-w-0 flex-col gap-2 overflow-hidden rounded-3xl bg-card py-4 text-sm text-card-foreground"
+      data-slot="card"
+      data-size="sm"
+    >
+      <div className="px-4" data-slot="card-header">
         <div className="flex items-start justify-between gap-3">
           <CardTitle>{title}</CardTitle>
           <Icon size={18} className="shrink-0 text-muted-foreground" />
         </div>
-      </CardHeader>
-      <CardContent className="mt-auto flex flex-col gap-2">
+      </div>
+      <div
+        className="mt-auto flex flex-col gap-2 px-4"
+        data-slot="card-content"
+      >
         <p className="text-3xl font-semibold leading-none tracking-tight tabular-nums text-foreground">
           {value}
         </p>
@@ -69,7 +71,7 @@ export function MetricCard({
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
