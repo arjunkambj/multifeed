@@ -34,59 +34,22 @@
     "convex/require-args-validator": "error",
     "convex/explicit-table-ids": "error",
     "convex/import-wrong-runtime": "error",
-    "shadcn/no-restyle": [
-      "warn",
+    "shadcn/no-restyle": ["error", { "allow": ["layout"] }],
+    "shadcn/no-raw-colors": "error",
+    "shadcn/no-arbitrary-values": ["error", { "allow": ["layout"] }],
+    "shadcn/no-inline-styles": [
+      "error",
       {
-        "allow": ["layout"],
-        "deny": [
-          "h",
-          "min-h",
-          "max-h",
-          "size",
-          "block-size",
-          "min-block-size",
-          "max-block-size"
-        ],
         "contracts": [
           {
-            "pattern": "^Skeleton$",
-            "allow": ["layout", "shape"],
-            "deny": []
-          },
-          {
-            "pattern": "^Spinner$",
-            "allow": ["layout"],
-            "deny": []
+            "pattern": "^motion\\.",
+            "allow": ["*"]
           }
-        ],
-        "message": {
-          "spacing": "Padding and gap are not allowed on {{component}}. Use a size ({{sizes|none defined}}) or margin here / gap on the parent.",
-          "color": "Do not change colors on {{component}}. Use a variant: {{variants|none defined}}.",
-          "shape": "Do not change border radius or shape on {{component}}. Use a variant: {{variants|none defined}}.",
-          "layout": "Do not change height on {{component}}. Width and placement are allowed.",
-          "default": "Do not restyle {{component}}. Use a variant: {{variants|none defined}}."
-        }
-      }
-    ],
-    "shadcn/no-raw-colors": "warn",
-    "shadcn/no-arbitrary-values": [
-      "warn",
-      {
-        "allow": ["layout"],
-        "deny": [
-          "h",
-          "min-h",
-          "max-h",
-          "size",
-          "block-size",
-          "min-block-size",
-          "max-block-size"
         ]
       }
     ],
-    "shadcn/no-inline-styles": "warn",
-    "shadcn/no-unknown-classes": "warn",
-    "shadcn/require-static-classes": "warn"
+    "shadcn/no-unknown-classes": "error",
+    "shadcn/require-static-classes": "error"
   },
   "overrides": [
     {
