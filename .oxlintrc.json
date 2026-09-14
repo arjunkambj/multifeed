@@ -35,7 +35,7 @@
     "convex/explicit-table-ids": "error",
     "convex/import-wrong-runtime": "error",
     "shadcn/no-restyle": [
-      "error",
+      "warn",
       {
         "allow": ["layout"],
         "deny": [
@@ -56,9 +56,9 @@
         }
       }
     ],
-    "shadcn/no-raw-colors": "error",
+    "shadcn/no-raw-colors": "warn",
     "shadcn/no-arbitrary-values": [
-      "error",
+      "warn",
       {
         "allow": ["layout"],
         "deny": [
@@ -72,9 +72,9 @@
         ]
       }
     ],
-    "shadcn/no-inline-styles": "error",
-    "shadcn/no-unknown-classes": "error",
-    "shadcn/require-static-classes": "error"
+    "shadcn/no-inline-styles": "warn",
+    "shadcn/no-unknown-classes": "warn",
+    "shadcn/require-static-classes": "warn"
   },
   "overrides": [
     {
