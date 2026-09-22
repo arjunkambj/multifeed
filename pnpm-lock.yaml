@@ -95,8 +95,8 @@ importers:
         specifier: ^1.0.71
         version: 1.0.71(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(next@16.3.2(@opentelemetry/api@1.9.1)(@types/node@25.6.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.0)(zod@4.6.1)
       '@honeyicons/react':
-        specifier: ^0.0.3
-        version: 0.0.3(react@19.2.8)
+        specifier: ^0.0.5
+        version: 0.0.5(react@19.2.8)
       '@internationalized/date':
         specifier: ^3.12.2
         version: 3.12.2
@@ -193,8 +193,8 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0(@date-fns/tz@1.5.0)(@types/react@19.2.18)(date-fns@4.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@honeyicons/react':
-        specifier: ^0.0.3
-        version: 0.0.3(react@19.3.0)
+        specifier: ^0.0.5
+        version: 0.0.5(react@19.3.0)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -919,8 +919,9 @@ packages:
       yup:
         optional: true
 
-  '@honeyicons/react@0.0.3':
-    resolution: {integrity: sha512-VtUoE1c3PgtrzHaPWW0cQDXtFibNrwQ9q5jCUJ19DpG56nm5l20vQPWJ9KyNt4KItQ9jFkh+zUAMn/1pVa/mLA==}
+  '@honeyicons/react@0.0.5':
+    resolution: {integrity: sha512-7b+/n+0hw/IY1R27IdIMwlGKaXy01MDz590Seo+m8FgulPRTCakleVxX9CNHkdj5uzA3E47q9xLNEYCHgzWrAA==}
+    engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
 
@@ -5718,11 +5719,11 @@ snapshots:
       - buffer
       - supports-color
 
-  '@honeyicons/react@0.0.3(react@19.2.8)':
+  '@honeyicons/react@0.0.5(react@19.2.8)':
     dependencies:
       react: 19.2.8
 
-  '@honeyicons/react@0.0.3(react@19.3.0)':
+  '@honeyicons/react@0.0.5(react@19.3.0)':
     dependencies:
       react: 19.3.0
 
